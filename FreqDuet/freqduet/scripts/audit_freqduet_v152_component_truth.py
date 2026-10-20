@@ -157,8 +157,10 @@ def case(root, out, runtime, seed, day, model):
                     close(sum(packet.values()), s['points'][name])
             structured = reference is not None and joint is not None
             counts[mode+('/paired_components' if structured else '/opaque_reference')] += 1
-            actual = parts.actual_parts(path, row, geometry[bool(row['direction'])])
-            close(sum(actual.values()), truth)
+            launch = 'clearance' in labels and jstatus == 'observed_same_clock_launch'
+            if structured or launch:
+                actual = parts.actual_parts(path, row, geometry[bool(row['direction'])])
+                close(sum(actual.values()), truth)
             if structured:
                 values = component_errors(dict(v149=reference, joint=joint), actual)
                 values.update(episode=episode)
@@ -174,7 +176,7 @@ def case(root, out, runtime, seed, day, model):
                         groups[scope+'/separable_holding'].append(holding)
                 if 'hour2' in labels and jstatus == 'structured':
                     groups['hour2/downstream_only'].append(values)
-            if 'clearance' in labels and jstatus == 'observed_same_clock_launch':
+            if launch:
                 launches.append(dict(seed=seed, day=day, mode=mode, query=list(k),
                     time_s=row['prediction_time_s'], follower=list(stats.follower(row)), truth_s=truth,
                     points={v: s['points'][v] for v in ('v141', 'v149', 'events', 'joint')},
