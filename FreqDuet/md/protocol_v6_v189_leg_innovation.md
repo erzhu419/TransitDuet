@@ -29,3 +29,19 @@ Seal protocol before reading support counts;tests and one archive preflight
 before all1536 paths. Scheduler high/manual,node001-node006. Detailed cells stay
 server-side;pull small summary only. Support cannot authorize fitting or establish
 incremental prediction value;the next decision must reflect actual support.
+
+Completed:92c59ee242,t210806,high/manual node004,exit0;1536 paths,7987200
+queries. Original V172 denominators/finite fractions and absorption identity pass.
+Count-only readout3333f6729c,t210812,same node,exit0;5 tests pass. Retract the
+original observed-key counts:empty support sets had been included. All other
+support metrics and actor/day margins are exactly unchanged. Only two small
+summaries(863226 bytes total)were fetched;no residual files were opened.
+
+Episode-weighted at-least-one availability,old/handoff:hour2 80.78/80.86%,
+clearance74.03/73.89%,hour13 moving-launch73.83/73.84%. Nine-traversal availability
+is3.20/3.22%,0.010/0.011%,3.09/3.15%,respectively. Under that diagnostic count,
+19-day-supported keys number151/151,0/0,12/12. Nine is not a new admission gate.
+Decision:no fine-key interval fit or mean-innovation point overlay. The latter
+reduces algebraically to a matched-duration/native-mean contrast,not new evidence.
+Next,if continuing,preregister an incremental full-ETA tail-risk audit on supported
+original64 data,retaining sparse-sample abstention;support alone is not risk skill.
