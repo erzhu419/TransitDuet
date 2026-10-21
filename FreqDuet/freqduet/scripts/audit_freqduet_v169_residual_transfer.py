@@ -178,7 +178,9 @@ def describe(rows, actors, reservation):
                 result['crossed_ci95'][metric] = np.percentile(draws, [2.5, 97.5]).tolist()
             for axis in ('actor', 'day'):
                 m = group.groupby(axis)[list(uncertainty)].mean()
-                marginal.extend(dict(**key, axis=axis, identity=int(i), **r) for i, r in m.to_dict('index').items())
+                marginal.extend(dict(**key, axis=axis, identity=int(i),
+                    **{k: float(v) if np.isfinite(v) else None for k, v in r.items()})
+                    for i, r in m.to_dict('index').items())
                 result[axis+'_range'] = {metric: [float(m[metric].min()), float(m[metric].max())]
                     for metric in uncertainty if m[metric].notna().any()}
         summaries.append(result)
@@ -200,11 +202,16 @@ def run(args):
     require(reservation['calibration_days'] == list(range(2951001, 2951065)) and
         reservation['confirmation_days'] == list(range(2852001, 2852033)), 'wrong residual cohorts')
     rows = []
-    with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
-        jobs = [pool.submit(bucket, args, actor, mode, reservation) for actor in actors for mode in ('old', 'handoff')]
-        for done, job in enumerate(as_completed(jobs), 1):
-            rows.extend(job.result())
-            print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=done, total=len(jobs), unit='actor_mode')), flush=True)
+    if args.cells_root is not None:
+        for actor in actors:
+            for mode in ('old', 'handoff'):
+                rows.extend(read(args.cells_root/f'{actor}_{mode}.json'))
+    else:
+        with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
+            jobs = [pool.submit(bucket, args, actor, mode, reservation) for actor in actors for mode in ('old', 'handoff')]
+            for done, job in enumerate(as_completed(jobs), 1):
+                rows.extend(job.result())
+                print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=done, total=len(jobs), unit='actor_mode')), flush=True)
     summaries, marginals = describe(rows, actors, reservation)
     for mode in ('old', 'handoff'):
         for scope in ('all', 'hour2', 'hour13'):
@@ -218,6 +225,7 @@ def run(args):
     write(args.out_root/'details/marginals.json', marginals)
     write(args.out_root/'summary/status.json', dict(status='v169_readonly_complete',
         execution_source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], map_source=saved.MAP_SOURCE,
+        saved_cells_root=None if args.cells_root is None else str(args.cells_root),
         cohort_paths=dict(calibration=1536, confirmation=768), summaries=summaries,
         residual_sign='prediction minus truth, seconds', residence='holding + execution waits + inseparable current-ready remainder',
         weights='query mean within selected episode; equal episodes within actor/day; equal actor/day cells',
@@ -235,4 +243,5 @@ if __name__ == '__main__':
     for name in ('v167-root', 'v168-root', 'out-root'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--workers', type=int, default=16)
+    parser.add_argument('--cells-root', type=Path, help='Aggregate completed V169 cells without rescanning residual archives')
     run(parser.parse_args())

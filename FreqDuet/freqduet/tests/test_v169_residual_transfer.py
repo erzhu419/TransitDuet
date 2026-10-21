@@ -1,4 +1,5 @@
 from copy import deepcopy
+import json
 from pathlib import Path
 import sys
 import unittest
@@ -63,6 +64,11 @@ class ResidualTransferTests(unittest.TestCase):
             data[index][0] = np.nan
             with self.assertRaises(AssertionError):
                 audit.cells(1, 'old', 'calibration64_in_sample', data)
+
+    def test_sparse_marginals_are_json_null_not_nan(self):
+        rows = audit.cells(1, 'old', 'calibration64_in_sample', self.fixture())
+        result = audit.describe(rows, [1], dict(calibration_days=[2951001]))
+        json.dumps(result, allow_nan=False)
 
 
 if __name__ == '__main__':
