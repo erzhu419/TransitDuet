@@ -16,3 +16,12 @@ alone is not success. No fitting, selection on V173 or automatic policy change.
 The server protocol records the complete estimator, freshness, support and
 fixed-budget rules. This stage only audits frozen calibration baselines;
 constructing and sealing the new envelope requires separate authorization.
+
+Completed on node005 through high/manual scheduler tasks. t210455 saved all
+24 calibration buckets; t210461 finalized them without raw rereads, using the
+original sealing order to eliminate completion-order floating-point differences.
+Eight tests passed. Freshness checked 19,269 metadata files with no conflicts;
+only the 74,049-byte summary was pulled. Calibration finite fractions are
+89.38%/89.29% (clearance), 98.66%/98.79% (moving-launch), old/handoff. Frozen
+support is reproduced exactly. New bands, confirmation collection and policy
+changes remain unstarted. Final seal source: 5f8cdf4296.
