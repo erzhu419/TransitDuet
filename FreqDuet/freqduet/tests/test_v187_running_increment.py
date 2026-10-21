@@ -72,6 +72,23 @@ class RunningIncrementTests(unittest.TestCase):
         self.assertEqual(stage.DAYS, tuple(range(2951001, 2951065)))
         self.assertEqual(stage.PARTITIONS['distance_stage'], ('remaining_stops', 'stage'))
 
+    def test_full_summary_builds_fixed_state_and_cell_controls(self):
+        actors, days, rows = (1, 2), (10, 11, 12, 13), []
+        for a in actors:
+            for day in days:
+                values = np.mean([stage.moment([r+day, s], np.full(len(stage.TARGETS), r+s+y+day))
+                    for r, s, y in product_bits()], axis=0)
+                rows.append(dict(actor=a, day=day, groups=[dict(level='distance_stage',
+                    key=['3', 'moving-launch'], moments=values.tolist())]))
+        result = stage.summarize(rows, actors, days, 'distance_stage')
+        self.assertEqual(result['support_mass']['mean'], 1.)
+        self.assertEqual(result['cells_with_support'], 8)
+        for target in stage.TARGETS:
+            entry = result['estimates'][target]
+            self.assertEqual(set(entry), {'running_correlation', 'service_correlation', 'running_partial_service',
+                'within_actor_day_state', 'between_actor_day_state_means'})
+            self.assertEqual(len(entry['running_partial_service']['ci95']), 2)
+
 
 def product_bits():
     return [(r, s, y) for r in (-1., 1.) for s in (-1., 1.) for y in (-1., 1.)]

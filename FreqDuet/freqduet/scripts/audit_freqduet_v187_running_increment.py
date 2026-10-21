@@ -237,8 +237,8 @@ def summarize(rows, actors, days, level):
     boot, local_boot, between_boot = map(np.concatenate, (boot, local_boot, between_boot))
     supported = matrix[:, :, 0].reshape(len(actors), len(days), len(keys)) > 0.
     support_days = supported.any(axis=0).sum(axis=0)
-    result = {t: {name: estimate(point[i, j], boot[:, i, j]) for j, name in enumerate
-        ('running_correlation', 'service_correlation', 'running_partial_service')} for i, t in enumerate(TARGETS)}
+    result = {t: {name: estimate(point[i, j], boot[:, i, j]) for j, name in enumerate(
+        ('running_correlation', 'service_correlation', 'running_partial_service'))} for i, t in enumerate(TARGETS)}
     for i, target in enumerate(TARGETS):
         for name, p, b in (('within_actor_day_state', local_point, local_boot),
                 ('between_actor_day_state_means', between_point, between_boot)):
@@ -257,8 +257,9 @@ def summarize(rows, actors, days, level):
 def reduce_scope(args, model, mode, scope):
     actors, rows = sorted(model['actors']), []
     for actor in actors:
-        value = read(args.out_root/'cells'/f'{actor}_{mode}.json')
-        require(value['source'] == os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], 'bucket source differs')
+        value = read((args.input_root or args.out_root)/'cells'/f'{actor}_{mode}.json')
+        require(value['source'] == ('920866629e' if args.input_root else os.environ['FREQDUET_DIAGNOSTIC_COMMIT']),
+            'bucket source differs')
         rows.extend(r for r in value['rows'] if r['scope'] == scope)
     results = []
     for split, days in (('all64', DAYS), ('first32', DAYS[:32]), ('last32', DAYS[32:])):
@@ -282,10 +283,15 @@ def run(args):
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
         str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v187_*.py', '-v'], check=True)
     model = parents(args)
-    with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
-        for i, job in enumerate(as_completed([pool.submit(bucket, args, model, chunk) for chunk in model['chunks']]), 1):
-            job.result()
-            print('SCHEDULEURM_PROGRESS {"current":%d,"total":24,"unit":"readonly_actor_mode"}' % i, flush=True)
+    if args.command == 'run':
+        require(args.input_root is None, 'new extraction cannot reuse cells')
+        with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
+            for i, job in enumerate(as_completed([pool.submit(bucket, args, model, chunk) for chunk in model['chunks']]), 1):
+                job.result()
+                print('SCHEDULEURM_PROGRESS {"current":%d,"total":24,"unit":"readonly_actor_mode"}' % i, flush=True)
+    else:
+        require(args.input_root is not None and args.input_root != args.out_root,
+            'aggregate requires separate completed extraction input')
     results = []
     with ProcessPoolExecutor(max_workers=4, mp_context=get_context('spawn')) as pool:
         for job in as_completed([pool.submit(reduce_scope, args, model, m, s) for m, s in
@@ -294,6 +300,8 @@ def run(args):
     require(parents(args) == model, 'frozen parent changed')
     write(args.out_root/'summary/status.json', dict(status='v187_calibration_running_increment_complete',
         source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], paths=1536, calibration_days=list(DAYS), actors=model['actors'],
+        input_source='920866629e' if args.input_root else os.environ['FREQDUET_DIAGNOSTIC_COMMIT'],
+        extraction_root=str(args.input_root or args.out_root),
         v172_bounds_support_and_episode_weights_reproduced=True, window_s=3600., minimum_completed_episodes=9,
         bootstrap_draws=5000, bootstrap_seed=20260803, results=sorted(results, key=lambda r:(r['mode'],r['scope'],r['split'],r['level'])),
         interval_fit=False, predictor_fit=False, map_updates=0, confirmation_outcomes_read=False,
@@ -304,7 +312,9 @@ def run(args):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('command', choices=('run', 'aggregate'))
     for name in ('out-root', 'v166-root', 'v166-audit-root', 'v172-root'):
         p.add_argument('--'+name, type=Path, required=True)
     p.add_argument('--workers', type=int, default=12)
+    p.add_argument('--input-root', type=Path)
     run(p.parse_args())
