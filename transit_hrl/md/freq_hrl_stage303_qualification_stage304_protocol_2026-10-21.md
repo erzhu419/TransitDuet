@@ -38,3 +38,10 @@ server-side; only qualification and freeze summaries were pulled.
 Physical worker t208546/node002 is alive at 98% CPU / 533 MiB. The initial
 snapshot records 15 running, 108 launching and 1,157 queued jobs, across five
 active nodes, without failures. Formal performance results have not been read.
+
+Completion: all 1,280 formal tasks finished done/exit0, zero retries. Direct
+existing-result aggregation qualified all 219,520 native episodes; no new
+scheduler task, fit or simulation was launched. Both closed-loop transfer gates
+and incremental critic-cost support fail. Full episode intervals, seed halves,
+retention margins and historical evidence are recorded in
+`freq_hrl_stage304_closed_loop_and_paper_evidence_2026-10-21.md`.

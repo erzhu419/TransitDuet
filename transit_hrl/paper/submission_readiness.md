@@ -1,5 +1,26 @@
 # Freq-HRL submission-readiness decision
 
+## Update: 2026-10-21
+
+The historical assessment below is retained as the 2026-08-31 record, not the
+latest experiment inventory. The current synthesis is
+`../md/freq_hrl_stage304_closed_loop_and_paper_evidence_2026-10-21.md`.
+Stage9 independently confirms fixed-budget plan-validity triggering in
+PointMaze; Stage88-100 and129-135 retain genuine but bounded learned-upper
+results. Transit Stage298/301 confirm single-intervention cost/wait gains on
+new prefixes. Stage304 does not confirm the frozen two-decision closed-loop
+dual gain, statistical 50% wait-retention floor, or extra learned-critic cost
+value. Its 320 independent full scenes cannot be counted as training seeds.
+
+These separate methods do not close the original domain-general frequency-
+separated learned-HRL claim. Consolidate one bounded method and its positive
+and negative controls before submission; the old manuscript/registry is not
+an automatically current main-results package. New experiments are paused at
+the user's request. No algorithm, threshold or manuscript-body claim was
+changed by this evidence review.
+
+## Historical Assessment
+
 Date: 2026-08-31
 
 Decision: **not ready for a top-tier CS conference or journal in its current

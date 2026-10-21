@@ -1,0 +1,737 @@
+{
+  "source_run": "native_transit_closed_loop_confirmation_stage304_20261021_r2",
+  "new_native_episodes": 0,
+  "new_fits": 0,
+  "scene_count": 320,
+  "actual_mean": {
+    "raw": {
+      "cost": 2.1880062687500006,
+      "fleet": 0.4804687500000003,
+      "service": 1.7075375187500001,
+      "wait_min": 13.502300000000002
+    },
+    "zero_abstain": {
+      "cost": 2.189836859375001,
+      "fleet": 0.4830729166666671,
+      "service": 1.7067639427083328,
+      "wait_min": 13.495925000000003
+    },
+    "service_only": {
+      "cost": 2.189907600000001,
+      "fleet": 0.4830729166666671,
+      "service": 1.706834683333333,
+      "wait_min": 13.496593750000002
+    },
+    "joint_budgeted": {
+      "cost": 2.189936171875001,
+      "fleet": 0.4830729166666671,
+      "service": 1.706863255208333,
+      "wait_min": 13.496956250000006
+    }
+  },
+  "arm_diagnostics": {
+    "zero_abstain": {
+      "mean": {
+        "cost": 0.0018305906250000031,
+        "fleet": 0.002604166666666667,
+        "service": -0.000773576041666664,
+        "wait_min": -0.00637499999999999
+      },
+      "relative_cost_percent": 0.08366477971956691,
+      "relative_wait_percent": -0.04721417832517415,
+      "fleet_events": [
+        {
+          "root": 397,
+          "scenario": "high_noise",
+          "replica": 0,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.42355199999999993,
+            "fleet": 0.4166666666666667,
+            "service": 0.006885333333333188,
+            "wait_min": 0.07900000000000063
+          }
+        },
+        {
+          "root": 397,
+          "scenario": "ood_period",
+          "replica": 14,
+          "raw_peak": 15,
+          "arm_peak": 14,
+          "delta": {
+            "cost": -0.4102950000000001,
+            "fleet": -0.4166666666666667,
+            "service": 0.006371666666666664,
+            "wait_min": 0.019000000000000128
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 7,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.39867200000000036,
+            "fleet": 0.4166666666666667,
+            "service": -0.01799466666666616,
+            "wait_min": -0.18100000000000094
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 14,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.31893499999999997,
+            "fleet": 0.4166666666666667,
+            "service": -0.09773166666666677,
+            "wait_min": -0.8519999999999994
+          }
+        }
+      ],
+      "scene_effect_counts": {
+        "cost": {
+          "improve": 20,
+          "equal": 293,
+          "worsen": 7
+        },
+        "fleet": {
+          "improve": 1,
+          "equal": 316,
+          "worsen": 3
+        },
+        "service": {
+          "improve": 21,
+          "equal": 293,
+          "worsen": 6
+        },
+        "wait_min": {
+          "improve": 18,
+          "equal": 294,
+          "worsen": 8
+        }
+      },
+      "first_action_changes": 11,
+      "same_prior_second_action_changes": 16,
+      "top_wait_scenes": [
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 14,
+          "delta": {
+            "cost": 0.31893499999999997,
+            "fleet": 0.4166666666666667,
+            "service": -0.09773166666666677,
+            "wait_min": -0.8519999999999994
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "hour_burst",
+          "replica": 8,
+          "delta": {
+            "cost": -0.037139000000000255,
+            "fleet": 0.0,
+            "service": -0.037139000000000255,
+            "wait_min": -0.31799999999999784
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "persistent_shift",
+          "replica": 11,
+          "delta": {
+            "cost": -0.02955599999999947,
+            "fleet": 0.0,
+            "service": -0.02955599999999947,
+            "wait_min": -0.21699999999999875
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 7,
+          "delta": {
+            "cost": 0.39867200000000036,
+            "fleet": 0.4166666666666667,
+            "service": -0.01799466666666616,
+            "wait_min": -0.18100000000000094
+          }
+        },
+        {
+          "root": 397,
+          "scenario": "persistent_shift",
+          "replica": 22,
+          "delta": {
+            "cost": -0.01802199999999976,
+            "fleet": 0.0,
+            "service": -0.01802199999999976,
+            "wait_min": -0.15200000000000102
+          }
+        }
+      ]
+    },
+    "service_only": {
+      "mean": {
+        "cost": 0.001901331250000006,
+        "fleet": 0.002604166666666667,
+        "service": -0.0007028354166666612,
+        "wait_min": -0.00570625
+      },
+      "relative_cost_percent": 0.08689788860094212,
+      "relative_wait_percent": -0.04226131844204321,
+      "fleet_events": [
+        {
+          "root": 397,
+          "scenario": "high_noise",
+          "replica": 0,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.42355199999999993,
+            "fleet": 0.4166666666666667,
+            "service": 0.006885333333333188,
+            "wait_min": 0.07900000000000063
+          }
+        },
+        {
+          "root": 397,
+          "scenario": "ood_period",
+          "replica": 14,
+          "raw_peak": 15,
+          "arm_peak": 14,
+          "delta": {
+            "cost": -0.4102950000000001,
+            "fleet": -0.4166666666666667,
+            "service": 0.006371666666666664,
+            "wait_min": 0.019000000000000128
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 7,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.39867200000000036,
+            "fleet": 0.4166666666666667,
+            "service": -0.01799466666666616,
+            "wait_min": -0.18100000000000094
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 14,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.31893499999999997,
+            "fleet": 0.4166666666666667,
+            "service": -0.09773166666666677,
+            "wait_min": -0.8519999999999994
+          }
+        }
+      ],
+      "scene_effect_counts": {
+        "cost": {
+          "improve": 14,
+          "equal": 299,
+          "worsen": 7
+        },
+        "fleet": {
+          "improve": 1,
+          "equal": 316,
+          "worsen": 3
+        },
+        "service": {
+          "improve": 15,
+          "equal": 299,
+          "worsen": 6
+        },
+        "wait_min": {
+          "improve": 14,
+          "equal": 299,
+          "worsen": 7
+        }
+      },
+      "first_action_changes": 9,
+      "same_prior_second_action_changes": 12,
+      "top_wait_scenes": [
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 14,
+          "delta": {
+            "cost": 0.31893499999999997,
+            "fleet": 0.4166666666666667,
+            "service": -0.09773166666666677,
+            "wait_min": -0.8519999999999994
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "hour_burst",
+          "replica": 8,
+          "delta": {
+            "cost": -0.037139000000000255,
+            "fleet": 0.0,
+            "service": -0.037139000000000255,
+            "wait_min": -0.31799999999999784
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "persistent_shift",
+          "replica": 11,
+          "delta": {
+            "cost": -0.02955599999999947,
+            "fleet": 0.0,
+            "service": -0.02955599999999947,
+            "wait_min": -0.21699999999999875
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 7,
+          "delta": {
+            "cost": 0.39867200000000036,
+            "fleet": 0.4166666666666667,
+            "service": -0.01799466666666616,
+            "wait_min": -0.18100000000000094
+          }
+        },
+        {
+          "root": 397,
+          "scenario": "persistent_shift",
+          "replica": 22,
+          "delta": {
+            "cost": -0.01802199999999976,
+            "fleet": 0.0,
+            "service": -0.01802199999999976,
+            "wait_min": -0.15200000000000102
+          }
+        }
+      ]
+    },
+    "joint_budgeted": {
+      "mean": {
+        "cost": 0.0019299031250000053,
+        "fleet": 0.002604166666666667,
+        "service": -0.0006742635416666614,
+        "wait_min": -0.0053437499999999995
+      },
+      "relative_cost_percent": 0.08820372923805887,
+      "relative_wait_percent": -0.03957659065492545,
+      "fleet_events": [
+        {
+          "root": 397,
+          "scenario": "high_noise",
+          "replica": 0,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.42355199999999993,
+            "fleet": 0.4166666666666667,
+            "service": 0.006885333333333188,
+            "wait_min": 0.07900000000000063
+          }
+        },
+        {
+          "root": 397,
+          "scenario": "ood_period",
+          "replica": 14,
+          "raw_peak": 15,
+          "arm_peak": 14,
+          "delta": {
+            "cost": -0.4102950000000001,
+            "fleet": -0.4166666666666667,
+            "service": 0.006371666666666664,
+            "wait_min": 0.019000000000000128
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 7,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.39867200000000036,
+            "fleet": 0.4166666666666667,
+            "service": -0.01799466666666616,
+            "wait_min": -0.18100000000000094
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 14,
+          "raw_peak": 14,
+          "arm_peak": 15,
+          "delta": {
+            "cost": 0.31893499999999997,
+            "fleet": 0.4166666666666667,
+            "service": -0.09773166666666677,
+            "wait_min": -0.8519999999999994
+          }
+        }
+      ],
+      "scene_effect_counts": {
+        "cost": {
+          "improve": 11,
+          "equal": 301,
+          "worsen": 8
+        },
+        "fleet": {
+          "improve": 1,
+          "equal": 316,
+          "worsen": 3
+        },
+        "service": {
+          "improve": 12,
+          "equal": 301,
+          "worsen": 7
+        },
+        "wait_min": {
+          "improve": 11,
+          "equal": 302,
+          "worsen": 7
+        }
+      },
+      "first_action_changes": 6,
+      "same_prior_second_action_changes": 13,
+      "top_wait_scenes": [
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 14,
+          "delta": {
+            "cost": 0.31893499999999997,
+            "fleet": 0.4166666666666667,
+            "service": -0.09773166666666677,
+            "wait_min": -0.8519999999999994
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "hour_burst",
+          "replica": 8,
+          "delta": {
+            "cost": -0.037139000000000255,
+            "fleet": 0.0,
+            "service": -0.037139000000000255,
+            "wait_min": -0.31799999999999784
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "persistent_shift",
+          "replica": 11,
+          "delta": {
+            "cost": -0.02955599999999947,
+            "fleet": 0.0,
+            "service": -0.02955599999999947,
+            "wait_min": -0.21699999999999875
+          }
+        },
+        {
+          "root": 401,
+          "scenario": "high_noise",
+          "replica": 7,
+          "delta": {
+            "cost": 0.39867200000000036,
+            "fleet": 0.4166666666666667,
+            "service": -0.01799466666666616,
+            "wait_min": -0.18100000000000094
+          }
+        },
+        {
+          "root": 397,
+          "scenario": "persistent_shift",
+          "replica": 22,
+          "delta": {
+            "cost": -0.01802199999999976,
+            "fleet": 0.0,
+            "service": -0.01802199999999976,
+            "wait_min": -0.15200000000000102
+          }
+        }
+      ]
+    }
+  },
+  "groups": {
+    "397/high_noise": {
+      "joint_budgeted": {
+        "cost": 0.01353275000000001,
+        "fleet": 0.013020833333333334,
+        "service": 0.0005119166666666744,
+        "wait_min": 0.006968750000000051
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": 0.013502156250000008,
+        "fleet": 0.013020833333333334,
+        "service": 0.00048132291666667243,
+        "wait_min": 0.006343750000000037
+      },
+      "zero_abstain": {
+        "cost": 0.013399593749999994,
+        "fleet": 0.013020833333333334,
+        "service": 0.00037876041666665833,
+        "wait_min": 0.005968750000000078
+      }
+    },
+    "397/hour_burst": {
+      "joint_budgeted": {
+        "cost": 0.00028928124999999527,
+        "fleet": 0.0,
+        "service": 0.00028928124999999527,
+        "wait_min": 0.0018437500000000329
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": 0.00028928124999999527,
+        "fleet": 0.0,
+        "service": 0.00028928124999999527,
+        "wait_min": 0.0018437500000000329
+      },
+      "zero_abstain": {
+        "cost": 0.00016090624999999525,
+        "fleet": 0.0,
+        "service": 0.00016090624999999525,
+        "wait_min": 0.0011250000000000426
+      }
+    },
+    "397/low_noise": {
+      "joint_budgeted": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": -6.618749999999854e-05,
+        "fleet": 0.0,
+        "service": -6.618750000000201e-05,
+        "wait_min": -0.00024999999999998634
+      },
+      "zero_abstain": {
+        "cost": -6.618749999999854e-05,
+        "fleet": 0.0,
+        "service": -6.618750000000201e-05,
+        "wait_min": -0.00024999999999998634
+      }
+    },
+    "397/ood_period": {
+      "joint_budgeted": {
+        "cost": -0.013504000000000013,
+        "fleet": -0.013020833333333334,
+        "service": -0.00048316666666668034,
+        "wait_min": -0.0024374999999999536
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": -0.013462468750000008,
+        "fleet": -0.013020833333333334,
+        "service": -0.0004416354166666761,
+        "wait_min": -0.0027187499999999643
+      },
+      "zero_abstain": {
+        "cost": -0.013504000000000013,
+        "fleet": -0.013020833333333334,
+        "service": -0.00048316666666668034,
+        "wait_min": -0.0024374999999999536
+      }
+    },
+    "397/persistent_shift": {
+      "joint_budgeted": {
+        "cost": -0.0011635312500000022,
+        "fleet": 0.0,
+        "service": -0.0011635312500000022,
+        "wait_min": -0.009687500000000071
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": -0.0011635312500000022,
+        "fleet": 0.0,
+        "service": -0.0011635312500000022,
+        "wait_min": -0.009687500000000071
+      },
+      "zero_abstain": {
+        "cost": -0.0011635312500000022,
+        "fleet": 0.0,
+        "service": -0.0011635312500000022,
+        "wait_min": -0.009687500000000071
+      }
+    },
+    "401/high_noise": {
+      "joint_budgeted": {
+        "cost": 0.02242521875000001,
+        "fleet": 0.026041666666666668,
+        "service": -0.003616447916666654,
+        "wait_min": -0.03228125000000001
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": 0.022194750000000013,
+        "fleet": 0.026041666666666668,
+        "service": -0.0038469166666666513,
+        "wait_min": -0.03475
+      },
+      "zero_abstain": {
+        "cost": 0.022194750000000013,
+        "fleet": 0.026041666666666668,
+        "service": -0.0038469166666666513,
+        "wait_min": -0.03475
+      }
+    },
+    "401/hour_burst": {
+      "joint_budgeted": {
+        "cost": -0.001160593750000008,
+        "fleet": 0.0,
+        "service": -0.001160593750000008,
+        "wait_min": -0.009937499999999932
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": -0.001160593750000008,
+        "fleet": 0.0,
+        "service": -0.001160593750000008,
+        "wait_min": -0.009937499999999932
+      },
+      "zero_abstain": {
+        "cost": -0.001160593750000008,
+        "fleet": 0.0,
+        "service": -0.001160593750000008,
+        "wait_min": -0.009937499999999932
+      }
+    },
+    "401/low_noise": {
+      "joint_budgeted": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "zero_abstain": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      }
+    },
+    "401/ood_period": {
+      "joint_budgeted": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "zero_abstain": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      }
+    },
+    "401/persistent_shift": {
+      "joint_budgeted": {
+        "cost": -0.0011200937499999397,
+        "fleet": 0.0,
+        "service": -0.0011200937499999397,
+        "wait_min": -0.007906250000000115
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "service_only": {
+        "cost": -0.0011200937499999397,
+        "fleet": 0.0,
+        "service": -0.0011200937499999397,
+        "wait_min": -0.007906250000000115
+      },
+      "zero_abstain": {
+        "cost": -0.0015550312499999497,
+        "fleet": 0.0,
+        "service": -0.0015550312499999497,
+        "wait_min": -0.013781250000000078
+      }
+    }
+  },
+  "joint_vs_service": {
+    "same_metrics_scenes": 315,
+    "same_action_sequence_scenes": 315,
+    "different_first_action_scenes": 3,
+    "peak_fleet_difference_scenes": 0
+  }
+}

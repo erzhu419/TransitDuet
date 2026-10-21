@@ -1,0 +1,38 @@
+{
+  "protocol": "native_transit_closed_loop_confirmation_stage304_v1",
+  "recorded_at_utc": "2026-10-21T08:27:39.475470+00:00",
+  "source_revision": "2851a7567ce10972a37c47428044f123daa1e8c8",
+  "scheduler": {
+    "count": 1280,
+    "first": "t208544",
+    "last": "t209823",
+    "status_counts": {
+      "done": 1280
+    },
+    "exit_code_counts": {
+      "0": 1280
+    },
+    "retry_count_total": 0,
+    "completed_by_node": {
+      "node002": 63,
+      "node006": 291,
+      "node001": 313,
+      "node005": 299,
+      "node004": 314
+    }
+  },
+  "aggregation": {
+    "mode": "direct_existing_results_single_cpu_no_scheduler_submission",
+    "node": "node002",
+    "new_scheduler_tasks": 0,
+    "new_native_episodes": 0,
+    "new_fits": 0,
+    "report_bytes_pulled": 36252,
+    "descriptive_audit_bytes_pulled": 12799,
+    "raw_or_model_data_pulled": false
+  },
+  "coverage_qualified": true,
+  "independent_scene_units": 320,
+  "actual_controller_episodes": 1280,
+  "native_episodes_including_inner": 219520
+}
