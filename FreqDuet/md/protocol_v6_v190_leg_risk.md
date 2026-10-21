@@ -41,3 +41,22 @@ the same forecast/state variables but not the other innovation. This distinguish
 shared information from unique information;the original primary gate is unchanged.
 Seal the supplement before saved-moment analysis,without opening parent risk
 results. Reuse only V190 moment cells,write a separate readout,keep19-day masks.
+
+Completed:a7d126966a/t210827 and30829987d4/t210834,high/manual node004,both
+exit0/no retries;6 distinct tests pass.1536 paths reproduce V189 support. Pulled
+only116996+177759-byte summaries;primary estimates/gates exactly unchanged by
+the supplemental readout. Full64 analysis mass old/handoff:hour2 80.09/80.18%,
+clearance73.24/73.10%,hour13 moving-launch70.62/70.57%;19-day gate never relaxed.
+
+Primary RMS/upper correlations:.0499/.0508(clearance),.0545/.0565(hour13 moving),
+family intervals positive in both modes. Both first32 intervals cross0;last32
+intervals are positive. Lower-tail evidence is insufficient:all8 primary pairs
+miss the full replication rule. This is partial information,not a demonstrated
+sign reversal or proof of no information. Baseline-only diagnostics agree.
+Hour2 diagnostic signed/upper r=.0433/.0429,95% intervals[.0290,.0585]/
+[.0287,.0584],both halves positive;RMS/lower associations are negative,not a
+symmetric spread pattern. These diagnostics are not family-adjusted discoveries.
+
+Decision:no interval fit,new confirmation or main change. Next only read existing
+data on keys meeting19 days in both halves,to distinguish support composition
+from cross-day risk changes and asymmetric running/service/residence contributions.
