@@ -24,3 +24,11 @@ failed V1717c38e514fd source. Its full source equals valid V171f5d152f0bc after
 only repairing parentheses/indentation of an explanatory string. Resolve that
 single declaration check against the valid source, retaining the failed audit
 and both original files. No archive rescan or cohort replacement.
+
+Final high/manual t210684,node005,source1ce0cfc596:7 tests passed, reservation
+complete.45 result roots,20812 metadata files,120223 artifact names,5933 generator
+files; zero day/sampler collisions and no unresolved errors.32 fixed days/samplers
+unchanged,768 future paths not started. V182/V172 records unchanged; no fitting,
+bounds, raw-file reads, replay or training. Pulled only3598-byte final summary
+(plus3018-byte blocked summary/small logs). Next: separately authorized original64-day
+fit/seal, not confirmation collection.
