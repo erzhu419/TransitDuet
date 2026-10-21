@@ -24,3 +24,18 @@ correlations do not prove score/coverage benefit. Original calibration is in-sam
 Future32-day confirmation needs separate freshness/reservation and approval;
 none reserved or started here. All frozen items/main policy unchanged.
 High/manual scheduler node001-node006; small summary only.
+
+## Support result and next step
+
+Sourcea57afaa337; high/manual t210682 on node005;7 tests passed. Only59489-byte
+summary and small logs retrieved. Metadata covers original1536 paths and
+6,687,180 eligible queries; residual/atom files opened0, fitted values/new bounds0.
+All48 parameters pass: positive28-29 distinct days, nonpositive44-46, minimum19
+unchanged. V172 original-key support and all419597 native/44788 V172 abstentions
+remain. Candidate support equals V172 in every mode/scope, including hour13
+.87056/.87058; no additional calibration abstentions. V181 remains unchanged.
+
+This is support feasibility, not score/coverage evidence. Next: metadata-only
+freshness/reservation of the independent32-day cohort before separately
+authorized fitting; no reservation, fitting or collection started here.
+Result: freqduet/results_freqduet/protocol_v6_v182_shared_lower/protocol_a57afaa337/summary/status.json.
