@@ -225,7 +225,7 @@ def summarize(rows, actors, mode, scope):
         cell = next(c for c in row['scopes'] if c['scope'] == scope)
         for g in cell['groups']:
             for i,j in enumerate((1,2)):
-                if len(days[actor,tuple(g['key']),j]) < MIN_DAYS:
+                if len(days.get((actor,tuple(g['key']),j),())) < MIN_DAYS:
                     blocked[i] += g['values'][j]/(len(actors)*len(DAYS))
     def marginal(axis):
         ids = actors if axis == 0 else DAYS
@@ -239,8 +239,8 @@ def summarize(rows, actors, mode, scope):
             dict(zip(FIELDS,np.mean([r[2] for r in rates],axis=0).tolist())),
         baseline_finite_fraction=None if not denominators else float(np.mean(denominators)),
         below19_supported_mass=dict(at_least_one=float(blocked[0]),at_least_nine=float(blocked[1])) if complete else None,
-        keys_by_count={str(j):dict(observed=sum(k[2] == j for k in days),
-            at_least19=sum(k[2] == j and len(d) >= MIN_DAYS for k,d in days.items())) for j in (1,2)},
+        keys_by_count={str(n):dict(observed=sum(k[2] == j and bool(d) for k,d in days.items()),
+            at_least19=sum(k[2] == j and len(d) >= MIN_DAYS for k,d in days.items())) for j,n in ((1,1),(2,9))},
         actor_margins=marginal(0),day_margins=marginal(1))
 
 

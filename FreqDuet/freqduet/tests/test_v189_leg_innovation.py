@@ -54,7 +54,7 @@ class InnovationTests(unittest.TestCase):
                 rows.append(dict(actor=actor,day=day,scopes=[dict(scope='hour2',eligible_episodes=1,
                     finite_fraction=1.,groups=[dict(key=[1,2,2],values=v.tolist())])]))
         result = stage.summarize(rows,(1,2),'old','hour2')
-        self.assertEqual(result['keys_by_count']['2'],dict(observed=2,at_least19=1))
+        self.assertEqual(result['keys_by_count']['9'],dict(observed=2,at_least19=1))
         self.assertAlmostEqual(result['below19_supported_mass']['at_least_nine'],18./128.)
         self.assertEqual(len(result['actor_margins']),2)
         self.assertEqual(len(result['day_margins']),64)
@@ -63,6 +63,13 @@ class InnovationTests(unittest.TestCase):
         self.assertFalse(result['complete_crossed_grid'])
         self.assertIsNone(result['rates'])
         self.assertIsNotNone(result['observed_nonempty_path_rates'])
+
+    def test_zero_support_keys_are_not_counted_as_observed(self):
+        rows = [dict(actor=1,day=day,scopes=[dict(scope='hour2',eligible_episodes=1,
+            finite_fraction=1.,groups=[dict(key=[1,2,2],values=[1.,1.,0.,1.,0.,0.,1.])])]) for day in stage.DAYS]
+        result = stage.summarize(rows,(1,),'old','hour2')
+        self.assertEqual(result['keys_by_count']['1'],dict(observed=1,at_least19=1))
+        self.assertEqual(result['keys_by_count']['9'],dict(observed=0,at_least19=0))
 
 
 if __name__ == '__main__':
