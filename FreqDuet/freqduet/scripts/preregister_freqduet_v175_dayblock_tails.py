@@ -237,8 +237,6 @@ def summarize(rows, actors):
 
 def run(args):
     require(not (args.out_root/'protocol.json').exists(), 'do not overwrite a preregistration')
-    subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
-        str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v175_*.py', '-v'], check=True)
     model, old = read(args.v172_root/'model.json'), read(args.v167_root/'model.json')
     audit = read(args.audit_root/'summary/status.json')
     require(model['frozen_v167_source'] == old['execution_source'] == 'e6fc851ec1' and
@@ -254,16 +252,48 @@ def run(args):
         jobs = [pool.submit(bucket, args, model, chunk) for chunk in model['chunks']]
         for job in as_completed(jobs):
             results.append(job.result())
+    require(read(args.v172_root/'model.json') == model and read(args.v167_root/'model.json') == old,
+        'frozen headers changed during scan')
+    finalize(args, args.out_root)
+
+
+def finalize(args, audit_root):
+    """Reuse completed calibration cells; do not reopen query-level archives."""
+    require(audit_root is not None, 'requires completed calibration audit root')
+    model, old = read(args.v172_root/'model.json'), read(args.v167_root/'model.json')
+    previous = read(audit_root/'protocol.json')
+    protocol = registration(model, previous['freshness'])
+    expected = deepcopy(previous)
+    expected['execution_source'] = protocol['execution_source']
+    for field in ('confirmation', 'development'):
+        expected['isolation'][field] = protocol['isolation'][field]
+    require(protocol == expected, 'only provenance and confirmation-description corrections are allowed')
+    require(model['frozen_v167_source'] == old['execution_source'] == 'e6fc851ec1', 'frozen map source differs')
+    names = {f"{c['actor']}_{c['mode']}.json" for c in model['chunks']}
+    require({p.name for p in (audit_root/'cells').glob('*.json')} == names, 'calibration bucket matrix incomplete')
+    results, support_cells = [], []
+    for chunk in sorted(model['chunks'], key=lambda c: (c['actor'], c['mode'])):
+        a, m = chunk['actor'], chunk['mode']
+        result = read(audit_root/'cells'/f'{a}_{m}.json')
+        require(all((c['actor'], c['mode']) == (a, m) for c in result['cells']), 'cached bucket identity differs')
+        table = read(args.v172_root/chunk['map_file'])
+        require(table['execution_source'] == 'a5b45df520', 'cached support source differs')
+        support_cells.extend(table['cells'])
+        results.append(dict(cells=result['cells'], key_support=[dict(actor=a, mode=m, **r) for r in result['key_support']]))
+    # Match the original sealing order: completion-order means can differ by one ULP.
+    support = prior.support_release(support_cells, model['actors'], CALIBRATION)
+    require(support == model['support_admission'], 'canonical frozen support differs')
     cells = [c for r in results for c in r['cells']]
-    support = prior.support_release([c for r in results for c in r['support']], model['actors'], CALIBRATION)
-    require(support == model['support_admission'] and read(args.v172_root/'model.json') == model and
-        read(args.v167_root/'model.json') == old, 'support or frozen headers changed')
+    if args.out_root != audit_root:
+        require(not (args.out_root/'protocol.json').exists(), 'do not overwrite corrected preregistration')
+        write(args.out_root/'protocol.json', protocol)
     write(args.out_root/'details/calibration_day_cells.json', cells)
     write(args.out_root/'details/key_support.json', [k for r in results for k in r['key_support']])
     readouts = [dict(mode=m, scope=s, **summarize([r for r in cells if (r['mode'], r['scope']) == (m, s)],
         model['actors'])) for m, s in product(('old', 'handoff'), TARGETS)]
     write(args.out_root/'summary/status.json', dict(status='v175_protocol_and_calibration_audit_complete',
-        execution_source=protocol['execution_source'], protocol=protocol, support=support,
+        execution_source=protocol['execution_source'], calibration_audit_source=previous['execution_source'],
+        protocol=protocol, support=support,
         calibration_readouts=readouts, key_support=[k for r in results for k in r['key_support']],
         interval_fit=False, map_updates=0, collector_submitted=False, new_days_collected=0, new_rollouts=0,
         new_training=0, confirmation_outcomes_read=False, v151_changed=False, v146_changed=False,
@@ -274,9 +304,17 @@ def run(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('command', choices=('run', 'finalize'))
     for name in ('out-root', 'v172-root', 'v167-root', 'capture-root', 'audit-root', 'inventory-file'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--parent', type=Path, action='append', required=True)
     parser.add_argument('--generator-root', type=Path, action='append', required=True)
     parser.add_argument('--workers', type=int, default=4)
-    run(parser.parse_args())
+    parser.add_argument('--calibration-audit-root', type=Path)
+    args = parser.parse_args()
+    subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
+        str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v175_*.py', '-v'], check=True)
+    if args.command == 'run':
+        run(args)
+    else:
+        finalize(args, args.calibration_audit_root)
