@@ -34,7 +34,8 @@ class StateDayTests(unittest.TestCase):
     def test_group_algebra_with_correlated_and_duplicate_controls(self):
         rng = np.random.default_rng(20260803)
         x = rng.normal(size=(200,stage.N))
-        x[:,10],x[:,0] = x[:,9],x[:,1]+x[:,9]
+        x[:,10] = x[:,9]
+        x[:,0] += x[:,1]+x[:,9]
         cov = np.cov(x,rowvar=False)
         ref = stage.parent.measure(cov,1,True)
         for c in (cov,2.*cov,np.stack((cov,2.*cov))):
