@@ -18,3 +18,9 @@ No V177 confirmation outcomes used. High/manual scheduler,node001-node006 only.
 
 After successful reservation: separately authorize fitting/sealing on original64
 calibration days. Independent confirmation collection still needs later approval.
+
+Initial high/manual t210683,node005: zero ID collisions, one parser gap in the
+failed V1717c38e514fd source. Its full source equals valid V171f5d152f0bc after
+only repairing parentheses/indentation of an explanatory string. Resolve that
+single declaration check against the valid source, retaining the failed audit
+and both original files. No archive rescan or cohort replacement.

@@ -1,3 +1,4 @@
+import ast
 from copy import deepcopy
 from pathlib import Path
 import sys
@@ -66,6 +67,16 @@ class ConfirmationReservationTests(unittest.TestCase):
         self.assertEqual(protocol, original)
         with self.assertRaises(AssertionError):
             plan.reservation(protocol, dict(decision='blocked', collisions=[1], errors=[]))
+
+    def test_observed_archived_description_repair_does_not_change_declarations(self):
+        broken = "CONFIRMATION = range(3152001, 3152033)\ndef registration():\n    result['estimator']['implementation'] = 'same V161 empirical ranks and joint atoms; future mixtures must recompute '\n        'equal-day/episode/query weights within each new key, never reuse old-key atom weights'\n"
+        with self.assertRaises(SyntaxError):
+            ast.parse(broken)
+        repaired = plan.repair_description_only(broken)
+        parsed = ast.parse(repaired)
+        self.assertEqual([n.value for n in parsed.body[0].value.args], [3152001, 3152033])
+        with self.assertRaises(AssertionError):
+            plan.repair_description_only('an unrelated syntax failure')
 
 
 if __name__ == '__main__':

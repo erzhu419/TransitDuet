@@ -124,6 +124,40 @@ def reservation(protocol, freshness):
         scope='metadata freshness/reservation only; no prediction, calibration or controller performance claim')
 
 
+def repair_description_only(text):
+    broken = "    result['estimator']['implementation'] = 'same V161 empirical ranks and joint atoms; future mixtures must recompute '\n        'equal-day/episode/query weights within each new key, never reuse old-key atom weights'"
+    fixed = "    result['estimator']['implementation'] = (\n        'same V161 empirical ranks and joint atoms; future mixtures must recompute '\n        'equal-day/episode/query weights within each new key, never reuse old-key atom weights')"
+    require(text.count(broken) == 1, 'not the observed V171 description-only syntax defect')
+    return text.replace(broken, fixed)
+
+
+def resolve_previous(args, protocol):
+    old = read(args.previous_root/'summary/status.json')
+    intent = read(args.previous_root/'reservation_intent.json')
+    fresh = read(args.previous_root/'details/freshness.json')
+    require(old['source'] == '4ed654a9b9' and old['status'] == 'v183_reservation_blocked' and
+        intent['confirmation_days'] == list(DAYS) and
+        intent['sampler_seeds'] == {str(d): SAMPLERS[d] for d in DAYS} and intent['v182_protocol'] == protocol and
+        not fresh['collisions'] and len(fresh['errors']) == 1, 'requires the unchanged zero-conflict V183 audit')
+    broken = Path(fresh['errors'][0]['path'])
+    reference = args.reference_generator
+    require(reference is not None and broken.parents[2].name == 'protocol_7c38e514fd' and
+        reference.parents[2].name == 'protocol_f5d152f0bc' and
+        broken.name == reference.name == 'preregister_freqduet_v171_temporal_tails.py' and
+        repair_description_only(broken.read_text()) == reference.read_text(),
+        'archived generators differ beyond the observed description parentheses; stop')
+    require(not ledger.metadata.literal_conflicts(reference, set(DAYS) | set(SAMPLERS.values())),
+        'equivalent V171 declarations conflict with fixed cohort')
+    fresh.update(decision='fresh', errors=[], syntax_resolution=dict(original_errors=fresh['errors'],
+        reference=str(reference), declarations_unchanged=True, original_files_modified=False,
+        method='whole-source equality after only the known description-string parentheses/indentation repair; '
+            'literal/range check on the equivalent valid source; no archive rescan or cohort replacement'))
+    require(not (args.out_root/'reservation_intent.json').exists(), 'never overwrite cohort intent')
+    write(args.out_root/'reservation_intent.json', intent)
+    print('V183_SINGLE_SYNTAX_GAP_RESOLVED_NO_ARCHIVE_OR_COHORT_CHANGE', flush=True)
+    return fresh
+
+
 def run(args):
     protocol = read(args.v182_root/'protocol.json')
     support = read(args.v182_root/'summary/status.json')
@@ -131,6 +165,10 @@ def run(args):
     validate(protocol, support, model)
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
         str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v183_*.py', '-v'], check=True)
+    if args.previous_root:
+        fresh = resolve_previous(args, protocol)
+        finish(args, protocol, support, model, fresh)
+        return
     require(not (args.out_root/'reservation_intent.json').exists(), 'never overwrite a fixed cohort intent')
     write(args.out_root/'reservation_intent.json', dict(status='fixed_before_metadata_audit',
         confirmation_days=list(DAYS), sampler_seeds={str(d): SAMPLERS[d] for d in DAYS}, v182_protocol=protocol))
@@ -141,6 +179,10 @@ def run(args):
     for group in inventory['groups']:
         roots.update(p for p in Path(group['base']).parents if p.name == 'results_freqduet' and p.is_dir())
     fresh = audit(roots, args.generator_root, inventory, args.out_root.parent)
+    finish(args, protocol, support, model, fresh)
+
+
+def finish(args, protocol, support, model, fresh):
     write(args.out_root/'details/freshness.json', fresh)
     require(read(args.v182_root/'protocol.json') == protocol and
         read(args.v182_root/'summary/status.json') == support and read(args.v172_root/'model.json') == model,
@@ -156,7 +198,8 @@ def run(args):
         interval_fit=False, fitted_parameter_values=0, new_bounds=0, raw_files_opened=0,
         new_rollouts=0, new_training=0, confirmation_outcomes_read=False,
         confirmation_started=False, collector_submitted=False, main_policy_changed=False,
-        next='Separate authorization for original64-day fitting/seal; no confirmation collection yet.')
+        next='Separate authorization for original64-day fitting/seal; no confirmation collection yet.'
+            if fresh['decision'] == 'fresh' else 'Resolve metadata admission gap; no fitting or collection authorization.')
     if fresh['decision'] == 'fresh':
         registered = reservation(protocol, fresh)
         write(args.out_root/'registration.json', registered)
@@ -172,4 +215,6 @@ if __name__ == '__main__':
         parser.add_argument('--'+name, type=Path, required=True)
     for name in ('parent', 'generator-root'):
         parser.add_argument('--'+name, type=Path, action='append', required=True)
+    for name in ('previous-root', 'reference-generator'):
+        parser.add_argument('--'+name, type=Path)
     run(parser.parse_args())
