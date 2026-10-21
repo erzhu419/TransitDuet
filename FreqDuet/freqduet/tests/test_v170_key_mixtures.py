@@ -53,6 +53,7 @@ class KeyMixtureTests(unittest.TestCase):
         new = next(r for r in result if r['event'] == 'new' and r['field'] == 'predicted_horizon_band')
         self.assertEqual(new['mass'], .25)
         self.assertEqual(new['event_share'], 1.)
+        self.assertEqual(new['rate_within_matched_category'], .25)
         self.assertEqual(new['point_s'], 100.)
         for cell in cells:
             self.assertEqual(cell['new']+cell['repaired']+cell['both']+cell['neither'], 1.)
@@ -66,7 +67,9 @@ class KeyMixtureTests(unittest.TestCase):
             key[0], key[-1] = actor, band
             rows.append(dict(cohort='confirmation32', mode='old', event='new', key=key,
                 mass=mass, sums=[100.*mass]*len(audit.FEATURES)))
-        result = [r for r in audit.composition(rows, [1, 2]) if r['field'] == 'predicted_horizon_band']
+            rows.append(dict(cohort='confirmation32', mode='old', event='all', key=key,
+                mass=1., sums=[100.]*len(audit.FEATURES)))
+        result = [r for r in audit.composition(rows, [1, 2]) if r['field'] == 'predicted_horizon_band' and r['event'] == 'new']
         self.assertAlmostEqual(sum(r['mass'] for r in result), .2)
         self.assertAlmostEqual(sum(r['event_share'] for r in result), 1.)
         self.assertTrue(all(r['point_s'] == 100. for r in result))

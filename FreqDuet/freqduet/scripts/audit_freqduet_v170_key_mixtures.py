@@ -178,8 +178,11 @@ def composition(rows, actors):
     output = []
     for identity, v in sorted(groups.items()):
         cohort, mode, event, field, value = identity
+        baseline = groups[(cohort, mode, 'all', field, value)][0]
+        require(baseline > 0., 'event category lacks matched-sample exposure')
         output.append(dict(cohort=cohort, mode=mode, event=event, field=field, value=json.loads(value),
             mass=float(v[0]), event_share=float(v[0]/totals[identity[:3]]),
+            rate_within_matched_category=float(v[0]/baseline),
             **dict(zip(FEATURES, (v[1:]/v[0]).tolist()))))
     return output
 
@@ -233,7 +236,7 @@ def run(args):
                     close(sum(c['mass'] for c in groups if (c['event'], c['field']) == (event, field)),
                         summary['mean'][event])
             diagnostics.append(dict(cohort=cohort, mode=mode, hour13=summary,
-                composition=[c for c in groups if c['event'] in ('new', 'repaired') and
+                composition=[c for c in groups if c['event'] in ('all', 'new', 'repaired') and
                     c['field'] in ('predicted_horizon_band', 'position_status', 'native_stage_kind', 'native_support_class')],
                 top_signatures={e: sorted([c for c in groups if (c['event'], c['field']) == (e, 'key_signature')],
                     key=lambda c: c['mass'], reverse=True)[:4] for e in ('new', 'repaired')}))
