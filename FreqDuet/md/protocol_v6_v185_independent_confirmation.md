@@ -26,3 +26,11 @@ Save actor/day marginals and all negative results; controller never admitted.
 High/manual scheduler,node001-node006 only.48 shards x8 pairs,4 workers each;
 prepare and aggregation separately scheduled. Dependencies use only small
 prepare/shard status receipts synced locally; raw/CSV/checkpoints stay server-side.
+
+Launch: source9c36b3b3cf,high/manual prepare t210738,node005;6 tests and8742
+consumed-query prefix comparisons passed exactly.45 roots/120223 artifact names/
+20783 sampler receipts:zero consumed-cohort conflicts. Only423-byte preparation
+summary and small logs pulled. High/manual shards t210739-t210786 all observed
+running on node001/004/005/006,192 workers; aggregate t210787 waits for48 small
+completion receipts. First old/handoff paths passed full readback. No partial
+scientific readout or tuning; evaluate once all768 assigned paths are complete.
