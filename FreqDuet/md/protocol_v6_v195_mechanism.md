@@ -35,3 +35,39 @@ Next decision follows V194:no replicated first-road sign means no propagation
 correction;no non-running offset contrast means no cancellation claim. These
 reused calibration-day associations cannot establish held-future prediction
 skill,causal holding mediation or a replacement controller.
+
+## Result and decision
+
+t210894/source759c662f20 completed high/manual on node004,exit0,six workers.
+Eight tests passed;all six cases reproduced V191 balanced masses and points.
+Fetched only438956-byte summary;moments and detailed allocations stay server-side.
+Summary:freqduet/results_freqduet/protocol_v6_v195_mechanism/readout_759c662f20/summary/status.json.
+
+All64 primary WITHIN-day covariances(squared seconds,original nominal mass);
+brackets are the registered99.375% family intervals,not MAE or a control effect:
+
+| Mode/scope | J,first running | J,non-running |
+| --- | --- | --- |
+| old/clearance | 0.328[-3.917,4.950] | -0.944[-2.454,0.495] |
+| handoff/clearance | 0.404[-3.793,4.978] | -0.855[-2.325,0.556] |
+| old/hour13 moving-launch | 0.627[-3.606,5.255] | -0.918[-2.460,0.631] |
+| handoff/hour13 moving-launch | 0.512[-3.599,4.997] | -0.756[-2.245,0.746] |
+
+Neither H1 nor H3 replicated in either primary scope. First-road point
+covariances switch from negative in first32 to positive in last32,but every
+half95% interval crosses zero. Non-running covariance is negative95% only in
+last32 clearance(both modes),not first32 or all64. Its negative point allocation
+is mostly holding outside joint residence;service and later-running95% intervals
+also cross zero. I and A first-road diagnostics show the same half-direction
+change,so absorption alone is not an established explanation.
+
+Between-day first-road point covariances are larger(4.725-5.971 versus within-day
+0.328-0.627),but their95% intervals also cross zero. Do not substitute these
+descriptive day-level associations for the failed within-day replication.
+
+Decision:no J-based propagation correction,no stable cancellation claim,no
+interval fit or confirmation launch. If continuing,preregister a saved-moment
+decomposition of the first-road half change into unadjusted covariance,fixed
+control-projection terms,and actor/common-road-key contributions;do not retune
+RMS thresholds. Frozen items and main remain unchanged. These reused calibration
+days and imprecise component contrasts do not establish no effect or causality.
