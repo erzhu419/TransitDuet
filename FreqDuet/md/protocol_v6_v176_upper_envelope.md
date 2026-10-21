@@ -14,3 +14,10 @@ V167/V172, V151, V146, native window, nominal tails and main policy stay fixed.
 Run via high/manual scheduler on node001-node006, eight server workers. Pull
 only the small summary. The 64 reserved confirmation days remain unopened;
 construction/support acceptance is not independent coverage or policy evidence.
+
+Sealed by t210495 (node005, high/manual, exit 0), source 36108d4f49; eight tests
+passed. All 24 maps passed: 2,020 target finite keys widened, 170,186 queries
+expanded, all 6,222,795 finite masks preserved and 8,951 abstaining keys retained.
+Lower bounds and non-target intervals are unchanged; no upper contraction.
+Maximum upper expansion is 135.022 seconds, so independent score/width tradeoffs
+remain unresolved. Only the 7,839-byte summary was pulled; confirmation stays unopened.
