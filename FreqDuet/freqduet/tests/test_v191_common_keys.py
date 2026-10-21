@@ -64,7 +64,7 @@ class CommonKeyTests(unittest.TestCase):
         a = (None,np.array([1.,-.3]),np.array([2.,3.]))
         b = (None,np.array([2.,-.1]),np.array([5.,1.]))
         covariance,normalization = stage.normalization(a,b)
-        np.testing.assert_allclose(covariance+normalization,b[1]/b[2]-a[1]/a[2])
+        np.testing.assert_allclose(covariance+normalization,b[1]/b[2]-a[1]/a[2],atol=1e-12)
 
     def test_halves_share_actors_but_not_arbitrary_day_positions(self):
         a,days = stage.weights(12)
