@@ -136,6 +136,10 @@ def registration(model, fresh):
             'day variability only; no new quantiles, interval construction, collection or training',
         calibration_seal='separate authorization required; construct exactly one new envelope from only the '
             '64 V166 calibration days, reproduce support/mask/lower bounds and seal before collecting fresh days',
+        confirmation='only after separate authorization and mapping seal: all 1536 assigned paths '
+            '(12 actors x 64 fresh demand days x 2 modes); apply the sealed envelope once, no updates',
+        development='historical diagnostics motivate the upper-tail question only; numerical design is fixed '
+            'before this calibration readout, and no confirmation outcome is used to select parameters',
         fixed_budget='existing 64 calibration days; exactly 64 reserved confirmation days if separately '
             'authorized; no replacements, optional additions, subgroup admission or post-failure shrinkage',
         no_reuse='no V168/V173 confirmation records in fitting, support, bootstrap or threshold selection; '

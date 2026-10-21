@@ -50,6 +50,8 @@ class DayBlockProtocolTests(unittest.TestCase):
         self.assertEqual(result['upper_tail_envelope']['candidate_count'], 1)
         self.assertIn('L_new=L_V172', result['upper_tail_envelope']['interval'])
         self.assertIn('never collapse duplicates', result['upper_tail_envelope']['repeated_days'])
+        self.assertEqual(reservation['confirmation_paths'], 1536)
+        self.assertIn('1536', result['isolation']['confirmation'])
 
     def test_collision_or_changed_window_blocks_registration(self):
         with self.assertRaises(AssertionError):
