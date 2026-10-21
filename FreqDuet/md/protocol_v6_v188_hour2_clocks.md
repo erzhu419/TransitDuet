@@ -21,3 +21,18 @@ input. No sign inversion,threshold selection or mapping release from this audit.
 
 High/manual scheduler,node001-node006. Detailed cells stay server-side;retrieve
 only small summary and logs. Next decision follows replication and decomposition.
+
+Completed:source80cdc761f7,t210804,high/manual node004;5 tests and1536 path
+checks passed. V187 moments/endpoints and native means/counts/clocks reproduced;
+running analysis mass1.0. Pulled122595-byte summary only. Residual-prefix queries
+average2205.6s old,completion age1821.8s,label delay383.8s;ready-after-arrival only
+12.95s.61.1% of prefix queries precede hour2;52.7% of native samples entered earlier.
+Across fixed quarters,true running336.6->294.8s while forecast278.0->296.5s.
+Old service-controlled covariance(error)=-178.86=-45.41(truth)-133.45(prediction).
+Forecast-level control alone leaves r=-.216,so absorption is not the sole source.
+Time/distance/horizon controls reduce running-error r to+.012;adding completed
+clocks/stages gives+.001,CI[-.023,.026],upper-miss/score CIs cross0. Both modes
+and predetermined halves agree;quarter-conditioned full-clock CIs also cross0.
+Decision:no sign inversion,global residual overlay,fit or new confirmation.
+If continuing,next preregister a road-leg/time-aligned innovation and support
+audit on original64 only. Associations do not uniquely identify causal shares.
