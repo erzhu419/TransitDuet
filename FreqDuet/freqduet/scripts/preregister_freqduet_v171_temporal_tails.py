@@ -207,8 +207,9 @@ def registration(model, fresh):
     result['gates']['applies_to'] = 'both modes and all six registered scopes, including hour13_moving_launch'
     result['comparator'].update(map_source='e6fc851ec1', primary='unchanged V167 coarse reference',
         secondary='unchanged V167 conditional map; report paired differences on the same candidate-finite mask')
-    result['estimator']['implementation'] = 'same V161 empirical ranks and joint atoms; future mixtures must recompute '
-        'equal-day/episode/query weights within each new key, never reuse old-key atom weights'
+    result['estimator']['implementation'] = (
+        'same V161 empirical ranks and joint atoms; future mixtures must recompute '
+        'equal-day/episode/query weights within each new key, never reuse old-key atom weights')
     result['isolation'].update(first='protocol and calibration-support counts only; no collector or estimator now',
         release='all six calibration support scopes: complete actor/day grid, nonempty finite estimate in every cell, '
             'mean finite fraction >=0.8, no missing frozen comparator; otherwise stop without regrouping or added days',
