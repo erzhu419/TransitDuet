@@ -48,3 +48,21 @@ masks/balance. Later-road contrast and component allocations are diagnostic.
 Hour13 overlaps clearance and is not independent replication. No first-road
 replication:no propagation correction;no offset contrast:no cancellation claim.
 Positive calibration association alone is not held-future skill or causal mediation.
+
+## Admission and next step
+
+t210892/source51a9409ec2 completed high/manual on node004,exit0,no retries;
+12 workers. Six tests and four fixed real-path preflights passed,followed by all
+1536 original actor/day/mode paths.119953 admitted query records passed source/
+label clock,physical identity and additive-component checks. V190 moments and
+episode denominators reproduced;common keys keep19 supported days in EACH half.
+Only the13361-byte summary was fetched;derived joint moments stay server-side.
+
+Mechanism associations have NOT yet been tested. Next read only the saved moments
+under the sealed contrasts:within-day J/first-road covariance and J/non-running
+covariance,with first/last32 replication and separate between-day diagnostics.
+Use the average of the two balanced-half within-day covariance matrices for the
+common projection;all64 is their equal-weight mean. Bootstrap this fixed-half
+design with independent day draws in each half and shared actor draws.
+No new archive scan,threshold adjustment,interval fit,confirmation,replay,
+training or main-policy change is required for that readout.
