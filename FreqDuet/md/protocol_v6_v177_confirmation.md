@@ -16,3 +16,13 @@ crossed bootstrap. Save actor/day marginals and score/width/tail decompositions
 on the server. Submit 96 eight-pair shards plus a receipt-dependent aggregate,
 all high priority, manually dispatched to node001-node006. Pull only tiny shard
 receipts and the small final summary, never raw trajectories or checkpoints.
+
+## Launch record
+
+Source d1454cfc39 passed all nine server-side preflight tests (t210496),
+including reserved-day isolation, frozen-map geometry and runtime equivalence.
+Collection tasks t210498-t210593 and aggregate t210594 were submitted at high
+priority and explicitly manually dispatched. At launch verification, 88 shards
+were running and eight awaited resources; no failures or retries were present.
+Server logs contained completed V177 confirmation paths. The aggregate waits
+for all 96 tiny shard receipts. This is launch evidence, not a coverage verdict.
