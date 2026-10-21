@@ -219,8 +219,8 @@ def run(args):
                 ('confirmation32_held_out', mode, scope, 'matched'))
             original = next(r for r in primary['readouts'] if (r['mode'], r['scope']) == (mode, scope))
             for metric in ('coverage', 'above', 'reference_above', 'width_delta_s', 'score_delta_s'):
-                saved.metadata.close(check[metric], original['estimates'][metric]['mean'])
-            saved.metadata.close(check['above']-check['reference_above'],
+                saved.fit.close(check[metric], original['estimates'][metric]['mean'])
+            saved.fit.close(check['above']-check['reference_above'],
                 check['candidate_only_upper']-check['reference_only_upper'])
     write(args.out_root/'details/marginals.json', marginals)
     write(args.out_root/'summary/status.json', dict(status='v169_readonly_complete',
