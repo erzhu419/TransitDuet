@@ -281,12 +281,25 @@ def calibration_moving(args, model):
             moving = np.zeros(len(q), dtype=bool)
             moving[ri] = np.array([e['key'][field] == 'moving-launch' for e in table['candidate']])[keys]
             selected = (q[:, 4]//3600 == 13) & moving
-            truth = np.full(len(q), np.nan)
-            truth[ri] = q[ri, 3]-z['residual_rsd'].sum(axis=1)
             saved_cells = {c['day']: c for c in table['cells'] if c['scope'] == 'hour13_moving_launch'}
             for day in model['calibration_days']:
                 group = {}
-                for i in np.flatnonzero(selected & (q[:, 0] == day)):
+                indices = np.flatnonzero(selected & (q[:, 0] == day))
+                wanted = {tuple(q[i, 5:].astype(int)): i for i in indices}
+                truth = {}
+                path = Path(model['capture_root'])/'calibration/residuals'/f"{chunk['actor']}_{day}_{chunk['mode']}.jsonl.gz"
+                # Use exact saved labels: subtracting summed residuals can flip coverage at an interval endpoint.
+                for residual in stream(path):
+                    key = tuple(residual['query_key'])
+                    if key in wanted:
+                        i = wanted.pop(key)
+                        require(residual['query_time_s'] == q[i, 4] and residual['label']['status'] == 'resolved',
+                            'calibration moving label join differs')
+                        truth[i] = residual['label']['full_eta_s']
+                    if not wanted:
+                        break
+                require(not wanted, 'calibration moving labels missing')
+                for i in indices:
                     p = dict(finite=bool(finite[i]), reference_finite=bool(reference[i]),
                         secondary_finite=bool(secondary[i]), bounds=bounds[i, 0],
                         reference_bounds=bounds[i, 1], secondary_bounds=secondary_bounds[i])

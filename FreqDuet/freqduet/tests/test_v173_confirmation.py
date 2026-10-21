@@ -1,5 +1,7 @@
 import ast
 from copy import deepcopy
+import gzip
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -103,20 +105,31 @@ class TemporalConfirmationTests(unittest.TestCase):
                 [10, 1, 17, 100., 46802., 3, 2, 1], [11, 2, 17, 100., 46800., 4, 2, 1]])
             finite = np.array([True, True, False, True])
             bounds = np.tile(np.array([[90., 110.], [0., 200.]]), (4, 1, 1))
+            bounds[0, 0] = [100., 100.]
             bounds[2, 0] = np.nan
+            residuals = np.zeros((4, 3))
+            residuals[0, 0] = 1e-12
             np.savez_compressed(root/'atoms.npz', requests=q, atom_request=np.arange(4),
                 candidate_key=np.array([0, 0, 1, 0]), finite_candidate=finite, finite_reference=np.ones(4, dtype=bool),
                 finite_frozen_v167=np.ones(4, dtype=bool), bounds=bounds,
-                frozen_v167_bounds=np.tile([80., 120.], (4, 1)), residual_rsd=np.zeros((4, 3)))
+                frozen_v167_bounds=np.tile([80., 120.], (4, 1)), residual_rsd=residuals)
+            (root/'calibration/residuals').mkdir(parents=True)
+            for day in (10, 11):
+                with gzip.open(root/'calibration/residuals'/f'1_{day}_old.jsonl.gz', 'wt') as handle:
+                    for row in q[q[:, 0] == day]:
+                        handle.write(json.dumps(dict(query_key=row[5:].astype(int).tolist(), query_time_s=row[4],
+                            label=dict(status='resolved', full_eta_s=100.)))+'\n')
             confirm.write(root/'map.json', dict(candidate=[dict(key=['moving-launch'])]*2,
                 cells=[dict(day=d, scope='hour13_moving_launch', eligible_queries=n, finite_queries=f,
                     finite_fraction=ratio) for d, n, f, ratio in ((10, 3, 2, .5), (11, 1, 1, 1.))]))
-            model = dict(calibration_days=[10, 11], frozen_protocol=dict(conditioning=dict(candidate_key=['native_stage_kind'])),
+            model = dict(calibration_days=[10, 11], capture_root=str(root),
+                frozen_protocol=dict(conditioning=dict(candidate_key=['native_stage_kind'])),
                 chunks=[dict(actor=1, mode='old', map_file='map.json', atom_file='atoms.npz')])
             rows = confirm.calibration_moving(SimpleNamespace(v172_root=root), model)
             self.assertEqual([r['finite_fraction'] for r in rows], [.5, 1.])
-            self.assertEqual([r['score_delta_s'] for r in rows], [-180., -180.])
-            self.assertEqual([r['secondary_score_delta_s'] for r in rows], [-20., -20.])
+            self.assertEqual([r['coverage'] for r in rows], [1., 1.])
+            self.assertEqual([r['score_delta_s'] for r in rows], [-190., -180.])
+            self.assertEqual([r['secondary_score_delta_s'] for r in rows], [-30., -20.])
 
     def test_predictions_precede_labels_and_no_update_entry(self):
         tree = ast.parse(Path(confirm.__file__).read_text())
