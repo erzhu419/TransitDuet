@@ -106,6 +106,41 @@ class DayBlockProtocolTests(unittest.TestCase):
         self.assertFalse(any(isinstance(n, ast.Attribute) and n.attr in
             ('v168_root', 'v173_root', 'v174_root') for n in ast.walk(tree)))
 
+    def test_finalization_reuses_saved_cells_and_canonical_support_without_raw_reads(self):
+        source = model()
+        source.update(frozen_v167_source='e6fc851ec1', support_admission=dict(decision='pass'),
+            chunks=[dict(actor=a, mode=m, map_file=f'maps/{a}_{m}.json')
+                for a in reversed(range(12)) for m in ('old', 'handoff')])
+        protocol = self.register(source)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = SimpleNamespace(out_root=root/'new', v172_root=root/'v172', v167_root=root/'v167')
+            archive = root/'audit'
+            (archive/'cells').mkdir(parents=True)
+            records = {args.v172_root/'model.json': source,
+                args.v167_root/'model.json': dict(execution_source='e6fc851ec1'),
+                archive/'protocol.json': protocol}
+            for c in source['chunks']:
+                a, m = c['actor'], c['mode']
+                path = archive/'cells'/f'{a}_{m}.json'
+                path.touch()
+                records[path] = dict(cells=[dict(actor=a, mode=m, day=d, scope=s)
+                    for d in stage.CALIBRATION for s in stage.TARGETS], key_support=[])
+                records[args.v172_root/c['map_file']] = dict(execution_source='a5b45df520',
+                    cells=[dict(actor=a, mode=m)])
+            with patch.object(stage, 'read', side_effect=lambda p: records[p]), \
+                    patch.object(stage, 'write') as output, \
+                    patch.object(stage, 'stream', side_effect=AssertionError('no raw reads')), \
+                    patch.object(stage, 'summarize', return_value=dict(cells=768)), \
+                    patch.object(stage.prior, 'support_release', return_value=source['support_admission']) as support, \
+                    patch.dict('os.environ', FREQDUET_DIAGNOSTIC_COMMIT='test-source'):
+                stage.finalize(args, archive)
+            order = [(c['actor'], c['mode']) for c in support.call_args.args[0]]
+            self.assertEqual(order, sorted(order))
+            summary = output.call_args.args[1]
+            self.assertFalse(summary['interval_fit'])
+            self.assertFalse(summary['collector_submitted'])
+
 
 if __name__ == '__main__':
     unittest.main()
