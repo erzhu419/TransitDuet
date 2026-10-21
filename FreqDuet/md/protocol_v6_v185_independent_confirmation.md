@@ -34,3 +34,16 @@ summary and small logs pulled. High/manual shards t210739-t210786 all observed
 running on node001/004/005/006,192 workers; aggregate t210787 waits for48 small
 completion receipts. First old/handoff paths passed full readback. No partial
 scientific readout or tuning; evaluate once all768 assigned paths are complete.
+
+Completed:48 shards/768 paths,all12 actor/day readout grids complete (384 cells
+each),no finite unresolved labels or missing references. Aggregate t210787,node004;
+5000 crossed draws. Gate:not_admitted. Coverage/support/lower-tail gates pass in
+both modes/all scopes. Upper-tail upper95 fails clearance,hour2,hour13 and moving-launch;
+hour2 mean exceedance10.45%,upper95~11.3%. Score gates fail all/active/clearance/
+hour13/moving-launch. Overall paired score:old+0.0208s,CI95[-0.0207,0.0668];
+handoff+0.0188s,[-0.0191,0.0621]. Clearance:old+0.5725s,[-1.2707,2.5245];
+handoff+0.5308s,[-1.1316,2.3711]. No confirmed score gain,not uniform significant
+degradation. V184/V172/V151/V146 unchanged,map updates/training0,main unchanged.
+Pulled76433-byte final summary and11444-byte completion receipts;no raw/CSV/ckpt.
+Next:stop this candidate's promotion,retain its negative confirmation and frozen
+maps. These32 days are consumed; no retuning or replacement cohort for this candidate.
