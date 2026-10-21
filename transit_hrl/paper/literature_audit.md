@@ -1,5 +1,33 @@
 # Freq-HRL Literature and Novelty Audit
 
+## Active Plan-Validity Scope: 2026-10-22
+
+The historical audit below addresses responsibility allocation, not the active
+timing manuscript's novelty. The current paper makes no priority claim for
+adaptive decision frequency or learning when to plan. Primary records inspected
+for the rewritten Related Work are:
+
+- [Option-Critic](https://arxiv.org/abs/1609.05140): learns intra-option policies
+  and termination, establishing the direct learned-termination comparison family.
+- [TEMPLE](https://arxiv.org/abs/2002.02080): a temporal gate adapts high-level
+  decision frequency, so adaptive upper timing is not new by itself.
+- [FiGAR](https://arxiv.org/abs/1702.06054): learns physical action repetitions;
+  the current paper instead retains primitive-time lower feedback.
+- [TAAC](https://proceedings.neurips.cc/paper/2021/hash/f337d999d9ad116a7b4f3d409fcc6480-Abstract.html):
+  chooses between previous and newly sampled actions; it is related timing work,
+  not an evaluated baseline in the present results.
+- [Learning When to Plan](https://arxiv.org/abs/2509.03581): supervised and RL
+  dynamic planning in language-model agents/Crafter. Its domain and training
+  differ, but the broader compute-allocation question is established prior art.
+
+The bounded distinction is paired keep/renew value supervision plus an exact
+within-bin call constraint and independent-root outcome evaluation. Competitive
+novelty still requires competent adaptive-timing baselines and matched compute;
+this focused primary-record update is not an exhaustive 2026 priority search.
+Stage10's collapsed termination baseline supplies no literature-wide superiority.
+
+## Historical Responsibility Audit
+
 Audit date: 2026-08-31
 
 Scope: primary conference, journal, and author-hosted records for work directly

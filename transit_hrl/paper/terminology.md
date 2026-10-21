@@ -1,53 +1,30 @@
-# Freq-HRL terminology ledger
+# Plan-Validity Manuscript Terminology
 
-Status: authoritative manuscript terminology, 2026-08-31
+Active vocabulary, 2026-10-22. The previous frequency-responsibility ledger is
+retained in `archive/2026-08-31/terminology.md` for that different method.
 
-This ledger fixes the vocabulary used by `manuscript.md`. Terms from retired
-drafts are not interchangeable with the definitions below.
+| Term | Definition in this manuscript |
+| --- | --- |
+| plan | A waypoint emitted by the upper policy and held until the next actual upper call |
+| upper policy / lower policy | Learned goal policy / goal-conditioned physical actuator policy |
+| plan-validity predictor | An operational predictor of the keep-versus-renew tracking-loss difference; not a validity probability |
+| renewal advantage | `keep ISE - renew ISE` over the paired 50-step branch horizon; positive favors renewal |
+| causal-history features | Features computed from current and past observations; causal means temporally available, not causal discovery |
+| budgeted replanning | First threshold crossing or deadline, exactly one upper call per 50-step bin |
+| planning budget | Upper-call count; distinct from total FLOPs, wall time and training/label-acquisition cost |
+| ISE | Integrated squared tracking error, `0.01 * sum(tracking_distance**2)` |
+| optimizer-seed root | Independent PointMaze controller-training replicate; evaluation paths are nested within it |
+| prefix | Native Transit history before a queried action; changing only its future does not create a new prefix |
+| conditional MC CI | Paired future-sampling interval on fixed Transit prefixes in the single-intervention studies |
+| episode CI | Full-scene uncertainty in Stage304; its bootstrap and normal intervals estimate the same sampling source |
+| base / zero_abstain | The full P8/S8 zero-event abstention rule before additional service or joint filtering |
+| service-only / joint | Frozen Transit service-score / service-plus-learned-fleet-score filtering of the same proposal |
+| raw | Each Transit profile's frozen reference selector; not flat RL or a no-control policy |
+| single intervention | One queried timetable action followed by the frozen suffix, not repeated online selection |
+| supported | The study's registered criterion passed; not a statement of universal safety or dominance |
+| Freq-HRL | Historical project and broader frequency-responsibility hypothesis; not the name of every positive result |
 
-| Canonical term | Definition | Avoid |
-|---|---|---|
-| Freq-HRL | The two-timescale actor-critic protocol, frequency-responsibility diagnostics, and guarded restoration procedure implemented in this repository. | Calling every frequency encoder or heuristic router Freq-HRL. |
-| upper policy | The policy acting once per macro interval. | Slow policy, planner, and manager as unqualified synonyms. |
-| lower policy | The policy acting at each environment step on residual control. | Fast policy and worker as unqualified synonyms. |
-| frequency responsibility | The assignment of low-frequency control effects to the upper level and high-frequency residual effects to the lower level. | Physical frequency separation; these are different claims. |
-| additive gauge transform | A causal transfer `(u, l) -> (u + g, l - g)` that leaves the additive total action unchanged. | A policy improvement or a change in physical behavior. |
-| gauge-fixed responsibility | The full-strength causal split computed only from total action; it is invariant to the raw additive factorization and reconstructs the total exactly. | Raw upper/lower policy output. |
-| responsibility-space lower-LF drift | Low-frequency power computed after the registered causal responsibility operator. | Raw lower-LF drift. |
-| raw lower-LF drift | Low-frequency power of the pre-routing lower action/effect. | Responsibility-space drift. |
-| upper-HF action power | High-frequency power of the upper action/effect under the registered causal filter. | Upper instability or noise without a metric definition. |
-| function-preserving router transaction | A change in responsibility coordinates that exactly preserves paired executed-action, reward, and latent-policy traces. | Learned policy improvement or behavioral improvement. |
-| guarded actor transaction | A finite actor update admitted only after the registered design-fold and reward-floor gates pass. | Guaranteed-safe update; the guarantee is empirical on the frozen path panel. |
-| guarded restoration portfolio | The fixed registry of router and actor transactions plus the common selection and abstention contract. | Ensemble, mixture policy, or end-to-end learned gate. |
-| frequency-violation merit | The registered non-negative aggregate excess above the frequency budgets. | Leakage loss unless referring to the training loss itself. |
-| worst frequency violation | The largest registered normalized frequency-budget excess in a snapshot. | Worst-case guarantee outside the evaluated paths. |
-| reference-feasible path | A reused development path whose frozen reference total action admits a responsibility split satisfying both registered component budgets. | A fresh validation path or an independent statistical replicate. |
-| actor-floor path | A path whose frozen total action admits no responsibility split satisfying both component budgets; feasibility therefore requires changing the total-action spectrum. | A failed router path in general; most router failures remain fixed-total-action recoverable. |
-| direct joint feasibility | Satisfaction of both component budgets by the causal realized upper/lower traces emitted online. | Feasibility of a corrected total under a separate offline decomposition. |
-| exact-oracle feasibility | Feasibility certified by the registered full-horizon convex allocation oracle for a frozen total-action trajectory. | Recursive or online feasibility. |
-| reward floor | The paired held-out return condition encoded by zero `reward_violation_count`. | Reward improvement. |
-| exact trace invariance | Equality of paired executed-action, reward, and latent-policy trace identifiers, with zero observed return and mean-reward delta. | Approximate behavioral equivalence. |
-| design paths | Frozen paths used for candidate eligibility and ranking. | Training paths or validation paths. |
-| validation paths | Disjoint frozen paths used once to adjudicate a selected transaction. | Independent optimizer replicates; paths are nested within a seed cell. |
-| optimizer-seed replicate | One independently trained anchor policy for a registered optimizer seed. | Treating paths from one anchor as independent replicates. |
-| abstention | No transaction passed the design gate; counted as a confirmatory failure. | Missing data or a skipped cell. |
-| supported | The exact registered decision rule passed. | Proven, universally valid, or state of the art. |
-| noninferiority | The lower confidence bound exceeded the registered negative margin. | Equality or superiority. |
-| confirmatory | Source-bound protocol and decision rule frozen before access to the corresponding outcome. | Any large run or post-hoc analysis. |
-| development | Evidence used to design or reject mechanisms, excluded from headline confirmation. | Validation or confirmation. |
-| fresh validation paths | Paths whose outcomes were not accessed during design, candidate selection, or threshold tuning and are used once under a frozen decision rule. | Unused paths from a repeatedly analyzed development panel. |
-| Quant v7.4 | The registered synthetic time-series control comparison with 24 independent training replicates. | Real-market deployment evidence. |
-
-## Claim hierarchy
-
-1. **Representation claim:** the implementation causally exposes slow and fast
-   state features. This is an implementation property, not a control result.
-2. **Responsibility claim:** the registered responsibility-space diagnostic is
-   reduced while the reward floor holds. MuJoCo v12 and v14.29 support bounded
-   forms of this claim.
-3. **Raw behavioral claim:** raw lower-LF drift and upper-HF power both satisfy
-   their gates. MuJoCo v13 does not support this claim across all three tasks.
-4. **Performance claim:** Freq-HRL improves return over matched learned
-   baselines. The current evidence is mixed and includes one supported harm.
-5. **Domain-general claim:** the same learned algorithm improves multiple real
-   domains. The authoritative ledger does not support this claim.
+ISE advantages in Table1 are comparator minus candidate; return advantages are
+candidate minus comparator. Transit differences are first controller minus
+comparator, where lower cost/wait is better. Cost is a composite normalized
+endpoint, not money. PointMaze and Transit estimands are not pooled.

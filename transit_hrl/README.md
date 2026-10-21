@@ -4,7 +4,20 @@ This directory is the isolated workspace for the general Freq-HRL direction.
 Existing `FreqDuet/` and `transit_duet/` code should be treated as read-only
 references unless a file is intentionally copied into this tree first.
 
-The active research mainline is **mechanism-preserving native Transit**.
+## Active Manuscript: 2026-10-22
+
+The paper is now organized around **plan-validity-driven replanning under a
+fixed planning budget**. See [manuscript](paper/manuscript.md),
+[evidence map](paper/evidence_map.md) and
+[remaining evidence](paper/submission_readiness.md). PointMaze Stage9 is the
+independent-seed main result. Transit Stage298/301 single-intervention gains
+and Stage304's failed two-decision criterion are separate evidence, not
+same-algorithm domain-general confirmation. Computation is paused; this
+manuscript consolidation authorizes no new scheduler tasks.
+
+## Historical Research Mainlines
+
+The 2026-10-09 research mainline was **mechanism-preserving native Transit**.
 `native_freqduet` preserves the current FreqDuet simulator, physical actions,
 rewards and RE-SAC backend while using the extracted shared count-harmonic
 encoder. Stage145 qualified feature and learned-control equivalence on two

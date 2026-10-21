@@ -1,631 +1,421 @@
-# Freq-HRL: Auditing and Guarded Restoration of Frequency Responsibility in Hierarchical Reinforcement Learning
+# Plan-Validity-Driven Replanning Under a Fixed Planning Budget
 
-Authoritative venue-neutral draft, 2026-08-31
-
-Evidence source: `transit_hrl/evidence/authoritative_registry_v1.json`
+Working manuscript, 2026-10-22. Evidence and source map: [evidence_map.md](evidence_map.md).
 
 ## Abstract
 
-Hierarchical reinforcement learning (HRL) separates decisions across temporal
-scales, but different decision periods do not ensure that the levels assume
-different frequency responsibilities. A lower policy may learn persistent
-low-frequency corrections, while an upper policy may oscillate at macro-step
-boundaries. We introduce Freq-HRL, a two-timescale actor-critic protocol that
-audits this failure in action-effect space and applies a guarded post-training
-restoration transaction. The protocol distinguishes raw lower-action drift from
-responsibility-space drift, preserves a paired reward floor, and abstains when
-no candidate satisfies frozen design-fold gates. In a preregistered MuJoCo
-study, an earlier Freq-HRL configuration reduced responsibility-space lower-
-frequency drift by 78.2--89.6% across HalfCheetah-v5, Hopper-v5, and Walker2d-v5
-while meeting return noninferiority (24 optimizer replicates per arm and task).
-A stricter follow-up did not support universal raw behavioral separation:
-HalfCheetah missed the raw lower-frequency gate and Hopper missed the upper
-high-frequency gate. We then evaluated a frozen restoration portfolio on 48
-fresh trained anchors. It passed for 16/16 HalfCheetah, 16/16 Hopper, and 15/16
-Walker optimizer seeds, with two-sided 95% Wilson lower bounds of 0.806, 0.806,
-and 0.717. Thirty-eight selections were function-preserving responsibility
-routers, nine were guarded actor updates, and one abstained; all 47 accepted
-cells respected the held-out reward floor. A separate synthetic time-series
-control study produced mixed results: 8 of 12 Holm-controlled contrasts favored
-Freq-HRL, one showed significant harm, and three were inconclusive. The evidence
-therefore supports an auditable responsibility-restoration protocol, not reward
-dominance or universal physical frequency separation.
+A hierarchical controller must decide not only what plan to execute but also
+when to replace it. We study whether a prediction of the value of renewing the
+current plan can improve that timing without increasing the number of planner
+calls. A goal-conditioned controller is first trained with variable option
+durations. Paired simulator branches then supply supervision for keeping or
+renewing its current waypoint. A predictor using causal plan-state and motion
+history features triggers the first threshold crossing within each planning
+bin, with a deadline that preserves exactly one call per bin. In a frozen
+PointMaze hidden-regime confirmation with eight independent optimizer seeds,
+the trigger reduced episode tracking-error integral by 0.506 (95% CI
+0.408-0.603) and increased return by 40.66 (31.55-49.78) relative to periodic
+planning, with 24 planner calls in every episode. Separate Transit studies
+reproduced single-intervention service and cost gains, but a subsequent
+320-scene two-decision evaluation did not confirm joint cost/wait improvement
+or added fleet-critic value. The evidence establishes fixed-call-budget timing
+utility within the PointMaze task family and identifies a boundary between
+local decision value and repeated-decision performance. The results identify
+a task-bounded role for supervised renewal value and expose the cost-risk
+barrier to extending local decision gains to repeated control.
 
 ## 1. Introduction
 
-Temporal abstraction is a central motivation for hierarchical reinforcement
-learning. Options formalize temporally extended actions [@sutton1999between],
-option-critic learns their internal policies and termination conditions
-[@bacon2017option], and modern continuous-control methods learn upper goals and
-lower goal-conditioned behavior [@nachum2018data]. These constructions decide
-*when* each level acts. They do not, by themselves, determine *which temporal
-frequencies of the resulting control effect* each level is responsible for.
+Planning and execution operate on different clocks. A lower controller can
+continue to respond to physical feedback while a higher-level waypoint remains
+unchanged. Periodic planning makes this division simple, but assigns the same
+refresh schedule to a useful plan and an obsolete one. The decision studied
+here is whether the present plan is worth replacing, conditional on the
+controller that will execute the replacement.
 
-This distinction matters in environments driven by exogenous time series. A
-slowly acting upper policy can still induce high-frequency action changes at
-macro boundaries. Conversely, a lower policy that acts every step can accumulate
-a persistent bias and become the de facto long-horizon planner. The resulting
-policy may achieve high return while violating the intended division of labor.
-The issue is not solved by adding Fourier or wavelet features: spectral
-representations can expose temporal scales [@konidaris2011fourier;
-@wang2026wavelet], but they do not identify which policy caused an action effect.
+Temporal abstraction already supports learned termination, action repetition
+and adaptive high-level decision frequency [@sutton1999between;
+@bacon2017option; @sharma2017figar; @zhou2020temple]. Our question is narrower:
+can direct supervision of a keep-versus-renew value difference improve the
+allocation of a fixed number of upper calls? Separating this timing decision
+from controller learning makes it possible to compare schedules using exactly
+the same trained upper and lower policies.
 
-Freq-HRL treats frequency separation as an explicit, auditable responsibility
-contract. It combines a semi-Markov upper/lower actor-critic with causal filters,
-domain-specific action-effect operators, separate raw and responsibility-space
-diagnostics, and a reward-constrained restoration stage. The restoration stage
-does not force every anchor through an update. It selects from a frozen set of
-function-preserving responsibility routers and guarded actor transactions, or
-abstains if all candidates fail. This makes the method closer to constrained
-policy improvement [@achiam2017cpo] than to an unconstrained auxiliary loss,
-while retaining an empirical, path-conditional guarantee rather than claiming a
-global safety theorem.
+The proposed procedure learns an operational plan-validity predictor. Its
+target is a paired short-horizon tracking loss difference, obtained by replaying
+the same simulator prefix while either retaining the waypoint or requesting
+a new one. At deployment, the predictor uses only current and past observations.
+It can move a call within a predefined bin but cannot add calls. Full-episode
+evaluation tests whether the local supervision remains useful after the
+resulting decisions change the states subsequently visited.
 
-An additive hierarchy also has a structural identification problem. If the
-environment sees only the sum of upper and lower effects, transferring any
-causal signal from one level to the other leaves behavior unchanged. We make
-this gauge freedom explicit and define a causal gauge-fixed responsibility
-coordinate from the total action. This separates what can be identified from
-behavior from what requires an architectural convention.
-
-Our contributions are:
-
-1. We define and implement a causal distinction between raw lower-frequency
-   behavior, responsibility-space lower-frequency drift, and upper-policy
-   high-frequency power. This prevents a representation result from being
-   reported as a behavioral result.
-2. We formalize the non-identifiability of raw additive upper/lower
-   factorizations and provide a causal, exactly reconstructing gauge-fixed
-   responsibility layer whose full-strength output depends only on total action.
-3. We introduce a domain-neutral guarded restoration portfolio with disjoint
-   design and validation paths, fold-wise eligibility, a paired reward floor,
-   exact trace-invariance requirements for function-preserving candidates, and
-   counted abstention.
-4. We report preregistered fresh-seed evidence together with the negative and
-   mixed results that bound the claim: responsibility restoration is reliable on
-   the frozen MuJoCo protocol, raw separation is not universal, and return does
-   not uniformly exceed matched learned baselines.
-
-The paper's central claim is deliberately narrower than the original project
-vision: Freq-HRL provides a reproducible way to audit and restore frequency
-responsibility under a reward floor. The present evidence does not establish a
-domain-general performance advantage.
+The study makes three contributions. First, it specifies a reproducible
+branch-supervised timing rule with an exact planner-call constraint. Second,
+it reports a frozen independent-seed PointMaze confirmation against periodic,
+random-offset and current-only timing controls. Third, it separates this result
+from a native Transit extension in which single-intervention improvements did
+not satisfy the registered repeated-decision criterion. The historical
+frequency-based research motivated the question; the tested advance is the
+use of plan-dependent renewal value to choose decision times.
 
 ## 2. Related Work
 
-### 2.1 Temporal abstraction and hierarchical control
+**Temporal abstraction.** Options formalize extended actions, and Option-Critic
+learns intra-option policies and termination conditions [@sutton1999between;
+@bacon2017option]. Our controller is trained with semi-Markov upper transitions;
+the added timing predictor is fitted afterwards from paired branches.
 
-The options framework connects temporally extended actions to semi-Markov
-decision processes [@sutton1999between]. Option-critic learns options end to end
-[@bacon2017option]. FeUdal Networks use a slow Manager and a primitive-time
-Worker [@vezhnevets2017feudal], Hierarchical Actor-Critic trains multiple goal
-levels with hindsight [@levy2019hindsight], and HIRO addresses off-policy
-correction between learned upper and lower policies [@nachum2018data]. These
-methods establish temporal abstraction and multi-level credit assignment, but a
-slow decision clock alone does not constrain the spectrum of the resulting
-action effect. Controlled-effect HRL shifts the hierarchical interface from
-primitive actions to environment transformations [@corcoll2022disentangling].
-Freq-HRL shares the focus on effects, but asks a different question: whether
-slow and fast control effects are assigned to the intended levels and whether
-that assignment can be restored without violating a paired reward floor.
+**Adaptive decision timing.** FiGAR learns action repetition lengths, TEMPLE
+adapts high-level decision frequency, and TAAC chooses between a previous and
+a newly proposed physical action [@sharma2017figar; @zhou2020temple;
+@yu2021taac]. These are direct conceptual neighbors. Here the executed lower
+action remains closed-loop at every primitive step, while the upper waypoint
+refresh is restricted to one call per bin. The present comparisons isolate
+timing effects under a shared trained controller.
 
-### 2.2 Frequency-aware representation
+**Allocating planning computation.** Learning when to plan also appears in
+language-model agents, including a supervised-plus-RL approach to dynamic
+planning in Crafter [@paglieri2025learning]. Our setting uses continuous-control
+waypoints, paired simulator supervision and a fixed call-count contract. The
+present comparisons establish schedule utility, not a general advantage in
+test-time compute allocation.
 
-Fourier bases provide fixed spectral features for value approximation
-[@konidaris2011fourier]. Recent wavelet predictive representations model
-multi-scale changes in non-stationary MDP sequences [@wang2026wavelet]. Freq-HRL
-uses causal slow and fast state streams, but its primary object is not a spectral
-state embedding. It measures the frequency content of policy action effects and
-separates physical behavior from responsibility coordinates.
+## 3. Method
 
-### 2.3 Decision frequency and action smoothness
+### 3.1 Controller and timing problem
 
-Decision-frequency methods alter when a policy refreshes its command. FiGAR
-learns how long to repeat an action [@sharma2017figar], time-discretization-aware
-Q-learning rescales learning under changing control steps [@tallec2019time],
-TAAC learns an act-or-repeat decision [@yu2021taac], and safe action repetition
-retains the ability to react under stochastic dynamics [@park2021sar]. TEMPLE
-adapts the high-level decision frequency in an HRL policy [@zhou2020temple].
-These methods change temporal resolution or command duration; they do not
-identify which level owns the slow and fast components of an additive action
-effect.
+Let h_t denote the observable history at primitive time t, and let g_t be the
+current waypoint. An upper policy pi_U produces a relative state-space goal;
+a goal-conditioned lower policy pi_L produces every physical actuator action.
+Both policies are learned with PPO [@schulman2017ppo]. An upper transition spans
+the actual interval between waypoint changes, and lower intrinsic GAE ends at
+the realized waypoint boundary.
 
-Action-smoothness methods are the closest neighbors to Freq-HRL's *raw*
-frequency diagnostics. CAPS regularizes temporal and state-conditioned action
-differences [@mysore2021caps], Policy Inertia Controller discourages rapid
-policy switching [@chen2021inertia], and LipsNet constrains actor sensitivity
-through an adaptive Lipschitz architecture [@song2023lipsnet]. LipsNet++ jointly
-learns a Fourier filter and a Lipschitz controller [@song2025lipsnetpp]. These
-methods target physical action fluctuation of the total policy. Freq-HRL instead
-audits the allocation of that effect across hierarchy levels and explicitly
-reports when a responsibility-space repair leaves physical behavior unchanged.
-It does not claim that responsibility routing replaces or outperforms dedicated
-action-smoothing methods.
+The episode has T = 1200 steps of 0.01 seconds. With K = 50, bin b contains
+steps bK through (b+1)K-1. The timing rule must make exactly one upper call per
+bin. The first call occurs at step zero. Subsequent bins allow calls only at
+offsets {0, 5, 10, 15, 20, 25}; the waypoint is held until the next actual call.
+The variable inter-call durations are therefore 25-75 steps. This is a
+constrained within-bin timing problem, not an unconstrained termination process.
 
-### 2.4 Constrained actor-critic updates
+### 3.2 Variable-duration controller training
 
-PPO provides the on-policy actor-critic foundation used by the shared Freq-HRL
-core [@schulman2017ppo]. CPO formalizes policy optimization under auxiliary
-constraints [@achiam2017cpo]. SAC and TD3 are included as off-policy continuous-
-control comparators in the time-series study [@haarnoja2018sac;
-@fujimoto2018td3]. Freq-HRL's restoration gate is empirical and paired: it
-requires zero observed reward-floor violations on frozen paths. It must not be
-interpreted as CPO's analytical near-constraint guarantee.
+Each optimizer seed uses eight controller-training paths and eight separate
+checkpoint-selection paths. Training lasts 384 iterations. A seeded
+random-offset schedule makes one upper call per bin, with offsets from zero
+to 25, so the controller encounters variable durations before trigger fitting.
+The selected upper/lower weights are then frozen across all four timing modes.
+The controller has 267,018 parameters; it uses a 0.64-second observation history,
+a 0.50-second nominal upper period and a 0.04-second fast feature timescale.
 
-## 3. Frequency Responsibility
+### 3.3 Paired renewal supervision
 
-### 3.1 Two-timescale control
-
-Let an environment evolve at primitive time $t$, with an upper decision every
-$K$ primitive steps. At macro index $m=\lfloor t/K\rfloor$, the upper policy
-samples $u_m \sim \pi_U(\cdot\mid s^U_m)$; the lower policy samples
-$l_t \sim \pi_L(\cdot\mid s^L_t,u_m)$. The domain adapter maps these decisions
-to an executed action $a_t$. Freq-HRL stores one semi-Markov upper transition
-per macro interval and one lower transition per primitive step, and applies
-independent PPO likelihood ratios to the two policies.
-
-The state adapter is causal. A slow exponential state and a faster exponential
-state are updated using observations available through time $t$. Their
-difference and residual expose middle- and high-frequency innovations without
-future leakage. Alternative causal Fourier, state-space, neural state-space,
-Poisson harmonic, and wavelet encoders exist in the implementation, but the
-confirmatory MuJoCo claim does not depend on an encoder-comparison result.
-
-### 3.2 Action-effect diagnostics
-
-Raw actions are not comparable across domains: holding time, inventory change,
-and motor torque have different accumulated effects. A domain action-effect
-operator therefore maps upper and lower action histories to aligned effect
-sequences $e^U_{1:T}$ and $e^L_{1:T}$. Let $L_w$ be the registered causal
-low-pass operator and $H_w=I-L_w$ its residual. The raw diagnostics are
+On eight separate branch-fit paths, a query is replayed twice from the same
+prefix: keep retains the current waypoint; renew invokes the upper policy
+once at the query. Both branches run the lower controller for the same next
+H = 50 steps without further upper calls. The target is
 
 \[
-D^{\mathrm{raw}}_L = T^{-1}\lVert L_w(e^L)\rVert_2^2,
+\Delta_H(h_t,g_t)
+= L_H^{\mathrm{keep}}(h_t,g_t)-L_H^{\mathrm{renew}}(h_t,g_t),
 \qquad
-P^{\mathrm{raw}}_U = T^{-1}\lVert H_w(e^U)\rVert_2^2.
+L_H = 0.01\sum_{j=0}^{H-1}\|e_{t+j}\|_2^2,
 \]
 
-A causal responsibility operator additionally constructs $(r^U_t,r^L_t)$ so
-that their sum reconstructs the registered total effect up to numerical error.
-The responsibility diagnostic is
-
-\[
-D^{\mathrm{resp}}_L = T^{-1}\lVert L_w(r^L)\rVert_2^2.
-\]
-
-The distinction is substantive. A responsibility router can lower
-$D^{\mathrm{resp}}_L$ while preserving every executed action. Such a transaction
-repairs attribution, not physical behavior. Raw separation requires improvement
-in $D^{\mathrm{raw}}_L$ and the upper high-frequency budget as separate gates.
-
-### 3.3 Additive gauge non-identifiability
-
-Assume the domain adapter and transition kernel depend on the hierarchy through
-the additive total effect $a_t=e^U_t+e^L_t$. For any causal transfer $g_t$ that
-keeps the component actions feasible, define
-
-\[
-e^{U\prime}_t=e^U_t+g_t,\qquad
-e^{L\prime}_t=e^L_t-g_t.
-\]
-
-**Proposition 1 (raw factorization is not behaviorally identifiable).** Under
-shared initial state and environment randomness, the original and transformed
-hierarchies induce identical state, executed-action, and reward trajectories.
-Consequently, an objective or diagnostic that observes only environment
-trajectories cannot identify the raw upper/lower factorization.
-
-*Proof.* At every $t$, the transformed total equals the original total. The
-domain adapter therefore emits the same executed action. Induction through the
-shared transition randomness gives the same next state and reward, completing
-the trajectory-wise argument. $\square$
-
-This proposition explains why responsibility restoration and raw policy
-distillation are different estimands. Successful responsibility routing cannot
-by itself imply improvement in either raw diagnostic.
-
-### 3.4 Causal gauge fixing
-
-Let $P$ be any deterministic causal operator on the total action history; the
-implementation uses a causal exponential low pass followed, when configured,
-by a lower-component feasibility projection. Define
-
-\[
-r^U_t=P(a_{1:t})_t,\qquad r^L_t=a_t-r^U_t.
-\]
-
-**Proposition 2 (canonical responsibility coordinate).** The map above is
-causal, reconstructs $a_t$ exactly, and is invariant to every additive gauge
-transform of Proposition 1. If the environment consumes only $r^U_t+r^L_t$, it
-also preserves return pathwise.
-
-*Proof.* Causality follows from $P$'s input restriction to $a_{1:t}$. Exact
-reconstruction is immediate by definition. Gauge-transformed components have
-the same total $a$, so both responsibility outputs are unchanged. Their sum is
-the original total; Proposition 1 then gives pathwise return invariance.
-$\square$
-
-The shared implementation exposes this operator as `CausalGaugeFixer`. A
-partial-strength transaction interpolates toward the canonical coordinate while
-preserving the total; only full strength is called gauge fixed. This layer was
-implemented after the frozen v14.29 study and is not part of that confirmatory
-claim.
-
-### 3.5 Violation snapshots
-
-For each frozen path panel, the implementation converts the registered
-frequency endpoints and reward floor into three diagnostics: a non-negative
-aggregate frequency-violation merit $M$, the largest normalized frequency
-violation $V$, and the number of reward-floor violations $N_R$. The exact
-endpoint budgets and normalization are fixed by the protocol artifact rather
-than estimated from validation outcomes.
-
-## 4. Guarded Restoration Portfolio
-
-### 4.1 Candidate transactions
-
-The frozen v14.29 portfolio contains 15 transactions applied to one trained
-anchor: five output-bias actor steps with RMS magnitudes
-(10^{-7},10^{-6},10^{-5},3\times10^{-5},10^{-4}), and ten causal router
-strengths from 0.0 to 1.0 in increments of 0.1 excluding the anchor strength
-0.5. Actor directions are estimated from paired, orthogonal finite-difference
-interventions and an action-cost critic. Router candidates change the registered
-responsibility assignment but are required to preserve the paired physical and
-policy traces exactly.
-
-### 4.2 Design-fold eligibility and selection
-
-Let candidate $c$ be compared with anchor $0$. On the pooled design panel and
-on each of two predeclared folds, it is eligible only if
-
-\[
-N_R(c)=0,\qquad M(c)\le(1-10^{-4})M(0),\qquad V(c)\le3V(0).
-\]
-
-A router is additionally ineligible unless executed-action, reward, and latent-
-policy trace identifiers match the paired anchor on every design and validation
-path. Eligible candidates are ranked lexicographically by reward violations,
-aggregate merit, worst violation, frozen candidate priority, and registry order.
-If no candidate is eligible, the cell abstains.
-
-The selected transaction is then evaluated once on 128 disjoint validation
-paths: four disturbance modes crossed with 32 roots. It is supported only if the
-same reward, merit, and funnel gate passes. Validation does not trigger candidate
-reselection.
-
-### 4.3 Confirmatory decision
-
-One fresh optimizer-seed anchor is the statistical unit. Sixteen anchors are
-trained independently in each environment. Abstention and validation failure
-both count as failure. An environment passes if the lower endpoint of a
-two-sided 95% Wilson interval [@wilson1927interval] for the success probability
-is strictly greater than 0.5. The algorithm-level claim requires all three
-environments to pass.
-
-![Freq-HRL protocol and estimands.](../results/authoritative_paper_figures_latest/figures/fig1_protocol_and_estimands.png)
-
-**Figure 1 | Freq-HRL separates physical behavior from responsibility
-coordinates.** (a) Upper and lower policies act at different clocks but produce
-one total physical effect. (b) Raw component spectra and canonical
-responsibility spectra are distinct estimands; the latter can change while the
-executed action remains fixed. (c) The frozen restoration portfolio selects a
-trace-invariant router or a guarded actor update only after design-fold
-frequency and reward-floor gates, and otherwise abstains.
-
-## 5. Experimental Protocol
-
-### 5.1 MuJoCo control
-
-We use HalfCheetah-v5, Hopper-v5, and Walker2d-v5 from the MuJoCo continuous-
-control suite [@todorov2012mujoco]. Each evaluation spans 1,000 primitive steps
-and includes registered standard, low-frequency, high-frequency, mixed, or
-out-of-distribution disturbance modes according to the experiment version.
-
-The v12 responsibility experiment compares the full method with its registered
-no-leakage comparator using 24 optimizer replicates per arm and environment and
-40 held-out paths per cell. The v13 experiment uses fresh optimizer, training,
-selection, and evaluation seeds and adds raw lower-frequency and upper high-
-frequency gates. Both use 50,000 hierarchical bootstrap draws and family-wise
-alpha 0.05; paths are nested within optimizer replicates.
-
-For v14.29, 48 fresh anchors were frozen before portfolio evaluation. Each cell
-uses 320 critic-training intervention paths, 320 critic-holdout intervention
-paths, 128 design paths, and 128 disjoint validation paths. The source revision,
-source manifest, candidate order, seeds, root roles, scheduler contract, and
-decision rule were frozen before outcome access. All 48 cells completed.
-
-### 5.2 Synthetic time-series control
-
-Quant v7.4 evaluates 12 learned variants across six registered scenarios. It
-uses 24 independent training replicates and eight held-out paths per replicate,
-for 13,824 raw rows. Paths and scenarios are averaged within each training
-replicate to avoid pseudoreplication. The 12 primary return and lower-LF drift
-contrasts compare Freq-HRL with matched flat PPO, flat GRU-PPO, generic HRL-PPO,
-generic HRL-GRU-PPO, SAC, and TD3. Holm's procedure controls the primary family
-[@holm1979multiple]. This is synthetic control evidence, not live-market or
-execution evidence.
-
-### 5.3 Evidence governance
-
-Every manuscript result must be present in the fail-closed authoritative
-registry. The registry stores allowed and forbidden wording, stage, decision,
-paper-use status, source artifacts, and expected file digests. Development
-screens cannot become headline evidence by being rerun at larger scale. The
-retired manuscript and legacy C1--C9 matrices are excluded. The 2026-08-31
-snapshot contains 47 records: 4 reportable confirmatory records, of which
-2 support positive claims and 2 are mixed or negative; 41 development-only
-records; and 2 excluded legacy records.
-
-## 6. Results
-
-### 6.1 Responsibility-space separation with return noninferiority
-
-The v12 primary family passed in all three environments (Table 1). Freq-HRL
-reduced responsibility-space lower-LF drift by 78.2--89.6%, and the family-wise
-return noninferiority gate passed in every environment. Positive return
-differences are exploratory because superiority was not the registered return
-claim.
-
-**Table 1. MuJoCo v12 responsibility-space confirmatory result.** Intervals are
-95% bootstrap intervals; all registered family-wise gates passed.
-
-| Environment | Return difference [95% CI] | Responsibility drift reduction [95% CI] |
-|---|---:|---:|
-| HalfCheetah-v5 | 118.70 [53.01, 198.84] | 89.60% [79.10%, 94.26%] |
-| Hopper-v5 | 20.24 [5.19, 38.99] | 78.23% [69.90%, 85.28%] |
-| Walker2d-v5 | 31.40 [17.65, 46.18] | 89.56% [85.13%, 93.55%] |
-
-### 6.2 The stronger raw behavioral claim fails
-
-The fresh-seed v13 follow-up passed return noninferiority and responsibility-
-space reduction in all environments, but its joint behavioral family failed
-(Table 2). HalfCheetah's raw lower-frequency reduction was 5.22% and missed the
-registered reduction gate. Hopper reduced raw lower-frequency drift by 58.04%
-but exceeded the upper-HF budget. Only Walker2d passed all gates. This negative
-result rules out the statement that Freq-HRL universally separates the physical
-upper and lower action streams.
-
-**Table 2. MuJoCo v13 stricter behavioral confirmation.** Parentheses indicate
-the registered gate decision.
-
-| Environment | Return NI | Responsibility reduction | Raw lower-LF reduction | Upper-HF RMS | Joint gate |
-|---|---:|---:|---:|---:|---:|
-| HalfCheetah-v5 | pass | 74.89% (pass) | 5.22% (fail) | 0.0634 (pass) | fail |
-| Hopper-v5 | pass | 73.15% (pass) | 58.04% (pass) | 0.1068 (fail) | fail |
-| Walker2d-v5 | pass | 90.37% (pass) | 38.39% (pass) | 0.0240 (pass) | pass |
-
-### 6.3 Fresh-seed guarded restoration is reliable on the frozen panel
-
-The v14.29 portfolio passed its preregistered environment-level decision in all
-three tasks (Table 3). HalfCheetah and Hopper each supported all 16 optimizer
-replicates. Walker2d supported 15 and abstained once because no candidate passed
-the design gate. All lower Wilson bounds exceeded 0.5.
-
-**Table 3. MuJoCo v14.29 guarded restoration confirmation.** Confidence
-intervals are two-sided 95% Wilson intervals over optimizer-seed cells.
-
-| Environment | Supported | Success rate [95% CI] | Selected mechanism | Validation merit reduction |
-|---|---:|---:|---|---:|
-| HalfCheetah-v5 | 16/16 | 1.000 [0.806, 1.000] | 16 routers | 38.04--60.00% |
-| Hopper-v5 | 16/16 | 1.000 [0.806, 1.000] | 16 routers | 33.70--60.00% |
-| Walker2d-v5 | 15/16 | 0.938 [0.717, 0.989] | 6 routers, 9 actor updates | 0.053--43.54% |
-
-All 38 selected routers exactly matched paired executed-action, reward, and
-latent-policy traces on design and validation paths. All 47 supported cells had
-zero reward-floor violations. The result is therefore strongest as evidence
-that the frozen portfolio can restore the registered responsibility contract
-without observed reward-floor harm. For HalfCheetah and Hopper, it does not show
-that a learned policy or physical trajectory improved: selection always chose a
-function-preserving router. Walker2d required actor changes in nine cells, so the
-claim also cannot be reduced to a universal router-only mechanism.
-
-![MuJoCo confirmatory evidence.](../results/authoritative_paper_figures_latest/figures/fig2_mujoco_confirmatory_evidence.png)
-
-**Figure 2 | Confirmatory MuJoCo evidence.** (a) V12 responsibility-drift
-point estimates; horizontal ticks are registered family-wise lower bounds. (b)
-V13 gate decisions show that the stronger raw claim failed in HalfCheetah and
-Hopper. (c) V14.29 success rates over 16 fresh optimizer seeds per task with
-two-sided 95% Wilson intervals. (d) Selected transactions across 48 cells.
-Paths within an optimizer seed are nested evaluation units, not independent
-replicates.
-
-### 6.4 Matched time-series baselines give a mixed performance result
-
-Quant v7.4 supported improvement in eight of 12 Holm-controlled contrasts
-(Table 4). It improved both registered endpoints relative to flat PPO, flat
-GRU-PPO, and TD3, and improved return relative to generic HRL-PPO. However,
-return was significantly worse than generic HRL-GRU-PPO. Return versus SAC and
-drift versus both generic HRL variants were inconclusive.
-
-**Table 4. Quant v7.4 pooled matched-baseline contrasts.** Positive directional
-deltas favor Freq-HRL after metric orientation.
-
-| Comparator | Endpoint | Directional delta | Holm-adjusted p | Decision |
-|---|---|---:|---:|---|
-| flat PPO | return | 0.005033 | 0.00042 | improvement |
-| flat PPO | lower-LF drift | 0.004775 | 0.00006 | improvement |
-| flat GRU-PPO | return | 0.004211 | 0.01506 | improvement |
-| flat GRU-PPO | lower-LF drift | 0.003928 | 0.00006 | improvement |
-| generic HRL-PPO | return | 0.003449 | 0.00028 | improvement |
-| generic HRL-PPO | lower-LF drift | -0.000006 | 0.65460 | inconclusive |
-| generic HRL-GRU-PPO | return | -0.002407 | 0.01506 | harm |
-| generic HRL-GRU-PPO | lower-LF drift | 0.000033 | 0.65460 | inconclusive |
-| SAC | return | 0.000967 | 0.65460 | inconclusive |
-| SAC | lower-LF drift | 0.007259 | 0.00006 | improvement |
-| TD3 | return | 0.002710 | 0.01674 | improvement |
-| TD3 | lower-LF drift | 0.012716 | 0.00006 | improvement |
-
-![Quant matched-baseline contrasts.](../results/authoritative_paper_figures_latest/figures/fig3_quant_matched_baseline_forest.png)
-
-**Figure 3 | Quant v7.4 matched-baseline contrasts.** All 12 registered
-directional contrasts are shown with 95% confidence intervals. Decisions use
-Holm-adjusted primary-family tests over 24 independent training replicates;
-positive values favor Freq-HRL after endpoint orientation. The supported harm
-against generic HRL-GRU-PPO and all three inconclusive contrasts are retained.
-
-## 7. Discussion
-
-### 7.1 What the positive result establishes
-
-The v14.29 result establishes a reproducible selection contract: across fresh
-trained anchors, a fixed portfolio usually found a transaction that reduced the
-registered violation merit on disjoint paths while preserving the reward floor.
-Counted abstention prevented forced success, and the seed rather than the path
-was the statistical unit. Exact trace matching makes the router result unusually
-auditable: its physical behavior is known to be unchanged, so any claim can be
-limited precisely to responsibility coordinates.
-
-### 7.2 Why function preservation is both a strength and a limitation
-
-Function-preserving routing isolates a mechanism and removes reward confounding.
-It also exposes the central limitation of the current algorithm. In 32 of 32
-HalfCheetah and Hopper cells, the selected transaction changed attribution but
-not behavior. A reviewer interested in control improvement can reasonably view
-this as reparameterization rather than policy learning. The v13 raw-behavior
-failure reinforces that concern. Three subsequent single-optimizer-seed
-development preflights attempted causal output-head distillation, bounded
-distillation, and a multi-source teacher. Only Hopper passed each joint
-development gate; HalfCheetah and Walker2d did not support expansion. These
-outcomes are excluded from confirmatory claims, but they reject a larger search
-over the same post-hoc output-head mechanism. The registered v16--v17.4
-development sequence then tested training-time EMA, audit-adaptive, macro-hold,
-zero-DC, headroom-homotopy, smooth-macro, audit-optimal macro, and streaming
-audit gauges. No
-design met its frozen cross-environment expansion rule. Most diagnostically,
-v17.2 exactly preserved reward, executed-action, and latent-policy traces on all
-360 paired paths, yet no tested smoothing coefficient reduced the registered
-lower-LPF32 or joint frequency merit in any environment. V17.3 then optimized
-an affine HPF8/LPF32 objective directly and preserved the same three traces on
-all 120 paired paths. It reduced lower-LPF32 and joint merit in Hopper and
-Walker2d, but increased upper-HPF8 in all three environments and worsened every
-frequency endpoint in HalfCheetah. Together these results reject both the naive
-EMA target and the reset finite-horizon persistence surrogate as general
-leakage solutions. V17.4 then carried the complete HPF8/LPF32 state across macro
-boundaries and replanned after every realized total action. It exactly preserved
-all 120 paired paths, reduced lower-LPF32 by 60.3--90.4% and normalized joint
-merit by 41.2--88.0% in all three environments, and met the absolute upper-HPF8
-budget in all three. The strict rule still rejected expansion: only Walker2d
-met the absolute lower-LPF32 budget, and HalfCheetah missed the registered
-upper-budget feasibility threshold. This identifies the next issue more
-precisely. A learned-policy experiment must model the joint physical feasible
-envelope and penalize excess above its unavoidable floor rather than assume
-that two fixed absolute component budgets are jointly attainable.
-The subsequent v17.5 development diagnostic tested that current-step floor on
-the rejected v17.4 paths. Although it eliminated local normalized regret in all
-three environments, it improved full-trajectory lower-LPF32 in only one and
-upper-HPF8 in none; Hopper and Walker2d lower drift increased by 45.0% and
-30.9%, respectively. All v17.5 closed-loop traces diverged because responsibility
-history enters the policy state. We therefore do not advance v17.5 or treat a
-greedy current-step floor as evidence of trajectory-level feasibility. V17.6
-then solved the bounded frozen-total-action HPF8/LPF32 allocation over each
-complete trajectory. The oracle recovered 81 of the 88 paths that were
-infeasible under the v17.4 online split, including every HalfCheetah failure and
-all eight Walker2d failures. Seven Hopper paths remained infeasible: their
-minimum lower-LPF32 power subject to the upper budget still exceeded the lower
-budget. This result separates two development targets. A causal router must
-approximate the recoverable full-horizon allocation, while the actor must change
-the total-action spectrum on the irreducible Hopper subset. V17.6 reused
-rejected paths and is acausal, so it is mechanism diagnosis rather than
-performance evidence.
-
-### 7.3 Development evidence closes three direct extensions
-
-The unchanged 120-path panel was subsequently used only for mechanism
-development. A causal fixed-total-action router sequence culminated in v17.11:
-the selected fractional-reservoir FIR recovered 62 of 81 oracle-recoverable
-failures and preserved all 32 reference-feasible Walker2d paths, but recovered
-only 14 of 33 Hopper failures. The frozen router-only line was therefore closed
-without accessing fresh validation paths.
-
-The remaining seven Hopper paths required a change to the total action rather
-than another responsibility split. The acausal v17.12 oracle found feasible
-targets for all seven with total-action correction RMS at most 0.00812. A
-grouped causal FIR adapter recovered three paths in v17.13. Exhaustive audit of
-all 900 members of that frozen linear FIR grid in v17.14 recovered six of seven
-while preserving all 113 reference-feasible paths; one Hopper `ood_chirp` path
-remained unresolved. This closes the tested linear actor-residual class, not all
-causal actor architectures.
-
-Higher-capacity and projection-based alternatives did not justify fresh-panel
-access. The state-conditioned MLP in v18.2 recovered only three of seven paths.
-The target-free instantaneous projector in v18.3 recovered all seven, but its
-maximum absolute action correction was 1.8076 and its reference-path correction
-RMS reached 0.2935, far outside the frozen trust region. Receding-horizon
-projection reduced the maximum absolute correction to 0.9888, but v18.4 was
-directly feasible on only 69 of 120 realized component traces despite an exact
-offline oracle accepting all corrected totals; it also accumulated 40,962
-prefix budget violations. Finally, no preregistered v18.5 causal actor-floor
-score passed the discrimination rule. The best score covered only five of seven
-actor-floor paths in the global top 14. No fresh validation path was accessed in
-v17.8--v18.5, and post-hoc score combinations are excluded from method
-selection. Further tuning on this panel would be development-set overfitting.
-
-![Closed development route.](../results/authoritative_paper_figures_latest/figures/fig_s1_development_stop_map.png)
-
-**Supplementary Figure S1 | Closed v17--v18 development route.** Every node
-uses the unchanged 120-path development panel. No node accessed a fresh
-validation path, and none is manuscript performance evidence. The sequence
-separates router recoverability, actor-floor correction, action trust, online
-direct feasibility, and gate discrimination as distinct failure modes.
-
-### 7.4 Negative results define the claim boundary
-
-The v13 failure is not a minor ablation. It shows that responsibility-space
-success does not imply raw action separation. The Quant harm against generic
-HRL-GRU-PPO likewise rules out a uniform performance claim. Reporting these
-results makes the contribution narrower, but scientifically identifiable: the
-current evidence concerns auditability and guarded responsibility restoration,
-not state-of-the-art return.
-
-## 8. Limitations
-
-First, the v14.29 confirmation is conditional on one frozen panel of disturbance
-modes and validation roots. The validation paths nested within a seed are not
-independent replicates. Second, most successful transactions were
-function-preserving routers; they do not demonstrate physical control
-improvement. Third, the stricter raw behavioral claim failed in two of three
-MuJoCo tasks, and the v15--v18.5 follow-ups remain development-only. Several
-used only one development optimizer seed, while v17.8--v18.5 repeatedly reused
-the same 120-path panel and did not access fresh validation paths. Fourth, Quant
-is a synthetic time-series control environment and
-contains one supported performance harm. Fifth, Transit, public passenger data,
-and order-book adapters exist in the repository but currently lack reportable
-records in the authoritative ledger and are therefore excluded from the paper's
-empirical claims. Sixth, the reward floor is an empirical finite-panel gate, not
-a global safety or convergence guarantee. Finally, the current evidence does
-not support deployment, universal frequency separation, or domain-general
-performance superiority.
-
-## 9. Reproducibility and Evidence Availability
-
-The v14.29 algorithm is frozen at Git revision
-`fc7fa8d8c1e55325af9cb32efece3e0cfc2bbd3c`; its Freq-HRL source manifest is
-`02f3ba95376021dff0aa11f30d46dd6159e63b55a1d2678d6011ea350745af39`.
-The preregistration, fresh-anchor qualification, cell-level CSV, structured
-decision, and report are stored under
-`transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/`.
-The manuscript claim ledger is
-`transit_hrl/evidence/authoritative_registry_v1.json`. It verifies source-file
-digests and excludes unregistered development outputs. Its 2026-08-31 snapshot
-contains 47 records, but only 4 are manuscript-reportable and only 2 support
-positive claims. The fresh anchor run used
-scheduler tasks `t84875`--`t84922`; the portfolio confirmation used
-`t84930`--`t84977` with dynamic placement on node001--node006. Raw checkpoints
-and large run directories are intentionally not part of the paper source tree;
-the frozen seeds, manifests, summaries, and launch contracts are tracked.
-
-## 10. Conclusion
-
-Freq-HRL makes a normally implicit HRL assumption testable: upper and lower
-levels should assume distinct frequency responsibilities. The registered
-experiments show that responsibility-space drift can be reduced without
-violating a paired reward floor and that a guarded portfolio reproduces this
-restoration across fresh MuJoCo optimizer seeds. They also show where the method
-does not yet hold: raw physical separation fails in two tasks, and synthetic
-time-series performance is mixed. The defensible contribution is therefore an
-auditable responsibility contract and guarded restoration protocol. Converting
-that contract into a training-time gauge-fixed hierarchy with competitive raw
-behavior and return remains the primary algorithmic problem. The v17.8--v18.5
-development sequence closes several direct router, linear-residual, and
-projection implementations of that idea; a new architecture must be frozen
-before evaluation on a genuinely fresh panel.
+where e is the task tracking error. A positive value favors renewing for this
+branch horizon. Prefix and feature equality checks pair the interventions;
+the lower controller continues to respond to the evolving physical state.
+
+Each path supplies four queries from each of six simulator-defined classes:
+three lags after a regime change, a force pulse, a distractor change and a
+matched neutral opportunity. This gives 192 paired queries per optimizer seed.
+Event information stratifies offline query acquisition, including neutral-window
+selection. It is excluded from predictor inputs and deployment decisions.
+
+### 3.4 Causal-history predictor
+
+The candidate uses 39 features of plan age, tracking and waypoint geometry,
+observed target velocities over 1/10/25/50-step lags, force magnitude, and their
+fixed interactions. The current-only control uses 170 quadratic features
+constructed from 17 current state/plan variables. Both models standardize
+features using fit data and solve ridge regression with an unpenalized
+intercept. The ridge coefficient is selected by leave-one-fit-path-out MSE
+from {0.01, 0.1, 1, 10, 100, 1000, 10000}.
+
+For the selected coefficient, leave-one-fit-path-out predictions determine the
+75th-percentile threshold q. This threshold is an empirical timing parameter,
+not a calibrated probability or a certificate that renewal has positive value.
+Evaluation paths do not select coefficients, features or thresholds.
+
+### 3.5 Budgeted deployment
+
+At an unused call opportunity in a bin, the predictor scores the current
+observable history and plan. The upper policy is called at the first score
+at least q, or at offset 25 if no earlier opportunity passes. Computing a
+predictor score does not call the upper policy. The lower policy acts at every
+step, including while the timing rule is waiting.
+
+```text
+Fit and select the variable-duration controller on disjoint path sets.
+Fit the renewal predictor and its threshold on branch-fit paths only.
+Freeze controller weights, predictor and threshold.
+For each held-out episode:
+    Call the upper policy at step zero.
+    In each later 50-step bin:
+        At offsets 0, 5, 10, 15, 20, 25, until one call occurs:
+            Score the currently observed plan and history.
+            Renew if score >= threshold or offset == 25.
+    Execute the lower policy on every primitive step.
+```
+
+**Budget property.** Every bin makes at most one call because later checks
+are disabled after renewal. Every bin makes at least one because offset 25
+is a mandatory deadline. Thus every complete episode makes exactly T/K = 24
+calls. This scheduling property does not imply optimal timing or lower total
+computational cost.
+
+## 4. Experimental Design
+
+### 4.1 Independent PointMaze confirmation
+
+The hidden-regime task combines moving targets, physical force pulses and
+distractor observations. The frozen algorithm was developed before confirming
+it on optimizer roots 209011, 209023, 209037, 209049, 209061, 209073, 209089
+and 209101. Each root uses 8 training, 8 selection, 8 branch-fit and 16
+trigger-evaluation path seeds. All 320 path seeds across these roles are
+distinct and disjoint from development.
+
+Four timing modes share a root's trained controller and its evaluation paths:
+periodic calls at bin starts, seeded random-offset calls, the current-only
+trigger, and the causal-history candidate. The primary endpoint is fixed minus
+candidate episode integrated squared tracking error (ISE). Four additional
+registered gates test ISE against random-offset and current-only controls,
+return against fixed timing, and controller learning against initialization.
+
+For each contrast, path differences are averaged within a root; the eight
+root means supply the two-sided 95% Student-t interval with seven degrees of
+freedom. The joint registered decision requires all five lower bounds to be
+positive. The 128 evaluation paths and 512 paired-mode rollouts do not replace
+the eight optimizer seeds as the independent units. Development and
+confirmation estimates remain separate.
+
+### 4.2 Native Transit boundary study
+
+Transit evaluates a different, finite-Monte-Carlo action-selection procedure.
+Independent P8 proposal and S8 screening futures support a service-aware
+timetable intervention with a frozen lower controller. It searches alternative
+timetable actions, rather than only timing a call to the PointMaze policy.
+It therefore tests an extension of the decision-value idea, not the same
+algorithm in a second domain.
+
+Single-intervention studies use independent evaluation futures after actions
+and matching weights are sealed. Prefix-bootstrap intervals quantify scenario
+variation; paired conditional-MC intervals quantify future sampling at those
+prefixes. The subsequent two-decision study evaluates 320 fresh complete
+scenes, with four paired controllers, at upper callbacks 8 and 9. Each
+controller rebuilds its second state and P8/S8 menus after its own executed
+first action. Both its stratified bootstrap and paired normal intervals use
+complete scene/episode units; neither is a conditional-future MC interval.
+
+## 5. Results
+
+### 5.1 Plan-validity timing improved held-out PointMaze control
+
+All five registered confirmation gates passed (Table 1). Every optimizer root
+had positive candidate-versus-fixed ISE and return effects. Mean episode ISE
+was 1.447072 with fixed timing, 1.549716 with random offsets, 1.202303 with
+the current-only trigger and 0.941530 with the causal-history trigger. The
+candidate's 34.94% reduction relative to fixed timing is a ratio of pooled
+point means, not an interval estimate for a percentage effect.
+
+**Table 1. Frozen independent-seed PointMaze confirmation.** Positive contrasts
+favor the candidate or trained controller. Intervals use eight paired root means.
+
+| Registered contrast | Mean | 95% CI |
+| --- | ---: | --- |
+| Fixed - candidate episode ISE | 0.505541 | [0.408443, 0.602640] |
+| Random-offset - candidate episode ISE | 0.608186 | [0.570111, 0.646260] |
+| Current-only - candidate episode ISE | 0.260773 | [0.152216, 0.369331] |
+| Candidate - fixed episode return | 40.662456 | [31.548406, 49.776506] |
+| Untrained - trained controller ISE | 20.862987 | [15.939428, 25.786547] |
+
+All modes made exactly 24 upper calls per episode. The candidate made 13.1953
+pre-deadline calls on average, showing that it did not simply wait for every
+deadline. Its mean 84.1875 score checks per episode (range 48-120) were additional
+inference operations. The eight-root branch-fit phase replayed 1,942,606
+primitive steps, including repeated prefixes; controller training and selection
+are separate costs. These counts establish call parity, not equal FLOPs or a
+measured runtime advantage.
+
+The earlier eight-root development result also passed, with ISE advantage
+0.396372 [0.275784, 0.516959] and return advantage 30.770657
+[21.111415, 40.429899] against fixed timing. These are supporting development
+observations, not another eight roots added to the confirmation interval.
+
+### 5.2 Historical learned-upper gains are real but method-specific
+
+Later PointMaze studies established additional learned-upper effects under
+their own contracts. Fresh-sample Stage88 learning improved joint-call return
+over lower-only by 0.2215/0.4801 at periods50/100; actor swaps isolated an
+upper contribution. Stage100 replicated staged upper gains on eight new
+teacher roots, although most route-level advantage was inherited lower quality.
+A compact fixed-lower upper update in Stage135 improved over causal forecast
+by 1.985835 [1.490466, 2.363561] and 1.079190 [0.679043, 1.333611], using
+within-stage multiplicity-corrected root intervals. These gains were only
+0.1724% and 0.0947% of forecast return. The following ordinary joint PPO
+update lost the warm-start advantage in all four diagnostic root/period cells.
+
+These studies reject the blanket interpretation that a learned upper never
+changed useful behavior. They do not constitute independent replications of
+the timing predictor in Table 1. A full historical evidence inventory is
+retained in the supplementary source map.
+
+### 5.3 Single-intervention Transit benefits replicated on new prefixes
+
+Two separate 400-prefix cohorts reproduced negative total-cost and waiting
+contrasts for the frozen joint selector against raw control. The second also
+evaluated a service-only selector, which improved both endpoints under both
+interval types and in both evaluation halves. Table 2 reports their scope
+without pooling cohorts or treating fixed historical profiles as training seeds.
+
+**Table 2. Native Transit single-intervention outcomes.** Negative favors the
+first controller; cost and waiting/minute values are multiplied by 1e6.
+
+| Study / contrast / endpoint | Mean | Prefix CI95 | Conditional MC CI95 |
+| --- | ---: | --- | --- |
+| Stage298 / joint - raw / cost | -202.006 | [-288.844, -119.627] | [-265.551, -138.460] |
+| Stage298 / joint - raw / wait | -1182.737 | [-1658.035, -781.291] | [-1299.168, -1066.305] |
+| Stage301 / service-only - raw / cost | -318.120 | [-424.992, -215.424] | [-396.701, -239.539] |
+| Stage301 / service-only - raw / wait | -1230.467 | [-1757.211, -825.834] | [-1357.549, -1103.385] |
+| Stage301 / joint - service-only / cost | 10.981 | [-38.466, 60.105] | [-26.841, 48.802] |
+| Stage301 / joint - service-only / wait | 159.565 | [82.814, 250.561] | [110.377, 208.754] |
+
+The Stage301 service-only average waiting reduction was approximately 0.074
+seconds per single intervention. Joint selection had no confirmed extra cost
+benefit over service-only and significantly worsened waiting. Better-than-raw
+performance therefore did not establish the value of the additional fleet critic.
+
+### 5.4 The two-decision Transit confirmation failed its joint criterion
+
+All 1,280 controller evaluations completed successfully across 320 paired
+scenes. Including inner sampling and identity replays, 219,520 native episodes
+passed the execution ledger. The service-only-versus-raw primary did not pass:
+total cost increased at the point estimate, waiting had a crossing normal
+interval, and the two half-cohort cost effects had opposite signs (Table 3).
+
+**Table 3. Complete-episode Transit boundary.** Negative favors the first
+controller. Values use the same 1e6 scaling as Table 2. Both intervals here
+measure complete-episode sampling, not the two uncertainty sources in Table 2.
+
+| Contrast / endpoint | Mean | Episode bootstrap CI95 | Paired normal CI95 |
+| --- | ---: | --- | --- |
+| service-only - raw / cost | 1901.331 | [-2729.400, 6937.962] | [-2856.632, 6659.294] |
+| service-only - raw / service component | -702.835 | [-1497.065, -120.823] | [-1414.375, 8.704] |
+| service-only - raw / wait | -5706.250 | [-12519.141, -787.422] | [-11818.256, 405.756] |
+| joint - service-only / cost | 28.572 | [-5.247, 84.056] | [-19.407, 76.551] |
+
+Service-only cost was +4109.200 in the first 16-scene half per stratum and
+-306.537 in the last; waiting was -9462.500 and -1950.000. The pooled and
+half-cohort point waiting-retention ratios were 89.51%, 93.57% and 73.93% of
+full base. However, the paired margin comparing each effect with half of base
+did not have negative upper bounds under both interval methods in all three
+parts. The statistical 50% retention criterion therefore failed. Joint likewise
+failed transfer and added-cost-value criteria.
+
+The fleet component explains the pooled cost sign: its mean penalty
++0.002604167 exceeded the service saving -0.000702835. Four scenes changed
+peak fleet, with three increases and one decrease, all in the first half.
+Joint and service-only produced the same outcomes in 315/320 scenes and the
+same peak fleet in all 320. The risk filter did not change those fleet events.
+Service-only changed outcomes in only 21/320 scenes; its largest waiting-saving
+scene supplied 46.66% of net wait benefit while increasing total cost. These
+event and concentration counts are descriptive, not additional significance tests.
+
+## 6. Discussion
+
+The main positive result concerns decision timing with a fixed learned
+controller. A plan-dependent value signal improved the use of an unchanged
+number of upper calls on fresh PointMaze optimizer seeds. The current-only
+control shows that this result was not explained by its particular current
+state/plan representation alone; it does not isolate history information from
+all feature-design or regularization effects.
+
+The Transit extension distinguishes information value from a reliable risk
+decision. Its service-aware single-intervention gains survived independent
+futures and new prefixes, while adding a learned fleet score did not establish
+incremental cost value. In the two-decision study, the fleet filter left the
+few consequential peak events unchanged. More accurate average prediction or
+a passing software gate would not resolve this control-level result.
+
+The broader research history also separates three objects: reducing a
+frequency-responsibility diagnostic, learning a useful upper action, and
+learning when to renew that action. The positive result for one object cannot
+be substituted for evidence about another. This distinction gives the present
+paper a coherent timing contribution without discarding the earlier findings.
+
+## 7. Limitations
+
+**Task and baseline coverage.** The confirmed timing mechanism has one
+hidden-regime PointMaze task family and eight fresh optimizer seeds. The
+170-feature current-only comparator is not a capacity-matched history ablation.
+A later learned-termination development baseline mostly collapsed to the
+deadline and did not outperform fixed timing; it is not evidence of beating
+a competent learned-termination method. Event/error/age heuristics and strong
+adaptive-timing methods remain necessary comparisons for an algorithmic
+superiority claim. Sharing jitter-trained controller weights isolates the
+effect of timing, but does not compare timing methods with controllers trained
+under each method's own schedule.
+
+**Supervision and cost.** Training uses simulator branch access and
+event-stratified query acquisition, including privileged information for
+query sampling. Deployment does not use future observations or event labels.
+The procedure remains unvalidated with label-free or unstratified data
+acquisition. Planner-call parity excludes score checks, feature updates,
+branch simulation and policy-training cost; complete compute/latency-matched
+performance and budget-response curves are not yet established.
+
+**Transfer and horizon.** Transit uses a different action-search mechanism,
+two historical lower roots and, in the two-decision study, one fixed profile.
+Only two of 44 upper callbacks use the tested selector. Its comparison with
+the single-intervention cohorts changes profile composition, decision positions,
+on-policy states and scenes, so failure cannot be attributed uniquely to
+repeated decisions. It is not same-algorithm cross-domain confirmation or
+real-world passenger-demand deployment evidence.
+
+**Statistical and theoretical scope.** Each study retains its frozen analysis;
+root, prefix, conditional-future and whole-episode intervals are distinct.
+The studies are not pooled into a research-wide significance claim. A local
+branch advantage neither bounds the value of first-threshold-crossing timing
+over an episode nor certifies fleet-cost safety. Exact call accounting is the
+only deterministic guarantee of the deployed timing rule established here.
+
+## 8. Reproducibility
+
+The timing algorithm was frozen at revision
+`91b3e6919bcffe3a75d4942b0df31ae8478d69f6`. Its executable implementation is
+`freq_hrl/experiments/pointmaze_budgeted_trigger.py`, with feature/branch
+definitions in `pointmaze_compact_plan_validity.py` and
+`pointmaze_plan_validity_branching.py`, and the registered constants in
+`scripts/pointmaze_budgeted_trigger_stage9_spec.py`.
+
+The confirmation source is
+`results/pointmaze_budgeted_trigger_stage9_v2_confirmation_20260926_r1/`.
+The paper's compact [evidence artifact](plan_validity_evidence.json) is
+reconstructed from completed local results by
+`python3 paper/build_plan_validity_evidence.py`, run from `transit_hrl/`.
+This reads saved episode summaries and qualified Transit reports; it performs
+no training, simulation or remote access. The [evidence map](evidence_map.md)
+records the different algorithms and units. Raw server caches and checkpoints
+are separate from the small manuscript sources; the code/data release package
+and submission figures remain unfinished.
+
+## 9. Conclusion
+
+Plan-validity-driven timing improved PointMaze closed-loop tracking and return
+without increasing planner calls in a frozen independent-seed study. Historical
+learned-upper effects and Transit single-intervention benefits remain useful
+supporting evidence, while the Transit two-decision result bounds their
+interpretation. The supported conclusion is that supervised renewal value can
+guide a fixed call budget within the evaluated task family. Establishing a
+competitive general algorithm requires competent adaptive-timing baselines,
+matched total computation and same-algorithm confirmation beyond that family.

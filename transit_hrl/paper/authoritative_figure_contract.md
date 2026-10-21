@@ -1,72 +1,40 @@
-# Authoritative Freq-HRL Figure Contract
+# Plan-Validity Figure Contract
 
-Date: 2026-08-31
+Date: 2026-10-22. These figures are specified, not generated. The archived
+MuJoCo/Quant responsibility figures belong to the previous paper argument.
+Backend when rendered: Python, following the existing project convention.
 
-Backend: Python with matplotlib, exclusively for drawing, export, preview, and
-visual QA.
+## Figure 1: Timing rule and acquisition
 
-Target: venue-neutral top-CS double-column manuscript. Main figures are 183 mm
-wide or narrower, retain editable text in SVG/PDF, and include a compact PNG
-preview plus source-data CSV. TIFF is deferred unless a selected venue requires
-it; the vector exports are the submission sources.
+A 50-step-bin timeline shows periodic, random-offset and learned-threshold
+calls, the offset-25 deadline and variable 25-75-step option durations. A separate
+training branch shows event-stratified simulator queries, paired keep/renew
+labels and the fitted 39-feature predictor. Deployment has causal observations
+and no branch simulation. The caption distinguishes call count from score checks.
 
-## Core conclusion
+## Figure 2: Independent PointMaze timing evidence
 
-The authoritative evidence supports auditing and guarded restoration of
-frequency responsibility under a paired reward floor, while the stronger raw
-behavioral-separation and uniform performance claims remain mixed or negative.
+Use the five registered contrasts and eight root effects in
+`plan_validity_evidence.json`. Display optimizer roots as points and the original
+paired-root Student-t CI as the summary. Distinguish the primary ISE contrast
+from the four required secondary gates. Show 24 calls for every mode and
+84.1875 candidate score checks separately. Development results are not pooled.
 
-## Figure map
+## Figure 3: Transit positive effects and failed repeated-decision criterion
 
-### Figure 1: Protocol and estimands
+Use separate panels for Stage298/301 single-intervention outcomes and Stage304
+complete-episode outcomes. Labels name the different uncertainty sources:
+prefix versus conditional MC in the former; episode bootstrap versus paired
+normal in the latter. Include total cost, waiting, the fleet/service split,
+both 16-scene halves and the failed paired half-base retention margin.
+No connecting trajectory may imply that these are matched samples of one
+algorithm. The four fleet events and 315/320 joint/service outcome matches
+may be annotated as descriptive counts from the existing event audit.
 
-- Archetype: schematic-led composite.
-- Panel a: asynchronous upper/lower policies produce one physical action
-  effect.
-- Panel b: raw component diagnostics and canonical responsibility diagnostics
-  are different estimands.
-- Panel c: a frozen portfolio chooses a trace-invariant router, a guarded
-  physical actor update, or abstention after design-fold gates.
-- Reviewer risk addressed: a coordinate repair must not be presented as action
-  smoothing or reward improvement.
+## Supplement
 
-### Figure 2: MuJoCo confirmatory evidence
-
-- Archetype: quantitative grid.
-- Panel a: v12 responsibility-drift reduction and familywise lower bounds.
-- Panel b: v13 gate matrix, including the failed HalfCheetah raw-lower and
-  Hopper upper-HF gates.
-- Panel c: v14.29 fresh-optimizer-seed support rates and Wilson intervals.
-- Panel d: router, actor, and abstention counts.
-- Statistics: 24 independent optimizer replicates per v12/v13 arm and task;
-  16 fresh optimizer seeds per v14.29 task; held-out paths remain nested within
-  their optimizer replicate.
-
-### Figure 3: Quant matched-baseline contrasts
-
-- Archetype: quantitative grid with two forest panels.
-- Panels a-b: all 12 preregistered directional contrasts, their 95% confidence
-  intervals, and Holm-controlled decisions; no contrast is omitted.
-- Statistics: 24 independent training replicates, eight held-out paths per
-  replicate, and six scenarios.
-
-### Supplementary Figure 1: Closed development route
-
-- Archetype: schematic-led evidence map.
-- Evidence: v17.6, v17.11, v17.14, and v18.2-v18.5.
-- Mandatory banner: development only, unchanged 120-path panel, zero fresh
-  validation access.
-- Reviewer risk addressed: reused-path mechanism diagnosis cannot authorize a
-  manuscript performance claim or another tuned screen.
-
-## Integrity rules
-
-1. Figures 2 and 3 may contain only records marked manuscript-reportable by the
-   validated authoritative registry.
-2. Supplementary Figure 1 may contain only development records and must expose
-   their selection access and lack of fresh validation.
-3. No old unified matrix, retired manuscript figure package, Transit result,
-   order-book result, or unregistered artifact may enter the package.
-4. Positive, harmful, and inconclusive results use both color and text/marker
-   encoding.
-5. Source CSV rows carry evidence ID, evidence stage, and paper disposition.
+Historical learned-upper and responsibility results can have a separate source
+map; their algorithms and statistical units stay visible. Figure sources are
+the active evidence artifact and linked reports, not the old figure builder's
+MuJoCo/Quant registry selection. Vector exports, previews and source data remain
+submission work; no plot or image in this contract is a completed deliverable.

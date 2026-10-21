@@ -2,7 +2,11 @@
 
 Date: 2026-09-28
 
-This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
+This is the registered historical mechanism ledger. Unregistered artifacts and
+the old independent claim generators are excluded from its decisions by default.
+The active 2026-10-22 plan-validity manuscript uses the separate
+[paper evidence map](../paper/evidence_map.md); it does not reclassify these
+historical records or treat different algorithms as one confirmation series.
 
 | Evidence | Domain | Stage | Decision | Paper use | Positive claim |
 |---|---|---|---|---|---:|
