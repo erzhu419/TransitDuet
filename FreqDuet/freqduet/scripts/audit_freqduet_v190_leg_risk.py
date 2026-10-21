@@ -264,8 +264,8 @@ def actor_covariance(first,seconds,weights):
     return (weights@seconds.reshape(len(seconds),-1)).reshape(-1,N,N)-np.einsum('bki,bkj->bij',scaled,scaled),mass.sum(axis=1)
 
 
-def partial(cov,signal,controls=True):
-    indices = ([VARS.index(c) for c in CONTROLS]+[1-signal]) if controls else []
+def partial(cov,signal,controls=True,other_signal=True):
+    indices = ([VARS.index(c) for c in CONTROLS]+([1-signal] if other_signal else [])) if controls else []
     if indices:
         cc = cov[...,indices,:][...,:,indices]
         sd = np.sqrt(np.maximum(np.diagonal(cc,axis1=-2,axis2=-1),0.))
@@ -330,8 +330,10 @@ def summarize(rows,actors,days,scope):
     estimates = {}
     for si,s in enumerate(SIGNALS):
         p,boot = partial(point,si),partial(draw_cov,si)
+        base,base_boot = partial(point,si,other_signal=False),partial(draw_cov,si,other_signal=False)
         raw = partial(point,si,False)
         estimates[s] = {t:dict(partial=interval(p[j],boot[:,j]),
+            base_adjusted_diagnostic=interval(base[j],base_boot[:,j]),
             family=interval(p[j],boot[:,j],.05/FAMILY) if scope in PRIMARY and t in ('below','above') else None,
             unadjusted=float(raw[j]) if np.isfinite(raw[j]) else None) for j,t in enumerate(TARGETS)}
     return dict(scope=scope,retained_keys=keys,raw_one_mass=raw_mass,analysis_mass=mass,
@@ -340,11 +342,13 @@ def summarize(rows,actors,days,scope):
         day_margins=[dict(day=day,mass=float(day_mass[i])) for i,day in enumerate(days)])
 
 
-def reduce_scope(args,model,mode,scope):
+def reduce_scope(args,model,mode,scope,input_root=None):
     rows = []
+    root = args.out_root if input_root is None else input_root
+    source = os.environ['FREQDUET_DIAGNOSTIC_COMMIT'] if input_root is None else 'a7d126966a'
     for actor in model['actors']:
-        b = read(args.out_root/'cells'/f'{actor}_{mode}.json')
-        require(b['source'] == os.environ['FREQDUET_DIAGNOSTIC_COMMIT'],'cell source differs')
+        b = read(root/'cells'/f'{actor}_{mode}.json')
+        require(b['source'] == source,'cell source differs')
         rows.extend(b['rows'])
     result = []
     for split,days in (('all64',DAYS),('first32',DAYS[:32]),('last32',DAYS[32:])):

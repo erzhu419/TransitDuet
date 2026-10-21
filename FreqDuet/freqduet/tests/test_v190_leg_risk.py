@@ -89,6 +89,19 @@ class LegRiskTests(unittest.TestCase):
             (d['scope'],d['signal'],d['target']) == (stage.PRIMARY[-1],stage.SIGNALS[0],'below'))
         self.assertEqual(d['decision'],'inconclusive')
 
+    def test_redundant_signals_can_share_information_without_unique_information(self):
+        moments = []
+        for x,noise in product((-1.,1.),repeat=2):
+            v = np.zeros(stage.N)
+            v[:2] = x,x
+            v[stage.VARS.index('above')] = x+noise
+            moments.append(stage.moment(v))
+        m = np.mean(moments,axis=0)
+        cov = stage.second(m)-np.outer(m[1:1+stage.N],m[1:1+stage.N])
+        j = stage.TARGETS.index('above')
+        self.assertGreater(stage.partial(cov,0,other_signal=False)[j],.7)
+        self.assertTrue(np.isnan(stage.partial(cov,0)[j]))
+
 
 if __name__ == '__main__':
     unittest.main()

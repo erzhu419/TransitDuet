@@ -35,3 +35,9 @@ not independent prediction skill or evidence for changing the controller.
 High/manual scheduler,node001-node006;tests and one real archive before1536 paths.
 Resample per-key first moments and summed second moments;verify against direct
 calculation. Detailed actor/day diagnostics stay server-side;small summary only.
+
+Pre-inspection supplement:also report95% single-signal associations controlling
+the same forecast/state variables but not the other innovation. This distinguishes
+shared information from unique information;the original primary gate is unchanged.
+Seal the supplement before saved-moment analysis,without opening parent risk
+results. Reuse only V190 moment cells,write a separate readout,keep19-day masks.
