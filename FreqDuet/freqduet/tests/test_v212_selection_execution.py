@@ -40,6 +40,7 @@ class SelectionExecutionTests(unittest.TestCase):
         self.assertEqual(v.reduction_class(values), 'partly_offset')
         r['lower'][0]['base_bin'] = 1
         r['results']['action_counts'] = {str(int(a)): 0 for a in v.ACTIONS}
+        r['results']['action_counts']['0'] = 1
         r['ledger'].update(commanded_holding_s=0., executed_holding_s=0.)
         values, _ = v.paired_effect(r, control)
         self.assertEqual(v.reduction_class(values), 'amplified_reduction')
@@ -71,6 +72,15 @@ class SelectionExecutionTests(unittest.TestCase):
         r['ledger']['commanded_holding_s'] = 10.
         with self.assertRaisesRegex(AssertionError, 'reproduce'):
             v.command_histogram(r)
+
+    def test_zero_effect_crossed_and_future_intervals_preserve_pairing(self):
+        pairs = [dict(values=dict.fromkeys(v.FIELDS, 0.), histograms=np.zeros((3, 7))) for _ in range(64)]
+        result = v.summarized(pairs)
+        self.assertEqual(result['n_pairs'], 64)
+        self.assertEqual(result['nonzero_direct_override_paths'], 0)
+        self.assertEqual(result['any_saved_dispatch_signature_changed'], 0)
+        self.assertEqual(result['intervals']['rule_response_s']['crossed_ci95'], [0., 0.])
+        self.assertEqual(result['intervals']['rule_response_s']['conditional_future_ci95'], [0., 0.])
 
 
 if __name__ == '__main__':

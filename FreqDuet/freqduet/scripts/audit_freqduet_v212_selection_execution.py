@@ -118,9 +118,9 @@ def summarized(pairs):
         reduction_classes=dict(Counter(reduction_class(p['values']) for p in pairs)),
         dispatch_changes={k: sum(abs(p['values'][k]) > EPS for p in pairs) for k in dispatch_keys},
         any_saved_dispatch_signature_changed=sum(any(abs(p['values'][k]) > EPS for k in dispatch_keys) for p in pairs),
-        positive_direct_override_paths=sum(p['values']['direct_gross_s'] > EPS for p in pairs),
+        nonzero_direct_override_paths=sum(p['values']['direct_gross_s'] > EPS for p in pairs),
         mean_action_count_changes={name: dict(zip(map(lambda a: str(int(a)), ACTIONS), histograms[j].tolist()))
-            for j, name in enumerate(('direct_override', 'whole_day', 'rule_response'))))
+            for j, name in enumerate(('direct_override', 'whole_day', 'rule_response'))})
 
 
 def scan_inventory(root):
