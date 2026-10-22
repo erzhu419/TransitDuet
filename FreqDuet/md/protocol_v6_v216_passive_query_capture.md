@@ -45,3 +45,11 @@ simulations including the failed-write runs. Seal this cost amendment before
 repair,no V214 replay,no new candidate/future or changed scientific gate.
 Represent initial inventory by `return_observed=false` and a null return time.
 After repair the smoke budget is exhausted;no intervention is authorized.
+
+Repair preflight/common-prefix audit t211148 passed17 tests and exit0. Repair
+t211150(node006,high/manual,source773811c554) completed4 paths,exit0. All4
+match original references exactly;each has5200 complete query snapshots and
+11314 ordered native events. All4 anchors issue AND execute10s holding,return
+after83--111s,and dispatch the same vehicle1s later for the original due ID.
+All service clears. However0/4 have the frozen native fresh upper follow-up;
+this does not pass joint-execution admission. Retrieved only10470-byte summary.
