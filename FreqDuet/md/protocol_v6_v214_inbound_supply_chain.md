@@ -51,7 +51,7 @@ authorization: passive capture/equivalence and nonzero-opportunity smoke first.
 Limitations: consumed prefixes and conditional future innovations, not fresh-day
 policy confirmation, online deployment, strong-fixed or frequency-gain evidence.
 
-Smoke implementation 6a76cc6b6c: high/manual t211131 on node004. Five paths:
+Smoke implementation ee908c69b6: high/manual on node004. Five paths:
 original baseline, passive baseline, separate smoke-future baseline, fixed joint
 ID3(-30s/reduce), identical joint repeat. Compare archived endpoint and full
 actions/timing/resources; require real issued reductions and changed plan clocks.
@@ -61,5 +61,13 @@ Startup t211129 exited1 before simulation (nested runtime-proof path); t211130
 reproduced the archived baseline, then stopped at the first passive query because
 the frozen Bus lacks pre_action_time_s. The fix passively timestamps the native
 observation-ready callback; no current-time backfill. Reuse the same five paths,
-candidate and future. Preserve both failures; one prior full baseline plus these
-five paths totals six full smoke replays, with the pre-action abort separate.
+candidate and future. t211131 then completed a second native baseline and full
+passive simulation,but V211's frozen finish rejected fewer than two old-selector
+decisions. V214 now owns its physical finish and retains real0/1/2 support;
+the nonzero executed-reduction smoke gate remains mandatory.
+
+Engineering-only amendment before the next attempt:three prior full simulations,
+one pre-action abort and one pre-simulation failure are retained. Cap total full
+engineering simulations at8(original6);rerun only the SAME five paths with ID3
+and2149000000. Seal this in engineering_recovery.json before replay. No added
+candidate/future,selection/evaluation budget increase or scientific gate change.
