@@ -13,6 +13,29 @@ def bus(index, state='TRAVEL', *, direction=1, on_route=True):
 
 
 class InboundSmokeTests(unittest.TestCase):
+    def test_v214_finish_keeps_zero_or_one_opportunity_and_closes_ledger(self):
+        for count in (0, 1, 2):
+            a = object.__new__(v.InboundAudit)
+            a.anchor, a.applied_upper = dict(inbound=[{}]), {}
+            a.launches = {0: dict(time_s=0., holding_counter_at_launch=0.)}
+            a.return_ledger = {0: dict(launch_s=0., return_s=100., holding_s=10.*count,
+                                     other_elapsed_s=100.-10.*count)}
+            a.dispatch_ledger = [dict(actual_s=0., public_baseline_s=0.)]
+            a.frozen_scalars, a.anchor_frames, a.upper_calls, a.arrivals, a.departures = (1., 2., 3.), [], [], [], []
+            a.lower_changes = [dict(base_bin=2, selected_bin=2) for _ in range(count)]
+            a.queries = [dict(trip_id=0, station_id=i+1, direction=True, time_s=float(i), command_s=10.)
+                         for i in range(count)]
+            records = [dict(q, action=2) for q in a.queries]
+            runner = NS(env=NS(bus_all=[NS(on_route=False) for _ in range(12)], _done_reason='clear'), cfg={},
+                lower_trainer=NS(alpha=1., lambda_param=2.), upper_trainer=NS(alpha=3.))
+            with patch.object(v.prior.prior.factorial.prior, 'physical_contract', return_value={}), \
+                 patch.object(v.prior.prior.factorial.prior, 'dispatch_metrics', return_value={}), \
+                 patch.object(v.prior.prior.frozen.source.experiment.LogitCross, 'finish'):
+                a.finish(runner, records, [dict(action_s=10.) for _ in range(count)])
+            self.assertEqual(a.execution['opportunities'], count)
+            self.assertEqual(a.ledger['executed_holding_s'], 10.*count)
+            self.assertEqual(a.ledger['unexecuted_command_s'], 0.)
+
     def test_ready_clock_comes_from_native_prepare_and_hook_is_reversible(self):
         class FrozenBus:
             def _prepare_for_action(self, current_time, buses):

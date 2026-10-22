@@ -145,11 +145,45 @@ class InboundAudit(passive.PassiveAudit):
 
     def finish(self, runner, records, holds):
         prior.require(self.anchor is not None, 'V214 no supported anchor; fresh-query frames='+str(self.anchor_frames))
-        super().finish(runner, records, holds)
+        prior.require(self.applied_upper is not None, 'registered upper command missing')
+        # V211's frozen finish requires exactly two old-selector decisions. V214
+        # instead keeps real support (including zero); retain its physical ledger.
+        env, active = runner.env, {}
+        for bus in env.bus_all:
+            if bus.on_route:
+                trip = int(bus.trip_id)
+                start = self.launches[trip]
+                row = prior.time_account(start['time_s'], float(env.current_time),
+                    float(bus.episode_hold_vehicle_seconds)-start['holding_counter_at_launch'])
+                row['observed_until_s'] = row.pop('return_s')
+                active[trip] = row
+        prior.require(len(env.bus_all) == 12 and not (set(active) & set(self.return_ledger))
+            and set(active) | set(self.return_ledger) == set(self.launches)
+            and len(self.dispatch_ledger) == len(self.launches), 'vehicle ledger does not close')
+        holding = prior.holding_account(list(self.return_ledger.values()), list(active.values()),
+            sum(r['action_s'] for r in holds), not active)
+        scalar = (float(runner.lower_trainer.alpha), float(runner.lower_trainer.lambda_param),
+                  float(runner.upper_trainer.alpha))
+        prior.require(scalar == self.frozen_scalars, 'temperature or dual changed')
+        self.ledger = dict(physical_vehicles=12, completed_trips=len(self.return_ledger), incomplete_trips=len(active),
+            censored_vehicle_time=list(active.values()), **holding,
+            inclusive_launch_delay_s=float(np.mean([max(0., r['actual_s']-r['public_baseline_s'])
+                for r in self.dispatch_ledger])), positive_control_slack_issued_s=0., guarantee_enroute_slack=False)
+        self.contract = prior.prior.factorial.prior.physical_contract(env, runner.cfg)
+        self.dispatch = prior.prior.factorial.prior.dispatch_metrics(env)
+        prior.prior.frozen.source.experiment.LogitCross.finish(self, runner, records, holds)
+        prior.require(len(records) == len(self.queries), 'passive query count differs')
+        for query, record in zip(self.queries, records):
+            prior.require(passive.key(query) == passive.key(record) and query['time_s'] == record['time_s']
+                and query['command_s'] == protocol.ACTIONS[record['action']], 'passive command differs')
+        prior.require(sum(q['command_s'] for q in self.queries) == sum(h['action_s'] for h in holds),
+            'issued and sampled holding totals differ')
+        self.full_trace = dict(lower_queries=self.queries, issued_holding=holds, upper_callbacks=self.upper_calls,
+            actual_launches=self.dispatch_ledger, vehicle_returns=self.return_ledger,
+            arrivals=self.arrivals, departures=self.departures, anchor_frames=self.anchor_frames)
         self.execution = dict(committed_trips=len(self.anchor['inbound']), opportunities=len(self.lower_changes),
             changed_commands=sum(r['selected_bin'] != r['base_bin'] for r in self.lower_changes),
             decisions=self.lower_changes, done_reason=runner.env._done_reason)
-        self.full_trace['anchor_frames'] = self.anchor_frames
 
 
 def replay(root, *, candidate=0, reference=None, future=None, label):
@@ -194,11 +228,19 @@ def smoke(root, registered, old):
     progress = dict(source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], candidate=SMOKE_CANDIDATE,
         future_seed=SMOKE_FUTURE, rollouts_started=0, rollouts_completed=0,
         selection_opened=False, evaluation_opened=False, training_updates=0, main_policy_changed=False)
+    recovery = dict(prior_full_simulations=3, prior_preaction_abort=1, prior_pre_simulation_failure=1,
+        full_simulation_cap=8, same_five_paths=True, added_candidates=0, added_futures=0,
+        prior_tasks=['t211129', 't211130', 't211131'], scientific_gates_and_budgets_unchanged=True,
+        reason='Engineering-only recovery of observation clock and old-selector finish; original6 cost cap amended before rerun')
+    prior.pilot.write_json(root/'engineering_recovery.json', recovery)
+    progress['engineering_recovery'] = recovery
     prior.pilot.write_json(root/'started.json', progress)
 
     def run(phase, function, **kwargs):
         progress.update(phase=phase, rollouts_started=progress['rollouts_started']+1)
         prior.require(progress['rollouts_started'] <= sealed['budget']['smoke_max'], 'smoke budget exceeded')
+        prior.require(progress['rollouts_started']+recovery['prior_full_simulations'] <= recovery['full_simulation_cap'],
+            'engineering recovery budget exceeded')
         prior.pilot.write_json(root/'progress.json', progress)
         value = function(**kwargs)
         progress['rollouts_completed'] += 1
