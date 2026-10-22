@@ -35,3 +35,17 @@ as unsupported rather than treating the next round trip as a large following gap
 All tests,replays and analysis use scheduler high/manual on node004,where the
 frozen archives reside. Parallel groups are allowed after smoke. Local retrieval
 is limited to smoke/shard markers and final small JSON summary;no raw traces/ckpts.
+
+## Execution
+
+Smoke c00e43dcac/t211087 exited0:8 tests and four paired paths(eight rollouts)
+passed exact full action/event,timing,dispatch/return and archived-endpoint checks.
+Analysis-only follow-up f30f6691e7/t211089 exited0 with9 tests,including the
+same-physical-vehicle unsupported label. Its passive recorder is unchanged.
+
+High/manual formal tasks t211093--t211096 cover groups0--16/16--32/32--48/48--64,
+16 workers each on node004(64 in total). Reuse the four completed passive paths;
+all other paths must match their original selection records before saving.
+Aggregate t211097 waits for all four small shard markers;it does not consume
+partial output. Only markers and final summary sync locally;traces stay remote.
+No controller admission or new scientific result is implied by the smoke pass.
