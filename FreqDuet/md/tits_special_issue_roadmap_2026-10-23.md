@@ -62,8 +62,10 @@ only small summaries return locally. Original TransitDuet stays untouched.
 
 Source `2b32bd5347`; benchmark decision-counter fix `d83ab96d5d` was made
 before any benchmark replay. The original six-worker queued task t211159 was
-cancelled without launch; replacement t211164 requests four workers because
-live CPU capacity is limited. Its six-path smoke gates the formal supplement.
+cancelled without launch; replacement t211164 requested four workers because
+live CPU capacity is limited, then exited 1 on an entrypoint syntax error
+before tests or any simulation. Corrected source `e975823767` runs as t211165;
+its six-path smoke gates the formal supplement, without extra rollout budget.
 All tasks use high priority and manual dispatch, restricted to node004/006.
 
 Read-only t211160 finished on node006 with exit 0. Its four existing paths
