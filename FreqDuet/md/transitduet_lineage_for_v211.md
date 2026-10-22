@@ -20,6 +20,10 @@ it uses narrowed categorical actions,explicit timetable context and upper holdin
 passenger/lateness penalties. Its env.launch_bus creates a vehicle when the terminal
 lacks one;_can_launch_trip caps concurrent service at fleet target+buffer,not a
 hard12-vehicle reusable pool. Parent passenger/CV accounting differs from V6.
+Specifically,env/sim.py:669 computes CV from each vehicle's final forward_headway,
+not all station arrivals over the day. Waiting time includes boarded passengers;
+total time includes completed passenger journeys. These are real limitations on
+interpreting its reported stability/service gains,not V6-equivalent endpoints.
 Its fixed-timetable SAC baseline is not V6's strong360s/no-holding fixed baseline.
 The named fixed300 row realizes mean dispatch357.44s(planned357.24s),not300s;
 its inherited900s baseline-shift cap and recursive actual-launch anchoring remain
@@ -32,3 +36,8 @@ joint improvement versus B200(journey-1.4031min,CV2-.006404,readiness-462.18s),b
 CV2 vs preserve is inconclusive;full frequency-separated long-training superiority
 and durable strong-fixed improvement remain unestablished. V211 is opportunity
 validation before any new learning or deployment decision.
+
+Borrow the executable plan/lower-context coordination and test system costs,
+but do not infer each mechanism's contribution from the combined held-out row:
+the wider-action/no-context ablations are training-window diagnostics. Current
+B200 upper authority is one shared-direction coefficient,not independent controls.

@@ -45,12 +45,10 @@ def future_seed(context, future):
     return 2110000000+100*context+future
 
 
-def upper_candidate(native, low, high, direction, shift):
+def upper_candidate(native, low, high, shift):
     native = np.asarray(native, np.float32).reshape(-1)
-    require(native.shape == (2,), 'V211 requires original two directional antisymmetric coefficients')
-    result = native.copy()
-    result[0 if direction else 1] += shift
-    return np.clip(result, low, high).astype(np.float32)
+    require(native.shape == (1,), 'V211 requires the original shared antisymmetric coefficient')
+    return np.clip(native+shift, low, high).astype(np.float32)
 
 
 def lower_candidate(base, offset, feasible):
@@ -63,6 +61,15 @@ def time_account(launch, returned, holding):
     elapsed = returned-launch
     require(elapsed >= holding >= 0., 'negative physical vehicle-time ledger')
     return dict(launch_s=launch, return_s=returned, holding_s=holding, other_elapsed_s=elapsed-holding)
+
+
+def holding_account(completed, active, commanded, cleared):
+    executed = sum(r['holding_s'] for r in (*completed, *active))
+    require(0. <= executed <= commanded, 'executed holding exceeds issued commands')
+    if cleared:
+        np.testing.assert_allclose(executed, commanded, atol=1e-8, rtol=0)
+    return dict(executed_holding_s=executed, commanded_holding_s=commanded,
+        unexecuted_command_s=commanded-executed)
 
 
 def resource_snapshot(env, launches):
@@ -104,7 +111,7 @@ class JointAudit(prior.TradeoffAudit):
             and planner.terminal_schedule_mode == 'exact_headway_curve'
             and planner.headway_budget_mode == 'rolling_zero_sum_delta_v6'
             and planner.coefficient_parameterization == 'antisymmetric_linear_v5'
-            and runner.upper_action_dim == 2 and np.all(runner.upper_action_low == -60.)
+            and planner.shared_directions and runner.upper_action_dim == 1 and np.all(runner.upper_action_low == -60.)
             and np.all(runner.upper_action_high == 60.), 'original upper authority differs')
         self.authority = dict(fleet=12, inventory='fixed_pool', lower_bins=pilot.step.ACTIONS.tolist(),
             upper_low=runner.upper_action_low.tolist(), upper_high=runner.upper_action_high.tolist(),
@@ -147,7 +154,7 @@ class JointAudit(prior.TradeoffAudit):
                 repeated.fork_future(runner, self.policy, self.fork)
                 self.uniforms.seed = self.fork+10000000
             shift = UPPER[CANDIDATES[self.candidate][0]]
-            result = upper_candidate(native, runner.upper_action_low, runner.upper_action_high, trip.direction, shift)
+            result = upper_candidate(native, runner.upper_action_low, runner.upper_action_high, shift)
             self.anchor_command = dict(native=np.asarray(native).tolist(), candidate=result.tolist())
             return native if shift == 0. else result
 
@@ -216,18 +223,31 @@ class JointAudit(prior.TradeoffAudit):
     def finish(self, runner, records, holds):
         require(self.anchor is not None and self.applied_upper is not None, 'registered upper anchor missing')
         require(self.continuation != 'bilateral025' or len(self.lower_changes) == 2, 'two causal related lower decisions missing')
-        require(len(runner.env.bus_all) == 12 and len(self.return_ledger) == len(self.launches)
-            and len(self.dispatch_ledger) == len(self.launches), 'resource ledger does not cover complete service')
-        held = sum(r['holding_s'] for r in self.return_ledger.values())
+        env = runner.env
+        active = {}
+        for bus in env.bus_all:
+            if bus.on_route:
+                trip = int(bus.trip_id)
+                start = self.launches[trip]
+                row = time_account(start['time_s'], float(env.current_time),
+                    float(bus.episode_hold_vehicle_seconds)-start['holding_counter_at_launch'])
+                row['observed_until_s'] = row.pop('return_s')
+                active[trip] = row
+        require(len(env.bus_all) == 12 and not (set(active) & set(self.return_ledger))
+            and set(active) | set(self.return_ledger) == set(self.launches)
+            and len(self.dispatch_ledger) == len(self.launches), 'resource ledger misses a launched vehicle trip')
         commands = sum(r['action_s'] for r in holds)
-        np.testing.assert_allclose(held, commands, atol=1e-8, rtol=0)
+        holding = holding_account(list(self.return_ledger.values()), list(active.values()), commands, not active)
         scalar = (float(runner.lower_trainer.alpha), float(runner.lower_trainer.lambda_param), float(runner.upper_trainer.alpha))
         require(scalar == self.frozen_scalars, 'frozen temperature or dual changed')
         self.ledger = dict(physical_vehicles=12, completed_trips=len(self.return_ledger),
-            executed_holding_s=held, commanded_holding_s=commands, accounting_error_s=abs(held-commands),
+            incomplete_trips=len(active), censored_vehicle_time=list(active.values()), **holding,
             inclusive_launch_delay_s=float(np.mean([max(0., r['actual_s']-r['public_baseline_s']) for r in self.dispatch_ledger])),
             positive_control_slack_issued_s=0., guarantee_enroute_slack=False)
-        super().finish(runner, records, holds)
+        # Unlike the historical cleared-service timing audit, keep truncated arms as outcomes.
+        self.contract = prior.factorial.prior.physical_contract(env, runner.cfg)
+        self.dispatch = prior.factorial.prior.dispatch_metrics(env)
+        prior.frozen.source.experiment.LogitCross.finish(self, runner, records, holds)
 
 
 def replay(root, ci, candidate=0, *, reference=None, future=None, continuation='bilateral025', label):
@@ -237,7 +257,9 @@ def replay(root, ci, candidate=0, *, reference=None, future=None, continuation='
     rule = JointAudit(seed, candidate, reference=reference, fork=future, continuation=continuation, uniforms=uniforms)
     row, events, _, _ = pilot.rollout(root, seed, day, 'stochastic', sampler, [0.]*4, label,
         probability_rule=rule, trace_observer=rule, event_uniforms=uniforms, credit_observer=credit)
-    row.update(inclusive_launch_delay_s=rule.ledger['inclusive_launch_delay_s'])
+    row.update(waiting_person_s=float(credit.stream.total[0]), onboard_person_s=float(credit.stream.total[1]),
+        backlog_trip_s=float(credit.stream.total[4]), holding_person_s=rule.holding_person_s,
+        inclusive_launch_delay_s=rule.ledger['inclusive_launch_delay_s'], **rule.dispatch)
     result = dict(context=ci, seed=seed, day=day, candidate=candidate, continuation=continuation,
         future_seed=future, results={k: row[k] for k in (*METRICS, 'action_counts')}, anchor=rule.anchor,
         upper=rule.applied_upper, anchor_command=rule.anchor_command, lower=rule.lower_changes,
@@ -255,7 +277,7 @@ def registration():
         resource_contract='Original12 fixed-pool vehicles,no creation,teleport,layover reduction or service deletion. '
             'Observable ready IDs/directions,published plans and executed holding tracked. Enroute guaranteed slack unknown; '
             'issue zero new credit. Actual holding+other elapsed=return-launch;match total actual holding to commands.',
-        authority='One original fresh upper decision after7200s:perturb current-direction native antisymmetric coefficient '
+        authority='One original fresh upper decision after7200s:perturb the native shared-direction antisymmetric coefficient '
             'by0/-30/+30 within original[-60,60]. Keep native EMA,exact headway curve,900s zero-sum projection and all '
             'execution gates. No direct launch override,hard spacing gate,new terminal wait or persistent policy change.',
         lower='First eligible bilateral seven-bin stop decision in anchor direction,then next same-stop/direction '

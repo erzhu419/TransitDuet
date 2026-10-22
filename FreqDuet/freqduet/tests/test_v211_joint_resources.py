@@ -6,9 +6,11 @@ import run_freqduet_v211_joint_resources as v
 
 
 class JointResourceTests(unittest.TestCase):
-    def test_original_directional_authority(self):
-        np.testing.assert_array_equal(v.upper_candidate([50., -50.], [-60., -60.], [60., 60.], True, 30.), [60., -50.])
-        np.testing.assert_array_equal(v.upper_candidate([50., -50.], [-60., -60.], [60., 60.], False, -30.), [50., -60.])
+    def test_original_shared_authority(self):
+        np.testing.assert_array_equal(v.upper_candidate([50.], [-60.], [60.], 30.), [60.])
+        np.testing.assert_array_equal(v.upper_candidate([-50.], [-60.], [60.], -30.), [-60.])
+        with self.assertRaisesRegex(AssertionError, 'shared'):
+            v.upper_candidate([0., 0.], [-60., -60.], [60., 60.], 30.)
 
     def test_lower_moves_only_original_feasible_bins(self):
         mask = np.array([1, 1, 0, 1, 1, 1, 1], bool)
@@ -22,6 +24,13 @@ class JointResourceTests(unittest.TestCase):
         self.assertEqual(v.time_account(100., 600., 40.)['other_elapsed_s'], 460.)
         with self.assertRaisesRegex(AssertionError, 'physical vehicle-time'):
             v.time_account(100., 120., 45.)
+
+    def test_incomplete_service_keeps_executed_and_pending_holding_separate(self):
+        result = v.holding_account([{'holding_s': 30.}], [{'holding_s': 5.}], 50., False)
+        self.assertEqual(result['executed_holding_s'], 35.)
+        self.assertEqual(result['unexecuted_command_s'], 15.)
+        with self.assertRaises(AssertionError):
+            v.holding_account([{'holding_s': 30.}], [], 50., True)
 
     def test_futures_disjoint_and_common_to_candidates(self):
         self.assertFalse(set(v.SELECT_FUTURES) & set(v.EVAL_FUTURES))

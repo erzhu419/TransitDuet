@@ -3,7 +3,7 @@
 Freeze the script's protocol before smoke outcomes. Four consumed V106 prefixes:
 actors12037/933083 x days2061001/2061004,first fresh native upper decision after7200s.
 Baseline is frozen bilateral025/B200 upper. Native12-vehicle fixed pool,seven
-holding bins,upper[-60,60] antisymmetric coefficients,EMA and900s zero-sum plan
+holding bins,one shared-direction upper[-60,60] antisymmetric coefficient,EMA and900s zero-sum plan
 projection unchanged. No added terminal hold,extra vehicles or fabricated slack.
 
 The public resource ledger records ready vehicle IDs/directions,published plans,
@@ -11,6 +11,8 @@ and executed holding. Guaranteed enroute slack remains unknown;zero new credit.
 Actual holding+other trip elapsed=return-launch,and commands must reproduce actual
 holding. Inclusive launch delay uses positive actual-minus-original-public-clock
 lateness,so delaying eligibility cannot conceal control waiting.
+Truncated trips retain actual executed time and unexecuted commands separately;
+incomplete service is a measured constraint outcome,not a discarded branch.
 
 15 fixed candidates:one current-direction upper perturbation0/-30/+30s crossed
 with five two-stop one-bin offset patterns. Second stop is reached causally on
@@ -32,3 +34,8 @@ Scenario forks preserve hidden current-window/day state:conditional simulation
 lookahead is not an observable-state online planner. Suffix controls are not
 whole-day B200/preserve baselines. No frequency or strong-fixed superiority claim.
 All tests/replays/aggregation via scheduler high/manual on001--006;small JSON only.
+
+Initial smoke t211032 stopped before simulation:the audit incorrectly required
+two independent upper coefficients. B200 has shared_directions=true and one
+coefficient. Correct the audit/intervention to the archived authority;do not
+expand it. Candidate counts,futures and statistical gates stay unchanged.
