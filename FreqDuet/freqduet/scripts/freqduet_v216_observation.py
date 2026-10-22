@@ -1,5 +1,7 @@
 """Query-time observations and separate realized supply labels for V215."""
 
+import math
+
 import preregister_freqduet_v215_positive_event as protocol
 
 
@@ -17,7 +19,10 @@ def snapshot(env, stamp):
     for b in env.bus_all:
         row = dict(bus_id=int(b.bus_id), direction=bool(b.direction), position_sample_s=now)
         if not b.on_route:
-            ready.append(dict(row, last_observed_return_s=float(b.back_to_terminal_time)))
+            returned = float(b.back_to_terminal_time)
+            assert math.isfinite(returned) or returned == -math.inf
+            ready.append(dict(row, return_observed=math.isfinite(returned),
+                last_observed_return_s=returned if math.isfinite(returned) else None))
         else:
             active.append(dict(row, trip_id=int(b.trip_id), state=b.state.name,
                 last_station_id=int(b.last_station.station_id), next_station_id=int(b.next_station.station_id),

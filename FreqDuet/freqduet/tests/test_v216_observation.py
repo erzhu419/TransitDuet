@@ -1,4 +1,5 @@
 from types import SimpleNamespace as NS
+import json
 import unittest
 
 import freqduet_v216_observation as v
@@ -24,6 +25,15 @@ def observation():
 
 
 class ObservationTests(unittest.TestCase):
+    def test_initial_inventory_negative_infinity_is_no_observed_return_not_zero(self):
+        env = environment()
+        env.bus_all[0].on_route = False
+        env.bus_all[0].back_to_terminal_time = float('-inf')
+        frame = v.snapshot(env, dict(time_s=7500., event_seq=4))
+        self.assertFalse(frame['ready'][0]['return_observed'])
+        self.assertIsNone(frame['ready'][0]['last_observed_return_s'])
+        json.dumps(frame, allow_nan=False)
+
     def test_snapshot_reads_current_executable_queue_and_no_active_return_label(self):
         env = environment()
         frame = v.snapshot(env, dict(time_s=7500., event_seq=3))

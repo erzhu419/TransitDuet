@@ -230,6 +230,23 @@ def replay(root, context, capture):
     return result, common, rule
 
 
+def pair_summary(context, native, observed, state):
+    audit = observed[2]
+    window = [q for q in audit.queries if 7200 <= q['time_s'] < 8100]
+    positive = [q for q in window if q['base_bin'] > 0 and q['forward_valid'] and q['follower_valid']
+                and not q['terminal_masked'] and any(i < q['base_bin'] for i in q['feasible_bins'])]
+    return dict(state, status='v216_passive_pair_exact', seed=protocol.CONTEXTS[context][0],
+        day=protocol.CONTEXTS[context][1], all_endpoints_and_physical_ledgers_exact=True,
+        full_actions_states_plans_and_timing_exact=True, **audit.validation,
+        window_queries=len(window), positive_valid_queries=len(positive),
+        queue_supported_queries=sum(protocol.lower_anchor(q) is not None for q in window),
+        anchor=audit.anchor, native_fresh_followup=None if audit.followup is None else
+            {k: audit.followup[k] for k in ('time_s', 'event_seq', 'trip_id', 'direction', 'native_coefficient')},
+        supply=audit.supply, results={k: native[0]['results'][k] for k in
+            (*protocol.CONSTRAINTS, 'passenger_person_s', 'journey_min', 'holding_s_per_trip')},
+        main_policy_changed=False, future_banks_opened=False)
+
+
 def run_pair(root, context):
     progress = root/'progress'/f'c{context}.json'
     assert not progress.exists(), 'inspect original attempt;no automatic reruns'
@@ -247,21 +264,7 @@ def run_pair(root, context):
         write(progress, state)
         exact(native[0], observed[0], 'all_endpoints_ledgers_contract')
         exact(native[1], observed[1], 'full_actions_states_plans_events_and_physical_timing')
-        audit = observed[2]
-        window = [q for q in audit.queries if 7200 <= q['time_s'] < 8100]
-        positive = [q for q in window if q['base_bin'] > 0 and q['forward_valid'] and q['follower_valid']
-                    and not q['terminal_masked'] and any(i < q['base_bin'] for i in q['feasible_bins'])]
-        summary = dict(state, status='v216_passive_pair_exact', seed=protocol.CONTEXTS[context][0],
-            day=protocol.CONTEXTS[context][1], all_endpoints_and_physical_ledgers_exact=True,
-            full_actions_states_plans_and_timing_exact=True, **audit.validation,
-            window_queries=len(window), positive_valid_queries=len(positive),
-            queue_supported_queries=sum(protocol.lower_anchor(q) is not None for q in window),
-            anchor=audit.anchor, native_fresh_followup=None if audit.followup is None else
-                {k: audit.followup[k] for k in ('time_s', 'event_seq', 'trip_id', 'direction', 'native_coefficient')},
-            supply=audit.supply, results={k: native[0]['results'][k] for k in
-                (*protocol.CONSTRAINTS, 'passenger_person_s', 'journey_min', 'holding_s_per_trip')},
-            main_policy_changed=False, future_banks_opened=False)
-        write(root/'summary'/f'c{context}.json', summary)
+        write(root/'summary'/f'c{context}.json', pair_summary(context, native, observed, state))
         print('V216_PASSIVE_PAIR_EXACT', context, flush=True)
     except Exception as error:
         state.update(status='v216_passive_pair_failed', failure=str(error))
@@ -269,11 +272,10 @@ def run_pair(root, context):
         raise
 
 
-def preflight(root, registered):
+def preflight_checks(root, registered):
     sealed = prior.read(registered/'protocol.json')
     expected = protocol.registration('033350c890')
     exact({k: sealed[k] for k in expected}, expected, 'sealed_V215_contract')
-    assert not (root/'protocol.json').exists(), 'V216 already preregistered'
     prior.pilot.joint.optimized_runtime(root)
     from env.bus import Bus
     assert 'current_time' in inspect.signature(Bus._prepare_for_action).parameters
@@ -281,6 +283,11 @@ def preflight(root, registered):
     for pattern in ('test_v215_positive_event.py', 'test_v216_observation.py'):
         subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
             str(Path(__file__).resolve().parents[1]/'tests'), '-p', pattern, '-v'], check=True)
+
+
+def preflight(root, registered):
+    assert not (root/'protocol.json').exists(), 'V216 already preregistered'
+    preflight_checks(root, registered)
     write(root/'protocol.json', dict(stage='v216_V215_passive_capture_only',
         source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], parent=str(registered/'protocol.json'),
         contexts=[list(c) for c in protocol.CONTEXTS], max_paths=8,
@@ -299,20 +306,20 @@ def preflight(root, registered):
     print('V216_PREFLIGHT_PASSED_NO_ROLLOUTS', flush=True)
 
 
-def aggregate(root):
+def aggregate(root, smoke_used=4, smoke_cap=6, new_rollouts=8):
     rows = [prior.read(root/'summary'/f'c{i}.json') for i in range(4)]
     assert all(r['all_endpoints_and_physical_ledgers_exact'] and r['full_actions_states_plans_and_timing_exact'] for r in rows)
     supported = all(r['anchor'] is not None for r in rows)
     followups = all(r['native_fresh_followup'] is not None for r in rows)
     same_supply = all(r['supply'].get('same_vehicle_due_supply', False) for r in rows)
     write(root/'summary/status.json', dict(status='v216_passive_capture_complete', contexts=rows,
-        references_used=4, smoke_attempts_used=4, smoke_attempts_remaining=2,
+        references_used=4, smoke_attempts_used=smoke_used, smoke_attempts_remaining=smoke_cap-smoke_used,
         all_action_timing_endpoint_equivalence_passed=True, all_contexts_have_positive_queue_anchor=supported,
         all_contexts_have_native_upper_followup=followups, all_anchors_observed_same_vehicle_due_supply=same_supply,
         all_anchor_holding_executions_verified=all(r['supply'].get('anchor_holding_execution_matches', False) for r in rows),
         all_service_cleared=all(r['results']['trips_unlaunched'] == r['results']['trips_incomplete'] == 0 for r in rows),
         observation_only=True, causal_control_benefit_tested=False, intervention_matrix_admitted=False,
-        new_rollouts=8, training_updates=0, future_banks_opened=False, main_policy_changed=False,
+        new_rollouts=new_rollouts, training_updates=0, future_banks_opened=False, main_policy_changed=False,
         next_decision='Stop opportunity pilot if any anchor missing;otherwise inspect native fresh follow-up '
             'and physical supply labels before separately authorizing any intervention smoke. No point replacement.'))
     print('V216_PASSIVE_CAPTURE_COMPLETE', supported, followups, same_supply, flush=True)

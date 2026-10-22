@@ -30,3 +30,18 @@ pilot; missing follow-ups, assignment mismatches and uncleared service remain
 explicit. Passive supply linkage is not a causal intervention benefit. No
 intervention matrix is authorized by this stage. Keep raw traces on server;
 retrieve only compact summaries/logs locally.
+
+## Initial-inventory write repair
+
+Preflight t211145,node006,passed14 tests. Original t211147 completed4 references
+and4 passive-on simulations,but JSON writing failed on initial inventory's
+`back_to_terminal_time=-inf`. It means no observed return,not time0. Preserve
+the failed files/logs;recover only their complete result/trace JSON prefixes.
+Query inventories/global order/supply labels need new passive capture.
+
+User explicitly approved ONLY2 additional smoke slots:cap6->8. Reuse all4
+references;repeat ONLY4 passive-on paths,4 contexts unchanged,total12 full
+simulations including the failed-write runs. Seal this cost amendment before
+repair,no V214 replay,no new candidate/future or changed scientific gate.
+Represent initial inventory by `return_observed=false` and a null return time.
+After repair the smoke budget is exhausted;no intervention is authorized.
