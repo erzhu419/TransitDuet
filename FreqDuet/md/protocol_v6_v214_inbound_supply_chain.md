@@ -43,31 +43,32 @@ same-terminal launch of that vehicle. These checks never filter outcomes.
 
 ## Audit and next step
 
-High/manual t211126 on node004 exited0: 8 tests, runtime interface audit and
-known scheduler/protocol namespace checks passed. Retrieved only2026-byte JSON.
-No replay,smoke,training,fitting or main-policy change. Next requires separate
-authorization: passive capture/equivalence and nonzero-opportunity smoke first.
+Preregistration t211126 exited0 with8 tests; no replay at that stage. Later
+high/manual t211134(source ee908c69b6,node004) passed14 tests and completed all
+five fixed smoke paths. Archived endpoint,full passive/off action/timing/resource
+equivalence,and identical joint repeat passed. The real-reduction gate FAILED;
+exit1 is a support rejection,not a task to retry or expand.
 
-Limitations: consumed prefixes and conditional future innovations, not fresh-day
-policy confirmation, online deployment, strong-fixed or frequency-gain evidence.
+Read-only high/manual t211136(source8b4311aa35) exited0 with2 tests; retrieved
+only8984-byte JSON. At anchor7560s,bus9/trip31 has2 window decisions and
+bus10/trip33 has6. ALL8 request0s,with valid forward/follower evidence,no mask
+and no post-window queries. Both baseline and joint have0 registered changes.
+Other incoming trips offer14 valid positive queries across5 trips;these do not
+yet establish terminal-queue relevance or immediate vehicle-supply linkage.
+Journey,passenger time,actual CV2 and total public-clock delay differences are0;
+readiness mean changes-0.061068s/trip. This is not a joint-control improvement.
 
-Smoke implementation ee908c69b6: high/manual on node004. Five paths:
-original baseline, passive baseline, separate smoke-future baseline, fixed joint
-ID3(-30s/reduce), identical joint repeat. Compare archived endpoint and full
-actions/timing/resources; require real issued reductions and changed plan clocks.
-Keep the native transition-mode last nonterminal holding opportunity. Selection
-and evaluation banks stay closed; no matrix or training is authorized here.
-Startup t211129 exited1 before simulation (nested runtime-proof path); t211130
-reproduced the archived baseline, then stopped at the first passive query because
-the frozen Bus lacks pre_action_time_s. The fix passively timestamps the native
-observation-ready callback; no current-time backfill. Reuse the same five paths,
-candidate and future. t211131 then completed a second native baseline and full
-passive simulation,but V211's frozen finish rejected fewer than two old-selector
-decisions. V214 now owns its physical finish and retains real0/1/2 support;
-the nonzero executed-reduction smoke gate remains mandatory.
+Engineering failures t211129--t211131 exposed the nested runtime-proof path,
+missing native ready-clock field and old V211's exactly-two-decisions finish.
+Fixes preserve native dynamics and record ready time passively,without backfill.
+The cost amendment was sealed BEFORE t211134:3 prior full simulations plus
+5 fixed reruns=8(original6 cap),with1 pre-action abort and1 pre-simulation failure
+separate. Same ID3/future2149000000;no scientific budget/gate/choice changes.
 
-Engineering-only amendment before the next attempt:three prior full simulations,
-one pre-action abort and one pre-simulation failure are retained. Cap total full
-engineering simulations at8(original6);rerun only the SAME five paths with ID3
-and2149000000. Seal this in engineering_recovery.json before replay. No added
-candidate/future,selection/evaluation budget increase or scientific gate change.
+Stop V214:selection/evaluation stay closed,no more replay or main-policy change.
+Next needs a NEW causal event-based preregistration:require an actually observed
+positive holding opportunity,then verify its current terminal-queue/supply link,
+rather than locking the nearest two vehicles regardless of their action support.
+
+Limitations:one smoke future,consumed prefix;not fresh-day policy confirmation,
+online deployment,strong-fixed superiority or frequency-gain evidence.
