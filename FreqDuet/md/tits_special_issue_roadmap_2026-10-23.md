@@ -57,3 +57,19 @@ are rebuilt. Freeze the method by October 25 if feasible; do not trade away
 independent confirmation or mechanism evidence to meet the CFP deadline.
 All execution uses scheduler high priority, manual dispatch, node001--006;
 only small summaries return locally. Original TransitDuet stays untouched.
+
+## Execution record
+
+Source `2b32bd5347`; benchmark decision-counter fix `d83ab96d5d` was made
+before any benchmark replay. The original six-worker queued task t211159 was
+cancelled without launch; replacement t211164 requests four workers because
+live CPU capacity is limited. Its six-path smoke gates the formal supplement.
+All tasks use high priority and manual dispatch, restricted to node004/006.
+
+Read-only t211160 finished on node006 with exit 0. Its four existing paths
+contain 352 native shared-upper cycles, 134 with live due-queue-linked positive
+holding opportunities (472 queries). All 472 have a subsequent same-vehicle
+due-service supply label. Queries can share vehicles/cycles and are not
+independent replications. This supports testing upper-first cycle coordination,
+not actual changed-departure authority, counterfactual benefit or policy admission.
+Only the 1462-byte coverage summary was retrieved; raw records remain remote.
