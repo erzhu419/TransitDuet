@@ -152,7 +152,7 @@ def aggregate(root, v107):
             for m in ('zero', 'bilateral025')} for d in old.DAYS},
             learned=None, reason='original V107 did not save original-public launch clocks; not reconstructed as zero'),
         consumed_days=True, fresh_confirmation=False, new_training=0, main_policy_changed=False,
-        interpretation='attribution benchmark, not frequency proof or automatic policy promotion')))
+        interpretation='attribution benchmark, not frequency proof or automatic policy promotion'))
     print('V217_FACTORIAL_COMPLETE', flush=True)
 
 
