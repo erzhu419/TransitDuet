@@ -29,3 +29,27 @@ Five server tests target per-key additivity,orthogonal variance channels,
 signed cancellation,day deletion and undefined resamples. High/manual scheduler
 on node004;local summary only. No raw scan,interval/predictor fit,confirmation,
 replay,training or change to V151/V146/V172,3600s,.1/.1 tails or main/actor/dual.
+
+## Result and next decision
+
+t210914/source5d73c20fd9 completed high/manual-dispatch on node004,exit0.
+Five tests passed;all4 cases reproduced V200 points/intervals(max error7.11e-15)
+and variance/allocation identities. Only53271-byte summary fetched:
+freqduet/results_freqduet/protocol_v6_v201_uncertainty_sources/audit_5d73c20fd9/summary/status.json.
+
+Shared-day variance accounts for95.98-97.09% of mix uncertainty and98.49-98.85%
+of conditional-term uncertainty. Conditional actor main effect0.54-0.78%,
+interaction0.60-0.73%. This is not predominantly an actor-heterogeneity problem.
+The exact keys(0,7,13),(0,12,13) jointly allocate80.77-88.17% of conditional
+crossed variance by SIGNED covariance allocation,not independent key variances.
+Conditional product-measure/crossed variance difference is below0.18%.
+
+Clearance conditional sensitivity is largest on2951044,2951038,2951013;
+moving-launch on2951032,2951033. Maximum single-day deletion changes the point
+by1.46-1.69s^2 and does not reverse its positive sign in any case. These are
+descriptive dates,not exclusions. SD/point units s^2;variance units s^4.
+
+Decision:V200 remains uncertain;do not fit a correction or add actor training
+to address this shared-day uncertainty. Next inspect existing day-level J and
+first-road error co-moments inside the two dominant fixed keys,including
+supported/unsupported contributions and cancellation. No new gate or fitting.
