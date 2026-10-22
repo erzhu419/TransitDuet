@@ -20,3 +20,13 @@ Local retrieval is limited to logs/preflight/small status JSON.
 Next decision:only after all48 mixed blocks pass admission,execute the
 V208 frozen association test. An admitted data supplement is not a result
 about predictor skill or controller improvement.
+
+## Result
+
+t211025/source8fa2f736b2 completed high/manual on node004,exit0;5 tests and
+four-path preflight passed. All1536 paths/7987200 archive queries reproduced;
+119953 admitted physical queries. All3-scope per-bin M0/M1/M2/facts errors=0;
+original denominators match,clock violations=0,support315/864 unchanged.
+48 mixed blocks admitted,35744 primary-scope query memberships(overlapping
+scopes,not distinct queries). Only24969-byte status fetched;blocks stay remote.
+Proceed to V208's frozen association readout,no fit or policy change.
