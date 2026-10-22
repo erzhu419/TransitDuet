@@ -29,6 +29,8 @@ by completed-neighbour mechanical marginal squared-gap correction,unresolved
 support and onboard exposure proxy;retain passenger/CV2/readiness/public-clock
 delay effects. These labels distinguish locally compensatory and counterproductive
 responses,not the causal necessity of individual actions without extra interventions.
+The next service of the SAME physical vehicle is not a follower label;retain it
+as unsupported rather than treating the next round trip as a large following gap.
 
 All tests,replays and analysis use scheduler high/manual on node004,where the
 frozen archives reside. Parallel groups are allowed after smoke. Local retrieval

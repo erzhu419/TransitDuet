@@ -76,7 +76,8 @@ def completed_labels(decisions, departures):
         for index, r in enumerate(rows):
             k, context = key(r), r['context']
             following = rows[index+1] if index+1 < len(rows) else None
-            observed = following is not None and k in departed and context['evidence_valid']
+            observed = (following is not None and following['bus_id'] != r['bus_id']
+                and k in departed and context['evidence_valid'])
             gap = following['time_s']-r['time_s'] if observed else None
             gain = mechanical_gain(context['forward_headway_s'], gap,
                 context['target_headway_s'], r['command_s']) if observed else None

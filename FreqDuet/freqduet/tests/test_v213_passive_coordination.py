@@ -5,7 +5,7 @@ import run_freqduet_v213_passive_coordination as v
 
 
 def query(trip, time, command, *, station=2, evidence=True):
-    return dict(trip_id=trip, station_id=station, direction=True, time_s=float(time), ordinal=trip,
+    return dict(trip_id=trip, bus_id=trip, station_id=station, direction=True, time_s=float(time), ordinal=trip,
         command_s=float(command), onboard=3, context=dict(evidence_valid=evidence,
             forward_headway_s=100., target_headway_s=360.))
 
@@ -41,6 +41,13 @@ class PassiveCoordinationTests(unittest.TestCase):
     def test_duplicate_keys_are_not_silently_collapsed(self):
         with self.assertRaisesRegex(AssertionError, 'repeated lower'):
             v.unique_decisions([query(1, 10., 0.), query(1, 20., 0.)])
+
+    def test_next_trip_of_same_vehicle_is_not_a_follower(self):
+        rows = [query(1, 10., 0.), query(2, 5000., 0.)]
+        rows[1]['bus_id'] = rows[0]['bus_id']
+        labels = v.completed_labels(rows, [dict(trip_id=1, station_id=2, direction=True, time_s=10.)])
+        self.assertIsNone(labels[1, 2, True]['ready_stage_gain'])
+        self.assertIsNone(labels[1, 2, True]['follower_label_available_s'])
 
     def test_plan_updates_record_before_after_without_mutation(self):
         before = {1: dict(planned_s=100.)}
