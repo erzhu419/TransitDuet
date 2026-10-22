@@ -64,7 +64,8 @@ def jitter_schedule(args, seed):
 
 def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=None,
                 rule=None, sample=False, branch_step=None, renew=False,
-                intervention_step=None, arm=None, feature_steps=(), latency_recorder=None):
+                intervention_step=None, arm=None, feature_steps=(), latency_recorder=None,
+                risk_spec=None, continuation_seed=None):
     """One execution loop: scheduled training, adaptive timing, or paired keep/renew."""
     period = time_scale.upper_period_steps
     mode_name = rule.name if rule is not None else "scheduled"
@@ -83,13 +84,15 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         or [s // period for s in schedule] != list(range(args.horizon // period))
         or schedule[0] != 0 or any(s % period > args.max_offset_steps for s in schedule)):
         raise ValueError("schedule must preserve one call per bin")
-    if branch_step is not None and (schedule is None or sample or branch_step in schedule
+    if branch_step is not None and (sample or (schedule is not None and branch_step in schedule)
                                    or not 0 < branch_step < args.horizon - 50):
         raise ValueError("keep/renew query needs a noncolliding prefix and complete window")
     if intervention_step is not None and (rule is None or arm not in ("now", "wait_one_check")
         or not period <= intervention_step < args.horizon - period
         or intervention_step % period >= 25 or intervention_step % 5):
         raise ValueError("timing intervention must be a nondeadline check")
+    if continuation_seed is not None and (branch_step is None) == (intervention_step is None):
+        raise ValueError("a conditional future requires exactly one causal branch point")
     task = task_spec.open(seed=seed, horizon=args.horizon)
     ledger = active_ledger()
     try:
@@ -109,6 +112,7 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         decision_set = set(schedule or ())
         subgoal = observation.achieved_goal.copy()
         decisions, errors, rewards, queries = [], [], [], []
+        risk_distances, clipped_steps = [], []
         feature_rows = []
         feature_steps = set(feature_steps)
         captured = None
@@ -116,6 +120,10 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         planner_seconds = lower_seconds = score_seconds = 0.0
         end_step = args.horizon if branch_step is None else branch_step + 50
         for step in range(end_step):
+            if continuation_seed is not None and step in (branch_step, intervention_step):
+                task.driver = task.driver.conditional_future(step=step, seed=continuation_seed)
+                if not np.array_equal(np.concatenate(task.driver.sample(step)), observation.task_measurement):
+                    raise RuntimeError("conditional future changed the current causal observation")
             if latency_recorder is not None:
                 control_wall, control_cpu = time.perf_counter(), time.process_time()
             bin_index, offset = divmod(step, period)
@@ -124,6 +132,8 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
             query = step == branch_step or step == intervention_step
             check = (rule is not None and step > 0 and decisions[-1] // period != bin_index
                      and offset <= 25 and offset % 5 == 0)
+            if step == branch_step and rule is not None and not check:
+                raise RuntimeError("local branch is not an available deployed-policy check")
             if query or check or step in feature_steps:
                 started = time.perf_counter()
                 if query or step in feature_steps or rule.kind != "threshold":
@@ -197,6 +207,10 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                     value=float(output["value"]), reward=float(intrinsic), upper_reward=float(reward),
                     done=done, lower_done=bool(done or step + 1 in decision_set), cost=0.0)
             errors.append(float(info["tracking_distance"]) ** 2 * time_scale.dt_seconds)
+            if risk_spec is not None:
+                risk_distances.append(float(info["tracking_distance"]))
+                disturbed = requested + observation.force
+                clipped_steps.append(bool(np.any((disturbed < task.action_low) | (disturbed > task.action_high))))
             rewards.append(float(reward))
             observation = next_observation
             if latency_recorder is not None:
@@ -226,6 +240,16 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                **(captured or {})}
         if branch_step is not None:
             row["branch_ise"] = float(sum(errors[branch_step:]))
+        if intervention_step is not None:
+            row["window_ise"] = float(sum(errors[intervention_step:intervention_step + period]))
+            row["tail_ise"] = float(sum(errors[intervention_step + period:]))
+            row["first_200_step_ise"] = float(sum(errors[intervention_step:intervention_step + 200]))
+            row["first_200_step_length"] = min(200, len(errors) - intervention_step)
+        if risk_spec is not None:
+            from .plan_validity_reliability import episode_risk
+
+            row["reliability"] = episode_risk(errors, risk_distances, clipped_steps,
+                dt=time_scale.dt_seconds, period=period, **risk_spec)
         if feature_steps:
             row["feature_rows"] = feature_rows
         return batch, row

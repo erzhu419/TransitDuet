@@ -124,4 +124,6 @@ Named-method reproductions and local-to-full-episode reliability remain open.
 When computation resumes: run a small development-only cost pilot, freeze the
 budget frontier, then evaluate admitted configurations on fresh paired roots
 and full episodes. Report performance and total costs by task/root, not by query.
-During this pause, the next preparation item is local-value-to-episode reliability.
+The fourth item now has a [prepared episode-reliability path](freq_hrl_episode_reliability_protocol_2026-10-22.md).
+Its branch diagnostics are evaluation expenditure, not free training supervision
+or deployment control cost.

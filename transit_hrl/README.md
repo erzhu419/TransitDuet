@@ -32,6 +32,11 @@ The [total-compute preparation](md/freq_hrl_total_compute_budget_protocol_2026-1
 adds CPU/step accounting for training, branch supervision, selection and scoring,
 plus end-to-end control latency and development-only lifecycle-budget selection.
 It has not measured an efficiency advantage and submits no tasks.
+The [episode-reliability preparation](md/freq_hrl_episode_reliability_protocol_2026-10-22.md)
+adds paired state-occupancy diagnostics, independent conditional-future probes,
+local/opportunity/tail attribution and root-level full-episode/risk inference.
+All four evidence items now have preparation code; their new performance
+comparisons remain unrun.
 
 ## Historical Research Mainlines
 

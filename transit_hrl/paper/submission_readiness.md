@@ -96,6 +96,14 @@ convergence theorem is not a substitute for competent baselines; a clearly
 stated conditional proposition would be sufficient if its assumptions apply
 to the implemented rule.
 
+The [prepared reliability path](../md/freq_hrl_episode_reliability_protocol_2026-10-22.md)
+now compares fixed-clock reference/deployed states, probes the unchanged local
+target against adaptive full-episode continuations with independent conditional
+futures, and separates opportunity and tail effects. Full-episode mean/tail ISE
+and sustained-failure inference use frozen margins and independent paths/roots;
+zero observed harmful events do not close the risk criterion automatically.
+This is executable preparation, not a global guarantee or a new positive result.
+
 Practical effect size and robustness also remain central. Transit Stage301
 service-only saves about 0.074s per single intervention; Stage304's service-only
 point wait gain is 0.342s but total cost is worse at the point estimate and
