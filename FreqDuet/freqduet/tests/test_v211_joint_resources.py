@@ -59,6 +59,14 @@ class JointResourceTests(unittest.TestCase):
         stats['inclusive_launch_delay_s']['ci95'][1] = .1
         self.assertFalse(v.joint_gate(stats))
 
+    def test_missing_lower_opportunity_is_not_a_zero_effect_or_a_pass(self):
+        self.assertFalse(v.lower_execution('bilateral025', [])['complete'])
+        one = [dict(base_bin=1, selected_bin=0)]
+        self.assertFalse(v.lower_execution('bilateral025', one)['complete'])
+        self.assertEqual(v.lower_execution('bilateral025', one)['changed_commands'], 1)
+        self.assertTrue(v.lower_execution('bilateral025', one*2)['complete'])
+        self.assertTrue(v.lower_execution('native', [])['complete'])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,3 +46,12 @@ checks. High/manual dependent tasks:t211037 references+960 selection paths,
 t211038 freeze choices,t211039 independent evaluation,t211040 aggregation.
 Each waits for its predecessor's actual small marker;no evaluation before choices.
 Only smoke/shard markers,choice summaries and final status sync locally.
+
+Recovery:selection/freeze finished;independent evaluation t211039 exited1 with
+63/64 groups saved. Only c1/f25 is missing:its baseline completed simulation but
+the audit rejected a missing second lower opportunity before saving outcomes.
+Record this as execution-support failure,not zero effect or discarded future.
+No selector,action,future,metric or statistical threshold changes. Test a cached
+passive replay for exact equivalence,then resume only the missing group;retain
+all63 completed groups. Original aggregate stays frozen;an additional small audit
+reports joint-vs-each-single,selection-to-evaluation changes and execution support.

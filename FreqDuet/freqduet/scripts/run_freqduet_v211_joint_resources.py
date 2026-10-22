@@ -72,6 +72,13 @@ def holding_account(completed, active, commanded, cleared):
         unexecuted_command_s=commanded-executed)
 
 
+def lower_execution(continuation, lower):
+    return dict(expected_decisions=2 if continuation == 'bilateral025' else None,
+        observed_decisions=len(lower),
+        complete=continuation != 'bilateral025' or len(lower) == 2,
+        changed_commands=sum(r['base_bin'] != r['selected_bin'] for r in lower))
+
+
 def resource_snapshot(env, launches):
     ready, active = [], []
     for bus in env.bus_all:
@@ -99,6 +106,8 @@ class JointAudit(prior.TradeoffAudit):
         self.anchor, self.current_upper_trip, self.policy = None, None, None
         self.upper_prefix, self.lower_prefix, self.lower_changes = [], [], []
         self.first_lower, self.applied_upper, self.return_ledger, self.dispatch_ledger = None, None, {}, []
+        self.lower_support = dict(same_direction=0, forward_valid=0, follower_valid=0,
+            nonterminal=0, all_bins_feasible=0, same_station_other_vehicle=0)
 
     def attach(self, runner):
         super().attach(runner)
@@ -197,6 +206,15 @@ class JointAudit(prior.TradeoffAudit):
         if self.continuation != 'bilateral025' or len(self.lower_changes) >= 2:
             return law
         feasible = policy.feasible_action_mask(states)[0].numpy()
+        if bool(bus.direction) == self.anchor['direction']:
+            self.lower_support['same_direction'] += 1
+            self.lower_support['forward_valid'] += bool(context.evidence_valid)
+            self.lower_support['follower_valid'] += bool(context.follower_evidence_valid)
+            self.lower_support['nonterminal'] += not self.runner._lower_terminal_action_masked(bus)
+            self.lower_support['all_bins_feasible'] += bool(feasible.all())
+            if self.first_lower is not None:
+                self.lower_support['same_station_other_vehicle'] += (
+                    identity[1:3] == self.first_lower[1:3] and identity[3] != self.first_lower[3])
         eligible = (bool(bus.direction) == self.anchor['direction'] and context.evidence_valid
             and context.follower_evidence_valid and not self.runner._lower_terminal_action_masked(bus) and feasible.all())
         if not eligible:
@@ -222,7 +240,11 @@ class JointAudit(prior.TradeoffAudit):
 
     def finish(self, runner, records, holds):
         require(self.anchor is not None and self.applied_upper is not None, 'registered upper anchor missing')
-        require(self.continuation != 'bilateral025' or len(self.lower_changes) == 2, 'two causal related lower decisions missing')
+        # Missing causal opportunities are protocol failures, not missing service outcomes.
+        self.execution = dict(lower_execution(self.continuation, self.lower_changes),
+            support=self.lower_support, anchor_s=self.anchor['time_s'],
+            first_lower=self.first_lower, decisions=self.lower_changes,
+            done_reason=runner.env._done_reason)
         env = runner.env
         active = {}
         for bus in env.bus_all:
@@ -264,6 +286,7 @@ def replay(root, ci, candidate=0, *, reference=None, future=None, continuation='
         future_seed=future, results={k: row[k] for k in (*METRICS, 'action_counts')}, anchor=rule.anchor,
         upper=rule.applied_upper, anchor_command=rule.anchor_command, lower=rule.lower_changes,
         ledger=rule.ledger, authority=rule.authority, physical_contract=rule.contract)
+    result['execution'] = rule.execution
     return result, rule, events
 
 
@@ -453,9 +476,67 @@ def aggregate(root):
     print('V211_COMPLETE', gates, flush=True)
 
 
+def audit_results(root):
+    """Read only frozen choices and completed branches; do not refit selections."""
+    status = read(root/'summary/status.json')
+    choices = status['frozen_choices']
+    methods = ('bilateral', 'upper_only', 'lower_only', 'joint', 'best_single')
+    rows, failures, context_rows, absolute = [], [], [], []
+    for ci in range(4):
+        futures, selected = [], choices[ci]
+        for future in EVAL_FUTURES:
+            group = read(root/'evaluate'/f'c{ci}_f{future}.json')
+            lookup = {(r['candidate'], r['continuation']): r for r in group['rows']}
+            ids = dict(bilateral=0, **{m: selected[m] for m in methods[1:]})
+            futures.append([[lookup[(ids[m], 'bilateral025')]['results'][k] for k in METRICS] for m in methods])
+            for row in group['rows']:
+                execution = lower_execution(row['continuation'], row['lower'])
+                if not execution['complete']:
+                    failures.append(dict(context=ci, future=future, candidate=row['candidate'],
+                        continuation=row['continuation'], **execution, diagnostics=row.get('execution')))
+        futures = np.asarray(futures)
+        rows.append(futures)
+        selected_effects = {m: np.asarray(selected['candidate_means'][selected[m]])-
+            np.asarray(selected['candidate_means'][0]) for m in methods[1:]}
+        context_rows.append(dict(context=ci, seed=SEEDS[ci//2], day=DAYS[ci%2],
+            choices={m: selected[m] for m in methods[1:]},
+            selection={m: dict(zip(METRICS, v.tolist())) for m, v in selected_effects.items()},
+            evaluation={m: dict(zip(METRICS, (futures[:, j]-futures[:, 0]).mean(0).tolist()))
+                for j, m in enumerate(methods) if j},
+            signal_noise={m: {k: dict(mean=float(v.mean()), sd=float(v.std(ddof=1)),
+                mean_over_se=float(v.mean()/(v.std(ddof=1)/4)) if v.std(ddof=1) > 0 else None,
+                nonzero_futures=int(np.count_nonzero(v)), negative_futures=int((v < 0).sum()),
+                half_means=[float(v[:8].mean()), float(v[8:].mean())])
+                for q, k in enumerate(METRICS) for v in [(futures[:, j]-futures[:, 0])[:, q]]}
+                for j, m in enumerate(methods) if j}))
+        absolute.append(futures.mean(0))
+    cube = np.asarray(rows)
+    contrasts = [(f'joint_vs_{base}', 'joint', base) for base in ('bilateral', 'upper_only', 'lower_only', 'best_single')]
+    effects = np.stack([cube[:, :, methods.index(a)]-cube[:, :, methods.index(b)] for _, a, b in contrasts], axis=2)
+    paired = [dict(seed=SEEDS[ci//2], day=DAYS[ci%2], effects={name: dict(zip(METRICS,
+        effects[ci, :, j].mean(0).tolist())) for j, (name, _, _) in enumerate(contrasts)}) for ci in range(4)]
+    crossed, bounds = confirmation.describe(paired, 'effects'), conditional_intervals(effects)
+    conditional = {name: {k: dict(mean=float(effects[:, :, j, q].mean()), ci95=bounds[:, j, q].tolist())
+        for q, k in enumerate(METRICS)} for j, (name, _, _) in enumerate(contrasts)}
+    for name in ('joint_vs_bilateral', 'joint_vs_best_single'):
+        for k in METRICS:
+            np.testing.assert_allclose(crossed[name][k]['mean'], status['effects'][name][k]['mean'], atol=1e-10, rtol=0)
+            np.testing.assert_allclose(conditional[name][k]['ci95'], status['conditional_future'][name][k]['ci95'], atol=1e-10, rtol=0)
+    pilot.write_json(root/'audit/status.json', dict(status='v211_frozen_choice_audit_complete',
+        original_statistical_gate=status['joint_gate_passed'], protocol_execution_complete=not failures,
+        qualified=bool(status['joint_gate_passed'] and not failures), execution_failures=failures,
+        effects=crossed, conditional_future=conditional, contexts=context_rows,
+        absolute={m: dict(zip(METRICS, np.mean(absolute, axis=0)[j].tolist())) for j, m in enumerate(methods)},
+        evaluation_halves=status['evaluation_halves'], original_gates=status['gates'],
+        selection_paths=960, evaluation_paths=status['evaluation_continuations'],
+        actor_updates=0, critic_updates=0, dual_updates=0, main_policy_changed=False,
+        scope=status['scope']))
+    print('V211_AUDIT_COMPLETE', 'execution_failures', len(failures), flush=True)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=('smoke', 'references', 'select', 'freeze', 'evaluate', 'aggregate'))
+    p.add_argument('command', choices=('smoke', 'references', 'select', 'freeze', 'evaluate', 'aggregate', 'audit'))
     p.add_argument('--out-root', type=Path, required=True)
     p.add_argument('--v106-root', type=Path)
     p.add_argument('--start', type=int, default=0)
@@ -470,6 +551,8 @@ def main():
         freeze_choices(a.out_root)
     elif a.command == 'aggregate':
         aggregate(a.out_root)
+    elif a.command == 'audit':
+        audit_results(a.out_root)
     else:
         with ProcessPoolExecutor(max_workers=a.workers, mp_context=get_context('spawn')) as pool:
             jobs = [pool.submit(collect_group, a.out_root, a.command, i) for i in range(a.start, a.end)]
