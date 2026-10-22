@@ -50,3 +50,10 @@ authorization: passive capture/equivalence and nonzero-opportunity smoke first.
 
 Limitations: consumed prefixes and conditional future innovations, not fresh-day
 policy confirmation, online deployment, strong-fixed or frequency-gain evidence.
+
+Smoke implementation e29668eb11: high/manual t211129 on node004. Five paths:
+original baseline, passive baseline, separate smoke-future baseline, fixed joint
+ID3(-30s/reduce), identical joint repeat. Compare archived endpoint and full
+actions/timing/resources; require real issued reductions and changed plan clocks.
+Keep the native transition-mode last nonterminal holding opportunity. Selection
+and evaluation banks stay closed; no matrix or training is authorized here.
