@@ -534,9 +534,24 @@ def audit_results(root):
     print('V211_AUDIT_COMPLETE', 'execution_failures', len(failures), flush=True)
 
 
+def recover_evaluation(root):
+    subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', str(Path(__file__).resolve().parents[1]/'tests'),
+        '-p', 'test_v211_*.py', '-v'], check=True)
+    old = next(r for r in read(root/'evaluate/c0_f16.json')['rows']
+        if r['candidate'] == 0 and r['continuation'] == 'bilateral025')
+    new, _, _ = replay(root, 0, reference=read(root/'references/c0.json'),
+        future=future_seed(0, 16), label='recovery_passive_c0_f16')
+    pilot.joint.assert_same_state({k: new[k] for k in old}, old, 'V211_reporting_only_cached_equivalence')
+    pilot.write_json(root/'recovery/verification.json', dict(status='nine_tests_and_cached_endpoints_exact',
+        unchanged_choices=True, changed_policy=False))
+    for index in range(64):
+        collect_group(root, 'evaluate', index)
+    pilot.write_json(root/'shards/evaluate_0_64.json', dict(status='complete'))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=('smoke', 'references', 'select', 'freeze', 'evaluate', 'aggregate', 'audit'))
+    p.add_argument('command', choices=('smoke', 'references', 'select', 'freeze', 'evaluate', 'aggregate', 'audit', 'recover'))
     p.add_argument('--out-root', type=Path, required=True)
     p.add_argument('--v106-root', type=Path)
     p.add_argument('--start', type=int, default=0)
@@ -553,6 +568,8 @@ def main():
         aggregate(a.out_root)
     elif a.command == 'audit':
         audit_results(a.out_root)
+    elif a.command == 'recover':
+        recover_evaluation(a.out_root)
     else:
         with ProcessPoolExecutor(max_workers=a.workers, mp_context=get_context('spawn')) as pool:
             jobs = [pool.submit(collect_group, a.out_root, a.command, i) for i in range(a.start, a.end)]
