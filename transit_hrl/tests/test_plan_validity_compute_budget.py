@@ -108,6 +108,21 @@ class BudgetTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "roster"):
             select([left, right], expected=[left])
 
+    def test_shared_pilot_cost_is_paid_once_and_amortized_over_the_declared_cohort(self):
+        rows, pilot = [record("r1"), record("r2")], record("pilot", cpu=30, steps=200)
+        rows[1]["optimizer_seed"] = 72
+        pilot["optimizer_seed"], pilot["status"] = 7, "failed"
+        result = select(rows, cpu_cap_seconds=40, shared_records=[pilot], shared_expected_runs=[pilot])
+        groups = result["selections"]
+        self.assertTrue(result["all_groups_budget_feasible"])
+        self.assertEqual(sum(row["shared_allocation_cpu_seconds"] for row in groups), 30)
+        self.assertTrue(all(row["lifecycle_cpu_seconds"] == 37 for row in groups))
+        self.assertTrue(all(row["shared_failed_trial_count"] == 1 for row in groups))
+        self.assertFalse(select(rows, cpu_cap_seconds=30, shared_records=[pilot],
+                                shared_expected_runs=[pilot])["all_groups_budget_feasible"])
+        missing = select(rows, shared_expected_runs=[pilot])
+        self.assertTrue(all(row["status"] == "missing_measurement" for row in missing["selections"]))
+
     def test_latency_quantiles_include_all_steps_and_deadline_misses(self):
         latency = budget.ControlLatency()
         for index in range(100):

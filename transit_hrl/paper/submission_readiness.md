@@ -2,6 +2,12 @@
 
 Date: 2026-10-22. Computation is paused at the user's request. This document
 records scientific gaps; it authorizes no scheduler submission or experiment.
+The four prepared paths are integrated in the
+[unified preregistration draft](../md/freq_hrl_unified_preregistration_2026-10-22.md).
+It distinguishes the bounded in-distribution main claim from cross-stress
+robustness. Two-stage freezes and two required comparators share a global
+alpha0.05 allocation. Calibration costs, operational thresholds, historical
+seed audit and confirmation artifacts remain pending; no formal run is authorized.
 
 ## Current conclusion
 

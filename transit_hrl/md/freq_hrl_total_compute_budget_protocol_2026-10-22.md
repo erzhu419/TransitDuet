@@ -1,5 +1,8 @@
 # Total Compute Budget: Prepared, Not Run
 
+The [unified preregistration](freq_hrl_unified_preregistration_2026-10-22.md)
+fixes the primary N=100, confirmation cohort and prospective cost scope.
+
 Date: 2026-10-22. This prepares the third evidence item for the bounded
 plan-validity paper. No scheduler submission, training or performance run.
 Preparation verification: 57 focused tests passed, covering ledger arithmetic,
@@ -19,9 +22,9 @@ a mechanism-isolation comparison, not a total-compute efficiency result.
 For each task, optimizer root and method, admit a frozen configuration only if:
 
 ```text
-search_CPU = sum(offline process CPU seconds of ALL declared attempted trials)
+search_CPU = sum(ALL local attempted trial CPU) + shared_development_CPU / declared_roots
 lifecycle_CPU(N) = search_CPU + N * selected_validation_control_CPU_per_episode
-search_environment_steps = sum(actual primitive steps of ALL attempted trials)
+search_environment_steps = sum(ALL local primitive steps) + shared_development_steps / declared_roots
 
 lifecycle_CPU(N) <= CPU_cap
 search_environment_steps <= environment_step_cap
@@ -109,7 +112,10 @@ node when experiments resume. No installation is performed by either entry point
 via `--inputs`, the complete roster via `--plans`, and explicit
 `--cpu-cap-seconds`, `--environment-step-cap`, `--deployment-episodes`,
 `--latency-p99-cap-seconds` and `--output`. Its output freezes admitted run IDs
-and retains failures; it does not access checkpoints, raw trajectories or test
+and can include method-specific preflight/pilot costs with `--shared-inputs`
+and `--shared-plans`. Shared costs are paid once across the complete declared
+cohort; pilot models are not eligible as confirmation winners. It retains
+failures and does not access checkpoints, raw trajectories or test
 outcomes. Keep fit caches/checkpoints on the server; retrieve logs or compact
 JSONs first.
 

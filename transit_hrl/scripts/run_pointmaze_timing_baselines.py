@@ -55,7 +55,7 @@ def protocol(args):
         "termination_data": "identical_pooled_behavior_mixture_for_both_views",
         "termination_execution": "deterministic_same_as_pair_continuation_no_forced_early_calls",
         "selection": "lowest_selection_ise_no_filtering_collapsed_checkpoints_or_roots",
-        "test_access": "only_after_all_rules_and_checkpoints_are_frozen",
+        "test_access": "none_this_entry_point_is_development_only",
         "test_reuse": "reserve_new_roots_and_paths_before_any_performance_run",
         "scheduler_submission": False,
         "performance_claim_supported": False,
@@ -97,7 +97,7 @@ def run_cell(args):
 
 def fit_timing_comparison(args, controller, payload, fit_rows, time_scale,
                           *, rollout_fn=None, pair_collector=None):
-    """One fitting/selection/test procedure for both physical tasks."""
+    """One development fitting/selection procedure for both physical tasks."""
     rollout_fn = rollout_rule if rollout_fn is None else rollout_fn
     pair_collector = collect_timing_pairs if pair_collector is None else pair_collector
     ledger = {"branch_label_replay_steps": sum(
@@ -152,13 +152,7 @@ def fit_timing_comparison(args, controller, payload, fit_rows, time_scale,
         rules.append(selected)
         checkpoint_scores[view] = scores
         readiness[view] = termination_readiness(selection(selected), selection(clock))
-    # Freeze every arm before the first call on a test path, including failed gates.
     frozen_rules = [rule.to_dict() for rule in rules]
-    test_rows = []
-    for rule in rules:
-        for row in evaluate(rule, args.trigger_eval_seeds, "test_steps"):
-            row.pop("queries")
-            test_rows.append(row)
     return {
         "optimizer_seed": args.optimizer_seed, "frozen_rules": frozen_rules,
         "controller_selected_iteration": payload["selected_checkpoint_iteration"],
@@ -171,7 +165,7 @@ def fit_timing_comparison(args, controller, payload, fit_rows, time_scale,
         "paired_timing_fit_count": len(pooled_pairs),
         "clock_selection": clock_scores, "threshold_selection": threshold_scores,
         "termination_checkpoint_selection": checkpoint_scores,
-        "termination_readiness": readiness, "test_rows": test_rows,
+        "termination_readiness": readiness, "test_accessed": False,
         "fit_cache": {"branch_fit_rows": fit_rows, "paired_timing_rows": pooled_pairs},
         "performance_claim_supported": False,
     }

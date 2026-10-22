@@ -37,6 +37,10 @@ adds paired state-occupancy diagnostics, independent conditional-future probes,
 local/opportunity/tail attribution and root-level full-episode/risk inference.
 All four evidence items now have preparation code; their new performance
 comparisons remain unrun.
+The [unified prospective protocol](md/freq_hrl_unified_preregistration_2026-10-22.md)
+and [machine-readable draft](protocols/plan_validity_preregistration_2026-10-22.json)
+now define the two freezes, reserved seed roles, lifecycle costs and global
+statistical allocation. Missing pilot costs/thresholds/artifacts keep it unlocked.
 
 ## Historical Research Mainlines
 

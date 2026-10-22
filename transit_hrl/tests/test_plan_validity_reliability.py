@@ -29,6 +29,7 @@ def cell_report(root, risk_margin=0.01):
         "evaluation_seeds": paths, "risk_spec": {"distance": 1, "duration_steps": 25},
         "risk_rate_margin": risk_margin, "tail_ise_margin": 0,
         "family_alpha": reliability.FAMILY_ALPHA,
+        "registered_comparator_method": "fixed", "comparator_eligible": True,
         "comparison": {"candidate_method": "history", "comparator_method": "fixed"}},
         "profiles": {"in_distribution": {"status": "complete", "episodes": [
             {"seed": seed, "candidate": {"tracking_squared_error_integral": 3,
@@ -130,6 +131,14 @@ class ReliabilityTest(unittest.TestCase):
         self.assertEqual(result["panels"][0]["missing_or_failed_roots"], [2])
         self.assertFalse(result["joint_reliability_supported"])
 
+    def test_ineligible_comparator_is_retained_but_cannot_close_the_claim(self):
+        reports = [cell_report(root, 0.99) for root in (1, 2, 3)]
+        reports[1]["protocol"]["comparator_eligible"] = False
+        result = aggregate(reports, risk_rate_margin=0.99)
+        self.assertEqual(result["panels"][0]["optimizer_roots"], 3)
+        self.assertFalse(result["panels"][0]["comparator_eligible"])
+        self.assertFalse(result["joint_reliability_supported"])
+
     def test_profiles_change_only_the_declared_exogenous_stress(self):
         original = _task_options(options())
         fast = reliability.profile_options(original, "fast_regime")
@@ -164,6 +173,7 @@ class ReliabilityTest(unittest.TestCase):
     def test_default_plan_does_not_load_sources_or_execute(self):
         command = ["--candidate-report", "/not-yet-created/history.json", "--candidate-run-id", "history-root1",
             "--comparator-report", "/not-yet-created/fixed.json", "--comparator-run-id", "fixed-root1",
+            "--comparator-method", "fixed",
             "--task", "pointmaze", "--optimizer-seed", "1", "--evaluation-seeds", "101", "102",
             "--probe-seeds", "101", "--risk-distance", "2", "--risk-rate-margin", "0.01", "--tail-ise-margin", "0"]
         with tempfile.TemporaryDirectory() as folder:
@@ -218,6 +228,7 @@ class ReliabilityTest(unittest.TestCase):
             source, output = Path(folder) / "case.json", Path(folder) / "summary.json"
             source.write_text(json.dumps(cell_report(1)))
             analyzer.main(["--inputs", str(source), "--expected-roots", "1", "--task", "pointmaze",
+                "--comparator-method", "fixed",
                 "--risk-rate-margin", "0.01", "--tail-ise-margin", "0", "--output", str(output)])
             result = json.loads(output.read_text())
             self.assertEqual(result["statistical_unit"], "optimizer_root")

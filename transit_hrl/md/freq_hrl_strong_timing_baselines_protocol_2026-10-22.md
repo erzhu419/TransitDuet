@@ -1,5 +1,8 @@
 # Strong Timing Baselines: Prepared, Not Run
 
+The [unified preregistration](freq_hrl_unified_preregistration_2026-10-22.md)
+governs seed counts, freezes, budget and statistical allocation.
+
 Date: 2026-10-22. Entry point: `scripts/run_pointmaze_timing_baselines.py`.
 No scheduler submission, native performance run or new scientific result.
 Local preparation checks: 32 tests passed, including mocked native replay,
@@ -83,8 +86,9 @@ PYTHONPATH=. python3 scripts/run_pointmaze_timing_baselines.py \
 
 These are illustrative IDs, not a reserved experiment roster. The explicit
 `--execute` command runs development locally when computation is authorized;
-this entry point never submits jobs. First use is a short native preflight,
-then independent-root development. If termination remains collapsed or cannot
+this entry point never submits jobs or evaluates reserved `trigger_eval_seeds`.
+Formal frozen-artifact evaluation is a separate stage. First use is a short
+native preflight, then independent-root development. If termination remains collapsed or cannot
 improve on the clock, retain that failure and stop confirmation of this recipe.
 If eligible, freeze a separate new-root confirmation comparing root-level paired
 ISE/return, with fixed, strongest threshold and learned baselines. No confirmation

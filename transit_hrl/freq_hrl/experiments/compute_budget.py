@@ -142,7 +142,8 @@ class ControlLatency:
 
 
 def select_with_budget(records, *, cpu_cap_seconds, environment_step_cap,
-                       deployment_episodes, latency_p99_cap_seconds, expected_runs):
+                       deployment_episodes, latency_p99_cap_seconds, expected_runs,
+                       shared_records=(), shared_expected_runs=()):
     """All trials are charged; ranking reads validation ISE, never test outcomes."""
     caps = (cpu_cap_seconds, environment_step_cap, latency_p99_cap_seconds)
     if not all(math.isfinite(v) and v > 0 for v in caps) or deployment_episodes < 0:
@@ -161,23 +162,48 @@ def select_with_budget(records, *, cpu_cap_seconds, environment_step_cap,
     for row in records:
         if any(row[key] != expected_by_id[row["run_id"]][key] for key in ("task", "optimizer_seed", "method")):
             raise ValueError("measurement task/root/method differs from its planned run")
+    shared_by_id = {row["run_id"]: row for row in shared_records}
+    shared_plan = {row["run_id"]: row for row in shared_expected_runs}
+    if (len(shared_by_id) != len(shared_records) or len(shared_plan) != len(shared_expected_runs)
+        or set(shared_by_id) - set(shared_plan) or set(shared_plan).intersection(expected_by_id)):
+        raise ValueError("shared development costs need unique, separate planned run IDs")
+    shared_groups = {}
+    cohort_roots = {}
+    for task, root, method in groups:
+        cohort_roots.setdefault((task, method), set()).add(root)
+    for row in shared_expected_runs:
+        key = row["task"], row["method"]
+        if key not in cohort_roots:
+            raise ValueError("shared development method/task is outside the confirmation roster")
+        shared_groups.setdefault(key, []).append(row["run_id"])
+    for row in shared_records:
+        if any(row[key] != shared_plan[row["run_id"]][key] for key in ("task", "optimizer_seed", "method")):
+            raise ValueError("shared measurement differs from its planned run")
     output = []
     for (task, root, method), ids in groups.items():
         trials = [by_id[run_id] for run_id in ids if run_id in by_id]
+        shared_ids = shared_groups.get((task, method), [])
+        overhead = [shared_by_id[run_id] for run_id in shared_ids if run_id in shared_by_id]
         base = {"task": task, "optimizer_seed": root, "method": method,
                 "trial_count": len(trials), "selected_run_id": None}
-        missing = [run_id for run_id in ids if run_id not in by_id]
+        missing = ([run_id for run_id in ids if run_id not in by_id] +
+                   [run_id for run_id in shared_ids if run_id not in shared_by_id])
         if missing:
             output.append({**base, "status": "missing_measurement", "missing_run_ids": missing})
             continue
-        if any(not row.get("accounting_complete") for row in trials):
+        if any(not row.get("accounting_complete") for row in (*trials, *overhead)):
             output.append({**base, "status": "incomplete_accounting"})
             continue
         profile = trials[0]["hardware_profile"]
-        if any(row["hardware_profile"] != profile for row in trials):
+        if any(row["hardware_profile"] != profile for row in (*trials, *overhead)):
             raise ValueError("budget matching requires the same measured hardware/thread profile")
-        search_cpu = sum(row["offline_cost"]["cpu_seconds"] for row in trials)
-        search_steps = sum(row["offline_cost"]["counts"].get("environment_steps", 0) for row in trials)
+        share = len(cohort_roots[(task, method)])
+        shared_cpu = sum(row["offline_cost"]["cpu_seconds"] for row in overhead)
+        shared_steps = sum(row["offline_cost"]["counts"].get("environment_steps", 0) for row in overhead)
+        local_cpu = sum(row["offline_cost"]["cpu_seconds"] for row in trials)
+        local_steps = sum(row["offline_cost"]["counts"].get("environment_steps", 0) for row in trials)
+        search_cpu = local_cpu + shared_cpu / share
+        search_steps = local_steps + shared_steps / share
         if not math.isfinite(search_cpu) or search_cpu < 0 or search_steps < 0:
             raise ValueError("invalid measured search cost")
         feasible = []
@@ -194,6 +220,12 @@ def select_with_budget(records, *, cpu_cap_seconds, environment_step_cap,
                 and latency["wall_p99_seconds"] <= latency_p99_cap_seconds):
                 feasible.append((row, lifecycle_cpu))
         base.update(search_cpu_seconds=search_cpu, search_environment_steps=search_steps,
+                    local_search_cpu_seconds=local_cpu, local_search_environment_steps=local_steps,
+                    shared_development_cpu_seconds=shared_cpu,
+                    shared_development_environment_steps=shared_steps, shared_allocation_roots=share,
+                    shared_allocation_cpu_seconds=shared_cpu / share,
+                    shared_allocation_environment_steps=shared_steps / share, shared_run_ids=shared_ids,
+                    shared_failed_trial_count=sum(row["status"] == "failed" for row in overhead),
                     deployment_episodes=deployment_episodes,
                     failed_trial_count=sum(row["status"] == "failed" for row in trials))
         if not feasible:
@@ -205,7 +237,7 @@ def select_with_budget(records, *, cpu_cap_seconds, environment_step_cap,
                        "selected_run_id": winner["run_id"], "lifecycle_cpu_seconds": lifecycle,
                        "validation_ise": winner["validation_ise"]})
     # Different methods may not be compared across different CPU/runtime profiles.
-    profiles = [row["hardware_profile"] for row in records if row.get("accounting_complete")]
+    profiles = [row["hardware_profile"] for row in (*records, *shared_records) if row.get("accounting_complete")]
     if profiles and any(profile != profiles[0] for profile in profiles):
         raise ValueError("cross-method budget comparisons require matched hardware profiles")
     return {"selections": output, "performance_claim_supported": False,
@@ -214,4 +246,4 @@ def select_with_budget(records, *, cpu_cap_seconds, environment_step_cap,
                             "deployment_episodes": deployment_episodes,
                             "latency_p99_seconds": latency_p99_cap_seconds},
             "all_groups_budget_feasible": all(row["status"] == "selected_without_test_access" for row in output),
-            "budget_basis": "all_measured_search_cpu_plus_future_control_cpu_and_environment_steps"}
+            "budget_basis": "all_local_search_plus_amortized_shared_development_plus_future_control"}

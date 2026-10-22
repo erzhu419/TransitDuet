@@ -1,5 +1,8 @@
 # Local Value To Episode Reliability: Prepared, Not Run
 
+The [unified preregistration](freq_hrl_unified_preregistration_2026-10-22.md)
+governs the two primary comparators, alpha allocation and frozen seed reservation.
+
 Date: 2026-10-22. Fourth evidence item. No scheduler submission, controller
 training or performance experiment. The scope remains multiscale control with
 useful slow plans and fast feedback, not universal RL optimizer superiority.
@@ -11,7 +14,7 @@ uncertainty, frozen margins and existing timing/budget/paper-evidence regression
 
 Use the PointMaze/Reacher execution kernel and frozen development artifacts from
 the total-compute preparation. Choose one primary renewal-value predictor and
-one competent timing comparator per task/frontier before confirmation. Keep
+the two registered timing comparators per task before confirmation. Keep
 their weights, target, fitting, threshold and action generation unchanged.
 For budget claims, use only the run IDs admitted by the declared budget search.
 
@@ -88,8 +91,8 @@ The initial design uses eight new optimizer roots per task, with distinct held
 path banks across roots and paired identical paths between methods. Freeze the complete
 path roster, diagnostic subset, risk threshold, risk-rate margin and tail-ISE
 margin before test access. Primary intervals use paired root means, not pooled
-query counts. Each task has family alpha0.025, allowing two task families at
-total alpha0.05 by a union bound. Half the task's alpha covers the three episode
+query counts. Each task/comparator has family alpha0.0125, allowing two tasks
+and two comparators at total alpha0.05 by a union bound. Half the family's alpha covers the three episode
 endpoints across profiles; half covers conditional harmful-event bounds across
 roots/profiles. Root-level local diagnostics and conditional-path intervals are
 descriptive and labelled separately.
@@ -108,6 +111,7 @@ From `transit_hrl/`, this writes only a plan, without opening source artifacts:
 PYTHONPATH=. python3 scripts/run_plan_validity_reliability.py \
   --candidate-report /server/results/history.json --candidate-run-id history-root1 \
   --comparator-report /server/results/threshold.json --comparator-run-id threshold-root1 \
+  --comparator-method threshold \
   --task pointmaze --optimizer-seed 1 --evaluation-seeds 101 102 103 104 \
   --probe-seeds 101 103 --probes-per-episode 3 --conditional-replicates 4 \
   --risk-distance 2 --risk-rate-margin 0.02 --tail-ise-margin 0 \

@@ -9,8 +9,8 @@ from .pointmaze_compact_plan_validity import _base_matrix
 
 
 PROFILES = ("in_distribution", "fast_regime", "force_tail")
-PROTOCOL_VERSION = "plan_validity_episode_reliability_v1_prepared"
-FAMILY_ALPHA = 0.025
+PROTOCOL_VERSION = "plan_validity_episode_reliability_v2_unified"
+FAMILY_ALPHA = 0.0125
 
 
 def profile_options(options, profile):
@@ -221,6 +221,9 @@ def aggregate_reliability(reports, *, expected_roots, tasks, profiles=PROFILES,
     expected = {(task, root) for task in tasks for root in expected_roots}
     if set(keys) - expected:
         raise ValueError("report outside the declared task/root roster")
+    comparators = {report["protocol"]["registered_comparator_method"] for report in reports}
+    if len(comparators) > 1:
+        raise ValueError("analyze each registered comparator separately")
     path_banks = {task: set() for task in tasks}
     for report in reports:
         task = report["protocol"]["task"]
@@ -290,17 +293,21 @@ def aggregate_reliability(reports, *, expected_roots, tasks, profiles=PROFILES,
                          and risk["interval"][1] <= risk_rate_margin
                          and np.mean(risk_bounds) <= risk_rate_margin
                          and all(row["mean"] < 0 for row in halves))
+            comparator_eligible = all(by_key[(task, root)]["protocol"]["comparator_eligible"] for root in expected_roots)
             output.append({"task": task, "profile": profile, "status": "analyzed", "optimizer_roots": len(cells),
                 "candidate_minus_comparator_ise": ise, "sustained_failure_rate_difference": risk,
                 "episode_ise_expected_shortfall_difference": tail, "evaluation_halves": halves,
                 "root_risk_counts": root_risk_counts,
                 "conditional_mean_harmful_event_probability_upper": float(np.mean(risk_bounds)),
                 "local_transfer_diagnostics": transfer_summary(cells),
-                "joint_reliability_supported": bool(supported)})
+                "comparator_eligible": comparator_eligible,
+                "joint_reliability_supported": bool(supported and comparator_eligible)})
     return {"panels": output, "statistical_unit": "optimizer_root",
+            "tasks": list(tasks), "expected_roots": list(expected_roots),
             "scope": "frozen_complete_episode_endpoints_not_a_per_state_value_guarantee",
             "root_interval_alpha": endpoint_alpha, "conditional_risk_bound_alpha": risk_alpha,
             "family_alpha": alpha,
+            "comparator_method": next(iter(comparators), None),
             "risk_rate_margin": risk_rate_margin, "tail_ise_margin": tail_ise_margin,
             "joint_reliability_supported": all(row.get("joint_reliability_supported", False) for row in output)}
 

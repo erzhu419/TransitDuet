@@ -1,5 +1,8 @@
 # Same-Algorithm Second Task: Prepared, Not Run
 
+The [unified preregistration](freq_hrl_unified_preregistration_2026-10-22.md)
+supersedes earlier sample-count suggestions and defines the two freeze stages.
+
 Date: 2026-10-22. No scheduler submission, controller training or performance run.
 Only unit tests and a six-step native Reacher interface check are authorized here.
 Preparation verification: 43 targeted tests passed, including legacy execution/
@@ -100,8 +103,10 @@ its plan, invalid physical timing or missing query classes blocks confirmation;
 it is not repaired by selecting favorable test paths.
 
 Then freeze eight new optimizer roots per task, with eight controller-training,
-eight controller-selection, eight timing-fit, eight timing-selection and sixteen
-test paths per root. Five roles are disjoint. Freeze every candidate before test
+eight controller-selection, eight timing-fit, eight timing-selection and512
+test paths per root, including8 predeclared diagnostic paths. Five roles are
+disjoint. The development entry point never executes the reserved test paths.
+Freeze every candidate before test
 access; revealed historical confirmation paths are not new confirmation data.
 Aggregate paired full-episode ISE/return by optimizer root, not by query/path.
 Report each task separately, using paired root-level t intervals as in Stage9.

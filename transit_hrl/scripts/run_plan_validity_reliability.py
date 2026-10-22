@@ -54,6 +54,7 @@ def prepare(args):
     return {"protocol_version": PROTOCOL_VERSION, "task": args.task, "optimizer_seed": args.optimizer_seed,
         "candidate_report": str(args.candidate_report), "candidate_run_id": args.candidate_run_id,
         "comparator_report": str(args.comparator_report), "comparator_run_id": args.comparator_run_id,
+        "registered_comparator_method": args.comparator_method,
         "evaluation_seeds": args.evaluation_seeds, "profiles": list(PROFILES),
         "probe_seeds": args.probe_seeds,
         "risk_spec": {"distance": args.risk_distance, "duration_steps": args.risk_duration_steps},
@@ -72,6 +73,10 @@ def prepare(args):
 def run_case(args, resolved):
     candidate = load_record(args.candidate_report, args.candidate_run_id)
     comparator = load_record(args.comparator_report, args.comparator_run_id)
+    if comparator["method"] != args.comparator_method:
+        raise ValueError("source comparator differs from the registered comparison")
+    resolved["comparator_eligible"] = (not comparator["method"].startswith("termination_") or
+        comparator["termination_readiness"]["eligible_for_fresh_confirmation"])
     for row in (candidate, comparator):
         if row["task"] != args.task or row["optimizer_seed"] != args.optimizer_seed:
             raise ValueError("frozen source task/root differs from the declared case")
@@ -112,6 +117,7 @@ def main(argv=None):
     parser.add_argument("--candidate-run-id", required=True)
     parser.add_argument("--comparator-report", type=Path, required=True)
     parser.add_argument("--comparator-run-id", required=True)
+    parser.add_argument("--comparator-method", required=True)
     parser.add_argument("--task", choices=TASKS, required=True)
     parser.add_argument("--optimizer-seed", type=int, required=True)
     parser.add_argument("--evaluation-seeds", nargs="+", type=int, required=True)

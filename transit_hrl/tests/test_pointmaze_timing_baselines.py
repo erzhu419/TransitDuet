@@ -163,7 +163,7 @@ class TimingBaselinesTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "distinct"):
                 runner.main([*command, "--trigger-eval-seeds", "5", "--output", str(output)])
 
-    def test_suite_freezes_fits_before_test_and_never_uses_test_in_controller_diagnostics(self):
+    def test_development_suite_never_executes_reserved_test_paths(self):
         options = args(
             train_seeds=[11, 12], selection_seeds=[21], branch_fit_seeds=[31, 32, 33],
             timing_selection_seeds=[41, 42], trigger_eval_seeds=[51, 52], iterations=2,
@@ -185,11 +185,7 @@ class TimingBaselinesTest(unittest.TestCase):
             return timing.fit_termination(*args, **kwargs)
 
         def rollout(controller, rule, *, seed, **kwargs):
-            if seed in [51, 52]:
-                events.append("test")
-                self.assertEqual(events.count("fit"), 4)
-            else:
-                self.assertIn(seed, [41, 42])
+            self.assertIn(seed, [41, 42])
             return {"seed": seed, "mode": rule.name, "decision_steps": [0, 75, 125, 175, 225, 275],
                     "tracking_squared_error_integral": 1.0, "queries": [],
                     "episode_length": 300, "upper_decision_count": 6}
@@ -202,8 +198,10 @@ class TimingBaselinesTest(unittest.TestCase):
             patch.object(runner, "rollout_rule", side_effect=rollout),
         ):
             result = runner.run_cell(options)
-        self.assertEqual(len(result["test_rows"]), 20)
-        self.assertEqual(result["ledger"]["test_steps"], 20 * 300)
+        self.assertNotIn("test_rows", result)
+        self.assertFalse(result["test_accessed"])
+        self.assertEqual(events.count("fit"), 4)
+        self.assertEqual(result["ledger"]["test_steps"], 0)
         self.assertEqual(result["ledger"]["timing_pair_replay_steps"], 200)
         self.assertFalse(result["performance_claim_supported"])
         self.assertTrue(all(not state["eligible_for_fresh_confirmation"]

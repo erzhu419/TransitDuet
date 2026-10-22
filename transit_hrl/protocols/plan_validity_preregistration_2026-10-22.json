@@ -1,0 +1,184 @@
+{
+  "plan": {
+    "protocol_version": "plan_validity_unified_preregistration_v1",
+    "status": "draft_pending_development_calibration",
+    "scheduler_submission": false,
+    "contract": {
+      "horizon": 1200,
+      "dt_seconds": 0.01,
+      "period_steps": 50,
+      "check_stride_steps": 5,
+      "deadline_steps": 25,
+      "upper_calls": 24,
+      "branch_window_steps": 50,
+      "threshold_quantile": 0.75,
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1,
+        10,
+        100,
+        1000,
+        10000
+      ],
+      "controller_hidden_dim": 128,
+      "termination_hidden_dim": 64,
+      "learning_rate": 0.0003,
+      "checkpoint_evaluation_interval": 8,
+      "history_seconds": 0.64,
+      "fast_period_seconds": 0.04,
+      "maximum_subgoal_delta": 0.75,
+      "ppo_epochs": 4,
+      "ppo_minibatch_size": 1024,
+      "termination_rounds": 2,
+      "termination_epochs": 200,
+      "effective_df": 8,
+      "primary_iterations": 384,
+      "primary_events_per_class": 4,
+      "primary_pairs_per_path": 12,
+      "controller_schedule": "balanced_jitter",
+      "candidate": "history",
+      "renewal_target": "keep_minus_renew_50_steps_no_later_upper_calls"
+    },
+    "statistics": {
+      "global_alpha": 0.05,
+      "task_comparator_family_alpha": 0.0125,
+      "primary_comparators": [
+        "threshold",
+        "termination_history"
+      ],
+      "profiles": [
+        "in_distribution",
+        "fast_regime",
+        "force_tail"
+      ],
+      "confirmation_roots_per_task": 8,
+      "evaluation_paths_per_root": 512,
+      "probe_paths_per_root": 8,
+      "probes_per_path": 3,
+      "conditional_future_replicas": 4,
+      "risk_duration_steps": 25,
+      "risk_rate_margin": 0.02,
+      "tail_ise_margin": 0.0,
+      "primary_deployment_episodes": 100,
+      "latency_p99_cap_seconds": 0.01
+    },
+    "pointmaze_env_id": "PointMaze_UMaze-v3",
+    "task_driver_options": {
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ]
+    },
+    "seed_recipe": {
+      "base": 1970000000,
+      "phase_codes": {
+        "preflight": 1,
+        "cost_pilot": 2,
+        "confirmation": 3
+      },
+      "task_codes": {
+        "pointmaze": 1,
+        "reacher_tracking": 2
+      },
+      "role_offsets": {
+        "train_seeds": 1000,
+        "selection_seeds": 2000,
+        "branch_fit_seeds": 3000,
+        "timing_selection_seeds": 4000,
+        "trigger_eval_seeds": 5000
+      },
+      "phase_roots": {
+        "preflight": 1,
+        "cost_pilot": 2,
+        "confirmation": 8
+      }
+    },
+    "calibration": {
+      "historical_seed_exposure_audit_complete": false,
+      "pilot_reports": [],
+      "recipe_frozen": false,
+      "artifacts_frozen": false,
+      "per_task": {
+        "pointmaze": {
+          "cpu_cap_seconds": null,
+          "environment_step_cap": null,
+          "risk_distance": null,
+          "termination_development_eligible": null
+        },
+        "reacher_tracking": {
+          "cpu_cap_seconds": null,
+          "environment_step_cap": null,
+          "risk_distance": null,
+          "termination_development_eligible": null
+        }
+      },
+      "artifact_bindings": []
+    }
+  },
+  "readiness": {
+    "status": "draft_not_locked",
+    "pending": [
+      "historical exposure audit of reserved/effective training seeds",
+      "measured cost/competence pilot reports",
+      "pointmaze: cpu_cap_seconds",
+      "pointmaze: environment_step_cap",
+      "pointmaze: risk_distance",
+      "pointmaze: competent learned-termination development gate",
+      "reacher_tracking: cpu_cap_seconds",
+      "reacher_tracking: environment_step_cap",
+      "reacher_tracking: risk_distance",
+      "reacher_tracking: competent learned-termination development gate",
+      "recipe/budget/risk/seed lock before confirmation-root training",
+      "all 48 frozen primary controller/rule bindings and budget admissions",
+      "global artifact lock before any confirmation-path access"
+    ],
+    "seed_cells": 22,
+    "unique_reserved_seed_ids": 8968,
+    "confirmation_optimizer_roots": {
+      "pointmaze": [
+        1973110000,
+        1973120000,
+        1973130000,
+        1973140000,
+        1973150000,
+        1973160000,
+        1973170000,
+        1973180000
+      ],
+      "reacher_tracking": [
+        1973210000,
+        1973220000,
+        1973230000,
+        1973240000,
+        1973250000,
+        1973260000,
+        1973270000,
+        1973280000
+      ]
+    },
+    "zero_harm_event_minimum_paths_at_registered_precision": 409,
+    "performance_claim_supported": false,
+    "scheduler_submission": false
+  }
+}
