@@ -113,3 +113,7 @@ Actual changed departures AND executed holding must be observed before any
 independent-future efficacy matrix. Fixed+bilateral is now a mandatory strong
 control alongside V107. No new replay, training or policy switch was started
 in this result review; missing original-public delay for old V107 remains.
+
+V218 now implements this single resource-cycle candidate and its bounded
+four-arm execution smoke. See `protocol_v6_v218_persistent_cycle.md`; no new
+training or independent-future efficacy bank is authorized by that smoke.

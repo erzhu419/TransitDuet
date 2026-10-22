@@ -53,3 +53,6 @@ and the complete c0 V107 archive comparison. It then exited on a missing
 `get_context` import before any pool or intervention path started. Import-only
 repair reuses c0,retains the original protocol file and records its source
 separately;the frozen law and maximum16 paths are unchanged.
+Repair source b09088f636,task t211189 high/manual on node004 passed11 tests
+and reused c0 without replay. The remaining three exact baselines run in
+parallel before the twelve intervention paths. Independent futures stay closed.
