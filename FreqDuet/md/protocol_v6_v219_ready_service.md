@@ -36,3 +36,14 @@ manual dispatch,node001--006;only the small summary returns locally.
 Limitations: this audit does not run proposed projections or establish action
 credit,policy efficacy or frequency contribution. Outcome and future labels
 cannot enter query-time admission. Source registration is sealed before reads.
+
+Read-only task t211208 (high/manual,node006) exited0;source74050bb1e8 passed5
+tests. Only3401 bytes of summary returned. Each context has74 native cycles;
+mutable ready-backed tasks number3/8/3/8. All22 use the reserved physical bus,
+remain ready until launch,and exhibit strict native-plan waiting;their later
+positive feasible queries total250. All four pass IMPLEMENTATION admission.
+Next within V219: reproduce the native projection and test the single preview,
+especially coupled two-direction advances against EACH ready prefix. This
+coverage result does not establish that the shared +30 command is admissible,
+that compensation allows reduction,or that either action improves outcomes.
+No controller replay,training,future bank or main change occurred.

@@ -121,3 +121,8 @@ training or independent-future efficacy bank is authorized by that smoke.
 V218 completed: exact references and executed reductions,but no joint benefit.
 Target launches remain return+1s despite plan changes. Stop promotion;future bank
 stays closed. See the V218 decision for native-execution redesign;main stays frozen.
+
+V219 freezes ready-backed outbound service tasks,then own-trip compensation.
+Existing V216 records contain22 such opportunities across four contexts;only
+implementation is admitted. Native shared-projection equivalence/admissibility
+comes next within V219,not a new efficacy matrix. See `protocol_v6_v219_ready_service.md`.
