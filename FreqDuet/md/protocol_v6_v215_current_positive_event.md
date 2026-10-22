@@ -53,6 +53,13 @@ Do not fill them from the earlier anchor or later launch/return labels. Next
 needs separately authorized passive query capture and action/timing/endpoint
 equivalence, then genuinely nonzero joint execution on reserved smoke data.
 
+Sealed source033350c890 by high/manual t211138,node004,exit0;8 synthetic tests
+passed. Runtime return-direction/ready/fresh-upper interfaces verified. Schema
+audit only on5200 old queries confirmed the missing live fields;no new anchors
+were selected on V214. Known scheduler10289 hot/24198 archived tasks and8
+protocol metadata files had no reserved-seed conflict. Retrieved only2124-byte
+summary;protocol remains sealed on server. Replay admission stays closed.
+
 Limitations: two actors/two new days, conditional opportunity pilot only;
 empirical queue support and physical supply linkage remain unverified. No
 replay, collection, training, fitting or main-policy change in this stage.
