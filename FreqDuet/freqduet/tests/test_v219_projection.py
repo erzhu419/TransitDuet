@@ -44,6 +44,18 @@ class ProjectionTest(unittest.TestCase):
         self.assertFalse(result['supported'])
         self.assertEqual(result['unfunded_within_cycle_trip_ids'], [43])
 
+    def test_shared_coefficient_does_not_imply_global_plan_writes(self):
+        q = query()
+        trips = preview.query_timetable(q, [])
+        p = TimetableCurvePlanner(basis_per_direction=2, shared_directions=True, plan_all_directions=False,
+            coefficient_parameterization='antisymmetric_linear_v5', terminal_schedule_mode='exact_headway_curve',
+            headway_budget_mode='rolling_zero_sum_delta_v6', delta_min_s=-60, delta_max_s=60)
+        result = preview.preview(p, trips, q, np.array([10.5], np.float32))
+        for row in q['plans']:
+            if not row['direction']:
+                self.assertEqual(result[row['trip_id']]['planned_s'], row['planned_s'])
+        self.assertLess(result[42]['planned_s'], 7560.)
+
     def test_subtick_continuous_delay_is_not_silently_admitted(self):
         q = query()
         native = {p['trip_id']: dict(planned_s=p['planned_s']+.5, target_s=360.) for p in q['plans']}

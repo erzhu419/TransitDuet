@@ -21,7 +21,8 @@ def audit(data, planner, alpha, context):
     trace, capture = data['trace'], data['capture']
     callbacks = {(r['time_s'], r['trip_id']): r for r in trace['upper_callbacks'] if r['commands']}
     launch_seq = {e['trip_id']: e['event_seq'] for e in capture['events'] if e['kind'] == 'launch'}
-    previous, rows, checked, max_error = None, [], 0, 0.
+    previous, rows, checked, max_error = {}, [], 0, 0.
+    changed_directions = Counter()
     tick = data['result']['physical_contract']['dt_s']
     for query in capture['fresh_upper']:
         assert query['snapshot_event_seq'] == query['event_seq']
@@ -29,10 +30,14 @@ def audit(data, planner, alpha, context):
         trips = projection.query_timetable(query, observed)
         immutable = [vars(t).copy() for t in trips]
         raw = np.asarray(query['native_coefficient'], dtype=np.float32)
-        native_effective = projection.ema_action(raw, previous, alpha)
+        direction = bool(query['direction'])
+        native_effective = projection.ema_action(raw, previous.get(direction), alpha)
         native = projection.preview(planner, trips, query, native_effective)
         callback = callbacks[query['time_s'], query['trip_id']]
         assert callback['commands'][0]['coefficient'] == query['native_coefficient']
+        for change in callback['changes']:
+            assert change['after']['direction'] == direction, 'native callback changed the other direction'
+            changed_directions[str(direction)] += 1
         expected = {r['trip_id']: dict(planned_s=r['planned_s'], target_s=r['target_s']) for r in query['plans']}
         expected.update({r['trip_id']: {k: r['after'][k] for k in ('planned_s', 'target_s')}
                          for r in callback['changes']})
@@ -40,17 +45,19 @@ def audit(data, planner, alpha, context):
         checked += 1
         if query['time_s'] >= law.START_S:
             proposed_raw = np.clip(raw+30., planner.action_low, planner.action_high).astype(np.float32)
-            proposed_effective = projection.ema_action(proposed_raw, previous, alpha)
+            proposed_effective = projection.ema_action(proposed_raw, previous.get(direction), alpha)
             proposed = projection.preview(planner, trips, query, proposed_effective)
             evidence = projection.inspect_proposal(query, native, proposed, tick)
             rows.append(dict(time_s=query['time_s'], event_seq=query['event_seq'], trip_id=query['trip_id'],
                 native_effective=native_effective.tolist(), proposed_effective=proposed_effective.tolist(), **evidence))
         assert immutable == [vars(t) for t in trips], 'preview mutated its input timetable'
-        previous = native_effective
+        previous[direction] = native_effective
     seed, day = law.CONTEXTS[context]
     accepted = [r for r in rows if r['supported']]
     return dict(context=context, actor=seed, day=day, native_snapshots_checked=checked,
         max_native_error_s=max_error, native_continuous_and_tick_equivalent=True,
+        observed_native_plan_changes_by_direction=dict(changed_directions),
+        cross_direction_writes=False, ema_streams='separate by callback direction',
         candidate_queries=len(rows), admitted_queries=len(accepted),
         admitted_trip_ids=sorted({t for r in accepted for t in r['law_admission']['task_ids']}),
         rejected_reasons=dict(Counter(r['rejection'] for r in rows if not r['supported'])),
@@ -77,7 +84,10 @@ def main():
     config = load_config(str(a.model_root/'configs_freqduet/F_freqduet_protocol_v6_confirmed_main_hiro.yaml'))
     cfg = config['upper']['timetable_planner']
     planner = TimetableCurvePlanner.from_config(cfg)
-    assert planner.shared_directions and planner.plan_all_directions and planner.action_dim == 1
+    print('V219_NATIVE_PLANNER_CONTRACT', json.dumps(dict(shared_directions=planner.shared_directions,
+        plan_all_directions=planner.plan_all_directions, action_dim=planner.action_dim,
+        planner_config=cfg)), flush=True)
+    assert planner.shared_directions and not planner.plan_all_directions and planner.action_dim == 1
     assert planner.terminal_schedule_mode == 'exact_headway_curve'
     assert planner.headway_budget_mode == 'rolling_zero_sum_delta_v6'
     assert planner.action_low == [-60.] and planner.action_high == [60.]
@@ -93,7 +103,9 @@ def main():
         source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], planner_source=inspect.getfile(TimetableCurvePlanner),
         planner_config=cfg, contexts=[list(c) for c in law.CONTEXTS],
         acceptance='Native continuous clocks and headways within1e-6s AND identical executable ticks '
-            'for EVERY pending trip at EVERY fresh query,including warmup. Same native pre-query EMA '
+            'for EVERY pending trip at EVERY fresh query,including warmup. Shared coefficient means '
+            'one actor/action coordinate,not simultaneous two-direction execution: keep frozen '
+            'plan_all_directions=false and separate native directional EMA streams. Same pre-query EMA '
             'for native/+30 previews;never propagate counterfactual previews into baseline state. '
             'Both directions current900s advances must be ready-prefix funded;no continuous or tick '
             'delay anywhere in the projected timetable. Retain every fixed context and every rejection.',
@@ -110,6 +122,8 @@ def main():
         contexts.append({k: v for k, v in result.items() if k != 'rows'})
     passed = all(r['admitted_queries'] > 0 for r in contexts)
     summary = dict(status='v219_native_projection_preflight_complete', contexts=contexts,
+        native_contract=dict(shared_directions=planner.shared_directions, plan_all_directions=planner.plan_all_directions,
+                             action_dim=planner.action_dim, ema_streams='direction-local'),
         projection_equivalence_passed=True, replay_budget_admission=passed,
         proposed_controller_run=False, new_replays=0, new_training=0, main_policy_changed=False,
         limitations='Archived native states only,not a closed-loop candidate trajectory. Ready support '
