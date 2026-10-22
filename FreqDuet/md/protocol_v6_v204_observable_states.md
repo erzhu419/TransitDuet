@@ -35,3 +35,18 @@ Second moments cannot recover state-indicator JY/J2/Y2 or new state-specific
 19-day support. Explicitly report that gap;do not join marginal summaries.
 No raw trajectory scan,confirmation data,interval fit,replay,training or frozen
 controller/map/window/quantile change. Server high/manual dispatch;summary only.
+
+## Result and next decision
+
+t210949/source4b85f9159c completed high/manual-dispatch on node004,exit0;
+5 server tests passed. All48 existing joint-moment files and96 fixed-parent
+instances are present,with all78 required slots. V202 raw moments/masks and
+once-only V191 weighting reproduce exactly(max error0). Original support retains
+315/864 actor/key/bin cells;the remainder stays excluded from state decomposition.
+Only116913-byte summary fetched locally;no state operator or association fitted.
+
+Decision:the sealed additive diagnostic is evaluable from existing moments;
+no rescan or collection is needed for it. Next step is that diagnostic with
+V203 matched-draw reproduction,not a new interval/policy candidate. Finer
+state-dependent JY/J2/Y2 and corresponding distinct-day support remain missing;
+do not infer them from marginals or extend conclusions to unsupported exposure.
