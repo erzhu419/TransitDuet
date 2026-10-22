@@ -22,7 +22,7 @@ retained in `archive/2026-08-31/terminology.md` for that different method.
 | raw | Each Transit profile's frozen reference selector; not flat RL or a no-control policy |
 | single intervention | One queried timetable action followed by the frozen suffix, not repeated online selection |
 | supported | The study's registered criterion passed; not a statement of universal safety or dominance |
-| Freq-HRL | Historical project and broader frequency-responsibility hypothesis; not the name of every positive result |
+| Freq-HRL | Hierarchical protocol for multiscale time-series planning/execution; may use PPO/SAC backends, not replace them; broader than the timing mechanism tested here |
 
 ISE advantages in Table1 are comparator minus candidate; return advantages are
 candidate minus comparator. Transit differences are first controller minus

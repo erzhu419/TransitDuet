@@ -4,6 +4,11 @@ This directory is the isolated workspace for the general Freq-HRL direction.
 Existing `FreqDuet/` and `transit_duet/` code should be treated as read-only
 references unless a file is intentionally copied into this tree first.
 
+Freq-HRL targets multiscale time-series control with useful slow plans and fast
+closed-loop execution. It is a hierarchical protocol on top of learning backends
+such as PPO/SAC, not a proposed replacement for general-purpose RL optimizers.
+Generality means transfer within this applicability class, not universal dominance.
+
 ## Active Manuscript: 2026-10-22
 
 The paper is now organized around **plan-validity-driven replanning under a
@@ -16,6 +21,9 @@ same-algorithm domain-general confirmation. Computation is paused; this
 manuscript consolidation authorizes no new scheduler tasks.
 The three core figures and their source CSVs are linked in the
 [figure evidence audit](paper/figure_evidence_audit.md).
+The [strong timing-baseline preparation](md/freq_hrl_strong_timing_baselines_protocol_2026-10-22.md)
+adds thresholds, matched-capacity controls and paired learned termination code;
+it has not been performance-tested and authorizes no scheduler tasks.
 
 ## Historical Research Mainlines
 

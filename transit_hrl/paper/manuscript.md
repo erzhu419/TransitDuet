@@ -33,6 +33,12 @@ refresh schedule to a useful plan and an obsolete one. The decision studied
 here is whether the present plan is worth replacing, conditional on the
 controller that will execute the replacement.
 
+The motivating Freq-HRL scope is multiscale time-series control with persistent
+high-level plans and fast closed-loop execution. It is an architectural protocol
+that can use PPO or SAC as a learning backend, rather than an alternative
+general-purpose RL optimizer. The present study tests its renewal-timing question
+within this planning/execution class, not universal algorithm superiority.
+
 Temporal abstraction already supports learned termination, action repetition
 and adaptive high-level decision frequency [@sutton1999between;
 @bacon2017option; @sharma2017figar; @zhou2020temple]. Our question is narrower:

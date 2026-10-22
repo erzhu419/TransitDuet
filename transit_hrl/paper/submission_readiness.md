@@ -12,8 +12,10 @@ and Transit single-intervention gains, but identifies their different methods
 and units. Stage304's failed cost/wait, statistical wait-retention and critic-
 increment criteria remain in the main Results.
 
-This is a coherent bounded manuscript, not yet a demonstrated top-tier general
-algorithm. The dominant issue is comparative and external evidence, not wording,
+This is a coherent bounded manuscript whose timing mechanism still needs stronger
+comparative evidence within its intended multiscale planning/execution class.
+Freq-HRL is not intended to replace general-purpose PPO/SAC learning backends.
+The dominant issue is comparative and external evidence, not wording,
 another encoder interface or more seeds on the same cached states.
 
 ## Competent timing baselines and mechanism isolation
@@ -32,10 +34,19 @@ intervention, but not sufficient for ranking complete training algorithms.
 Periodic and adaptive baselines need their own properly matched training
 schedules, with inherited training/selection/label costs counted.
 
+The [prepared baseline suite](../md/freq_hrl_strong_timing_baselines_protocol_2026-10-22.md)
+now implements simple thresholds, equal-parameter/effective-DF ridge controls,
+and paired learned termination with equal-capacity current/history heads.
+It preserves collapsed best checkpoints and reserves test access until freeze.
+Preparation and unit tests do not close this scientific gap; no performance
+run or faithful named-method reproduction has been completed for the new suite.
+
 ## Same algorithm beyond one task family
 
 The next generality evidence would have to keep the renewal target, fitting
 recipe and timing contract fixed in a genuinely different control problem.
+That problem should share the intended slow-plan/fast-execution structure;
+universal superiority over underlying RL optimizers is not the target.
 Transit currently changes binary keep/renew timing into finite-MC timetable
 action search; its positive results therefore cannot fill this role. A new
 evaluation would need independent training roots and full episodes, with task
