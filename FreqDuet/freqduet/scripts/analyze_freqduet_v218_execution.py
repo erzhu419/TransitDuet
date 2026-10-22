@@ -7,6 +7,8 @@ import gzip
 import json
 from pathlib import Path
 from statistics import fmean
+import subprocess
+import sys
 
 from freqduet_v218_cycle_policy import ACTIONS, ARMS
 
@@ -179,6 +181,9 @@ def main():
     p.add_argument('--root', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
     args = p.parse_args()
+    subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
+                    str(Path(__file__).resolve().parents[1]/'tests'),
+                    '-p', 'test_v218_execution_audit.py', '-v'], check=True)
     old = json.loads((args.root/'summary/status.json').read_text())
     assert old['paths'] == 16 and old['all_baseline_trajectories_archived_exact']
     assert old['execution_gate_passed'] and not old['independent_futures_opened']
