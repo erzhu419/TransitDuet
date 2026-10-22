@@ -132,3 +132,9 @@ previews,so no replay budget is sealed. Correct earlier "shared/global cycle"
 wording: coefficient sharing does not imply simultaneous directional planning;
 the frozen controller uses direction-local caches/EMA and plan writes. Next is
 a separately registered supply-constrained projection,not another scalar-gain trial.
+
+V220 jointly projects headways with unsupported cumulative clocks fixed.
+Static t211219 passes:18 tests,352 exact native snapshots,3/8/3/8 admitted
+ready-backed queries. Each advances only1 executable second. Next is separately
+budgeted actual-launch authority smoke before lower/joint execution,not a gain
+sweep or efficacy claim. See `protocol_v6_v220_supply_projection.md`;main stays frozen.

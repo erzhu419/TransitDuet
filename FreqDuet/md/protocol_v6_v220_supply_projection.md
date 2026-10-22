@@ -40,3 +40,17 @@ predictors, calibrations, filters, actors, critics, duals and main stay frozen.
 Run tests/static archive analysis via scheduler high/manual on node001--006;
 return only a small JSON summary. Static support does not establish service
 benefit or a frequency-learning contribution.
+
+## Static result and next decision
+
+High/manual t211219 on node006 exited0; source3e2f53b0d4 passed18 tests.
+All352 native snapshots reproduce exactly, including executable ticks. Four
+contexts admit3/8/3/8 queries versus0 for the unconstrained native+30 curve.
+Every admitted advance is1 executable second and ready-backed. Fixed clocks
+are exact, headway error0, maximum rolling-budget residual7.28e-12s, and no
+continuous/tick delay or outside-cycle advance occurs. Only4155 bytes returned.
+Static admission passes, not efficacy. Next preregister a bounded four-arm
+execution smoke with an upper-authority gate FIRST: verify that these small
+plan advances cause actual earlier launch on the same reserved vehicle before
+spending the lower/joint budget. Keep all contexts and the same +30 request;
+do not increase gain to manufacture a larger signal. Main/futures stay frozen.
