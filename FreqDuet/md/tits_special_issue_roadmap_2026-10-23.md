@@ -64,8 +64,11 @@ Source `2b32bd5347`; benchmark decision-counter fix `d83ab96d5d` was made
 before any benchmark replay. The original six-worker queued task t211159 was
 cancelled without launch; replacement t211164 requested four workers because
 live CPU capacity is limited, then exited 1 on an entrypoint syntax error
-before tests or any simulation. Corrected source `e975823767` runs as t211165;
-its six-path smoke gates the formal supplement, without extra rollout budget.
+before tests or any simulation. Corrected source `e975823767` in t211165
+exited during import because the staged dependency bundle omitted V107.
+Task t211167 includes that unchanged dependency (verified against `e994b9693a`)
+in the `_e975823767_complete` root. Its six-path smoke gates the formal
+supplement; neither entrypoint failure executed a simulation or used budget.
 All tasks use high priority and manual dispatch, restricted to node004/006.
 
 Read-only t211160 finished on node006 with exit 0. Its four existing paths
