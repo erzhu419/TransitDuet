@@ -51,9 +51,15 @@ authorization: passive capture/equivalence and nonzero-opportunity smoke first.
 Limitations: consumed prefixes and conditional future innovations, not fresh-day
 policy confirmation, online deployment, strong-fixed or frequency-gain evidence.
 
-Smoke implementation e29668eb11: high/manual t211129 on node004. Five paths:
+Smoke implementation 6a76cc6b6c: high/manual t211131 on node004. Five paths:
 original baseline, passive baseline, separate smoke-future baseline, fixed joint
 ID3(-30s/reduce), identical joint repeat. Compare archived endpoint and full
 actions/timing/resources; require real issued reductions and changed plan clocks.
 Keep the native transition-mode last nonterminal holding opportunity. Selection
 and evaluation banks stay closed; no matrix or training is authorized here.
+Startup t211129 exited1 before simulation (nested runtime-proof path); t211130
+reproduced the archived baseline, then stopped at the first passive query because
+the frozen Bus lacks pre_action_time_s. The fix passively timestamps the native
+observation-ready callback; no current-time backfill. Reuse the same five paths,
+candidate and future. Preserve both failures; one prior full baseline plus these
+five paths totals six full smoke replays, with the pre-action abort separate.
