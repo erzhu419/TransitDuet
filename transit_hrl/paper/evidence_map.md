@@ -2,6 +2,7 @@
 
 Date: 2026-10-22. Main manuscript: [manuscript.md](manuscript.md).
 Compact numerical source: [plan_validity_evidence.json](plan_validity_evidence.json).
+Core figures and traceability: [figure evidence audit](figure_evidence_audit.md).
 
 ## Central argument
 
@@ -44,6 +45,9 @@ report contrasts. It does not refit predictors, resample outcomes, change gates
 or contact servers. The old analyzer's ISE key contains `candidate_minus_fixed`,
 but its executable subtraction is fixed minus candidate; the manuscript and
 compact artifact name the arithmetic explicitly. No historical sign is changed.
+The artifact also includes the first registered confirmation path's saved
+call schedule, score-check counts by mode and the existing Stage304 descriptive
+event audit. These additions supply figures, not new performance experiments.
 
 ## Historical positive results and their place
 

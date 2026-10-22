@@ -14,6 +14,8 @@ independent-seed main result. Transit Stage298/301 single-intervention gains
 and Stage304's failed two-decision criterion are separate evidence, not
 same-algorithm domain-general confirmation. Computation is paused; this
 manuscript consolidation authorizes no new scheduler tasks.
+The three core figures and their source CSVs are linked in the
+[figure evidence audit](paper/figure_evidence_audit.md).
 
 ## Historical Research Mainlines
 

@@ -80,8 +80,10 @@ broader decision coverage matter more than an arbitrarily small significant gain
 
 The active manuscript, terminology, source map and table artifact are rebuilt.
 The old responsibility-restoration manuscript and figure contract are archived.
-The new figure contract specifies the intended evidence, but those figures and
-a venue-specific submission package are not yet produced. The related-work
+The three core figures, SVG/PDF/PNG exports, source CSVs and corresponding
+manuscript captions are now produced from existing results; see
+[figure evidence audit](figure_evidence_audit.md). A venue-specific submission
+package remains unfinished. The related-work
 update checks primary records for the current neighbors; it is not an exhaustive
 priority search. No new result, universal claim or submission-readiness verdict
 can be obtained merely by repackaging the existing positive stages.

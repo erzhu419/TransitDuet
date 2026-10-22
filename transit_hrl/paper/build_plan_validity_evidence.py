@@ -26,6 +26,8 @@ def stage9():
     effects = {name: [] for name in (*PAIRS, "controller_learning_ise")}
     means = {mode: [] for mode in MODES}
     checks, early, branch_steps, paths, by_root = [], [], 0, [], {}
+    mode_checks = {mode: [] for mode in MODES}
+    example, policy_contract = None, None
     for root in ROOTS:
         path = ROOT / "results" / STAGE9 / "cells/hrl_regime_history" / f"replicate_{root}/result.json"
         payload = read(path)
@@ -44,6 +46,18 @@ def stage9():
             untrained[s]["tracking_squared_error_integral"] - trained[s]["tracking_squared_error_integral"] for s in seeds))
         for mode in MODES:
             means[mode].append(fmean(indexed[s, mode]["tracking_squared_error_integral"] for s in seeds))
+            mode_checks[mode].extend(indexed[s, mode]["trigger_score_checks"] for s in seeds)
+        if root == ROOTS[0]:
+            example = {"root": root, "path_seed": seeds[0],
+                "source": str(path.relative_to(ROOT)),
+                "decision_steps": {mode: indexed[seeds[0], mode]["decision_steps"] for mode in MODES}}
+            policy_contract = {"bin_steps": cell["time_scale"]["upper_period_steps"],
+                "max_offset_steps": cell["trigger_max_offset_steps"],
+                "check_stride_steps": cell["trigger_check_stride_steps"],
+                "branch_horizon_steps": round(cell["branch_window_seconds"] / cell["time_scale"]["env_dt_seconds"]),
+                "candidate_features": len(cell["trigger_predictors"][MODES[-1]]["feature_names"]),
+                "threshold_quantile": cell["trigger_threshold_quantile"],
+                "fit_queries_per_root": len(cell["branch_fit_rows"])}
         candidate = [indexed[s, MODES[-1]] for s in seeds]
         checks.extend(r["trigger_score_checks"] for r in candidate)
         early.extend(r["trigger_early_calls"] for r in candidate)
@@ -64,7 +78,9 @@ def stage9():
         "upper_calls_per_episode_all_modes": 24, "candidate_score_checks_mean": fmean(checks),
         "candidate_score_checks_range": [min(checks), max(checks)],
         "candidate_predeadline_calls_mean": fmean(early),
-        "branch_fit_primitive_steps_replayed_all_roots": branch_steps}
+        "branch_fit_primitive_steps_replayed_all_roots": branch_steps,
+        "score_checks_by_mode": {mode: fmean(values) for mode, values in mode_checks.items()},
+        "example_schedule": example, "policy_contract": policy_contract}
 
 
 def transit(run, pairs):
@@ -86,6 +102,9 @@ def build():
     path304 = ROOT / "results" / run304 / "report/result.json"
     r304 = read(path304)
     assert r304["coverage_qualified"] and r304["independent_scene_units"] == 320
+    audit_path = path304.with_name("descriptive_audit.json")
+    audit = read(audit_path)
+    events = audit["arm_diagnostics"]["service_only"]["fleet_events"]
     return {"paper_scope": "plan_validity_driven_replanning;not_domain_general_Freq_HRL",
         "new_training_or_simulation": 0, "pointmaze_stage9_confirmation": pointmaze,
         "transit_stage298_single_intervention": transit(
@@ -95,6 +114,10 @@ def build():
             ("service_only_vs_raw", "joint_budgeted_vs_raw", "joint_budgeted_vs_service_only")),
         "transit_stage304_two_decisions": {"source": str(path304.relative_to(ROOT)),
             "statistical_unit": "complete_native_scene_episode", "independent_scene_units": 320,
+            "descriptive_source": str(audit_path.relative_to(ROOT)),
+            "descriptive": {"fleet_peak_increases": sum(e["arm_peak"] > e["raw_peak"] for e in events),
+                "fleet_peak_decreases": sum(e["arm_peak"] < e["raw_peak"] for e in events),
+                **audit["joint_vs_service"]},
             "comparisons": r304["comparisons"], "wait_retention_vs_base": r304["wait_retention_vs_base"],
             **{k: r304[k] for k in ("service_closed_loop_supported", "joint_closed_loop_supported", "critic_incremental_cost_supported")}}}
 

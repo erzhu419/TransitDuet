@@ -16,6 +16,11 @@ class PaperEvidenceTests(unittest.TestCase):
     def setUpClass(cls):
         cls.evidence = REPORT.build()
 
+    def test_saved_artifact_matches_original_result_sources(self):
+        import json
+        saved = json.loads((ROOT / "paper/plan_validity_evidence.json").read_text())
+        self.assertEqual(saved, self.evidence)
+
     def test_pointmaze_intervals_match_original_confirmation(self):
         expected = {
             "fixed_minus_candidate_ise": (.505541, .408443, .602640),
@@ -51,6 +56,8 @@ class PaperEvidenceTests(unittest.TestCase):
             ("transit_stage298_single_intervention", "joint_budgeted_vs_raw", "wait_min"),
             ("transit_stage301_single_intervention", "service_only_vs_raw", "cost"),
             ("transit_stage301_single_intervention", "service_only_vs_raw", "wait_min"),
+            ("transit_stage301_single_intervention", "joint_budgeted_vs_raw", "cost"),
+            ("transit_stage301_single_intervention", "joint_budgeted_vs_raw", "wait_min"),
             ("transit_stage301_single_intervention", "joint_budgeted_vs_service_only", "cost"),
             ("transit_stage301_single_intervention", "joint_budgeted_vs_service_only", "wait_min"),
         ]

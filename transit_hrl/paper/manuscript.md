@@ -174,6 +174,18 @@ is a mandatory deadline. Thus every complete episode makes exactly T/K = 24
 calls. This scheduling property does not imply optimal timing or lower total
 computational cost.
 
+![Paired supervision and observed budgeted planning calls.](figures/fig1_budgeted_replanning.png)
+
+**Figure 1 | Supervision and budgeted deployment.** (a) Event-stratified offline
+queries provide paired 50-step keep/renew losses for the 39-feature predictor.
+Deployment checks every five steps within the allowed offset window, with one
+upper call at the first threshold crossing or the offset-25 deadline. (b) The
+first 300 steps of the first registered confirmation root/path (209011/2180301)
+show actual saved upper-call times for all four modes; this example was not
+chosen for performance. Shading alternates 50-step bins; dotted lines mark
+deadlines after the initial bin. Lower actions remain closed-loop every step.
+All complete episodes have 24 upper calls. [Source data](figures/fig1_budgeted_replanning_source.csv).
+
 ## 4. Experimental Design
 
 ### 4.1 Independent PointMaze confirmation
@@ -247,6 +259,22 @@ primitive steps, including repeated prefixes; controller training and selection
 are separate costs. These counts establish call parity, not equal FLOPs or a
 measured runtime advantage.
 
+![Independent PointMaze timing confirmation.](figures/fig2_pointmaze_confirmation.png)
+
+**Figure 2 | Independent-seed PointMaze confirmation.** (a) Episode ISE
+advantages over fixed (primary), random-offset and current-only timing; (b)
+return advantage over fixed timing; (c) the required learning check, comparing
+untrained with trained controller ISE under canonical random-offset deployment.
+Teal dots are eight optimizer-root means, averaging 16 evaluation paths each;
+black diamonds and lines are equal-root means and two-sided 95% Student-t
+intervals (df7), reproducing Table 1's five registered gates. All lower bounds
+are positive. These are the original per-endpoint intervals, not simultaneous
+or research-wide corrected intervals. (d) All modes use 24 upper calls;
+current-only and history triggers additionally make 83.10 and 84.19 score checks
+per episode on average. Shared jitter-trained weights isolate schedule effects;
+call parity does not establish equal total compute.
+[Source data](figures/fig2_pointmaze_confirmation_source.csv).
+
 The earlier eight-root development result also passed, with ISE advantage
 0.396372 [0.275784, 0.516959] and return advantage 30.770657
 [21.111415, 40.429899] against fixed timing. These are supporting development
@@ -287,6 +315,8 @@ first controller; cost and waiting/minute values are multiplied by 1e6.
 | Stage298 / joint - raw / wait | -1182.737 | [-1658.035, -781.291] | [-1299.168, -1066.305] |
 | Stage301 / service-only - raw / cost | -318.120 | [-424.992, -215.424] | [-396.701, -239.539] |
 | Stage301 / service-only - raw / wait | -1230.467 | [-1757.211, -825.834] | [-1357.549, -1103.385] |
+| Stage301 / joint - raw / cost | -307.139 | [-403.590, -216.799] | [-376.580, -237.698] |
+| Stage301 / joint - raw / wait | -1070.902 | [-1583.164, -673.425] | [-1185.750, -956.054] |
 | Stage301 / joint - service-only / cost | 10.981 | [-38.466, 60.105] | [-26.841, 48.802] |
 | Stage301 / joint - service-only / wait | 159.565 | [82.814, 250.561] | [110.377, 208.754] |
 
@@ -330,6 +360,29 @@ same peak fleet in all 320. The risk filter did not change those fleet events.
 Service-only changed outcomes in only 21/320 scenes; its largest waiting-saving
 scene supplied 46.66% of net wait benefit while increasing total cost. These
 event and concentration counts are descriptive, not additional significance tests.
+
+![Native Transit single-intervention benefits and two-decision boundary.](figures/fig3_transit_boundary.png)
+
+**Figure 3 | Local Transit gains and the repeated-decision boundary.** (a,b)
+Frozen single-intervention contrasts against raw control on separate 400-prefix
+Stage298/301 cohorts: circles show stratified prefix-bootstrap CI95 and squares
+paired conditional-MC CI95. Fixed profiles and queried positions are averaged
+within prefixes, not counted as independent training seeds. (c,d) Stage304
+service-only minus raw, pooled over 320 complete scenes and split into first/last
+160-scene halves (16 scenes per root/regime stratum in each half): circles show
+episode-bootstrap CI95; squares show paired-normal
+CI95. Both intervals now measure complete-episode sampling. (e) Descriptive mean
+fleet, service and total-cost components; inference for total cost is in c.
+Three increased peaks and one decreased peak dominate the fleet difference.
+Joint and service-only outcomes coincide in 315/320 scenes, and the additional
+joint cost benefit is unconfirmed (Table 3). (f) Paired wait margin
+`delta_wait_service - 0.5 delta_wait_base`; retaining at least half of base's
+benefit requires negative upper bounds under both CIs in the pooled cohort and
+both halves. This criterion did not pass. Negative favors the first controller.
+Cost axes use units of 1e-3; waiting and margins are converted from minutes to
+seconds. These studies use different cohorts and an action-selection method
+different from the PointMaze trigger; no cross-panel pooling is performed.
+[Source data](figures/fig3_transit_boundary_source.csv).
 
 ## 6. Discussion
 
@@ -407,7 +460,9 @@ This reads saved episode summaries and qualified Transit reports; it performs
 no training, simulation or remote access. The [evidence map](evidence_map.md)
 records the different algorithms and units. Raw server caches and checkpoints
 are separate from the small manuscript sources; the code/data release package
-and submission figures remain unfinished.
+remains unfinished. The three core figures and source CSVs accompany this draft;
+venue-specific typesetting is separate submission work.
+[Figure exports and checks](figure_evidence_audit.md) record their traceability.
 
 ## 9. Conclusion
 
