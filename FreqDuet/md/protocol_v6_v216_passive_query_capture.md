@@ -53,3 +53,12 @@ match original references exactly;each has5200 complete query snapshots and
 after83--111s,and dispatch the same vehicle1s later for the original due ID.
 All service clears. However0/4 have the frozen native fresh upper follow-up;
 this does not pass joint-execution admission. Retrieved only10470-byte summary.
+
+Read-only t211153(source31e985ef76,high/manual,node006) exited0;3450-byte summary.
+For day2151001,the next target-direction fresh upper query is1055s after the
+anchor,outside900s. For day2151002,it is312/322s later,but the selected inbound
+trip has already returned and its original due ID has been served. No frozen
+follow-up qualifies. Preserve these observations;do not replace points,extend
+the window or force native replanning. A later coordination proposal needs its
+own preregistration;this stage establishes passive fidelity and supply relevance,
+not a realized intervention benefit. No matrix/training/main-policy change.
