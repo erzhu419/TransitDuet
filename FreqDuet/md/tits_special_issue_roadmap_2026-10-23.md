@@ -70,7 +70,9 @@ Task t211167 includes that unchanged dependency (verified against `e994b9693a`)
 in the `_e975823767_complete` root. Its six-path smoke gates the formal
 supplement; neither entrypoint failure executed a simulation or used budget.
 Task t211167 launched on node006 (PID 184189); its four tests passed and the
-six real equivalence paths are in progress. No formal result is available yet.
+six-path smoke passed, including cached V107 equivalence, fixed actor invariance
+and the external exact-fixed baseline. All 32 fixed corners and aggregation
+finished with exit 0. Only the 86855-byte final summary was retrieved.
 All tasks use high priority and manual dispatch, restricted to node004/006.
 
 Read-only t211160 finished on node006 with exit 0. Its four existing paths
@@ -80,3 +82,34 @@ due-service supply label. Queries can share vehicles/cycles and are not
 independent replications. This supports testing upper-first cycle coordination,
 not actual changed-departure authority, counterfactual benefit or policy admission.
 Only the 1462-byte coverage summary was retrieved; raw records remain remote.
+
+## V217 result and next decision
+
+| Upper / lower | Journey min | Actual CV2 | Readiness s |
+| --- | ---: | ---: | ---: |
+| B200 / original learned lower | 17.86114 | .063820 | 580.49 |
+| B200 / bilateral025 (V107) | 16.45807 | .057416 | 118.31 |
+| Exact fixed / bilateral025 | 16.45651 | .057169 | 117.84 |
+| Exact fixed / zero | 15.74749 | .196723 | 40.33 |
+
+V107 minus fixed+bilateral: journey +.001558 min, paired crossed 95% CI
+[-.004397,.006803]; CV2 +.0002473 [-.0000386,.0005765]; readiness +.4734s
+[.1124,.8759]. All arms complete service. The original-metric joint gate fails.
+The learned upper has no demonstrated incremental passenger/regularity benefit;
+this is not a formal equivalence claim. The V107-versus-B200 benefit remains
+real, but is reproduced by the unchanged bilateral rule with a fixed upper.
+Versus exact-fixed/zero, V107 costs +.71058 journey min [.61080,.82036], while
+improving CV2 by .13931 and worsening readiness by77.98s. Do not claim dominance.
+
+Do not repeat the existing V99/V213 diagnosis: V99 measured effective target
+RMS around1.1s; V213 found changed plans without changed corresponding launches
+in its supply-bound settings. Keep their cohort limits separate from V217.
+Next is ONE upper-first, persistent resource-coordination candidate, rather
+than enlarging the near-fixed B200 matrix or adding ETA/critic patches. Freeze
+its causal rule and execution smoke before replay: original fleet/authority,
+current supply queues and actual positive holding queries, no synthetic slack,
+no forced replan and no blanket suppression of later regularity compensation.
+Actual changed departures AND executed holding must be observed before any
+independent-future efficacy matrix. Fixed+bilateral is now a mandatory strong
+control alongside V107. No new replay, training or policy switch was started
+in this result review; missing original-public delay for old V107 remains.
