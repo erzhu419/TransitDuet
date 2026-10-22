@@ -69,6 +69,8 @@ exited during import because the staged dependency bundle omitted V107.
 Task t211167 includes that unchanged dependency (verified against `e994b9693a`)
 in the `_e975823767_complete` root. Its six-path smoke gates the formal
 supplement; neither entrypoint failure executed a simulation or used budget.
+Task t211167 launched on node006 (PID 184189); its four tests passed and the
+six real equivalence paths are in progress. No formal result is available yet.
 All tasks use high priority and manual dispatch, restricted to node004/006.
 
 Read-only t211160 finished on node006 with exit 0. Its four existing paths
