@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 import audit_freqduet_v213_coordination as v
+import audit_freqduet_v213_dispatch_binding as binding
 
 
 def prepared(plan, actual, final):
@@ -13,6 +14,13 @@ def prepared(plan, actual, final):
 
 
 class CoordinationReviewTests(unittest.TestCase):
+    def test_vehicle_availability_follows_assigned_physical_vehicle(self):
+        data = dict(trace=dict(actual_launches=[dict(trip=1, bus=4, actual_s=0.),
+            dict(trip=2, bus=4, actual_s=151.)], vehicle_returns={'1': dict(return_s=150.)}, upper_callbacks=[]))
+        result = binding.frame(data)
+        self.assertEqual(result['availability'][2], dict(previous_trip=1, return_s=150.))
+        self.assertIsNone(result['availability'][1]['return_s'])
+
     def test_plan_persists_but_execution_can_be_identical(self):
         counts, sums = v.plan_realization(prepared(100., 150., 100.), prepared(110., 150., 110.))
         self.assertEqual(counts['anchor_plan_changed_trips'], 1)
