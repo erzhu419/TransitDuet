@@ -42,3 +42,34 @@ Limitations:finite-bin association is not causal or full continuous-state
 conditioning. Old subgroups/full-path outcomes cannot substitute for same-road
 J/first-road Y. Unfamiliar schemas need explicit review,not an unsupported
 absence claim. High/manual scheduler,node004;small summary only.
+
+## Availability and next decision
+
+t210903/sourced347cfadd3 completed high/manual on node004,exit0. Four tests
+passed,including two joint distributions with identical ordinary second moments
+but opposite conditional JY. Audited16 lineage snapshots with no unfamiliar
+schema;all24 V194 actor/mode cells passed original64/common-key checks.
+Only26827-byte summary fetched:freqduet/results_freqduet/protocol_v6_v198_conditional_moments/audit_d347cfadd3/summary/status.json.
+
+Result:not_evaluable_from_existing_moments. No fixed fraction/horizon cell
+JY/J2/Y2/full-control blocks exist in the audited summaries. Their observed
+cells and19-day support are UNKNOWN,not zero. Older conditional/full-running
+tables cannot replace these query-aligned same-road J/first-road Y moments.
+
+Existing binary level1 support in clearance,each half>=19 days:
+
+| Mode | predicted_entry=1 | stage_command=1 |
+| --- | --- | --- |
+| old | 7/357 common keys | 0/357 |
+| handoff | 3/358 common keys | 0/358 |
+
+Moving-launch has no level1 exposure for either binary. Even supported binary
+cells still lack conditional JY/J2/Y2. No conditional association was estimated.
+Full parent centering means V194-admitted base-key/day queries BEFORE any
+conditional support exclusion,not queries missing parent-required inputs.
+
+Next:the requested distinction needs separately authorized derivation of the
+registered conditional moments from existing archives;do not start it here.
+Recount support first;sub19-day cells abstain without merging or relaxation.
+This cannot create new support or independent confirmation. No collection,
+rescan,fit,confirmation,replay,training or main/frozen-item change was made.
