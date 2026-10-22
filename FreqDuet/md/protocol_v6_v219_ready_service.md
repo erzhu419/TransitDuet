@@ -47,3 +47,14 @@ especially coupled two-direction advances against EACH ready prefix. This
 coverage result does not establish that the shared +30 command is admissible,
 that compensation allows reduction,or that either action improves outcomes.
 No controller replay,training,future bank or main change occurred.
+
+Native-preview preflight now authorized: use the frozen optimized runtime's
+planner and original resolved configuration,not current mutable runtime code.
+Reconstruct every native fresh query including warmup from query snapshots,
+observed past launches and native EMA only. Require all pending plan/headway
+values within1e-6s AND identical executable ticks,with unchanged input objects.
+Inspect both directions' current900s advances together;reject any unfunded
+advance or any continuous/tick delay across the entire projected timetable.
+Keep outside-cycle advances separate. Only nonzero admissible previews in all
+four fixed contexts allow sealing a later four-arm budget. This preflight
+starts no replay/training and cannot change the main policy or tune the law.
