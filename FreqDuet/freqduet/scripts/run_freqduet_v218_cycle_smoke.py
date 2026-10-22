@@ -7,6 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 import gzip
 import itertools
 import json
+from multiprocessing import get_context
 import os
 from pathlib import Path
 import subprocess
@@ -231,7 +232,16 @@ def main():
     a = p.parse_args()
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
         str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v218_*.py', '-v'], check=True)
-    passive.write(a.out_root/'protocol.json', law.registration(os.environ['FREQDUET_DIAGNOSTIC_COMMIT']))
+    spec = law.registration(os.environ['FREQDUET_DIAGNOSTIC_COMMIT'])
+    frozen = a.out_root/'protocol.json'
+    if frozen.exists():
+        original = json.loads(frozen.read_text())
+        assert {k: v for k, v in original.items() if k != 'source'} == {
+            k: v for k, v in spec.items() if k != 'source'}, 'engineering recovery changed the frozen law'
+    else:
+        passive.write(frozen, spec)
+    passive.write(a.out_root/'engineering'/f'source_{spec["source"]}.json', dict(source=spec['source'],
+        frozen_source=json.loads(frozen.read_text())['source'], reuse_completed_paths=True))
     run_item(a.out_root, a.archive_root, (0, 'v107'))
     with ProcessPoolExecutor(max_workers=a.workers, mp_context=get_context('spawn')) as pool:
         list(pool.map(run_item, itertools.repeat(a.out_root), itertools.repeat(a.archive_root),

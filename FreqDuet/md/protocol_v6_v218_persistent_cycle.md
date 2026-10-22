@@ -47,3 +47,9 @@ Only an execution pass admits a separately frozen independent-future protocol
 for this SAME candidate,with V107 and fixed+bilateral as mandatory controls.
 All tests/replays/analysis run by scheduler high/manual on node001--006.
 Local retrieval is restricted to a small final summary; raw traces stay remote.
+
+Execution: source b6ab0892ff,high/manual task t211187 on node004 passed10 tests
+and the complete c0 V107 archive comparison. It then exited on a missing
+`get_context` import before any pool or intervention path started. Import-only
+repair reuses c0,retains the original protocol file and records its source
+separately;the frozen law and maximum16 paths are unchanged.

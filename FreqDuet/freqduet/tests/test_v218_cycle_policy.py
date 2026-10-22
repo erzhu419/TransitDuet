@@ -2,7 +2,7 @@ import copy
 import unittest
 
 import freqduet_v218_cycle_policy as v
-from run_freqduet_v218_cycle_smoke import next_launch
+from run_freqduet_v218_cycle_smoke import get_context, next_launch
 from upper.timetable_planner import TimetableCurvePlanner
 
 
@@ -15,6 +15,9 @@ def query():
 
 
 class CyclePolicyTests(unittest.TestCase):
+    def test_entrypoint_resolves_its_spawn_context(self):
+        self.assertEqual(get_context('spawn').get_start_method(), 'spawn')
+
     def cycle(self):
         return dict(event_seq=5, time_s=7300., task_ids=[42])
 
