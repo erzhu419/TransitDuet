@@ -15,7 +15,7 @@ Truncated trips retain actual executed time and unexecuted commands separately;
 incomplete service is a measured constraint outcome,not a discarded branch.
 
 15 fixed candidates:one current-direction upper perturbation0/-30/+30s crossed
-with five two-stop one-bin offset patterns. Second stop is reached causally on
+with five two-decision one-bin offset patterns. Second decision is reached causally on
 another vehicle at the same station/direction. Resume bilateral025 afterward.
 16 selection futures/context(960 continuations);freeze joint/upper-only/lower-only
 choices before16 independent evaluation futures. Evaluate only frozen choices and
@@ -39,3 +39,10 @@ Initial smoke t211032 stopped before simulation:the audit incorrectly required
 two independent upper coefficients. B200 has shared_directions=true and one
 coefficient. Correct the audit/intervention to the archived authority;do not
 expand it. Candidate counts,futures and statistical gates stay unchanged.
+
+Corrected source c45b2d0a93:smoke t211034 exited0 on node004;8 tests and5
+rollouts passed cached endpoints,no-op actions/timing,future repeat and ledger
+checks. High/manual dependent tasks:t211037 references+960 selection paths,
+t211038 freeze choices,t211039 independent evaluation,t211040 aggregation.
+Each waits for its predecessor's actual small marker;no evaluation before choices.
+Only smoke/shard markers,choice summaries and final status sync locally.
