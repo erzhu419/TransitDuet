@@ -105,6 +105,7 @@ count, not effective DF. Original Stage9 branch acquisition uses simulator event
 metadata; paired timing acquisition instead samples visited bins without it.
 The termination pair bank is additional supervision, shared between its two
 heads, not the same bank as the ridge controls. Replay/selection/test steps are
-recorded separately; full controller-selection, optimizer and latency accounting,
-own-schedule controller training and a faithful named timing baseline remain
+recorded separately. Full controller-selection, optimizer and latency accounting
+now have a [prepared total-compute path](freq_hrl_total_compute_budget_protocol_2026-10-22.md).
+Own-schedule controller training and a faithful named timing baseline remain
 subsequent work. No total-compute or complete-algorithm fairness claim is closed.

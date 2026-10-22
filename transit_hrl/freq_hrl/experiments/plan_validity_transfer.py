@@ -18,6 +18,7 @@ from freq_hrl.rl import (
     train_frequency_separated_ppo,
 )
 from .pointmaze_budgeted_trigger import balanced_jitter_schedule
+from .compute_budget import active_ledger, count_work, measured_phase
 from .pointmaze_goal_validation import POINTMAZE_LOWER_ACTION_COST, _training_seed, pointmaze_goal_bounds, squash_box_action
 from .pointmaze_plan_validity_branching import _causal_plan_features, plan_renewal_opportunities
 from .pointmaze_plan_value_qualification import (
@@ -36,6 +37,7 @@ class PlanValidityTaskSpec:
     pointmaze_env_id: str
 
     def open(self, *, seed, horizon):
+        count_work("environment_opens")
         if self.name == "pointmaze":
             return _make_task(env_id=self.pointmaze_env_id, seed=seed, horizon=horizon, **self.options)
         if self.name == "reacher_tracking":
@@ -62,12 +64,16 @@ def jitter_schedule(args, seed):
 
 def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=None,
                 rule=None, sample=False, branch_step=None, renew=False,
-                intervention_step=None, arm=None):
+                intervention_step=None, arm=None, feature_steps=(), latency_recorder=None):
     """One execution loop: scheduled training, adaptive timing, or paired keep/renew."""
     period = time_scale.upper_period_steps
     mode_name = rule.name if rule is not None else "scheduled"
     if rule is not None and rule.kind == "jitter":
         schedule, rule = jitter_schedule(args, seed), None
+    elif rule is not None and rule.kind == "clock" and intervention_step is None:
+        offset = next((value for value in range(0, 26, 5) if value / 25 >= rule.threshold), 25)
+        schedule = tuple(0 if start == 0 else start + offset for start in range(0, args.horizon, 50))
+        rule = None
     if (args.horizon % period or period != 50 or args.max_offset_steps != 25
         or args.check_stride_steps != 5 or not np.isclose(time_scale.dt_seconds, 0.01)):
         raise ValueError("shared renewal execution requires the 10ms/50/25/5 contract")
@@ -85,36 +91,51 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         or intervention_step % period >= 25 or intervention_step % 5):
         raise ValueError("timing intervention must be a nondeadline check")
     task = task_spec.open(seed=seed, horizon=args.horizon)
+    ledger = active_ledger()
     try:
         observation = task.reset()
+        count_work("environment_resets")
         if not np.isclose(task.dt_seconds, time_scale.dt_seconds):
             raise ValueError("plant sampling interval differs from the renewal contract")
         adapter = task_spec.adapter(task, maximum_subgoal_delta=args.maximum_subgoal_delta)
         history = PointMazeRegimeFeatureBuilder(time_scale=time_scale, task_dim=observation.task_measurement.size)
+        if latency_recorder is not None:
+            reset_wall, reset_cpu = time.perf_counter(), time.process_time()
         history.reset(observation)
         controller.reset_recurrent_inference()
+        if latency_recorder is not None:
+            pending_wall, pending_cpu = time.perf_counter() - reset_wall, time.process_time() - reset_cpu
         builder = HierarchicalRolloutBuilder(gamma=float(controller.config.gamma)) if sample else None
         decision_set = set(schedule or ())
         subgoal = observation.achieved_goal.copy()
         decisions, errors, rewards, queries = [], [], [], []
+        feature_rows = []
+        feature_steps = set(feature_steps)
         captured = None
         last_plan_step = -1
         planner_seconds = lower_seconds = score_seconds = 0.0
         end_step = args.horizon if branch_step is None else branch_step + 50
         for step in range(end_step):
+            if latency_recorder is not None:
+                control_wall, control_cpu = time.perf_counter(), time.process_time()
             bin_index, offset = divmod(step, period)
             plan_now = step in decision_set if schedule is not None else step == 0
             names = values = None
             query = step == branch_step or step == intervention_step
             check = (rule is not None and step > 0 and decisions[-1] // period != bin_index
                      and offset <= 25 and offset % 5 == 0)
-            if query or check:
+            if query or check or step in feature_steps:
                 started = time.perf_counter()
-                names, values, _ = _causal_plan_features(
-                    observation=observation, feature_builder=history, subgoal=subgoal,
-                    plan_age_steps=step - last_plan_step, time_scale=time_scale)
+                if query or step in feature_steps or rule.kind != "threshold":
+                    names, values, _ = _causal_plan_features(
+                        observation=observation, feature_builder=history, subgoal=subgoal,
+                        plan_age_steps=step - last_plan_step, time_scale=time_scale)
+                    count_work("feature_vector_builds")
                 if check:
-                    score = rule.score(names, values, offset / 25, (args.horizon - step) / args.horizon)
+                    score = (threshold_score(rule.feature, observation, history, step - last_plan_step, time_scale)
+                             if rule.kind == "threshold" else
+                             rule.score(names, values, offset / 25, (args.horizon - step) / args.horizon))
+                    count_work("trigger_score_checks")
                     queries.append({"step": step, "offset": offset, "score": score,
                                     "stop": score >= rule.threshold})
                     plan_now = score >= rule.threshold or offset == 25
@@ -125,6 +146,11 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                                     observation.target, observation.task_measurement, history.history,
                                     subgoal, [last_plan_step])).astype(np.float64),
                                 "old_subgoal": subgoal.copy()}
+                if step in feature_steps:
+                    feature_rows.append({"seed": seed, "opportunity_step": step,
+                        "feature_names": list(names), "causal_features": values.tolist(),
+                        "candidate_feature_has_future_access": False,
+                        "candidate_feature_has_regime_label": False})
             if branch_step is not None and step >= branch_step:
                 plan_now = step == branch_step and renew
             if step == intervention_step:
@@ -135,6 +161,7 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                 upper_state = history.upper_state(observation, oracle_context=None)
                 started = time.perf_counter()
                 output = controller.plan_goal(upper_state, sample=sample)
+                count_work("planner_calls")
                 planner_seconds += time.perf_counter() - started
                 raw_goal = np.asarray(output["action"], dtype=np.float32)
                 subgoal = adapter.decode(raw_goal, observation.achieved_goal)
@@ -148,10 +175,18 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
             lower_state = history.lower_state(observation, subgoal=subgoal)
             started = time.perf_counter()
             output = controller.act_conditioned(lower_state, sample=sample)
+            count_work("lower_calls")
             lower_seconds += time.perf_counter() - started
             raw_action = np.asarray(output["action"], dtype=np.float32)
             requested = squash_box_action(raw_action, task.action_low, task.action_high)
+            if latency_recorder is not None:
+                latency_recorder.add(time.perf_counter() - control_wall + pending_wall,
+                    time.process_time() - control_cpu + pending_cpu, first_step=step == 0)
+            if ledger is not None:
+                ledger.count("environment_step_attempts")
             next_observation, reward, terminated, truncated, info = task.step(requested)
+            if ledger is not None:
+                ledger.count("environment_steps")
             done = bool(terminated or truncated)
             if done and step + 1 != args.horizon:
                 raise RuntimeError("plan-validity task terminated before the fixed horizon")
@@ -164,7 +199,12 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
             errors.append(float(info["tracking_distance"]) ** 2 * time_scale.dt_seconds)
             rewards.append(float(reward))
             observation = next_observation
+            if latency_recorder is not None:
+                update_wall, update_cpu = time.perf_counter(), time.process_time()
             history.update(observation)
+            if latency_recorder is not None:
+                pending_wall, pending_cpu = time.perf_counter() - update_wall, time.process_time() - update_cpu
+            count_work("history_updates")
         if (branch_step is not None or intervention_step is not None) and captured is None:
             raise RuntimeError("paired execution did not reach its causal query")
         durations = np.diff([*decisions, end_step])
@@ -186,25 +226,56 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                **(captured or {})}
         if branch_step is not None:
             row["branch_ise"] = float(sum(errors[branch_step:]))
+        if feature_steps:
+            row["feature_rows"] = feature_rows
         return batch, row
     finally:
         task.environment.close()
+
+
+def threshold_score(feature, observation, history, age_steps, time_scale):
+    """Compute only the scalar a simple threshold actually needs."""
+    if feature == "plan_age_fraction":
+        return age_steps / time_scale.upper_period_steps
+    if feature == "tracking_distance":
+        return float(np.linalg.norm(observation.target_error))
+    if feature == "force_current_norm":
+        return float(np.linalg.norm(np.asarray(observation.force, dtype=np.float64)))
+    if feature == "target_velocity_change_norm":
+        target = history.history.reshape(time_scale.history_steps, -1).astype(np.float64)[:, :2]
+        return float(np.linalg.norm((target[-1] - target[-2]) / time_scale.dt_seconds
+            - (target[-1] - target[-26]) / (25 * time_scale.dt_seconds)))
+    raise ValueError(f"unknown threshold feature: {feature}")
+
+
+def renewal_queries(task_spec, seed, args, schedule):
+    task = task_spec.open(seed=seed, horizon=args.horizon)
+    try:
+        return plan_renewal_opportunities(horizon=args.horizon, period_steps=50, branch_window_steps=50,
+            regime_change_steps=task.driver.regime_change_steps, force_pulse_steps=task.driver.pulse_start_steps,
+            distractor_change_steps=task.driver.distractor_change_steps, seed=seed,
+            max_events_per_class=args.max_events_per_class, blocked_steps=schedule)
+    finally:
+        task.environment.close()
+
+
+def collect_renewal_features(controller, *, task_spec, args, time_scale):
+    """Thresholds acquire the same causal query features without unused branch labels."""
+    rows = []
+    for seed in args.branch_fit_seeds:
+        schedule = jitter_schedule(args, seed)
+        queries = renewal_queries(task_spec, seed, args, schedule)
+        _, trajectory = run_episode(controller, task_spec=task_spec, seed=seed, args=args,
+            time_scale=time_scale, schedule=schedule, feature_steps=[query.step for query in queries])
+        rows.extend(trajectory["feature_rows"])
+    return rows
 
 
 def collect_renewal_labels(controller, *, task_spec, args, time_scale):
     rows = []
     for seed in args.branch_fit_seeds:
         schedule = jitter_schedule(args, seed)
-        task = task_spec.open(seed=seed, horizon=args.horizon)
-        try:
-            opportunities = plan_renewal_opportunities(
-                horizon=args.horizon, period_steps=50, branch_window_steps=50,
-                regime_change_steps=task.driver.regime_change_steps,
-                force_pulse_steps=task.driver.pulse_start_steps,
-                distractor_change_steps=task.driver.distractor_change_steps,
-                seed=seed, max_events_per_class=args.max_events_per_class, blocked_steps=schedule)
-        finally:
-            task.environment.close()
+        opportunities = renewal_queries(task_spec, seed, args, schedule)
         for query in opportunities:
             arms = [run_episode(controller, task_spec=task_spec, seed=seed, args=args,
                                  time_scale=time_scale, schedule=schedule,
@@ -226,6 +297,7 @@ def collect_renewal_labels(controller, *, task_spec, args, time_scale):
                          "prefix_max_abs_difference": 0.0,
                          "candidate_feature_has_future_access": False,
                          "candidate_feature_has_regime_label": False})
+            count_work("renewal_label_pairs")
     return rows
 
 
@@ -233,6 +305,7 @@ def train_shared_controller(task_spec, args, time_scale):
     task = task_spec.open(seed=0, horizon=args.horizon)
     try:
         observation = task.reset()
+        count_work("environment_resets")
         if (observation.physical.shape != (4,) or observation.achieved_goal.shape != (2,)
             or observation.task_measurement.shape != (6,) or task.action_low.shape != (2,)):
             raise ValueError("two-task controller expects four physical and six exogenous channels")
@@ -248,8 +321,11 @@ def train_shared_controller(task_spec, args, time_scale):
         epochs=4, minibatch_size=1024, init_log_std=-0.7))
 
     def rollout(controller, seed, sample):
-        return run_episode(controller, task_spec=task_spec, seed=seed, args=args, time_scale=time_scale,
-                           schedule=jitter_schedule(args, seed), sample=sample)
+        role = "train_rollout" if sample else (
+            "selection_rollout" if seed in args.selection_seeds else "diagnostic_rollout")
+        with measured_phase(role):
+            return run_episode(controller, task_spec=task_spec, seed=seed, args=args, time_scale=time_scale,
+                               schedule=jitter_schedule(args, seed), sample=sample)
 
     payload, _, trained = train_frequency_separated_ppo(
         model=model, train_seeds=args.train_seeds, selection_seeds=args.selection_seeds,
@@ -265,4 +341,5 @@ def train_shared_controller(task_spec, args, time_scale):
         metadata={"protocol_version": PROTOCOL_VERSION, "task_spec": task_metadata,
                   "capacity": {"actual_parameter_count": model.trainable_parameter_count},
                   "runtime_versions": {name: version(name) for name in ("gymnasium", "mujoco", "torch", "numpy")}})
+    count_work("controller_optimizer_updates", payload["gradient_updates_train"])
     return payload, trained

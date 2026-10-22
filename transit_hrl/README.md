@@ -28,6 +28,10 @@ The [second-task preparation](md/freq_hrl_second_task_protocol_2026-10-22.md)
 adds Reacher moving-target tracking and a shared PointMaze/Reacher execution,
 label and comparison path. Its objective, fitting recipe and stopping rule are
 unchanged; no second-task performance experiment has been launched.
+The [total-compute preparation](md/freq_hrl_total_compute_budget_protocol_2026-10-22.md)
+adds CPU/step accounting for training, branch supervision, selection and scoring,
+plus end-to-end control latency and development-only lifecycle-budget selection.
+It has not measured an efficiency advantage and submits no tasks.
 
 ## Historical Research Mainlines
 

@@ -119,5 +119,7 @@ cross-domain benchmark. Raw ISE units differ: multiply Reacher normalized ISE by
 `0.21**2` for square-metre-seconds, and never pool it with PointMaze raw ISE.
 The neural stopping comparator has separate full-episode paired credit; it does
 not replace the primary candidate's unchanged short-window keep/renew target.
-Own-schedule algorithm comparisons, named-method reproductions, total compute
-matching and local-value-to-episode reliability remain separate gaps.
+Own-schedule algorithm comparisons, named-method reproductions and
+local-value-to-episode reliability remain separate gaps. Total-compute accounting
+and budget selection now have a [prepared path](freq_hrl_total_compute_budget_protocol_2026-10-22.md),
+without measured efficiency evidence.

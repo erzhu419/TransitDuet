@@ -709,6 +709,9 @@ def _ridge_fit_predict(
     *,
     alpha: float,
 ) -> tuple[np.ndarray, dict[str, Any]]:
+    from .compute_budget import count_work
+
+    count_work("ridge_fit_calls")
     x_train = np.asarray(train_x, dtype=np.float64)
     x_eval = np.asarray(eval_x, dtype=np.float64)
     y = np.asarray(train_y, dtype=np.float64).reshape(-1)

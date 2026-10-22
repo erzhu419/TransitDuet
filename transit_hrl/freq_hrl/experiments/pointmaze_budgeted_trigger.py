@@ -117,6 +117,7 @@ def fit_budgeted_trigger_predictors(
     *,
     alpha_grid: Iterable[float] = DEFAULT_RIDGE_ALPHA_GRID,
     threshold_quantile: float = 0.75,
+    predictors: Iterable[str] = PREDICTOR_MODES,
 ) -> dict[str, dict[str, Any]]:
     if not 0.0 < float(threshold_quantile) < 1.0:
         raise ValueError("trigger threshold quantile must be in (0, 1)")
@@ -126,7 +127,9 @@ def fit_budgeted_trigger_predictors(
     )
     groups = np.asarray([row["seed"] for row in fit_rows], dtype=np.int64)
     output: dict[str, dict[str, Any]] = {}
-    for name in PREDICTOR_MODES:
+    for name in predictors:
+        if name not in PREDICTOR_MODES:
+            raise ValueError(f"unknown budgeted trigger predictor: {name}")
         if name == "causal_validity_interactions":
             x, feature_names = _causal_validity_interactions(schema, matrix)
         else:

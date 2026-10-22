@@ -111,7 +111,8 @@ def _ridge_at_df(x: np.ndarray, y: np.ndarray, eval_x: np.ndarray,
 
 
 def fit_capacity_controls(fit_rows: list[dict], *, effective_df: float = 8.0,
-                          threshold_quantile: float = 0.75) -> list[TimingRule]:
+                          threshold_quantile: float = 0.75,
+                          views=tuple(VIEWS)) -> list[TimingRule]:
     """Same branch labels, 171 coefficients and fixed effective DF in both views."""
     if not 0 < threshold_quantile < 1:
         raise ValueError("threshold quantile must be inside (0, 1)")
@@ -120,7 +121,7 @@ def fit_capacity_controls(fit_rows: list[dict], *, effective_df: float = 8.0,
     if len(np.unique(groups)) < 3:
         raise ValueError("capacity controls require three fitting paths")
     rules = []
-    for view in VIEWS:
+    for view in views:
         x, names = feature_view(fit_rows, view, quadratic=True)
         oof = np.empty(len(y))
         for group in np.unique(groups):
@@ -141,6 +142,7 @@ def fit_termination(fit_rows: list[dict], *, view: str, seed: int,
     """Cost-sensitive policy improvement from full-episode paired timing credit."""
     import torch
     from freq_hrl.rl.dual_actor_critic import BernoulliActor
+    from .compute_budget import count_work
 
     if epochs < 1 or hidden_dim < 1:
         raise ValueError("termination fit dimensions must be positive")
@@ -163,6 +165,7 @@ def fit_termination(fit_rows: list[dict], *, view: str, seed: int,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            count_work("termination_optimizer_updates")
         layers = [{"weight": layer.weight.detach().numpy().tolist(),
                    "bias": layer.bias.detach().numpy().tolist()}
                   for layer in actor.net if isinstance(layer, torch.nn.Linear)]

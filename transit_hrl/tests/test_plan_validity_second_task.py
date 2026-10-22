@@ -251,7 +251,7 @@ class SecondTaskTest(unittest.TestCase):
                     self.assertTrue(torch.equal(old, new))
             self.assertEqual(kwargs["eval_seeds"], args.timing_selection_seeds)
             self.assertNotIn(args.trigger_eval_seeds[0], kwargs["eval_seeds"])
-            return kwargs["metadata"], [], model
+            return {**kwargs["metadata"], "gradient_updates_train": 0}, [], model
 
         with (
             patch.object(shared, "_make_task", side_effect=lambda **kw: DenseTask(**{k: v for k, v in kw.items() if k != "env_id"})),

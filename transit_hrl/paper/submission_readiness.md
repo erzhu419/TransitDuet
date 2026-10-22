@@ -73,6 +73,14 @@ eight-root offline branch dataset replayed 1,942,606 primitive steps. Runtime,
 latency, training/selection cost and branch-label acquisition must be compared
 with competent baselines, alongside outcome-versus-budget curves.
 
+The [prepared total-compute path](../md/freq_hrl_total_compute_budget_protocol_2026-10-22.md)
+now measures complete single-method development pipelines on one-thread CPU
+workers, including branch supervision, fitting, selection, scoring and all-step
+control latency. Its budget selector charges every declared trial, including
+failures, and admits configurations using development data only. Missing costs
+block admission. No measurement or matched-budget performance result exists yet;
+the original fixed-call guarantee is unchanged.
+
 Simulator event metadata selects the training queries and neutral windows.
 Deployment features are causal and exclude event labels, but acquisition is
 not fully unprivileged. Evidence with attainable query selection, or an explicit
