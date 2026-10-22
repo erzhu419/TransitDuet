@@ -53,6 +53,7 @@ class RuleAudit(prior.TradeoffAudit):
         runner.env.launch_bus = launch
 
     def __call__(self, policy, states, features, theta):
+        self.count += len(states)
         if self.method == 'zero':
             return prior.factorial.zero_law(policy, states)
         assert self.method == 'bilateral025' and len(states) == 1
