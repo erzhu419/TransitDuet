@@ -38,3 +38,38 @@ diagnostics only;never drop other keys or claim fresh confirmation.
 Six mode/scope workers,server tests first;high/manual scheduler,node004.
 Only the compact global summary is retrieved locally. No J correction or
 policy promotion follows from this diagnostic alone.
+
+## Readout and decision
+
+t210902/source87cad6a8a8 completed high/manual on node004,exit0,six workers.
+Six tests and all six V196 point/bootstrap reproductions passed. Only966669-byte
+summary fetched:freqduet/results_freqduet/protocol_v6_v197_key_states/audit_87cad6a8a8/summary/status.json.
+Within-day nominal covariance deltas,last32-first32(squared seconds):
+
+| Mode/scope | Raw | State covariance | Mixed | Residual |
+| --- | --- | --- | --- | --- |
+| old/clearance | 9.201 | 3.360 | 0.053 | 5.789 |
+| handoff/clearance | 9.628 | 3.384 | 0.009 | 6.234 |
+| old/hour13 moving-launch | 7.557 | 2.938 | -1.069 | 5.688 |
+| handoff/hour13 moving-launch | 7.839 | 3.038 | -1.078 | 5.880 |
+
+All eight state/mixed delta family intervals cross zero. The residual is the
+part outside this fixed linear state projection,not identified physical drift.
+All between-day core-term delta95% intervals also cross zero.
+
+Diagnostic95%:Y correlations with first fraction,horizon and predicted running
+weaken in all four primary cases. Example old/moving-launch:running0.203->0.087,
+delta CI[-0.202,-0.029]. Horizon correlation decreases in20-23 of30 pooled keys;
+running in21-23,first fraction in17-18. These are not independent replications.
+Their mean shifts are not established;some other marginals DO change:clearance
+predicted-entry/command shares fall approximately10.8->9.4%/8.4->6.8%,and service
+prefix-age variance falls. Moving-launch has zero predicted-entry/command share
+in both halves,yet the covariance pattern persists. Stage mixture alone is
+therefore not a complete accounting explanation.
+
+Decision:no J correction,state gate,interval fit or confirmation. Distinguishing
+finer state mixing from within-state dependence would require conditional or
+higher-order cross moments absent from these saved first/second moments;do not
+infer that distinction from another linear decomposition. Any such extension
+needs a separate preregistration;no collection/rescan is started here. All
+frozen items and main remain unchanged.
