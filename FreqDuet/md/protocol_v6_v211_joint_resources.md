@@ -55,3 +55,42 @@ No selector,action,future,metric or statistical threshold changes. Test a cached
 passive replay for exact equivalence,then resume only the missing group;retain
 all63 completed groups. Original aggregate stays frozen;an additional small audit
 reports joint-vs-each-single,selection-to-evaluation changes and execution support.
+
+## Outcome
+
+Recovery source9733c89552/task t211058 exited0:9 tests,cached metrics/registered
+commands exact,and only the missing four-path group replayed. Inline recovery
+t211056 failed before startup(SSH argument length);the short script entry fixed
+this. Original aggregate t211040 and read-only audit t211057 both exited0.
+All960 selection and240 unique evaluation paths are present. Two result JSONs
+(256527 bytes total) and a small marker were retrieved;no checkpoints or traces.
+
+Joint minus comparator;negative is better. Journey is seconds/passenger;readiness
+and inclusive public-clock launch delay are mean seconds/launched trip,not day sums.
+
+| Comparator | Journey s | Actual CV2 | Readiness s | Inclusive delay s |
+|---|---:|---:|---:|---:|
+| bilateral025 | -.085524 | -.000022943 | -.063633 | -.051944 |
+| upper-only | -.081959 | -.000049957 | -.063931 | -.065601 |
+| lower-only | -.051635 | +.000011409 | -.020933 | -.008409 |
+| selection-best single | -.048069 | -.000015605 | -.021231 | -.022066 |
+
+Both primary gates fail under crossed actor/day and conditional-future intervals,
+and both evaluation-half nonharm gates fail. Versus bilateral,conditional95% CI:
+journey[-.225731,+.008654]s,CV2[-.000113314,+.000052967],readiness[-.232531,+.061488]s,
+inclusive delay[-.221493,+.073235]s. All primary methods complete all trips.
+Selection journey mean-.010291s becomes-.085524s in evaluation:the mean direction
+persists,but not robust joint benefit. Only c2 selects an actual joint candidate;
+it improves journey in5/16 futures(mean/SE=-.956),while mean CV2 versus bilateral
+worsens. c1 is lower-only and has just1/16 nonzero endpoint effects;c0/c3 keep baseline.
+The later8 futures versus bilateral have CV2+.000041508,readiness+.040196s and
+inclusive delay+.050215s,with only-.001493s journey change.
+
+One future(c1/f25),two branches lack the second eligible decision. First command
+is0->0;101 later same-station/different-vehicle calls lack the required follower
+support. Service clears. Preserve their true outcomes and mark execution support
+failed;neither impute effects nor count these as two independent future failures.
+Decision:do not promote or extend V211. Next inspect actual nonzero bin changes,
+upper request-to-dispatch realization and downstream holding differences in the
+consumed selection archive before designing a new persistent coordination policy.
+No training,main change,new confirmation futures or threshold adjustment.
