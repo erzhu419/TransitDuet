@@ -1,5 +1,6 @@
 from types import SimpleNamespace as NS
 import unittest
+from unittest.mock import patch
 
 import run_freqduet_v214_inbound_smoke as v
 
@@ -12,6 +13,26 @@ def bus(index, state='TRAVEL', *, direction=1, on_route=True):
 
 
 class InboundSmokeTests(unittest.TestCase):
+    def test_ready_clock_comes_from_native_prepare_and_hook_is_reversible(self):
+        class FrozenBus:
+            def _prepare_for_action(self, current_time, buses):
+                return 'native_result'
+        original = FrozenBus._prepare_for_action
+        audit = object.__new__(v.InboundAudit)
+        audit.observation_times = {}
+        runner = NS(upper_trainer=NS(policy_net=NS(get_action=None)))
+        def attach(a, r):
+            a.bus_class = FrozenBus
+        with patch.object(v.passive.PassiveAudit, 'attach', attach), patch.object(v.passive.PassiveAudit, 'detach'):
+            audit.attach(runner)
+            b = FrozenBus()
+            b.bus_id, b.trip_id, b.direction, b.last_station = 2, 4, True, NS(station_id=3)
+            self.assertEqual(b._prepare_for_action(123., []), 'native_result')
+            self.assertEqual(audit.observation_times[2, 4, 3, True], 123.)
+            self.assertFalse(hasattr(b, 'pre_action_time_s'))
+            audit.detach()
+        self.assertIs(FrozenBus._prepare_for_action, original)
+
     def test_public_position_and_modes_count_only_remaining_controlled_stops(self):
         self.assertTrue(v.controlled_stop_ahead(bus(0)))
         self.assertTrue(v.controlled_stop_ahead(bus(3, 'HOLDING')))
