@@ -55,9 +55,19 @@ class InboundAudit(passive.PassiveAudit):
         super().__init__(seed, 5*(candidate//2), **kwargs)
         self.inbound_candidate = candidate
         self.opportunities_seen, self.anchor_frames = set(), []
+        self.observation_times = {}
 
     def attach(self, runner):
         super().attach(runner)
+        self.prepare_original = self.bus_class._prepare_for_action
+
+        def prepare(bus, current_time, *args, **kwargs):
+            value = self.prepare_original(bus, current_time, *args, **kwargs)
+            identity = (int(bus.bus_id), int(bus.trip_id), int(bus.last_station.station_id), bool(bus.direction))
+            self.observation_times[identity] = float(current_time)
+            return value
+
+        self.bus_class._prepare_for_action = prepare
 
         def action(state, *args, **kwargs):
             native = self.get_action_original(state, *args, **kwargs)
@@ -91,6 +101,10 @@ class InboundAudit(passive.PassiveAudit):
         # V211's old anchor/action selector with the sealed V214 selector.
         runner.upper_trainer.policy_net.get_action = action
 
+    def detach(self):
+        self.bus_class._prepare_for_action = self.prepare_original
+        super().detach()
+
     def __call__(self, policy, states, features, theta):
         self.policy, self.method = policy, 'bilateral025'
         law = prior.prior.TradeoffAudit.__call__(self, policy, states, features, theta)
@@ -100,7 +114,7 @@ class InboundAudit(passive.PassiveAudit):
         identity = [int(bus.trip_id), int(bus.last_station.station_id), bool(bus.direction), int(bus.bus_id)]
         base = int(law.argmax(dim=1).item())
         feasible = np.flatnonzero(policy.feasible_action_mask(states)[0].numpy()).tolist()
-        captured = float(bus.pre_action_time_s)
+        captured = self.observation_times[identity[3], identity[0], identity[1], identity[2]]
         prior.require(captured <= env.current_time, 'lower context clock is in the future')
         query = dict(time_s=float(env.current_time), bus_id=identity[3], trip_id=identity[0], direction=identity[2],
             terminal_masked=bool(runner._lower_terminal_action_masked(bus) or bus.last_station.station_type == 0),
