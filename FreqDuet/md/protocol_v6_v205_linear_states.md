@@ -29,3 +29,32 @@ map/predictor/window/quantile or main-policy change.
 Limitations:reused development data,additive linear co-movement only. Mixed or
 residual covariance does not identify a conditional-law change or causal control
 effect;the V204 nonlinear joint-moment/support gap remains. No policy promotion.
+
+## Result and next decision
+
+t210954/source09530a00dc completed high/manual on node004,exit0;6 tests passed.
+All4 cases have10000 valid draws. V203 parts/endpoints/mix reproduce(max2.13e-14);
+the4 state/residual pairs add back(max6.06e-13). Support remains315/864 cells.
+Only157779-byte status summary fetched;detailed arrays stay on the server.
+Clearance point rank9(draws8-9);moving-launch rank7,with predicted-entry and
+known-command indicators constant and not individually identifiable there.
+
+Point ranges across old/handoff,NOT confidence intervals,nominal weighted s^2:
+
+| Key / scope | State-state | Mixed sum | Residual-residual | Original |
+| --- | --- | --- | --- | --- |
+| 7 / clearance | .384 to .484 | -1.586 to -1.514 | .101 to .485 | -.929 to -.717 |
+| 7 / moving-launch | .210 to .267 | -1.539 to -1.537 | 2.245 to 2.248 | .916 to .977 |
+| 12 / clearance | -.482 to -.443 | .485 to .552 | 2.260 to 2.414 | 2.331 to 2.456 |
+| 12 / moving-launch | -.240 to -.208 | 1.172 to 1.216 | 1.509 to 1.647 | 2.485 to 2.611 |
+
+All16 primary family intervals cross zero;all residual-change95% intervals also
+cross zero. State projection does not absorb key12's positive change at the
+point estimate. Residual between-day contribution is positive at the point
+estimate,not a confirmed conditional-law shift. Large raw-cell and parent-center
+terms still cancel;they are not independent explanatory gains.
+
+Decision:retain this diagnostic,all frozen items and existing support. No basis
+for a new state/interval correction. If continuing,locate actor/day contributions
+to the residual uncertainty from saved moments/draws,not by adding features,
+changing bins or refitting on confirmation data. No such additional test run here.
