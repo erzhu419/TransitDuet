@@ -88,3 +88,9 @@ replacement: its CV2 effect against V107 changes sign by day.
 
 Limitations: two consumed actors x two days; descriptive closed-loop differences,
 not independent efficacy,local causal attribution or frequency proof.
+
+Authority correction from V219 native reproduction: `shared_directions=true`
+shares coefficient coordinates,while `plan_all_directions=false` keeps plan
+writes,caches and EMA direction-local. The earlier BOTH-directions wording
+does not describe simultaneous control at one callback. Saved numerical results
+and the stop-promotion decision are unchanged;sealed experiment files are retained.

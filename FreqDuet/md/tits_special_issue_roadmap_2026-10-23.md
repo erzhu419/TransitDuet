@@ -126,3 +126,9 @@ V219 freezes ready-backed outbound service tasks,then own-trip compensation.
 Existing V216 records contain22 such opportunities across four contexts;only
 implementation is admitted. Native shared-projection equivalence/admissibility
 comes next within V219,not a new efficacy matrix. See `protocol_v6_v219_ready_service.md`.
+
+V219 native preflight now reproduces352 snapshots exactly,but admits zero +30
+previews,so no replay budget is sealed. Correct earlier "shared/global cycle"
+wording: coefficient sharing does not imply simultaneous directional planning;
+the frozen controller uses direction-local caches/EMA and plan writes. Next is
+a separately registered supply-constrained projection,not another scalar-gain trial.

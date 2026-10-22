@@ -58,3 +58,25 @@ advance or any continuous/tick delay across the entire projected timetable.
 Keep outside-cycle advances separate. Only nonzero admissible previews in all
 four fixed contexts allow sealing a later four-arm budget. This preflight
 starts no replay/training and cannot change the main policy or tune the law.
+
+## Native preflight result
+
+High/manual t211218 on node006 exited0 (source6da6038c57);11 tests passed.
+All352 native fresh snapshots reproduce pending clocks/headways exactly:
+maximum error0s and identical executable ticks. Only4640 bytes were retrieved.
+Native authority is `shared_directions=true,plan_all_directions=false`: a shared
+scalar actor with DIRECTION-LOCAL callbacks,cached plans and EMA,not simultaneous
+two-direction writes. Initial t211216 stopped on our incorrect global-plan
+assumption before reading trajectories. No native configuration was changed.
+
+All four contexts reject all74 +30 previews:72 have unfunded current-cycle
+advances and2 have no executable advance. Five previews also have a later tick
+despite no continuous delay above1e-6s;these overlap the rejected proposals.
+The earlier22 state opportunities do not fund every departure advanced by an
+entire scalar curve. No replay budget is sealed;main and future banks stay frozen.
+
+Next requires a SEPARATE preregistration of supply-constrained curve projection:
+fix unfunded cumulative departure clocks to the native plan while jointly
+preserving anchors,headway bounds and rolling zero-sum budgets. Do not post-mask
+times or search scalar gains on V219. This changes the projection method and
+cannot be silently substituted into the frozen native-preview candidate.
