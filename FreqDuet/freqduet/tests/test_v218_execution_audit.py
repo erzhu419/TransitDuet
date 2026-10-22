@@ -12,6 +12,16 @@ class ExecutionAuditTest(unittest.TestCase):
     def test_plan_only_is_not_actual_execution(self):
         self.assertEqual(audit.change_pattern(dict(next_plan_s=5, next_launch_s=0)), 'plan_only')
 
+    def test_plan_roundoff_and_supply_binding_do_not_prove_direct_plan_control(self):
+        a = dict(next_plan_s=80, return_s=100, return_to_launch_s=1)
+        b = dict(next_plan_s=80+1e-12, return_s=101, return_to_launch_s=1)
+        delta = dict(next_plan_s=-1e-12, next_launch_s=-1)
+        self.assertEqual(audit.change_pattern(delta), 'both')
+        evidence = audit.binding_evidence(a, b, delta, 1)
+        self.assertFalse(evidence['material_plan_and_actual_change'])
+        self.assertTrue(evidence['both_plans_before_return'])
+        self.assertTrue(evidence['both_launch_at_return_plus_tick'])
+
     def test_changed_assignment_is_not_a_matched_chain(self):
         a = dict(bus=1, inbound=2, outbound=3, direction=True)
         self.assertIsNone(audit.chain_delta(a, dict(a, outbound=5)))

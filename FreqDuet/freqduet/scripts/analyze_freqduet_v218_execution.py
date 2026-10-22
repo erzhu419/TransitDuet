@@ -89,6 +89,15 @@ def change_pattern(delta):
     return 'both' if plan and actual else 'plan_only' if plan else 'actual_only' if actual else 'neither'
 
 
+def binding_evidence(candidate, control, delta, tick):
+    return dict(plan_delta_over_roundoff=abs(delta['next_plan_s']) > 1e-6,
+                material_plan_and_actual_change=abs(delta['next_plan_s']) > 1e-6 and delta['next_launch_s'] != 0,
+                both_plans_before_return=candidate['next_plan_s'] <= candidate['return_s']
+                    and control['next_plan_s'] <= control['return_s'],
+                both_launch_at_return_plus_tick=candidate['return_to_launch_s'] == tick
+                    and control['return_to_launch_s'] == tick)
+
+
 def signs(values):
     return dict(decreased=sum(v < 0 for v in values), unchanged=sum(v == 0 for v in values),
                 increased=sum(v > 0 for v in values))
@@ -133,7 +142,7 @@ def audit_context(root, ci, original):
 
     comparisons = {}
     for a in ARMS[:-1]:
-        rows, unmatched, stop_deltas, examples = [], 0, [], []
+        rows, unmatched, stop_deltas, examples, binding = [], 0, [], [], Counter()
         for (bus, inbound), queries in grouped.items():
             c = chain(joint, ji, bus, inbound)
             reference = chain(arms[a], indexes[a], bus, inbound)
@@ -142,6 +151,8 @@ def audit_context(root, ci, original):
                 unmatched += 1
                 continue
             rows.append(delta)
+            binding.update({k: int(v) for k, v in binding_evidence(
+                c, reference, delta, joint['physical_contract']['dt_s']).items()})
             for q in queries:
                 key = (q['trip_id'], q['station_id'], q['direction'])
                 stop_deltas.append(ji['stops'][key]-indexes[a]['stops'][key])
@@ -150,9 +161,13 @@ def audit_context(root, ci, original):
                                      query_count=len(queries), joint=c, control=reference, delta=delta))
         comparisons[a] = dict(matched_chains=len(rows), unsupported_assignment_or_missing=unmatched,
             planned_actual_patterns=dict(Counter(change_pattern(d) for d in rows)),
+            binding_evidence=dict(binding),
             chain_delta_sum={k: sum(d[k] for d in rows) for k in rows[0]} if rows else {},
             chain_delta_signs={k: signs([d[k] for d in rows]) for k in
-                               ('inbound_holding_s', 'return_s', 'next_launch_s')} if rows else {},
+                               ('inbound_holding_s', 'return_s', 'next_launch_s', 'return_to_launch_s')} if rows else {},
+            whole_day_holding_delta_s=joint['ledger']['executed_holding_s']-arms[a]['ledger']['executed_holding_s'],
+            other_inbound_trips_holding_delta_s=joint['ledger']['executed_holding_s']
+                -arms[a]['ledger']['executed_holding_s']-sum(d['inbound_holding_s'] for d in rows),
             changed_query_actual_stop_holding_delta_sum_s=sum(stop_deltas),
             changed_query_actual_stop_holding_signs=signs(stop_deltas), examples=examples)
 
