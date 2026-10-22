@@ -92,12 +92,20 @@ def run_cell(args):
         maximum_subgoal_delta=args.maximum_subgoal_delta, task_options=_task_options(args),
         prefix_decision_steps_fn=schedule,
     )
+    return fit_timing_comparison(args, controller, payload, fit_rows, time_scale)
+
+
+def fit_timing_comparison(args, controller, payload, fit_rows, time_scale,
+                          *, rollout_fn=None, pair_collector=None):
+    """One fitting/selection/test procedure for both physical tasks."""
+    rollout_fn = rollout_rule if rollout_fn is None else rollout_fn
+    pair_collector = collect_timing_pairs if pair_collector is None else pair_collector
     ledger = {"branch_label_replay_steps": sum(
         r["keep_primitive_steps_replayed"] + r["renew_primitive_steps_replayed"] for r in fit_rows),
         "timing_pair_replay_steps": 0, "timing_selection_steps": 0, "test_steps": 0}
 
     def evaluate(rule, seeds, ledger_key):
-        rows = [rollout_rule(controller, rule, seed=seed, args=args, time_scale=time_scale)
+        rows = [rollout_fn(controller, rule, seed=seed, args=args, time_scale=time_scale)
                 for seed in seeds]
         ledger[ledger_key] += len(rows) * args.horizon
         return rows
@@ -116,7 +124,7 @@ def run_cell(args):
     threshold, threshold_scores = select_rule([r for r in candidates if r.kind == "threshold"], selection)
     legacy = fit_budgeted_trigger_predictors(fit_rows, alpha_grid=args.ridge_alpha_grid,
                                              threshold_quantile=args.threshold_quantile)
-    rules = [TimingRule("fixed", "clock", threshold=0), clock, threshold]
+    rules = [TimingRule("fixed", "clock", threshold=0), TimingRule("balanced_jitter", "jitter"), clock, threshold]
     rules.extend(TimingRule(f"stage9_recipe_{name}", "legacy", view=name,
                             threshold=fitted["threshold"], model=fitted)
                  for name, fitted in legacy.items())
@@ -125,7 +133,7 @@ def run_cell(args):
     behavior = [TimingRule("initial_clock_10", "clock", threshold=0.4)]
     pooled_pairs, checkpoints = [], {"current": [], "history": []}
     for index in range(args.timing_rounds):
-        pairs, steps = collect_timing_pairs(controller, behavior, seeds=args.branch_fit_seeds,
+        pairs, steps = pair_collector(controller, behavior, seeds=args.branch_fit_seeds,
                                             args=args, time_scale=time_scale, round_index=index)
         pooled_pairs.extend(pairs)
         ledger["timing_pair_replay_steps"] += steps
@@ -169,7 +177,7 @@ def run_cell(args):
     }
 
 
-def main(argv=None):
+def build_timing_parser():
     parser = build_parser()
     parser.description = __doc__
     parser.add_argument("--timing-selection-seeds", type=int, nargs="+", required=True)
@@ -181,7 +189,11 @@ def main(argv=None):
     # This entry point prepares a protocol unless execution is explicitly requested.
     parser.set_defaults(dry_run=True)
     parser.add_argument("--execute", action="store_false", dest="dry_run")
-    args = parser.parse_args(argv)
+    return parser
+
+
+def main(argv=None):
+    args = build_timing_parser().parse_args(argv)
     resolved = protocol(args)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     cells = [] if args.dry_run else [run_cell(args)]

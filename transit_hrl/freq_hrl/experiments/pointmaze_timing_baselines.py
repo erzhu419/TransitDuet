@@ -213,6 +213,19 @@ def rollout_rule(controller: Any, rule: TimingRule, *, seed: int, args: Any,
                  arm: str | None = None) -> dict:
     from .pointmaze_adaptive_pair_diagnostic import rollout_intervention
 
+    if rule.kind == "jitter":
+        if intervention_step is not None:
+            raise ValueError("paired stopping credit uses adaptive checks, not jitter schedules")
+        from .pointmaze_budgeted_trigger import rollout_budgeted_trigger
+        from .pointmaze_plan_validity_branching import _task_options
+
+        row = rollout_budgeted_trigger(controller, seed=seed, mode="balanced_jitter",
+            fitted_predictors={}, env_id=args.env_id, horizon=args.horizon, time_scale=time_scale,
+            maximum_subgoal_delta=args.maximum_subgoal_delta, max_offset_steps=args.max_offset_steps,
+            check_stride_steps=args.check_stride_steps, task_options=_task_options(args))
+        row["queries"] = []
+        return row
+
     queries = []
 
     def score(names, values, offset_fraction, remaining_fraction):
@@ -235,8 +248,10 @@ def rollout_rule(controller: Any, rule: TimingRule, *, seed: int, args: Any,
 
 
 def collect_timing_pairs(controller: Any, rules: list[TimingRule], *, seeds: list[int],
-                         args: Any, time_scale: Any, round_index: int) -> tuple[list, int]:
+                         args: Any, time_scale: Any, round_index: int,
+                         rollout_fn=None) -> tuple[list, int]:
     """Acquire equal-budget action-aligned labels on a mixture of visited states."""
+    rollout_fn = rollout_rule if rollout_fn is None else rollout_fn
     rows, replay_steps = [], 0
     period = time_scale.upper_period_steps
     # The first round's two heads share a clock; replay that identical behavior once.
@@ -246,7 +261,7 @@ def collect_timing_pairs(controller: Any, rules: list[TimingRule], *, seeds: lis
             unique_rules.append(rule)
     for rule_index, rule in enumerate(unique_rules):
         for seed in seeds:
-            factual = rollout_rule(controller, rule, seed=seed, args=args, time_scale=time_scale)
+            factual = rollout_fn(controller, rule, seed=seed, args=args, time_scale=time_scale)
             replay_steps += args.horizon
             eligible_bins = np.arange(1, args.horizon // period - 1)
             if args.pairs_per_path > len(eligible_bins):
@@ -258,7 +273,7 @@ def collect_timing_pairs(controller: Any, rules: list[TimingRule], *, seeds: lis
                                   args.max_offset_steps - args.check_stride_steps)
                 offset = int(rng.choice(np.arange(0, last_offset + 1, args.check_stride_steps)))
                 step = int(bin_index * period + offset)
-                arms = {arm: rollout_rule(controller, rule, seed=seed, args=args,
+                arms = {arm: rollout_fn(controller, rule, seed=seed, args=args,
                                          time_scale=time_scale, intervention_step=step, arm=arm)
                         for arm in ("now", "wait_one_check")}
                 replay_steps += 2 * args.horizon

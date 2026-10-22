@@ -202,8 +202,8 @@ class TimingBaselinesTest(unittest.TestCase):
             patch.object(runner, "rollout_rule", side_effect=rollout),
         ):
             result = runner.run_cell(options)
-        self.assertEqual(len(result["test_rows"]), 18)
-        self.assertEqual(result["ledger"]["test_steps"], 18 * 300)
+        self.assertEqual(len(result["test_rows"]), 20)
+        self.assertEqual(result["ledger"]["test_steps"], 20 * 300)
         self.assertEqual(result["ledger"]["timing_pair_replay_steps"], 200)
         self.assertFalse(result["performance_claim_supported"])
         self.assertTrue(all(not state["eligible_for_fresh_confirmation"]

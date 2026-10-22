@@ -52,6 +52,13 @@ action search; its positive results therefore cannot fill this role. A new
 evaluation would need independent training roots and full episodes, with task
 and stress-family coverage separated from repeated futures of one state.
 
+The [prepared second task](../md/freq_hrl_second_task_protocol_2026-10-22.md) is
+moving-target Reacher on the standard articulated-arm dynamics. Both plants now
+have a shared execution/label path and the same comparison/fitting function,
+without changing the 50-step keep/renew target, ridge recipe or one-call/bin rule.
+Only deterministic equivalence tests and a six-step Reacher interface check have
+run; this is preparation, not evidence of second-task effectiveness.
+
 Stage304 is a completed negative boundary, not a broken run to resubmit.
 Its changed profile mix, callback positions and state distribution prevent
 identifying repeated decisions alone as the cause. Any later Transit repair

@@ -24,6 +24,10 @@ The three core figures and their source CSVs are linked in the
 The [strong timing-baseline preparation](md/freq_hrl_strong_timing_baselines_protocol_2026-10-22.md)
 adds thresholds, matched-capacity controls and paired learned termination code;
 it has not been performance-tested and authorizes no scheduler tasks.
+The [second-task preparation](md/freq_hrl_second_task_protocol_2026-10-22.md)
+adds Reacher moving-target tracking and a shared PointMaze/Reacher execution,
+label and comparison path. Its objective, fitting recipe and stopping rule are
+unchanged; no second-task performance experiment has been launched.
 
 ## Historical Research Mainlines
 

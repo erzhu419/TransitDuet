@@ -17,7 +17,8 @@ every frequency-routing component or rank complete jointly trained algorithms.
 
 ## Comparators
 
-- Fixed start-of-bin timing and the best constant offset among 0/5/10/15/20/25.
+- Fixed start-of-bin timing, the original seeded random-jitter schedule, and the
+  best constant offset among 0/5/10/15/20/25.
 - Error, age, target-velocity-change and force thresholds: cutpoints are fit-path
   quantiles plus always/never-cross endpoints; selection uses separate full
   episodes. The strongest selected threshold competes with the candidate.
