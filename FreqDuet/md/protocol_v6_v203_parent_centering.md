@@ -27,3 +27,28 @@ Limitations:algebraic parts of one fixed estimand,not alternate algorithms or
 evidence to remove centering. Reused development days/keys;no new gate,causal
 claim or extrapolation beyond supported cells. Bootstrap uncertainty channels
 and day-mean covariance are different quantities.
+
+## Result and next decision
+
+t210948/sourcec26aa1f39b completed high/manual-dispatch on node004,exit0.
+Five tests passed;V202 points and individual draws reproduced(max error1.60e-14).
+Only78465-byte summary fetched:freqduet/results_freqduet/protocol_v6_v203_parent_centering/audit_c26aa1f39b/summary/status.json.
+
+Key12 between-cell contribution8.86-10.12s^2 is offset by parent-centering
+terms-8.69 to-7.69,leaving1.17-1.44. Full conditional raw-cell contribution
+11.12-12.28 is offset by centering-9.67 to-8.79,leaving2.33-2.61.
+Key7 clearance:raw-cell3.41-3.64 plus centering-4.36 to-4.34 gives-.93 to-.72;
+moving-launch:raw-cell3.88 plus centering-2.96 to-2.91 gives.92-.98.
+All are components of the SAME fixed estimand,not results of removing centering.
+
+Centering's signed conditional-variance allocation is negative:Key7 about-32%
+to-58%,Key12-110% to-118%. Raw-cell terms and centering are strongly dependent;
+their own variances cannot be added as independent noise. All new group-change
+95% intervals cross zero. No centering implementation error or basis for a
+predictor/control change was found.
+
+Decision:keep centering and all frozen items. The V202 daily mean algebra is
+now accounted for;more rearrangement cannot provide independent evidence.
+Further attribution to observable operating states requires statistics beyond
+these8 saved daily fields and a separately specified evidence design,not an
+extra correction fitted to these64 development days. No such work started here.
