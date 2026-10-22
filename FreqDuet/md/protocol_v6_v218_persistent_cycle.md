@@ -56,3 +56,35 @@ separately;the frozen law and maximum16 paths are unchanged.
 Repair source b09088f636,task t211189 high/manual on node004 passed11 tests
 and reused c0 without replay. The remaining three exact baselines run in
 parallel before the twelve intervention paths. Independent futures stay closed.
+
+## Completed audit and decision
+
+All16 paths completed; four complete V216 comparisons passed. High/manual
+read-only t211196 exited0 on node004,source c3461fb981,6 tests passed. Only its
+87639-byte summary was retrieved,under the run's `execution_audit_c3461fb981/summary`.
+Four-context means: joint minus comparator; negative is better.
+
+| Comparator | Journey s/passenger | Actual CV2 | Readiness s/trip | Public total delay s/day | Holding s/trip |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| V107 | +.26661 | +.00043144 | -2.42366 | -53.25 | -.20515 |
+| Upper-only | -.68358 | +.00042690 | -1.97424 | -520.25 | -.77767 |
+| Lower-only | +1.03730 | +.00039425 | -.69275 | +403.75 | +.84447 |
+
+All arms clear service. Joint worsens actual CV2 against every control in all
+four contexts; versus lower-only,journey and public delay also worsen in all four.
+278 executed reductions cover130 within-context unique physical supply chains.
+Original execution gate passes,but all130 target launches remain return+1s in
+every arm,with plans before return. Versus lower-only,69 unique chains show plan
+and actual co-movement;10 plan differences are roundoff-sized,leaving59 material
+co-movements,none proving direct target-plan control. Upper changes other launches.
+Versus V107,targeted inbound holding falls1015s,but other trips add800s: net-215s.
+
+Stop this candidate's promotion; keep its independent-future bank closed. Next:
+preregister native upper coordination conditioned on executable supply and
+original-public delay,retaining useful bilateral compensation. Require binding
+execution evidence,not co-movement,before a separate small paired test. No tuning
+on V218,new training,extra fleet/authority or main switch. Lower-only is not a
+replacement: its CV2 effect against V107 changes sign by day.
+
+Limitations: two consumed actors x two days; descriptive closed-loop differences,
+not independent efficacy,local causal attribution or frequency proof.

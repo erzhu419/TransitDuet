@@ -117,3 +117,7 @@ in this result review; missing original-public delay for old V107 remains.
 V218 now implements this single resource-cycle candidate and its bounded
 four-arm execution smoke. See `protocol_v6_v218_persistent_cycle.md`; no new
 training or independent-future efficacy bank is authorized by that smoke.
+
+V218 completed: exact references and executed reductions,but no joint benefit.
+Target launches remain return+1s despite plan changes. Stop promotion;future bank
+stays closed. See the V218 decision for native-execution redesign;main stays frozen.
