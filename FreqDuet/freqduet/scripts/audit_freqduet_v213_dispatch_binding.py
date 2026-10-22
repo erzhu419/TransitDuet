@@ -46,6 +46,10 @@ def binding_records(base, candidate):
             rows.append(dict(actual_s=launch['actual_s'], planned_s=p['latest_plan'][trip],
                 eligible_s=launch['eligible_s'], previous_return_s=available['return_s'],
                 previous_trip=available['previous_trip'], bus=launch['bus'],
+                registered_lower_hits_inbound_trip=any(v['identity'][0] == available['previous_trip']
+                    for v in p['data']['result']['lower']),
+                registered_lower_hits_assigned_vehicle=any(v['identity'][3] == launch['bus']
+                    for v in p['data']['result']['lower']),
                 after_eligible_s=launch['actual_s']-launch['eligible_s'],
                 after_plan_s=launch['actual_s']-p['latest_plan'][trip],
                 after_return_s=launch['actual_s']-available['return_s'] if available['return_s'] is not None else None))
@@ -77,6 +81,8 @@ def run(root, out):
             counts['same_vehicle'] += c['bus'] == b['bus']
             counts['both_wait_after_eligibility'] += min(b['after_eligible_s'], c['after_eligible_s']) > review.EPS
             counts['both_wait_after_plan'] += min(b['after_plan_s'], c['after_plan_s']) > review.EPS
+            counts['registered_lower_hits_inbound_trip'] += c['registered_lower_hits_inbound_trip']
+            counts['registered_lower_hits_assigned_vehicle'] += c['registered_lower_hits_assigned_vehicle']
             supported = b['previous_return_s'] is not None and c['previous_return_s'] is not None
             counts['previous_return_observed'] += supported
             if supported:
