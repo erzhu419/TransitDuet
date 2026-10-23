@@ -1,0 +1,925 @@
+{
+  "status": "v225_remaining_three_passed",
+  "paths": [
+    {
+      "context": 0,
+      "actor": 12037,
+      "demand_day": 2151001,
+      "engineering_passed": true,
+      "checks": {
+        "physical_contract_exact": true,
+        "prepared_recording_complete": true,
+        "prefix_before_first_change_exact": true,
+        "first_change_matches_archived_shadow": true,
+        "live_commands_match_frozen_law": true,
+        "changed_commands_actually_executed": true,
+        "upper_first_admission_same_reserved_bus_advance": true,
+        "native_calls_and_random_sampling_preserved": true,
+        "all_trips_cleared": true,
+        "endpoint_metrics_complete": true
+      },
+      "execution": {
+        "queries": 5200,
+        "executed_changes": 3,
+        "increases": 1,
+        "decreases": 2,
+        "requested_changed_s": 35.0,
+        "executed_changed_s": 35.0,
+        "direct_vs_same_state_native_s": -15.0,
+        "direct_by_trip_s": {
+          "127": 5.0,
+          "129": -5.0,
+          "225": -15.0
+        }
+      },
+      "first_change": {
+        "query_index": 2546,
+        "event_seq": 5573,
+        "prepare_event_seq": 5572,
+        "time_s": 24254.0,
+        "native_bin": 0,
+        "selected_bin": 1,
+        "prefix_counts": {
+          "lower_policy_inputs": 2547,
+          "upper_commands": 46,
+          "upper_callbacks": 135,
+          "issued_holding": 2546,
+          "actual_launches": 135,
+          "vehicle_returns": 124,
+          "arrivals": 2588,
+          "departures": 2585
+        },
+        "prefix_exact": true,
+        "first_shadow_exact": true
+      },
+      "upper_authority": {
+        "context": 0,
+        "first_query_exact": true,
+        "cleared": true,
+        "first_admitted_tasks": [
+          {
+            "trip_id": 129,
+            "reserved_bus_id": 10,
+            "reference_bus_id": 10,
+            "candidate_bus_id": 10,
+            "actual_advance_s": 1.0,
+            "executed_plan_advance_s": 1.3999999999978172,
+            "native_plan_preserved": true,
+            "proposed_plan_executed": true,
+            "passed": true
+          }
+        ],
+        "supported_queries": 3,
+        "passed": true,
+        "upper_minus_reference": {
+          "passenger_person_s": 4117.0,
+          "journey_min": 0.0034060000000017965,
+          "cv_squared": 3.9824497696662464e-05,
+          "readiness_delay_s": 0.24045800000001805,
+          "holding_s_per_trip": 0.15267199999999548,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 2436.0,
+          "onboard_person_s": 1681.0,
+          "backlog_trip_s": 63.0,
+          "holding_person_s": 290.0,
+          "dispatch_gap_mean_s": 0.06538461538463025,
+          "dispatch_gap_variance_s2": 12.362292899409113,
+          "dispatch_cv_squared": 8.30713618360443e-05,
+          "public_launch_delay_total_s": 63.0,
+          "readiness_delay_total_s": 63.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        }
+      },
+      "recording": {
+        "queries": 5200,
+        "prepares": 5240,
+        "role_phase_support": {
+          "front": {
+            "no_native_front": 40,
+            "known_zero": 5140,
+            "supported": 60
+          },
+          "current": {
+            "known_zero": 5180,
+            "supported": 60
+          },
+          "follower": {
+            "no_native_follower": 849,
+            "known_zero": 4340,
+            "supported": 51
+          }
+        },
+        "global_rng_unchanged": true,
+        "observer_native_call_delta": 0
+      },
+      "outcomes": {
+        "v107": {
+          "passenger_person_s": 22014703.0,
+          "journey_min": 18.220059,
+          "cv_squared": 0.054190378523276614,
+          "readiness_delay_s": 135.099237,
+          "holding_s_per_trip": 153.492366,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 7781111.0,
+          "onboard_person_s": 14233592.0,
+          "backlog_trip_s": 35396.0,
+          "holding_person_s": 1033220.0,
+          "dispatch_gap_mean_s": 361.46153846153845,
+          "dispatch_gap_variance_s2": 4158.856213017751,
+          "dispatch_cv_squared": 0.03183095876783426,
+          "public_launch_delay_total_s": 35396.0,
+          "readiness_delay_total_s": 35396.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        },
+        "upper": {
+          "passenger_person_s": 22020376.0,
+          "journey_min": 18.224752,
+          "cv_squared": 0.05428858379830267,
+          "readiness_delay_s": 135.385496,
+          "holding_s_per_trip": 153.473282,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 7785821.0,
+          "onboard_person_s": 14234555.0,
+          "backlog_trip_s": 35471.0,
+          "holding_person_s": 1032650.0,
+          "dispatch_gap_mean_s": 361.5269230769231,
+          "dispatch_gap_variance_s2": 4169.380044378699,
+          "dispatch_cv_squared": 0.031899964043981564,
+          "public_launch_delay_total_s": 35485.0,
+          "readiness_delay_total_s": 35471.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        },
+        "joint": {
+          "passenger_person_s": 22018820.0,
+          "journey_min": 18.223465,
+          "cv_squared": 0.054230203020973276,
+          "readiness_delay_s": 135.339695,
+          "holding_s_per_trip": 153.645038,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 7783547.0,
+          "onboard_person_s": 14235273.0,
+          "backlog_trip_s": 35459.0,
+          "holding_person_s": 1033510.0,
+          "dispatch_gap_mean_s": 361.5269230769231,
+          "dispatch_gap_variance_s2": 4171.21850591716,
+          "dispatch_cv_squared": 0.031914030129670305,
+          "public_launch_delay_total_s": 35459.0,
+          "readiness_delay_total_s": 35459.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        }
+      },
+      "joint_minus": {
+        "v107": {
+          "passenger_person_s": 4117.0,
+          "journey_min": 0.0034060000000017965,
+          "cv_squared": 3.9824497696662464e-05,
+          "readiness_delay_s": 0.24045800000001805,
+          "holding_s_per_trip": 0.15267199999999548,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 2436.0,
+          "onboard_person_s": 1681.0,
+          "backlog_trip_s": 63.0,
+          "holding_person_s": 290.0,
+          "dispatch_gap_mean_s": 0.06538461538463025,
+          "dispatch_gap_variance_s2": 12.362292899409113,
+          "dispatch_cv_squared": 8.30713618360443e-05,
+          "public_launch_delay_total_s": 63.0,
+          "readiness_delay_total_s": 63.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        },
+        "upper": {
+          "passenger_person_s": -1556.0,
+          "journey_min": -0.0012869999999978177,
+          "cv_squared": -5.8380777329392064e-05,
+          "readiness_delay_s": -0.045800999999983105,
+          "holding_s_per_trip": 0.1717559999999878,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": -2274.0,
+          "onboard_person_s": 718.0,
+          "backlog_trip_s": -12.0,
+          "holding_person_s": 860.0,
+          "dispatch_gap_mean_s": 0.0,
+          "dispatch_gap_variance_s2": 1.8384615384611607,
+          "dispatch_cv_squared": 1.4066085688740904e-05,
+          "public_launch_delay_total_s": -26.0,
+          "readiness_delay_total_s": -12.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        }
+      },
+      "holding_vs_upper": {
+        "total_trip_delta_s": 45.0,
+        "direct_same_state_delta_s": -15.0,
+        "native_state_response_s": 60.0
+      },
+      "descriptive_joint_passed": false
+    },
+    {
+      "context": 1,
+      "actor": 12037,
+      "demand_day": 2151002,
+      "engineering_passed": true,
+      "checks": {
+        "physical_contract_exact": true,
+        "prepared_recording_complete": true,
+        "prefix_before_first_change_exact": true,
+        "first_change_matches_archived_shadow": true,
+        "live_commands_match_frozen_law": true,
+        "changed_commands_actually_executed": true,
+        "upper_first_admission_same_reserved_bus_advance": true,
+        "native_calls_and_random_sampling_preserved": true,
+        "all_trips_cleared": true,
+        "endpoint_metrics_complete": true
+      },
+      "execution": {
+        "queries": 5200,
+        "executed_changes": 13,
+        "increases": 6,
+        "decreases": 7,
+        "requested_changed_s": 125.0,
+        "executed_changed_s": 125.0,
+        "direct_vs_same_state_native_s": -5.0,
+        "direct_by_trip_s": {
+          "127": 5.0,
+          "131": 5.0,
+          "129": -10.0,
+          "135": -10.0,
+          "141": -5.0,
+          "147": -5.0,
+          "211": 5.0,
+          "215": 10.0,
+          "213": -5.0,
+          "227": 5.0
+        }
+      },
+      "first_change": {
+        "query_index": 2463,
+        "event_seq": 5393,
+        "prepare_event_seq": 5392,
+        "time_s": 23436.0,
+        "native_bin": 2,
+        "selected_bin": 3,
+        "prefix_counts": {
+          "lower_policy_inputs": 2464,
+          "upper_commands": 44,
+          "upper_callbacks": 131,
+          "issued_holding": 2463,
+          "actual_launches": 131,
+          "vehicle_returns": 120,
+          "arrivals": 2509,
+          "departures": 2503
+        },
+        "prefix_exact": true,
+        "first_shadow_exact": true
+      },
+      "upper_authority": {
+        "context": 1,
+        "first_query_exact": true,
+        "cleared": true,
+        "first_admitted_tasks": [
+          {
+            "trip_id": 105,
+            "reserved_bus_id": 10,
+            "reference_bus_id": 10,
+            "candidate_bus_id": 10,
+            "actual_advance_s": 1.0,
+            "executed_plan_advance_s": 1.3999999841034878,
+            "native_plan_preserved": true,
+            "proposed_plan_executed": true,
+            "passed": true
+          }
+        ],
+        "supported_queries": 8,
+        "passed": true,
+        "upper_minus_reference": {
+          "passenger_person_s": -15847.0,
+          "journey_min": -0.013704000000000605,
+          "cv_squared": 0.00014007583253853456,
+          "readiness_delay_s": 0.6832060000000126,
+          "holding_s_per_trip": -0.11450400000001082,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": -15290.0,
+          "onboard_person_s": -557.0,
+          "backlog_trip_s": 179.0,
+          "holding_person_s": 840.0,
+          "dispatch_gap_mean_s": 0.034615384615392486,
+          "dispatch_gap_variance_s2": 12.627736686390108,
+          "dispatch_cv_squared": 9.143791819647001e-05,
+          "public_launch_delay_total_s": 179.0,
+          "readiness_delay_total_s": 179.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        }
+      },
+      "recording": {
+        "queries": 5200,
+        "prepares": 5240,
+        "role_phase_support": {
+          "front": {
+            "no_native_front": 40,
+            "known_zero": 5040,
+            "supported": 160
+          },
+          "current": {
+            "known_zero": 5080,
+            "supported": 160
+          },
+          "follower": {
+            "no_native_follower": 852,
+            "known_zero": 4252,
+            "supported": 136
+          }
+        },
+        "global_rng_unchanged": true,
+        "observer_native_call_delta": 0
+      },
+      "outcomes": {
+        "v107": {
+          "passenger_person_s": 17642749.0,
+          "journey_min": 15.266017,
+          "cv_squared": 0.04866976838452305,
+          "readiness_delay_s": 86.908397,
+          "holding_s_per_trip": 150.896947,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 4359267.0,
+          "onboard_person_s": 13283482.0,
+          "backlog_trip_s": 22770.0,
+          "holding_person_s": 949485.0,
+          "dispatch_gap_mean_s": 361.4153846153846,
+          "dispatch_gap_variance_s2": 3558.758224852071,
+          "dispatch_cv_squared": 0.027244899662470824,
+          "public_launch_delay_total_s": 22781.0,
+          "readiness_delay_total_s": 22770.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        },
+        "upper": {
+          "passenger_person_s": 17623870.0,
+          "journey_min": 15.249691,
+          "cv_squared": 0.048733687767908124,
+          "readiness_delay_s": 87.751908,
+          "holding_s_per_trip": 150.763359,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 4340710.0,
+          "onboard_person_s": 13283160.0,
+          "backlog_trip_s": 22991.0,
+          "holding_person_s": 950430.0,
+          "dispatch_gap_mean_s": 361.4653846153846,
+          "dispatch_gap_variance_s2": 3559.65649408284,
+          "dispatch_cv_squared": 0.02724423784318764,
+          "public_launch_delay_total_s": 23002.0,
+          "readiness_delay_total_s": 22991.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        },
+        "joint": {
+          "passenger_person_s": 17626902.0,
+          "journey_min": 15.252313,
+          "cv_squared": 0.04880984421706158,
+          "readiness_delay_s": 87.591603,
+          "holding_s_per_trip": 150.782443,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 4343977.0,
+          "onboard_person_s": 13282925.0,
+          "backlog_trip_s": 22949.0,
+          "holding_person_s": 950325.0,
+          "dispatch_gap_mean_s": 361.45,
+          "dispatch_gap_variance_s2": 3571.3859615384613,
+          "dispatch_cv_squared": 0.027336337580667294,
+          "public_launch_delay_total_s": 22960.0,
+          "readiness_delay_total_s": 22949.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        }
+      },
+      "joint_minus": {
+        "v107": {
+          "passenger_person_s": -15847.0,
+          "journey_min": -0.013704000000000605,
+          "cv_squared": 0.00014007583253853456,
+          "readiness_delay_s": 0.6832060000000126,
+          "holding_s_per_trip": -0.11450400000001082,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": -15290.0,
+          "onboard_person_s": -557.0,
+          "backlog_trip_s": 179.0,
+          "holding_person_s": 840.0,
+          "dispatch_gap_mean_s": 0.034615384615392486,
+          "dispatch_gap_variance_s2": 12.627736686390108,
+          "dispatch_cv_squared": 9.143791819647001e-05,
+          "public_launch_delay_total_s": 179.0,
+          "readiness_delay_total_s": 179.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        },
+        "upper": {
+          "passenger_person_s": 3032.0,
+          "journey_min": 0.002621999999998792,
+          "cv_squared": 7.615644915345832e-05,
+          "readiness_delay_s": -0.16030499999999392,
+          "holding_s_per_trip": 0.01908399999999233,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 3267.0,
+          "onboard_person_s": -235.0,
+          "backlog_trip_s": -42.0,
+          "holding_person_s": -105.0,
+          "dispatch_gap_mean_s": -0.015384615384618883,
+          "dispatch_gap_variance_s2": 11.729467455621489,
+          "dispatch_cv_squared": 9.209973747965547e-05,
+          "public_launch_delay_total_s": -42.0,
+          "readiness_delay_total_s": -42.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        }
+      },
+      "holding_vs_upper": {
+        "total_trip_delta_s": 5.0,
+        "direct_same_state_delta_s": -5.0,
+        "native_state_response_s": 10.0
+      },
+      "descriptive_joint_passed": false
+    },
+    {
+      "context": 2,
+      "actor": 933083,
+      "demand_day": 2151001,
+      "engineering_passed": true,
+      "checks": {
+        "physical_contract_exact": true,
+        "prepared_recording_complete": true,
+        "prefix_before_first_change_exact": true,
+        "first_change_matches_archived_shadow": true,
+        "live_commands_match_frozen_law": true,
+        "changed_commands_actually_executed": true,
+        "upper_first_admission_same_reserved_bus_advance": true,
+        "native_calls_and_random_sampling_preserved": true,
+        "all_trips_cleared": true,
+        "endpoint_metrics_complete": true
+      },
+      "execution": {
+        "queries": 5200,
+        "executed_changes": 3,
+        "increases": 1,
+        "decreases": 2,
+        "requested_changed_s": 35.0,
+        "executed_changed_s": 35.0,
+        "direct_vs_same_state_native_s": -15.0,
+        "direct_by_trip_s": {
+          "127": 5.0,
+          "129": -5.0,
+          "225": -15.0
+        }
+      },
+      "first_change": {
+        "query_index": 2546,
+        "event_seq": 5573,
+        "prepare_event_seq": 5572,
+        "time_s": 24254.0,
+        "native_bin": 0,
+        "selected_bin": 1,
+        "prefix_counts": {
+          "lower_policy_inputs": 2547,
+          "upper_commands": 46,
+          "upper_callbacks": 135,
+          "issued_holding": 2546,
+          "actual_launches": 135,
+          "vehicle_returns": 124,
+          "arrivals": 2588,
+          "departures": 2585
+        },
+        "prefix_exact": true,
+        "first_shadow_exact": true
+      },
+      "upper_authority": {
+        "context": 2,
+        "first_query_exact": true,
+        "cleared": true,
+        "first_admitted_tasks": [
+          {
+            "trip_id": 129,
+            "reserved_bus_id": 10,
+            "reference_bus_id": 10,
+            "candidate_bus_id": 10,
+            "actual_advance_s": 1.0,
+            "executed_plan_advance_s": 1.399999952314829,
+            "native_plan_preserved": true,
+            "proposed_plan_executed": true,
+            "passed": true
+          }
+        ],
+        "supported_queries": 3,
+        "passed": true,
+        "upper_minus_reference": {
+          "passenger_person_s": 4846.0,
+          "journey_min": 0.004009000000003482,
+          "cv_squared": 3.297620861114625e-05,
+          "readiness_delay_s": 0.2099230000000034,
+          "holding_s_per_trip": 0.01908399999999233,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 3571.0,
+          "onboard_person_s": 1275.0,
+          "backlog_trip_s": 55.0,
+          "holding_person_s": -250.0,
+          "dispatch_gap_mean_s": 0.06538461538463025,
+          "dispatch_gap_variance_s2": 9.208446745563378,
+          "dispatch_cv_squared": 5.894251302812625e-05,
+          "public_launch_delay_total_s": 69.0,
+          "readiness_delay_total_s": 55.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        }
+      },
+      "recording": {
+        "queries": 5200,
+        "prepares": 5240,
+        "role_phase_support": {
+          "front": {
+            "no_native_front": 40,
+            "known_zero": 5140,
+            "supported": 60
+          },
+          "current": {
+            "known_zero": 5180,
+            "supported": 60
+          },
+          "follower": {
+            "no_native_follower": 849,
+            "known_zero": 4340,
+            "supported": 51
+          }
+        },
+        "global_rng_unchanged": true,
+        "observer_native_call_delta": 0
+      },
+      "outcomes": {
+        "v107": {
+          "passenger_person_s": 22014004.0,
+          "journey_min": 18.219481,
+          "cv_squared": 0.05422347483317854,
+          "readiness_delay_s": 135.099237,
+          "holding_s_per_trip": 153.51145,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 7780344.0,
+          "onboard_person_s": 14233660.0,
+          "backlog_trip_s": 35396.0,
+          "holding_person_s": 1032985.0,
+          "dispatch_gap_mean_s": 361.46153846153845,
+          "dispatch_gap_variance_s2": 4158.402366863905,
+          "dispatch_cv_squared": 0.03182748513049984,
+          "public_launch_delay_total_s": 35406.0,
+          "readiness_delay_total_s": 35396.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        },
+        "upper": {
+          "passenger_person_s": 22018948.0,
+          "journey_min": 18.223571,
+          "cv_squared": 0.05432850260254158,
+          "readiness_delay_s": 135.416031,
+          "holding_s_per_trip": 153.625954,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 7783919.0,
+          "onboard_person_s": 14235029.0,
+          "backlog_trip_s": 35479.0,
+          "holding_person_s": 1032955.0,
+          "dispatch_gap_mean_s": 361.5269230769231,
+          "dispatch_gap_variance_s2": 4172.080044378698,
+          "dispatch_cv_squared": 0.031920621768152066,
+          "public_launch_delay_total_s": 35489.0,
+          "readiness_delay_total_s": 35479.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        },
+        "joint": {
+          "passenger_person_s": 22018850.0,
+          "journey_min": 18.22349,
+          "cv_squared": 0.05425645104178969,
+          "readiness_delay_s": 135.30916,
+          "holding_s_per_trip": 153.530534,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 7783915.0,
+          "onboard_person_s": 14234935.0,
+          "backlog_trip_s": 35451.0,
+          "holding_person_s": 1032735.0,
+          "dispatch_gap_mean_s": 361.5269230769231,
+          "dispatch_gap_variance_s2": 4167.610813609468,
+          "dispatch_cv_squared": 0.03188642764352797,
+          "public_launch_delay_total_s": 35475.0,
+          "readiness_delay_total_s": 35451.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        }
+      },
+      "joint_minus": {
+        "v107": {
+          "passenger_person_s": 4846.0,
+          "journey_min": 0.004009000000003482,
+          "cv_squared": 3.297620861114625e-05,
+          "readiness_delay_s": 0.2099230000000034,
+          "holding_s_per_trip": 0.01908399999999233,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 3571.0,
+          "onboard_person_s": 1275.0,
+          "backlog_trip_s": 55.0,
+          "holding_person_s": -250.0,
+          "dispatch_gap_mean_s": 0.06538461538463025,
+          "dispatch_gap_variance_s2": 9.208446745563378,
+          "dispatch_cv_squared": 5.894251302812625e-05,
+          "public_launch_delay_total_s": 69.0,
+          "readiness_delay_total_s": 55.0,
+          "public_early_launch_total_s": 3.0,
+          "public_early_launch_count": 3
+        },
+        "upper": {
+          "passenger_person_s": -98.0,
+          "journey_min": -8.099999999799934e-05,
+          "cv_squared": -7.20515607518929e-05,
+          "readiness_delay_s": -0.10687100000001237,
+          "holding_s_per_trip": -0.09542000000001849,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": -4.0,
+          "onboard_person_s": -94.0,
+          "backlog_trip_s": -28.0,
+          "holding_person_s": -220.0,
+          "dispatch_gap_mean_s": 0.0,
+          "dispatch_gap_variance_s2": -4.4692307692303075,
+          "dispatch_cv_squared": -3.4194124624097044e-05,
+          "public_launch_delay_total_s": -14.0,
+          "readiness_delay_total_s": -28.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        }
+      },
+      "holding_vs_upper": {
+        "total_trip_delta_s": -25.0,
+        "direct_same_state_delta_s": -15.0,
+        "native_state_response_s": -10.0
+      },
+      "descriptive_joint_passed": false
+    },
+    {
+      "context": 3,
+      "actor": 933083,
+      "demand_day": 2151002,
+      "engineering_passed": true,
+      "checks": {
+        "physical_contract_exact": true,
+        "prepared_recording_complete": true,
+        "prefix_before_first_change_exact": true,
+        "first_change_matches_archived_shadow": true,
+        "live_commands_match_frozen_law": true,
+        "changed_commands_actually_executed": true,
+        "upper_first_admission_same_reserved_bus_advance": true,
+        "native_calls_and_random_sampling_preserved": true,
+        "all_trips_cleared": true,
+        "endpoint_metrics_complete": true
+      },
+      "execution": {
+        "queries": 5200,
+        "executed_changes": 13,
+        "increases": 6,
+        "decreases": 7,
+        "requested_changed_s": 125.0,
+        "executed_changed_s": 125.0,
+        "direct_vs_same_state_native_s": -5.0,
+        "direct_by_trip_s": {
+          "127": 5.0,
+          "131": 5.0,
+          "129": -10.0,
+          "135": -10.0,
+          "141": -5.0,
+          "147": -5.0,
+          "211": 5.0,
+          "215": 10.0,
+          "213": -5.0,
+          "227": 5.0
+        }
+      },
+      "first_change": {
+        "query_index": 2463,
+        "event_seq": 5393,
+        "prepare_event_seq": 5392,
+        "time_s": 23436.0,
+        "native_bin": 2,
+        "selected_bin": 3,
+        "prefix_counts": {
+          "lower_policy_inputs": 2464,
+          "upper_commands": 44,
+          "upper_callbacks": 131,
+          "issued_holding": 2463,
+          "actual_launches": 131,
+          "vehicle_returns": 120,
+          "arrivals": 2509,
+          "departures": 2503
+        },
+        "prefix_exact": true,
+        "first_shadow_exact": true
+      },
+      "upper_authority": {
+        "context": 3,
+        "first_query_exact": true,
+        "cleared": true,
+        "first_admitted_tasks": [
+          {
+            "trip_id": 105,
+            "reserved_bus_id": 10,
+            "reference_bus_id": 10,
+            "candidate_bus_id": 10,
+            "actual_advance_s": 1.0,
+            "executed_plan_advance_s": 1.3999999046354787,
+            "native_plan_preserved": true,
+            "proposed_plan_executed": true,
+            "passed": true
+          }
+        ],
+        "supported_queries": 8,
+        "passed": true,
+        "upper_minus_reference": {
+          "passenger_person_s": -15315.0,
+          "journey_min": -0.013244000000000256,
+          "cv_squared": 0.00013912300765957925,
+          "readiness_delay_s": 0.6832059999999984,
+          "holding_s_per_trip": -0.05725200000000541,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": -15011.0,
+          "onboard_person_s": -304.0,
+          "backlog_trip_s": 179.0,
+          "holding_person_s": 1405.0,
+          "dispatch_gap_mean_s": 0.034615384615392486,
+          "dispatch_gap_variance_s2": 12.635428994082758,
+          "dispatch_cv_squared": 9.146126807629829e-05,
+          "public_launch_delay_total_s": 179.0,
+          "readiness_delay_total_s": 179.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        }
+      },
+      "recording": {
+        "queries": 5200,
+        "prepares": 5240,
+        "role_phase_support": {
+          "front": {
+            "no_native_front": 40,
+            "known_zero": 5040,
+            "supported": 160
+          },
+          "current": {
+            "known_zero": 5080,
+            "supported": 160
+          },
+          "follower": {
+            "no_native_follower": 854,
+            "known_zero": 4250,
+            "supported": 136
+          }
+        },
+        "global_rng_unchanged": true,
+        "observer_native_call_delta": 0
+      },
+      "outcomes": {
+        "v107": {
+          "passenger_person_s": 17643962.0,
+          "journey_min": 15.267066,
+          "cv_squared": 0.048796882876172,
+          "readiness_delay_s": 87.0,
+          "holding_s_per_trip": 151.335878,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 4356937.0,
+          "onboard_person_s": 13287025.0,
+          "backlog_trip_s": 22794.0,
+          "holding_person_s": 950630.0,
+          "dispatch_gap_mean_s": 361.4153846153846,
+          "dispatch_gap_variance_s2": 3582.9889940828402,
+          "dispatch_cv_squared": 0.02743040394085271,
+          "public_launch_delay_total_s": 22841.0,
+          "readiness_delay_total_s": 22794.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        },
+        "upper": {
+          "passenger_person_s": 17625471.0,
+          "journey_min": 15.251075,
+          "cv_squared": 0.048856234205100414,
+          "readiness_delay_s": 87.843511,
+          "holding_s_per_trip": 151.240458,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 4338660.0,
+          "onboard_person_s": 13286811.0,
+          "backlog_trip_s": 23015.0,
+          "holding_person_s": 951960.0,
+          "dispatch_gap_mean_s": 361.4653846153846,
+          "dispatch_gap_variance_s2": 3583.918032544379,
+          "dispatch_cv_squared": 0.027429926300876345,
+          "public_launch_delay_total_s": 23062.0,
+          "readiness_delay_total_s": 23015.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        },
+        "joint": {
+          "passenger_person_s": 17628647.0,
+          "journey_min": 15.253822,
+          "cv_squared": 0.04893600588383158,
+          "readiness_delay_s": 87.683206,
+          "holding_s_per_trip": 151.278626,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 4341926.0,
+          "onboard_person_s": 13286721.0,
+          "backlog_trip_s": 22973.0,
+          "holding_person_s": 952035.0,
+          "dispatch_gap_mean_s": 361.45,
+          "dispatch_gap_variance_s2": 3595.624423076923,
+          "dispatch_cv_squared": 0.02752186520892901,
+          "public_launch_delay_total_s": 23020.0,
+          "readiness_delay_total_s": 22973.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        }
+      },
+      "joint_minus": {
+        "v107": {
+          "passenger_person_s": -15315.0,
+          "journey_min": -0.013244000000000256,
+          "cv_squared": 0.00013912300765957925,
+          "readiness_delay_s": 0.6832059999999984,
+          "holding_s_per_trip": -0.05725200000000541,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": -15011.0,
+          "onboard_person_s": -304.0,
+          "backlog_trip_s": 179.0,
+          "holding_person_s": 1405.0,
+          "dispatch_gap_mean_s": 0.034615384615392486,
+          "dispatch_gap_variance_s2": 12.635428994082758,
+          "dispatch_cv_squared": 9.146126807629829e-05,
+          "public_launch_delay_total_s": 179.0,
+          "readiness_delay_total_s": 179.0,
+          "public_early_launch_total_s": 8.0,
+          "public_early_launch_count": 8
+        },
+        "upper": {
+          "passenger_person_s": 3176.0,
+          "journey_min": 0.002746999999999389,
+          "cv_squared": 7.97716787311678e-05,
+          "readiness_delay_s": -0.16030500000000814,
+          "holding_s_per_trip": 0.03816800000001308,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "waiting_person_s": 3266.0,
+          "onboard_person_s": -90.0,
+          "backlog_trip_s": -42.0,
+          "holding_person_s": 75.0,
+          "dispatch_gap_mean_s": -0.015384615384618883,
+          "dispatch_gap_variance_s2": 11.706390532543992,
+          "dispatch_cv_squared": 9.193890805266405e-05,
+          "public_launch_delay_total_s": -42.0,
+          "readiness_delay_total_s": -42.0,
+          "public_early_launch_total_s": 0.0,
+          "public_early_launch_count": 0
+        }
+      },
+      "holding_vs_upper": {
+        "total_trip_delta_s": 10.0,
+        "direct_same_state_delta_s": -5.0,
+        "native_state_response_s": 15.0
+      },
+      "descriptive_joint_passed": false
+    }
+  ],
+  "tests": 40,
+  "source": "f61f6c9734",
+  "completed_checks": 4,
+  "started_paths": 4,
+  "max_paths": 4,
+  "all_engineering_passed": true,
+  "descriptive_joint_passed": false,
+  "training_updates": 0,
+  "new_futures": 0,
+  "main_policy_changed": false
+}

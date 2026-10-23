@@ -40,3 +40,13 @@ compares live native/sidecar prefixes against the saved upper path;afterward it
 checks actual holding and endpoints. Server tests gate c0,c0 engineering gates
 the other3 regardless of service benefit. A separate authorization records this
 execution without changing the sealed protocol. No extra reference replays.
+
+Execution source f61f6c9734,t211263(high/manual,node006),exit0:40 tests and
+all4 engineering gates passed,4/4 paths used,no retry. Actual changes3/13/3/13;
+all requested holding executed. Descriptive joint gate FAILED in every context:
+versus V107,all4 have higher CV2,readiness and total public delay. Versus upper,
+day2151001 improves all four service criteria,but day2151002 worsens passenger
+time and CV2. Holding feedback offsets direct reductions in3/4 paths,not all4.
+Only the32310-byte summary returned;raw traces/checkpoints remain remote. Main
+stays frozen. Next:read-only decomposition of live quantization,subsequent native
+holding and supply-chain propagation;no retuning,replay or new training here.
