@@ -30,3 +30,24 @@ admit a separately budgeted passive/matched-future protocol;they do not prove
 passenger,CV2,readiness or total launch-delay improvement. Do not tune the law
 on these consumed paths. Summed hypothetical reductions on unchanged native
 states are requested dose,not a simulated trajectory or realized system benefit.
+
+Completed source cf90cfe637,t211338(high,node004;manual dispatch invoked),exit0,
+7 tests passed. Both5200-query paths retained;both request sets saved before
+evaluation labels were opened. H=0 changed zero requests. No replay,training,
+fit,shadow execution or main change. Local return is a compact receipt/log only.
+
+V107/upper:2264/2264 supported requests,1554/1548 changed;requested reductions
+16995/16945s on native states,NOT realized savings. Changed locations retain
+0.383598/0.381258 of native local predicted gain;1158/1148 changes reach the
+compensation floor. Exposure covers4670 future+290 due queries out of5200.
+Requested dose overlaps return-bound-late cycles(9205/9200s) AND cycles with
+observed postreturn wait(7790/7745s);the latter is not available slack. Native
+fixed-neighbour-benefit locations contain14680/14660s of requested reduction;
+this labels native-vs-zero diagnostics,not candidate harm or benefit.
+
+Decision:shadow support exists,but this broad exposure gate and large predicted
+compensation loss do not justify continuous execution. Keep V238 frozen. Next
+design a separately budgeted matched-future comparison including the same
+H-response without the supply-association condition,in addition to V107 and
+H=0 controls,to distinguish resource coordination from generic holding reduction.
+Do not tune the law on these paths or promote it on a summed requested dose.
