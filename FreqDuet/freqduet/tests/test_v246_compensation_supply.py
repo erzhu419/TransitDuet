@@ -7,12 +7,12 @@ from preregister_freqduet_v246_compensation_supply import (
 
 
 def inputs():
-    p = dict(cycle_key=[2,9,1], front_identity=[1,7,False], prepare_s=150.,prepare_seq=10,
+    p = dict(cycle_key=[2,9,1], front_identity=[1,7,False], prepare_s=150.,prepare_seq=10,prepare_order=100,
         forward_s=30.,backward_s=270.,
-        own=dict(launch_s=100.,launch_seq=1,holding_s=10.),
-        front=dict(launch_s=80.,departure_s=120.,departure_seq=8,holding_s=5.))
-    q = dict(query_s=151.,query_seq=11,native_bin=5,onboard=10,terminal_masked=False)
-    v = dict(cycle_key=[2,9,1],query_s=151.,native_event_seq=11,executed_holding_s=12.,
+        own=dict(launch_s=100.,launch_order=20,holding_s=10.),
+        front=dict(launch_s=80.,departure_s=120.,departure_order=90,holding_s=5.))
+    q = dict(query_s=152.,query_seq=11,query_order=110,native_bin=5,onboard=10,terminal_masked=False)
+    v = dict(cycle_key=[2,9,1],query_s=152.,native_event_seq=11,executed_holding_s=12.,
         own_association=dict(obligation=dict(trip_id=20,kind='due')),
         target_profile=dict(uncovered_due=[20]))
     return p,q,v
@@ -72,13 +72,20 @@ class CompensationSupplyTest(unittest.TestCase):
         self.assertEqual(persistent_change(None,p)['status'],'forward_components_unavailable')
 
     def test_future_front_departure_is_not_a_completed_prefix(self):
-        p,_,_ = inputs();p['front']['departure_seq']=12
+        p,_,_ = inputs();p['front']['departure_order']=120
         with self.assertRaises(AssertionError):completed_forward_parts(p)
+
+    def test_native_and_sidecar_ordinals_are_never_compared(self):
+        p,q,v=inputs()
+        self.assertGreater(p['front']['departure_order'],q['query_seq'])
+        self.assertIsNotNone(evidence_frontier(p,q,v,range(7))['prepared_parts'])
+        q['query_order']=99
+        with self.assertRaises(AssertionError):evidence_frontier(p,q,v,range(7))
 
     def test_persistence_separates_new_disturbance_from_executed_holding(self):
         p,_,_ = inputs();c=copy.deepcopy(p)
-        c.update(prepare_s=160.,prepare_seq=20,forward_s=35.)
-        c['own']['holding_s']=15.;c['front'].update(departure_s=125.,departure_seq=18)
+        c.update(prepare_s=160.,prepare_seq=20,prepare_order=200,forward_s=35.)
+        c['own']['holding_s']=15.;c['front'].update(departure_s=125.,departure_order=180)
         r=persistent_change(p,c)
         self.assertEqual(r['parts'],dict(release_s=0.,executed_holding_gap_s=5.,nonholding_elapsed_gap_s=0.))
         c['front_identity']=[3,8,False]

@@ -18,8 +18,8 @@ CONSTRAINTS = ('cv_squared', 'readiness_delay_s', 'public_launch_delay_total_s',
 def forward_parts_available(prepared):
     return prepared['forward_s'] is not None and all(
         prepared[role].get(field) is not None for role, fields in (
-            ('own', ('launch_s','launch_seq','holding_s')),
-            ('front', ('launch_s','departure_s','departure_seq','holding_s'))) for field in fields)
+            ('own', ('launch_s','launch_order','holding_s')),
+            ('front', ('launch_s','departure_s','departure_order','holding_s'))) for field in fields)
 
 
 def completed_forward_parts(prepared):
@@ -27,8 +27,8 @@ def completed_forward_parts(prepared):
     own, front = prepared['own'], prepared['front']
     now = prepared['prepare_s']
     assert own['launch_s'] <= now and front['launch_s'] <= front['departure_s'] <= now
-    assert own['launch_seq'] < prepared['prepare_seq']
-    assert front['departure_seq'] < prepared['prepare_seq']
+    assert own['launch_order'] < prepared['prepare_order']
+    assert front['departure_order'] < prepared['prepare_order']
     assert own['holding_s'] >= 0 and front['holding_s'] >= 0
     release = own['launch_s']-front['launch_s']
     holding = own['holding_s']-front['holding_s']
@@ -47,6 +47,7 @@ def persistent_change(previous, current):
     if not same:
         return dict(status='cycle_or_front_changed', parts=None)
     assert previous['prepare_seq'] < current['prepare_seq']
+    assert previous['prepare_order'] < current['prepare_order']
     a, b = completed_forward_parts(previous), completed_forward_parts(current)
     delta = {k: b[k]-a[k] for k in a}
     assert abs(sum(delta.values())-(current['forward_s']-previous['forward_s'])) <= 1e-8
@@ -58,6 +59,7 @@ def evidence_frontier(prepared, query, view, feasible_bins):
     assert prepared['cycle_key'] == view['cycle_key']
     assert prepared['prepare_s'] <= query['query_s'] == view['query_s']
     assert prepared['prepare_seq'] < query['query_seq'] == view['native_event_seq']
+    assert prepared['prepare_order'] < query['query_order']
     prepare_holding = prepared['own'].get('holding_s')
     if prepare_holding is not None:
         assert view['executed_holding_s'] >= prepare_holding
@@ -127,6 +129,9 @@ def registration(source):
     return dict(stage='v246_compensation_supply_identification_preregistration', source=source,
         authorization='Design seal,synthetic reference checks and source-interface inspection only.',
         parent_sources=dict(accounting='39cd832b46', elapsed='8050fd604e'),
+        supersedes_design_source='d5ebe1c77d',
+        amendment='Separate original native event_seq from original V224 sidecar order. '
+            'Preserve the earlier seal;no trajectory,criterion or action budget changed.',
         budget=dict(trajectory_scans=0, shadow_archive_queries=0, passive_paths=0,
             intervention_paths=0, new_futures=0, model_fits=0, training_updates=0),
         frozen=dict(fleet=12, holding_bins_s=list(ACTIONS), v238_source='b4b1d00203',
@@ -140,7 +145,10 @@ def registration(source):
         causal_state=dict(prepare='Keep original F/B,target,own/front/follower identities and '
             'native PREPARE/event provenance. Record own actual launch and executed H AT '
             'PREPARE plus the already completed matched-front departure/launch/H;never '
-            'substitute query H into prepare. Rear ETA stays a native prediction,not a '
+            'substitute query H into prepare. Launch/departure/prepare/query ORDER comparisons '
+            'stay within original V224 sidecar order;native prepare/query SEQ comparisons '
+            'stay within original EventClock. Join the existing prepare occurrence;never '
+            'compare numeric ordinals across domains. Rear ETA stays a native prediction,not a '
             'completed future identity or timing coordinate.',
             query='Current posted plans/last-write versions,ready FIFO inventory,all incoming '
                 'positions,query load/mask/native bin and separate query H,joined by exact '
@@ -237,7 +245,7 @@ def source_audit(scripts):
         prepare_holding_retained='holding_s' in current,
         required_extension=['own executed H sampled at native prepare,not query',
             'matched completed-front launch/H/departure timing with original occurrence',
-            'explicit supporting event/identity/clock joins'],
+            'explicit supporting event/identity/clock joins,with native and V224 domains separate'],
         unresolved_rear='No completed future rear timing permitted.',
         next_gate='Seal a minimal passive extension contract and no-op equivalence budget '
             'separately;no capture or replay is authorized by this field audit.')
@@ -266,6 +274,7 @@ def main():
     path.write_text(json.dumps(protocol,indent=2)+'\n')
     summary = dict(status='v246_identification_and_persistent_state_protocol_sealed',
         source=a.source,tests_passed=result.testsRun,budget=protocol['budget'],
+        supersedes_design_source=protocol['supersedes_design_source'],clock_domains_separated=True,
         source_interfaces=audit,protocol_path=str(path),runtime_connected=False,
         selector_defined=False,model_fits=0,replay_authorized=False,formal_authorized=False,
         main_policy_changed=False,v238_changed=False,next_step=audit['next_gate'])
