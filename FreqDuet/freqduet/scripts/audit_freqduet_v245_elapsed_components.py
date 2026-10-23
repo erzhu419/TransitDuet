@@ -2,7 +2,7 @@
 """Split the diagnosed V245 other-elapsed term using saved stop clocks only."""
 
 import argparse
-from collections import defaultdict
+from collections import Counter, defaultdict
 import gzip
 import json
 from pathlib import Path
@@ -50,12 +50,13 @@ def analyze(root, parent_file, out, source):
     parent = json.loads(parent_file.read_text())
     assert parent['status'] == 'v245_readonly_holding_propagation_complete'
     assert parent['source'] == '39cd832b46'
-    paths = {}
+    paths, dispatches = {}, {}
     for arm in ARMS:
         with gzip.open(root/'records'/f'smoke_c0_{arm}.pkl.gz', 'rb') as stream:
             saved = pickle.load(stream)
         assert saved['source'] == 'b879b53b25'
         paths[arm] = split(saved['trace'])
+        dispatches[arm] = {r['trip']: r for r in saved['trace']['actual_launches']}
         close(paths[arm]['cv2'], saved['results']['cv_squared'], 'unchanged original CV2')
         del saved
         print('V245_ELAPSED_PREPARED '+arm, flush=True)
@@ -69,7 +70,13 @@ def analyze(root, parent_file, out, source):
         for short in ('release', 'holding'):
             close(parts[short+'__observed_nonholding_stop']+parts[short+'__remaining_travel_and_clock'],
                   prior[short+'_other'], 'collapsed '+short+'/other covariance')
-        contrasts[name] = parts
+        b, c = dispatches[baseline], dispatches[candidate]
+        shifts = [c[k]['actual_s']-b[k]['actual_s'] for k in b.keys() & c.keys()]
+        contrasts[name] = dict(cv2_parts=parts, actual_launches=dict(
+            matched=len(shifts), baseline_only=len(b.keys()-c.keys()), candidate_only=len(c.keys()-b.keys()),
+            same_bus=sum(b[k]['bus'] == c[k]['bus'] for k in b.keys() & c.keys()),
+            shift_counts=dict(Counter('earlier' if d < 0 else 'later' if d > 0 else 'unchanged' for d in shifts)),
+            total_shift_s=sum(shifts), minimum_shift_s=min(shifts), maximum_shift_s=max(shifts)))
     result = dict(status='v245_observed_stop_split_complete', source=source,
         parent_analysis_source='39cd832b46', contrasts=contrasts, original_and_parent_closures_passed=True,
         new_rollouts=0, training_updates=0, controller_changed=False, v238_changed=False, formal_started=False,
