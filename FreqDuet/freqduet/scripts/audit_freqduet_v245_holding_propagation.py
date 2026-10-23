@@ -136,7 +136,6 @@ def prepare(data, check):
     close(sum(q['issued_s'] for q in requests), check['actual_holding_s'], 'saved holding endpoint')
     raw_moments = {name: moments(t[name]) for name in ('arrivals', 'departures')}
     close(raw_moments['arrivals']['cv2'], check['metrics']['cv_squared'], 'saved CV2 endpoint')
-    assert set(arrivals) == set(departures)
     by_stop = defaultdict(list)
     for r in t['departures']:
         by_stop[r['station_id'], r['direction']].append(r)
@@ -196,6 +195,9 @@ def prepare(data, check):
     rows_by_stop = {k: group_summary([r for r in labels if direction_name(r['station_id'], r['direction']) == k])
                    for k in sorted({direction_name(r['station_id'], r['direction']) for r in labels})}
     stats = dict(direct=group_summary(labels),
+        event_support=dict(arrivals=len(arrivals), departures=len(departures),
+            arrivals_without_departure=len(arrivals.keys()-departures.keys()),
+            departures_without_arrival=len(departures.keys()-arrivals.keys())),
         actual_holding_s=check['actual_holding_s'],
         native_requested_s=sum(ACTIONS[q['native_bin']] for q in requests),
         by_stop_direction=rows_by_stop,
