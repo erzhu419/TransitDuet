@@ -20,3 +20,17 @@ the public timetable. Reproduce V226 readiness,public-delay and idle deltas.
 Keep detailed trips remote. These are observed-path clock identities;neither
 idle nor plan-open residual is automatic recoverable slack. No alternative
 dispatch or passenger counterfactual is evaluated or selected on these days.
+
+Source4ae335a897,t211276(high/manual,node006),exit0:9 tests and4 contexts passed.
+All posted plans,88 fresh inventory snapshots/path,FIFO choices and V226 totals
+reproduce. In all12 paths,the entire recorded readiness delay is no-ready-fleet
+time;post-eligible plan blocks and open/ready residual are both0. Terminal idle
+contains only plan-blocked time and the native next-tick return boundary.
+Upper-V107 readiness increments75/221/83/221s are therefore genuine supply waits.
+On day2151002,both actors have33 late same-bus launches:+249s launch and+249s
+inbound-return difference,0 idle change. Extra idle primarily accompanies other
+earlier returns with unchanged departure,not the late-launch chains.
+Next:locate the FIRST new inbound return delay,split inherited launch lag from
+holding and other elapsed,and then inspect observed service/run components.
+Do not cut legitimate pre-plan idle or claim spare slack. No new control result,
+replay,training or main switch. Only the42749-byte summary returned locally.
