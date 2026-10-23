@@ -75,9 +75,12 @@ def check_packet(packet):
     for role in ('front', 'current', 'follower'):
         phase = packet['phases'][role]
         assert set(FIELDS['role_phase']) <= phase.keys(), ('missing phase field', role)
-        if phase['status'] in ('supported', 'known_zero'):
+        if role == 'current':
+            assert phase['launch_order'] is not None, 'current trip launch was not recorded'
+        if phase['launch_order'] is not None:
             assert phase['launch_order'] < order
             assert all(phase[k] == packet[role][k] for k in ('trip_id', 'bus_id', 'direction'))
+        if phase['status'] in ('supported', 'known_zero'):
             value = shadow.launch_phase(phase, tuple(packet[role][k] for k in
                 ('trip_id', 'bus_id', 'direction')), order)
             assert value == phase['phase_s'] and value is not None
