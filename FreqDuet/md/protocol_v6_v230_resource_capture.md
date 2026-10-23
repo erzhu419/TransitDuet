@@ -74,3 +74,10 @@ authorization. The independent extension copies existing live queries and
 completed native event/callback records,leaving legacy and V224 counters alone.
 Synthetic tests and a read-only c0 archived-plan-prefix check run BEFORE a path
 starts. Use2 workers within the reserved4-worker cap;no shadow action executes.
+
+Implementation eec7a20c71,t211288(high/manual,node004):17 tests passed and both
+c0 archives reconstructed88 fresh snapshots,262 callbacks and262 complete
+physical cycles before any path started. The c0 V107/upper pair is now running;
+the remaining6 stay gated. Queued placement was moved from busy node006 to the
+shared-filesystem node004 without resubmission or any extra path. Passive
+runtime equivalence is not yet established by these preflight checks.
