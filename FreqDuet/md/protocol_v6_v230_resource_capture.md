@@ -77,7 +77,15 @@ starts. Use2 workers within the reserved4-worker cap;no shadow action executes.
 
 Implementation eec7a20c71,t211288(high/manual,node004):17 tests passed and both
 c0 archives reconstructed88 fresh snapshots,262 callbacks and262 complete
-physical cycles before any path started. The c0 V107/upper pair is now running;
-the remaining6 stay gated. Queued placement was moved from busy node006 to the
+physical cycles before any path started. Queued placement was moved from busy node006 to the
 shared-filesystem node004 without resubmission or any extra path. Passive
-runtime equivalence is not yet established by these preflight checks.
+runtime equivalence was not inferred from these preflight checks.
+
+The first c0 pair subsequently PASSED all10 engineering gates:legacy payload
+AND entire old sidecar are exactly unchanged. Each path has5200 complete query
+extensions,262 upper versions,262 completed cycles and0 open cycles. Each has
+4360 supported and840 missing-follower shadow rows;none are discarded. RNG and
+native-call checks pass;shadow execution,training and policy changes remain0.
+The conditional6 paths are now admitted under the same task/budget;c1 V107 and
+upper started after the recorded first-pair gate. Full8-path completion is
+pending. Only preflight and the tiny first-pair summary returned locally.
