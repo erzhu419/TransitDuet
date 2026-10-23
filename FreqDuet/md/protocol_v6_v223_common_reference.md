@@ -62,7 +62,18 @@ V107/main,original12 vehicles,V220 upper authority/cadence,actors/critics/duals,
 V151/V146/V167 and all other frozen predictors/calibrations remain unchanged.
 Run tests only via scheduler high/manual on node001--006;return a small log.
 
-Pre-launch engineering correction: queued t211238 was withdrawn before launch.
-The initial test oracle incorrectly assumed float32 action bins;the native
-`pilot.step.ACTIONS` is float64. Extract its unchanged assignment and rule
-function directly for the corrected oracle. No trajectory was read or run.
+Engineering correction: t211238 auto-launched before the queued-only withdrawal
+could acquire the scheduler lock. Its13 tests completed,but the initial oracle
+incorrectly assumed float32 action bins;discard that equivalence evidence.
+The native `pilot.step.ACTIONS` is float64. Corrected source7939ddaab6 extracts
+its unchanged assignment and rule function directly for a replacement test.
+Neither test version reads or runs a trajectory.
+
+## Result
+
+Corrected source7939ddaab6,t211240,high/manual on node006:13 tests passed,
+launcher exit0. Only the small test log and exit receipt returned. The kernel
+remains disconnected;archive scans,replays,training and new futures are all0.
+This passes the algebraic gate,not runtime equivalence,action authority or
+service efficacy. Next freeze the prepare-time identity/phase handoff and
+passive-equivalence budget before any runtime path;main remains unchanged.

@@ -163,3 +163,6 @@ See `protocol_v6_v223_common_reference.md`. Synthetic tests precede any passive
 runtime handoff;no archive scan,replay,training,new future or main switch. A1s
 own-phase offset only shifts the continuous request by.25s;do not force a bin
 or mistake algebraic consistency for executable authority or service benefit.
+Corrected V223 source7939ddaab6 passed13 tests on node006,t211240(high/manual,
+exit0). Next is a separately frozen prepare-time causal handoff/passive
+equivalence preflight;no runtime path or main switch has been started.
