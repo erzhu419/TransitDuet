@@ -39,3 +39,8 @@ equivalence,not passenger benefit or permission for interventions.
 Seal/tests run through scheduler high/manual on node001--006;only compact JSON
 or logs return locally. Next:implement the independent observer and obtain
 authorization for the two reserved starts,without changing controls.
+
+Sealed source6396ae6baa,t211315(high/manual,node004),exit0;7 synthetic tests
+passed and V230/V232/V233 small parent summaries matched. No archive was scanned
+and no passive path started. Only the compact receipt/log returned locally;
+online observer integration and empirical path equivalence remain the next step.
