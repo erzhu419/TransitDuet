@@ -24,3 +24,10 @@ Tests only,scheduler high/manual,server CPU;no rollout command in the entrypoint
 No new passive paths,real smoke,future opening,formal matrix or training. V240's
 two passive slots remain consumed;smoke6/formal96 remain closed. Synthetic
 acceptance cannot establish real-path execution or policy gains.
+
+Completed:source e7ae23d971,task t211359,node004,high/manual dispatch invoked,
+exit0;all13 synthetic tests passed. Real frozen callback composition resolves;
+toy-prefix/future/authority and sampled-issued-departed execution checks pass,
+including negative cases. No new real paths or futures,training or main change.
+Next requires separate authorization for the six fixed c0 smoke slots;102
+reserved starts remain available,with formal96 still closed.
