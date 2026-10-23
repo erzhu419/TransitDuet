@@ -21,3 +21,8 @@ Server scheduler high/manual;only the compact test receipt returns locally.
 
 Next:obtain separate authorization for c0_v107 then c0_upper under V234 gates.
 Synthetic equivalence is not empirical full-path equivalence or a control benefit.
+
+Completed source6c3397ff7f,t211319(high/manual,node004),exit0;all16 tests passed.
+Synthetic original payloads match exactly,and independent reconstruction validates
+cycle closure,observed links,unmatched/open states and recording failure gates.
+No archive scan or actual path started;both V234 slots remain unspent.
