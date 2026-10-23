@@ -67,3 +67,10 @@ collector_implemented and collection_authorized are both false. Only the tiny
 summary and test/exit log returned locally. Next implement the independent
 extension without modifying frozen collectors;passive execution still needs
 separate authorization under these8 reserved slots.
+
+The user has now authorized implementation and the c0-pair/conditional-six
+passive execution. Keep the sealed protocol unchanged;write separate execution
+authorization. The independent extension copies existing live queries and
+completed native event/callback records,leaving legacy and V224 counters alone.
+Synthetic tests and a read-only c0 archived-plan-prefix check run BEFORE a path
+starts. Use2 workers within the reserved4-worker cap;no shadow action executes.
