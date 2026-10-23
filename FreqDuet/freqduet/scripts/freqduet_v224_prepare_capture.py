@@ -71,6 +71,7 @@ def check_packet(packet):
         follower = packet['follower']
         assert follower['status'] == 'supported' and follower['direction'] == own['direction']
         assert follower['avl_sample_s'] == now and follower['avl_sample_order'] < order
+        assert follower['trip_identity_order'] < follower['avl_sample_order']
     for role in ('front', 'current', 'follower'):
         phase = packet['phases'][role]
         assert set(FIELDS['role_phase']) <= phase.keys(), ('missing phase field', role)
@@ -92,7 +93,7 @@ class PrepareCapture:
         self.by_prepare_seq, self.prepare_counts, self.query_counts = {}, Counter(), Counter()
         self.calls, self.checked, self.patches = Counter(), Counter(), []
         self.avl_objects, self.estimates, self.pending_projection = [], {}, None
-        self.sample_time, self.policies = None, set()
+        self.identity_sample, self.policies = None, set()
 
     def mark(self, kind, **values):
         row = dict(order=len(self.events), kind=kind, time_s=float(self.env.current_time), **values)
@@ -131,12 +132,10 @@ class PrepareCapture:
         from env.scenario import ScenarioTape
         self.runner, self.env = runner, runner.env
         bus_module = importlib.import_module(Bus.__module__)
-        sim_module = importlib.import_module(type(self.env).__module__)
-        self.watch(sim_module, 'freeze_avl_vehicle_snapshots', 'avl_tick',
-                   lambda v, a, k: self.sample(v, 'native_tick_start'))
-        self.watch(bus_module, 'freeze_avl_vehicle_snapshots', 'avl_inline',
-                   lambda v, a, k: self.sample(v, 'native_inline_fallback'))
-        self.watch(bus_module, 'estimate_follower_departure_gap', 'estimator', self.estimate)
+        self.watch(Bus, '_update_pre_action_follower_eta', 'follower_update',
+                   before=self.sample_identities)
+        self.watch(bus_module, 'estimate_follower_departure_gap', 'estimator', self.estimate,
+                   before=lambda a, k: self.sample(k['vehicles'], 'native_inline_snapshot'))
         self.watch(Bus, '_prepare_for_action', 'prepare', self.prepare)
         self.watch(type(self.env.headway_events), 'record_departure', 'departure', self.departure)
         self.watch(legacy.supply, 'project', 'supply_projection', self.projection)
@@ -161,13 +160,19 @@ class PrepareCapture:
 
     def sample(self, vehicles, origin):
         now = float(self.env.current_time)
-        if self.sample_time != now:
-            self.avl_objects.clear()
-            self.sample_time = now
+        self.avl_objects.clear()
+        assert self.identity_sample['time_s'] == now
         order = self.mark('avl_sample', origin=origin)
-        row = dict(order=order, time_s=now, origin=origin, vehicles=[asdict(v) for v in vehicles])
+        row = dict(order=order, time_s=now, origin=origin, vehicles=[asdict(v) for v in vehicles],
+                   identity_sample=copy.deepcopy(self.identity_sample))
         self.samples.append(row)
         self.avl_objects.append((vehicles, row))
+
+    def sample_identities(self, args, kwargs):
+        _, now, buses = args
+        self.identity_sample = dict(time_s=float(now), order=self.mark('avl_identities'),
+            vehicles=[dict(bus_id=int(b.bus_id), trip_id=int(b.trip_id), direction=bool(b.direction),
+                           on_route=bool(b.on_route)) for b in buses if b.on_route])
 
     def estimate(self, value, args, kwargs):
         snapshot = next((r for v, r in self.avl_objects if v is kwargs['vehicles']), None)
@@ -243,7 +248,7 @@ class PrepareCapture:
         ctx = cached_context(bus)
         order = self.mark('prepare', **identity)
         clock = dict(prepare_s=float(now), record_read_s=float(self.env.current_time),
-            pre_action_time_s=float(bus.pre_action_time_s), handoff_order=order,
+            pre_action_time_s=float(now), pre_action_clock_source='native_prepare_argument', handoff_order=order,
             legacy_prepare_event_seq=legacy['event_seq'], prepare_occurrence=self.prepare_counts[key])
         self.prepare_counts[key] += 1
         front = dict(dict.fromkeys(FIELDS['front']), status='no_native_front')
@@ -258,12 +263,16 @@ class PrepareCapture:
                             avl_sample_origin=snap['origin'], estimate_order=estimate['order'])
         if ctx['follower_evidence_valid']:
             assert estimate is not None and estimate['time_s'] == now
-            fid, bid = int(bus.pre_action_follower_trip_id), int(bus.pre_action_follower_bus_id)
-            assert (fid, bid) == (estimate['result']['follower_trip_id'], estimate['result']['follower_bus_id'])
+            bid = int(bus.pre_action_follower_bus_id)
+            assert bid == estimate['result']['follower_bus_id']
             frozen = next(v for v in estimate['snapshot']['vehicles'] if v['bus_id'] == bid)
-            assert frozen['on_route'] and frozen['trip_id'] == fid and frozen['direction'] == identity['direction']
+            sampled_identity = next(v for v in estimate['snapshot']['identity_sample']['vehicles'] if v['bus_id'] == bid)
+            fid = sampled_identity['trip_id']
+            assert frozen['on_route'] and sampled_identity['on_route']
+            assert frozen['direction'] == sampled_identity['direction'] == identity['direction']
             follower.update(status='supported', trip_id=fid, bus_id=bid, direction=identity['direction'],
-                            launch_order=self.launches[fid]['launch_order'])
+                launch_order=self.launches[fid]['launch_order'], trip_identity_source='native_follower_update_entry',
+                trip_identity_order=estimate['snapshot']['identity_sample']['order'])
         native = dict(forward_gap_s=ctx['forward_headway_s'], forward_valid=ctx['evidence_valid'],
             forward_source=ctx['evidence_source'], follower_gap_s=ctx['follower_departure_gap_s'],
             follower_valid=ctx['follower_evidence_valid'], follower_source=ctx['follower_evidence_source'],

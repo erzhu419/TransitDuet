@@ -1,4 +1,6 @@
 import copy
+from dataclasses import fields
+import inspect
 import random
 from types import SimpleNamespace
 import unittest
@@ -22,15 +24,17 @@ def fixture():
     capture.departures[5, 2, True] = dict(status='supported', trip_id=5, bus_id=2, direction=True,
         station_id=2, departure_s=200., departure_order=capture.mark('departure'), launch_order=0)
     capture.env.current_time = 500.
-    sample = dict(time_s=500., order=capture.mark('avl_sample'), origin='native_tick_start',
-                  vehicles=[dict(bus_id=4, trip_id=9, direction=True, on_route=True)])
+    identities = dict(time_s=500., order=capture.mark('avl_identities'),
+                      vehicles=[dict(bus_id=4, trip_id=9, direction=True, on_route=True)])
+    sample = dict(time_s=500., order=capture.mark('avl_sample'), origin='native_inline_snapshot',
+                  vehicles=[dict(bus_id=4, direction=True, on_route=True)], identity_sample=identities)
     capture.estimates[3] = dict(time_s=500., order=capture.mark('estimate'), snapshot=sample,
-                              result=dict(follower_trip_id=9, follower_bus_id=4))
+                              result=dict(follower_bus_id=4))
     bus = SimpleNamespace(trip_id=7, bus_id=3, direction=True, last_station=SimpleNamespace(station_id=2),
-        pre_action_time_s=500., pre_action_forward_headway=300., _target_headway=360.,
+        pre_action_forward_headway=300., _target_headway=360.,
         pre_action_forward_headway_source='matched_departure_event', forward_predecessor_trip_id=5,
         pre_action_follower_departure_gap=420., pre_action_follower_source='same_time_avl_journey_speed_eta',
-        pre_action_follower_trip_id=9, pre_action_follower_bus_id=4)
+        pre_action_follower_bus_id=4)
     with capture.read('prepare'):
         capture.prepare(None, (bus, 500.), {})
     q = dict(trip_id=7, bus_id=3, station_id=2, direction=True, prepare_event_seq=77,
@@ -45,6 +49,18 @@ def basis(**kw):
 
 
 class PrepareCaptureTest(unittest.TestCase):
+    def test_frozen_runtime_uses_inline_snapshot_and_cached_bus_identity(self):
+        from env.bus import Bus
+        from env.scenario import ScenarioTape
+        from lower.causal_follower_eta import AVLVehicleSnapshot, FollowerDepartureEstimate
+        self.assertEqual(tuple(inspect.signature(Bus._update_pre_action_follower_eta).parameters),
+                         ('self', 'current_time', 'bus_all'))
+        self.assertEqual([f.name for f in fields(AVLVehicleSnapshot)],
+            ['bus_id', 'direction', 'on_route', 'progress_m', 'launch_time_s',
+             'current_speed_mps', 'route_speed_mps'])
+        self.assertIn('follower_bus_id', {f.name for f in fields(FollowerDepartureEstimate)})
+        self.assertTrue(callable(ScenarioTape._rng) and callable(ScenarioTape._stream_rng))
+
     def test_delivered_phase_uses_ticks_not_continuous_plan(self):
         r = seal_launch_phase(basis(), 7, 3, True, 99.2, 100., 1, 1.)
         self.assertEqual((r['status'], r['phase_s']), ('supported', -1.))

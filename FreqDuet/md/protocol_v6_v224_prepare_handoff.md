@@ -87,3 +87,15 @@ Sealed source282f0d884b,t211242(high/manual,node006),exit0:8 synthetic contract
 tests passed. Server protocol.json is frozen;only the small status/log returned.
 Started paths,archive scans,training and new futures are all0;launch_authorized
 is false. No collector was attached and runtime equivalence remains untested.
+
+## Authorized implementation
+
+The user subsequently authorized the8 passive slots,with c0 gating the other6.
+Keep the sealed protocol unchanged;record this approval in a separate execution
+authorization. Frozen V9 builds immutable AVL snapshots INLINE in its native
+follower update,not through the newer live tree's tick-freeze API. Copy those
+actual estimator arguments and returned bus identity. The old snapshot lacks
+trip IDs:join the selected physical bus to trip/direction copied at entry to
+that SAME native update,not at query. Record this provenance explicitly. Its
+prepare argument supplies the pre-action clock;do not add a missing native bus
+attribute or claim it was present. No estimator,control rule or clock changes.
