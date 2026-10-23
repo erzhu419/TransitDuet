@@ -28,7 +28,13 @@ class CommonReferenceTest(unittest.TestCase):
         source = Path(__file__).resolve().parents[1]/'scripts/run_freqduet_v106_service_tradeoff.py'
         node = next(n for n in ast.parse(source.read_text()).body
                     if isinstance(n, ast.FunctionDef) and n.name == 'rule_action')
-        namespace = dict(np=np, pilot=SimpleNamespace(step=SimpleNamespace(ACTIONS=np.array(ACTIONS, np.float32))))
+        step_source = source.with_name('freqduet_system_policy_step.py')
+        bins = next(n for n in ast.parse(step_source.read_text()).body
+                    if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'ACTIONS'
+                                                        for t in n.targets))
+        step_namespace = dict(np=np)
+        exec(compile(ast.Module(body=[bins], type_ignores=[]), str(step_source), 'exec'), step_namespace)
+        namespace = dict(np=np, pilot=SimpleNamespace(step=SimpleNamespace(ACTIONS=step_namespace['ACTIONS'])))
         exec(compile(ast.Module(body=[node], type_ignores=[]), str(source), 'exec'), namespace)
         cls.native_rule = staticmethod(namespace['rule_action'])
 
@@ -42,7 +48,7 @@ class CommonReferenceTest(unittest.TestCase):
                                      self.native_rule(c, 'bilateral', .25, np.array(mask)))
         self.assertEqual(command(context(300., 320.), range(7), (0., 0., 0.))['bin'], 0)
 
-    def test_native_float32_quantization_near_every_boundary(self):
+    def test_native_quantization_near_every_boundary(self):
         for left, right in zip(ACTIONS[:-1], ACTIONS[1:]):
             for epsilon in (-1e-7, 0., 1e-7):
                 raw = (left+right)/2+epsilon

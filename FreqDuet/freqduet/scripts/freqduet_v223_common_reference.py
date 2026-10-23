@@ -46,8 +46,8 @@ def command(context, feasible_bins, phases=None):
     raw = native+correction
     clipped = np.clip(raw, 0., ACTIONS[-1])
     choices = np.array(sorted(feasible_bins), dtype=int)
-    # Preserve the frozen runtime's float32 bin-distance arithmetic as well as ties.
-    bins = np.asarray(ACTIONS, dtype=np.float32)
+    # Match pilot.step.ACTIONS, not the unrelated float32 policy probabilities.
+    bins = np.asarray(ACTIONS, dtype=float)
     selected = int(choices[np.argmin(np.abs(bins[choices]-clipped))])
     return dict(mode=mode, native_raw_s=native, phase_correction_s=correction,
                 raw_s=raw, clipped_s=float(clipped), bin=selected, action_s=ACTIONS[selected])

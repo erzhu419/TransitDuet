@@ -61,3 +61,8 @@ actual CV2,readiness,original-public delay and completion criteria.
 V107/main,original12 vehicles,V220 upper authority/cadence,actors/critics/duals,
 V151/V146/V167 and all other frozen predictors/calibrations remain unchanged.
 Run tests only via scheduler high/manual on node001--006;return a small log.
+
+Pre-launch engineering correction: queued t211238 was withdrawn before launch.
+The initial test oracle incorrectly assumed float32 action bins;the native
+`pilot.step.ACTIONS` is float64. Extract its unchanged assignment and rule
+function directly for the corrected oracle. No trajectory was read or run.
