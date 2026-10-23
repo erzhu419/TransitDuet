@@ -19,6 +19,7 @@ def candidate(changed=True):
     if changed:
         q['context']['follower_departure_gap_s'] = 401.
         packet = capture.prepares[0]
+        packet['context']['follower_departure_gap_s'] = 401.
         packet['native']['follower_gap_s'] = 401.
         packet['phases']['current'].update(native_plan_s=151., native_tick_s=151.,
             reserved_bus_id=3, status='supported', phase_s=-1.)
