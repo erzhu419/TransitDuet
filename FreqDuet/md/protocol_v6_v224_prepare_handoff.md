@@ -36,6 +36,8 @@ including late launches. V107's unapplied shadow proposals are not phase offsets
 Never backfill from future actual neighbours,completed full-day labels or late
 onboard observations. Missing phase is not0;each field is present with a reason
 for legitimate absence. A missing recording is failure,not legitimate abstention.
+Only supported/known-zero rows enter V223's phase resolver;other statuses pass
+None even if an unsupported row happens to contain equal plan clocks.
 
 ## Reserved passive budget (not launched)
 
@@ -80,3 +82,8 @@ Zero differences stop intervention progression;nonzero differences only justify
 a separately budgeted actual-action smoke. Independent confirmation stays shut.
 All later execution uses scheduler high/manual,node001--006. Raw archives and
 sidecars stay remote;only small per-path checks/counts return locally.
+
+Sealed source282f0d884b,t211242(high/manual,node006),exit0:8 synthetic contract
+tests passed. Server protocol.json is frozen;only the small status/log returned.
+Started paths,archive scans,training and new futures are all0;launch_authorized
+is false. No collector was attached and runtime equivalence remains untested.

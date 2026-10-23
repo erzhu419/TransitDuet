@@ -172,3 +172,5 @@ passive budget against existing V221 references;no collection is launched.
 See `protocol_v6_v224_prepare_handoff.md`. Sidecar ordering must preserve the
 legacy clock exactly;every original action,timing and endpoint field must
 reproduce. Static seal tests alone do not establish runtime equivalence.
+V224 source282f0d884b sealed on node006,t211242(high/manual,exit0),with8
+contract tests passed and0 paths started. Collection remains unauthorized.
