@@ -17,3 +17,15 @@ Keep all four raw payloads remote;return per-path compact JSON/log checks only.
 
 Scheduler high,manual dispatch,node001--006. No training,shadow action,
 main-policy change or new future. A pass establishes passive equivalence only.
+
+Completed source6972500d67,t211322(high/manual,node004),exit0;5 preflight tests
+passed. V107 passed all13 gates before upper started;upper then passed all13.
+Exactly2 starts,2 checks,no retry. Each path has5200 queries,262 closed cycles,
+2 zero-query cycles,250 observed parent links and12 final returned cycles.
+Holding closes38375+1840=40215s(V107),38350+1860=40210s(upper).
+All original payloads match exactly;raw archives stay remote,only small summary
+and logs returned. Association identities did not change on these paths;this
+does not empirically exercise reassociation or demonstrate a control benefit.
+
+Next:use the saved fourth-sidecar states for a separately authorized read-only
+coordination-rule design;no automatic expansion,intervention or policy promotion.
