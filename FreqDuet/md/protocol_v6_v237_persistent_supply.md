@@ -31,3 +31,18 @@ retaining exclusions. One consumed actor/day supplies no efficacy CI.
 Scheduler high/manual,node001--006;all details remain remote,small JSON only
 locally. Next design decision follows accounting and missing causal evidence;
 this analysis admits no intervention or policy promotion.
+
+Completed raw source1f71d9678a,t211327(node004/high),exit0. Summary-only revision
+34af3ecc7b,t211333(node004/high),exit0,7 tests;no raw rescan. Missing next-launch
+aggregates are null. Each arm has125/250 labelled launches bound to return+dt
+and late to posted plan,244 cycles spanning positive-H message versions,and295
+own-plan revisions carrying positive H. At first own-due query,106 cycles had
+already executed14965/14940s,versus2110/2130s later(V107/upper). Of own-due H,
+380/415s lacks fixed-neighbour benefit;this is not a removable-action label.
+Upper-only saves5s whole-day H but adds89s public-total launch delay here.
+
+Next:separately preregister a current-state physical-cycle coordinator using
+posted obligations,positions and persistent H before own-due pressure appears.
+Preserve compensation,never reset credit on replan,and do not impose the local-R
+nonharm-cut gate that admits zero cuts here. Start with shadow-request design,
+not execution;future outcomes cannot enter its inputs.
