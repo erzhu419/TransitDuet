@@ -166,3 +166,9 @@ or mistake algebraic consistency for executable authority or service benefit.
 Corrected V223 source7939ddaab6 passed13 tests on node006,t211240(high/manual,
 exit0). Next is a separately frozen prepare-time causal handoff/passive
 equivalence preflight;no runtime path or main switch has been started.
+
+V224 seals prepare-time three-role identity/phase provenance and an8-path
+passive budget against existing V221 references;no collection is launched.
+See `protocol_v6_v224_prepare_handoff.md`. Sidecar ordering must preserve the
+legacy clock exactly;every original action,timing and endpoint field must
+reproduce. Static seal tests alone do not establish runtime equivalence.
