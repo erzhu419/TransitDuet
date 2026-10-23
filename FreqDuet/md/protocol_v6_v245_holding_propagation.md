@@ -11,3 +11,19 @@ not replayed action values. No per-query independence/CI or causal promotion cla
 No V238/controller edits,tuning,new futures,replays,training or formal matrix.
 Run synthetic accounting tests and analysis through scheduler high/manual on the
 server. Detailed diagnostics remain there;return only a small summary.
+
+Completed:high/manual node004 tasks t211377/39cd832b46 and t211378/8050fd604e,
+both exit0. Six-path endpoint/clock/covariance closure passed;5200 matched headway
+edges,no neighbour changes. Lower-supply vs V107:direct -20920s,native response
++6665s,net -14255s. Local fixed-departure geometry labels1270/1436 cuts as lost
+compensation;45->10s is116/117. CV2 delta+.019365 includes holding variance
+-.022969 but holding/remaining-travel-clock cross+.022647,normalization+.000364.
+Supply vs blind retains605s(630s with upper),slightly improves CV2,but costs
+journey time;all262 actual launches and vehicle identities are identical in
+both supply/blind pairs. This smoke's large service gain is also present blind.
+Next:do not open the formal matrix or tune V238. Separately preregister a rule
+that distinguishes necessary disturbance compensation from supply-chain excess;
+cumulative H alone has not made that distinction. Any new evaluation needs
+separate authorization. Limits:single consumed future,geometric/covariance
+accounting rather than per-action closed-loop causal effects;remaining time also
+contains unobserved terminal/clock effects,not separately measured pure running.

@@ -1,0 +1,85 @@
+{
+  "status": "v245_readonly_holding_propagation_and_elapsed_split_complete",
+  "parent_replay_source": "b879b53b25",
+  "analysis_source": "39cd832b46",
+  "elapsed_source": "8050fd604e",
+  "tasks": {"accounting": "t211377", "elapsed_split": "t211378"},
+  "node": "node004",
+  "priority": "high",
+  "manual_dispatch_invoked": true,
+  "both_remote_exit_codes": 0,
+  "synthetic_tests": {"accounting_passed": 6, "elapsed_job_passed": 8},
+  "existing_paths": 6,
+  "all_original_endpoints_and_timing_allocations_close": true,
+  "matched_decisions_per_pair": 5200,
+  "matched_arrival_headways_per_pair": 5200,
+  "changed_headway_neighbours": 0,
+  "new_rollouts": 0,
+  "new_training": 0,
+  "v238_changed": false,
+  "main_policy_changed": false,
+  "formal_started": false,
+  "lower_supply_minus_v107": {
+    "journey_min": -0.48505299999999707,
+    "actual_cv_squared": 0.0193653937278519,
+    "readiness_delay_total_s": -11303,
+    "public_launch_delay_total_s": -11303,
+    "holding_decomposition_s": {"direct_adjustment": -20920, "native_state_response": 6665, "net_actual": -14255},
+    "direct_changes": 1436,
+    "fixed_actual_departure_neighbour_restoration": {"cut_removed_local_compensation": 1270, "cut_helped_local_gap": 160, "neutral": 6},
+    "examples_by_native_to_selected_command": {
+      "45_to_10": {"queries": 117, "direct_cut_s": 4095, "lost_local_compensation_labels": 116},
+      "30_to_5": {"queries": 68, "direct_cut_s": 1700, "lost_local_compensation_labels": 68}
+    },
+    "physical_cv_squared_parts": {
+      "release_variance": 0.0038146334386688864,
+      "holding_variance": -0.02296926977517118,
+      "nonholding_stop_variance": 0.0015431185634312097,
+      "remaining_travel_clock_variance": 0.0018519078911924888,
+      "release_holding_cross": -0.0009344647293027401,
+      "release_nonholding_stop_cross": 0.0023114655916941875,
+      "release_remaining_cross": 0.003695881391297253,
+      "holding_nonholding_stop_cross": -0.00027473509897016525,
+      "holding_remaining_cross": 0.0226468866652009,
+      "nonholding_stop_remaining_cross": 0.007315559679495975,
+      "mean_normalization": 0.00036441011031483107
+    },
+    "largest_loss_stations_direction_1": [20, 19, 18],
+    "illustrative_propagation": {
+      "previous_trip": 150, "trip": 152, "station": 17, "direction": 1,
+      "arrival_gap_delta_s": 235,
+      "release_gap_delta_s": 98,
+      "cumulative_holding_gap_delta_s": 75,
+      "other_elapsed_gap_delta_s": 62,
+      "direct_adjustment_gap_delta_s": 285,
+      "native_response_gap_delta_s": -210
+    },
+    "actual_launch_shifts": {"same_bus_matched": 262, "earlier": 111, "later": 2, "unchanged": 149, "minimum_shift_s": -504, "maximum_shift_s": 3}
+  },
+  "supply_minus_same_H_formula_blind": {
+    "without_upper": {
+      "actual_holding_s": 605, "direct_adjustment_s": 895, "native_state_response_s": -290,
+      "journey_min": 0.006828000000002277, "actual_cv_squared": -0.0007417383884355117,
+      "readiness_delay_total_s": 0, "public_launch_delay_total_s": 0,
+      "actual_launches_identical": 262, "vehicle_identities_identical": 262,
+      "post_anchor_same_state_requests_differing_on_supply_path": 54,
+      "post_anchor_same_state_supply_minus_blind_request_s": 545
+    },
+    "with_upper": {
+      "actual_holding_s": 630, "direct_adjustment_s": 945, "native_state_response_s": -315,
+      "journey_min": 0.006759999999999877, "actual_cv_squared": -0.0008686467967796568,
+      "readiness_delay_total_s": 0, "public_launch_delay_total_s": 0,
+      "actual_launches_identical": 262, "vehicle_identities_identical": 262,
+      "post_anchor_same_state_requests_differing_on_supply_path": 54,
+      "post_anchor_same_state_supply_minus_blind_request_s": 560
+    },
+    "same_state_difference_reason": "no_own_unbacked_obligation",
+    "interpretation": "The large passenger/readiness gain is also present in the blind H-response arm. Supply association retains a small amount of compensation and improves CV2 relative to blind,without additional realized dispatch/readiness benefit in this smoke."
+  },
+  "limitations": "One consumed context/future only. Direct/native sums describe requests on different realized states,not independent causal action values. Restoration holds actual departure neighbours fixed and is not a full-day intervention. Remaining time includes travel and unobserved terminal/clock effects. No tuning,efficacy CI,selection or promotion.",
+  "decision": "Do not open the formal matrix or tune V238. A separately preregistered hypothesis must distinguish necessary disturbance compensation from supply-chain excess; new replay requires separate authorization.",
+  "server_root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v245_holding_propagation",
+  "server_details": "audit_39cd832b46/diagnostics.json",
+  "server_elapsed_summary": "elapsed_8050fd604e/summary/status.json",
+  "local_pull_scope": "Small logs and summaries only; no trajectories,CSV caches or checkpoints."
+}
