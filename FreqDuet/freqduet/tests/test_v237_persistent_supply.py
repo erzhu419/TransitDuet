@@ -1,7 +1,7 @@
 import unittest
 
 from analyze_freqduet_v237_persistent_supply import (
-    fixed_neighbour, next_clock, resource_class, version_intervals)
+    fixed_neighbour, next_clock, resource_class, supply_tally, version_intervals)
 
 
 def view(seq, holding, delta, due=False):
@@ -66,6 +66,16 @@ class PersistentSupplyTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             version_intervals([view(2, 10., 10.), view(5, 0., -10.)], [],
                               [dict(after_last_query_s=0., executed_holding_s=0.)])
+
+    def test_missing_next_launch_aggregates_remain_null_not_zero(self):
+        result = supply_tally([dict(holding_s=5., next_trip=None)], {})
+        self.assertEqual(result['next_launch_labels'], 0)
+        self.assertIsNone(result['next_public_delay_s'])
+        self.assertIsNone(result['postreturn_wait_after_native_tick_s'])
+        known = supply_tally([dict(trip_id=1, holding_s=5., next_trip=2, next_public_delay_s=0.)],
+                             {1: dict(postreturn_wait_s=0.)})
+        self.assertEqual(known['next_launch_labels'], 1)
+        self.assertEqual(known['next_public_delay_s'], 0.)
 
 
 if __name__ == '__main__':

@@ -105,6 +105,15 @@ def tally(rows):
         fixed_neighbour_unknown_holding_s=sum(r['holding_s'] for r in rows if r['fixed']['kind'] == 'unavailable'))
 
 
+def supply_tally(cycles, clocks):
+    labelled = [c for c in cycles if c['next_trip'] is not None]
+    return dict(cycles=len(cycles), holding_s=sum(c['holding_s'] for c in cycles),
+        next_launch_labels=len(labelled),
+        next_public_delay_s=sum(c['next_public_delay_s'] for c in labelled) if labelled else None,
+        postreturn_wait_after_native_tick_s=sum(clocks[c['trip_id']]['postreturn_wait_s']
+                                               for c in labelled) if labelled else None)
+
+
 def analyze(data, handoff, resource, capture):
     old_summary, model = prior.analyze_path(data, handoff, resource)
     assert capture['complete'] and len(capture['queries']) == len(model['decisions'])
@@ -157,10 +166,7 @@ def analyze(data, handoff, resource, capture):
         assert cycle['executed_holding_s'] == model['cycles'][key[1]]['holding_s']
     summary = dict(totals=tally(details), pressure_groups={k: tally(v) for k, v in sorted(pressure.items())},
         return_bound_after_plan_evidence={k: tally(v) for k, v in sorted(exposed.items())},
-        unique_supply_cycles={k: dict(cycles=len(v), holding_s=sum(c['holding_s'] for c in v),
-            next_public_delay_s=sum(c['next_public_delay_s'] for c in v if c['next_trip'] is not None),
-            postreturn_wait_after_native_tick_s=sum(clocks[c['trip_id']]['postreturn_wait_s'] for c in v
-                if c['next_trip'] is not None)) for k, v in sorted(unique_cycles.items())},
+        unique_supply_cycles={k: supply_tally(v, clocks) for k, v in sorted(unique_cycles.items())},
         first_own_due=dict(cycles=len(first_due), H_already_executed_s=sum(first_due.values()),
             later_holding_s=sum(model['cycles'][t]['holding_s']-h for t, h in first_due.items())),
         cross_version=version_summary,
@@ -193,7 +199,7 @@ def main():
     assert all(r['passed'] and r['legacy_exact'] and r['v224_sidecar_exact'] and r['v230_sidecar_exact'] for r in parent['paths'])
     suite = unittest.defaultTestLoader.discover(str(Path(__file__).resolve().parents[1]/'tests'),
                                               pattern='test_v237_persistent_supply.py')
-    assert suite.countTestCases() == 6
+    assert suite.countTestCases() == 7
     tested = unittest.TextTestRunner(verbosity=2).run(suite)
     assert tested.wasSuccessful()
     a.out_root.mkdir(parents=True, exist_ok=False)
