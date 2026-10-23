@@ -24,3 +24,11 @@ seal before collection or replay. Next is one source/support feasibility gate;
 missing causal support stops this branch rather than another H/guard sweep.
 Original12 vehicles,seven permissions,V238,all predictors and main stay frozen.
 Current budget:data scans0,passive0,replay0,training0,fit0,new future0.
+
+Sealed2026-10-24:source1828d9cd02,high/manual node004 task t211385,exit0,
+15 synthetic tests passed. Earlier d5ebe1c77d/t211384 is preserved but superseded:
+native event_seq and V224 sidecar order now remain separate,with an explicit join.
+Source audit finds query H but no retained prepare H in the original identity
+packet. Complete own-prepare H and completed-front launch/H/departure joins in
+an independent passive contract before any path budget;no late backfill.
+This seal defines no executable selector and starts no capture or replay.

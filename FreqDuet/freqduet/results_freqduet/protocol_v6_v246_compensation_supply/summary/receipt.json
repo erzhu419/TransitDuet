@@ -1,0 +1,50 @@
+{
+  "status": "v246_identification_and_persistent_state_protocol_sealed",
+  "date": "2026-10-24",
+  "source": "1828d9cd02",
+  "task": "t211385",
+  "node": "node004",
+  "priority": "high",
+  "manual_dispatch_invoked": true,
+  "remote_exit_code": 0,
+  "tests_passed": 15,
+  "superseded_seal": {
+    "source": "d5ebe1c77d", "task": "t211384", "remote_exit_code": 0, "tests_passed": 14,
+    "reason": "Reference clock comparisons mixed native and V224 ordinal domains; fixed before any data path or runtime integration.",
+    "preserved_on_server": true, "research_paths_consumed": 0
+  },
+  "parent_sources": {"accounting": "39cd832b46", "elapsed": "8050fd604e"},
+  "budget": {
+    "trajectory_scans": 0, "shadow_archive_queries": 0, "passive_paths": 0,
+    "intervention_paths": 0, "new_futures": 0, "model_fits": 0, "training_updates": 0
+  },
+  "frozen": {"physical_vehicles": 12, "holding_permissions_s": [0, 5, 10, 15, 20, 30, 45], "v238_source": "b4b1d00203"},
+  "runtime_connected": false,
+  "selector_defined": false,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "formal_authorized": false,
+  "clock_domains": {
+    "native": ["legacy_prepare_event_seq", "legacy_query_event_seq", "physical_cycle_launch_event_seq"],
+    "v224_sidecar": ["launch_order", "departure_order", "prepare_order", "query_order"],
+    "join": "Existing exact native prepare occurrence to original V224 prepare row; no numeric cross-domain ordering comparison."
+  },
+  "observable_state_contract": {
+    "prepared_forward_parts": "actual launch difference + executed H difference + nonholding elapsed difference",
+    "resource_states": ["own due uncovered", "other due uncovered", "future unbacked", "none"],
+    "holding_semantics": "Physical history only; no removable-delay inference, spending, refund or replan reset.",
+    "actions": "All and only native-feasible seven-bin commands remain on the evidence frontier; no automatic selection.",
+    "future_labels": "Independent full-day paired relative necessity/system nonharm; resource claim additionally needs incremental dispatch benefit versus blind and executed same-chain supply."
+  },
+  "source_audit": {
+    "source_only": true,
+    "archive_completeness_verified": false,
+    "existing_query_holding_available": true,
+    "prepare_holding_retained": false,
+    "required_extension": ["own H at PREPARE,not late QUERY H", "completed matched-front launch/H/departure coordinates", "separate-domain identity/event/clock joins"]
+  },
+  "next_step": "Seal the minimal passive field mapping/no-op equivalence budget separately. Do not collect or replay; executable action ranking needs a separate freeze before any later path.",
+  "limitations": "Identification/persistent-state preregistration only,not an executable coordinator or policy-effect result. Prepared forward coordinates do not reconstruct unfinished rear dynamics or prove causal necessity. No V244 parameter fitting or new confirmation data.",
+  "server_protocol": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v246_compensation_supply/seal_1828d9cd02/protocol.json",
+  "local_pull_scope": "Small status/log receipt only; no trajectories,CSV caches or checkpoints."
+}
