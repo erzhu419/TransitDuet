@@ -150,3 +150,9 @@ CV2 harm or the journey/readiness/delay tradeoff versus lower-only. Preserve
 the verified projection as an execution component,not a promoted controller.
 Next is own-trip holding-response/proxy-versus-observed-gap analysis of saved
 records only;no gain escalation,new replay,training or independent-future bank.
+
+V222 closes that read-only decomposition: native request increases largely
+cancel direct cuts at subsequent overridden stops;release-only nonharm conflicts
+with observed gaps. See `protocol_v6_v222_holding_response.md`. Next is a common
+observable service-phase/gap reference and a single consistent lower command,
+not another release guard or gain sweep. No new policy,training or replay yet.
