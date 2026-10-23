@@ -47,15 +47,24 @@ class PassivePairBudgetTest(unittest.TestCase):
             self.assertEqual([p.stem for p in (root/'started').glob('*.json')], ['c0_v107'])
 
     def test_frozen_observer_acceptance_survives_json_round_trip(self):
+        import random
+        import numpy as np
+        import torch
         from freqduet_v235_passive_cycle_capture import validate_capture
         from test_v235_passive_cycle_capture import Fixture
+        before = random.getstate(), np.random.get_state(), torch.get_rng_state()
         f = Fixture()
-        f.complete()
-        originals = json.loads(json.dumps(f.originals()))
-        capture = json.loads(json.dumps(f.audit.cycle_capture.data(True)))
-        result = validate_capture(originals, originals, capture)
-        self.assertTrue(all(result[k] is True for k in PAIR_CHECKS))
-        f.audit.detach()
+        try:
+            f.complete()
+            originals = json.loads(json.dumps(f.originals()))
+            capture = json.loads(json.dumps(f.audit.cycle_capture.data(True)))
+            result = validate_capture(originals, originals, capture)
+            self.assertTrue(all(result[k] is True for k in PAIR_CHECKS))
+        finally:
+            f.audit.detach()
+            random.setstate(before[0])
+            np.random.set_state(before[1])
+            torch.set_rng_state(before[2])
 
 
 if __name__ == '__main__':
