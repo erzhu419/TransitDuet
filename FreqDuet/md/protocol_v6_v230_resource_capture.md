@@ -60,3 +60,10 @@ started-path budget;it never creates a replay allowance.
 Only complete equivalence permits read-only shadow-support analysis. Report all
 fixed paths and unsupported cases;no favorable-outcome filter,gain tuning,
 selector fitting,training,intervention or independent future is admitted.
+
+Sealed source cf86ee990a,t211286(high/manual,node006),exit0;10 synthetic tests
+passed and the frozen V229 parent summary matched. Started paths remain0;
+collector_implemented and collection_authorized are both false. Only the tiny
+summary and test/exit log returned locally. Next implement the independent
+extension without modifying frozen collectors;passive execution still needs
+separate authorization under these8 reserved slots.
