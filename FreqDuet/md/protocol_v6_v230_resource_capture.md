@@ -86,6 +86,23 @@ AND entire old sidecar are exactly unchanged. Each path has5200 complete query
 extensions,262 upper versions,262 completed cycles and0 open cycles. Each has
 4360 supported and840 missing-follower shadow rows;none are discarded. RNG and
 native-call checks pass;shadow execution,training and policy changes remain0.
-The conditional6 paths are now admitted under the same task/budget;c1 V107 and
-upper started after the recorded first-pair gate. Full8-path completion is
-pending. Only preflight and the tiny first-pair summary returned locally.
+The conditional6 paths were admitted under the same task/budget;c1 V107 and
+upper started after the recorded first-pair gate. All8 subsequently PASSED;
+t211288 completed with exit0 and exactly8/8 started slots,no extra paths.
+
+Read-only acceptance 67e06526f4,t211293(high/manual,node004),exit0:5 focused
+tests passed,then the remaining6 legacy records AND complete old sidecars were
+recompared exactly to V224. Each has5200 complete queries,262 completed upper
+callbacks(88 fresh/174 cached),262 completed physical cycles and0 open cycles.
+Every query's posted plans,last-write and direction versions reconstruct from
+strict-prior native events;its executed holding matches the original arrival
+prefix exactly. Each path retains12 initial-stock launches,250 first later
+same-bus supply links and12 final returns without a later launch. Query clocks,
+inventory order,ready coverage and shadow frontiers pass. Missing-follower
+support remains explicit(840--846 queries/path);it is not missing capture data.
+Only completion/acceptance summaries returned locally;raw paths remain remote.
+
+Next:read-only analysis of saved pressure/frontier support and physical-cycle
+overlap to inform persistent coordination. These are passive engineering
+results,not evidence of control improvement. No selector,shadow execution,new
+replay,training,future or main-policy change is admitted by this acceptance.
