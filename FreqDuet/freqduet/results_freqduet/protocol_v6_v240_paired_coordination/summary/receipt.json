@@ -1,0 +1,49 @@
+{
+  "status": "v240_paired_protocol_sealed_no_replay",
+  "source": "e6788e6109",
+  "rule_source": "b4b1d00203",
+  "task_id": "t211342",
+  "node": "node004",
+  "priority": "high",
+  "manual_dispatch_invoked": true,
+  "exit_code": 0,
+  "tests_passed": 8,
+  "remote_protocol": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v240_paired_coordination/seal_e6788e6109/protocol.json",
+  "remote_slots": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v240_paired_coordination/seal_e6788e6109/reserved_slots.json",
+  "arms": ["v107", "upper_only", "lower_supply", "joint_supply", "lower_blind", "joint_blind"],
+  "contexts": 4,
+  "formal_futures_per_context": 4,
+  "selection_bank": null,
+  "namespace_audit": {
+    "registered_metadata_files": 73,
+    "scheduler_hot_tasks_checked": 10094,
+    "scheduler_archive_tasks_checked": 24442,
+    "malformed_archive_lines_text_checked": 1,
+    "reserved_future_roots": 17,
+    "conflicts": [],
+    "scope": "Known FreqDuet scheduler task and canonical registered protocol metadata only;no raw-cache scan."
+  },
+  "reserved_budget": {
+    "passive_max": 2,
+    "smoke_max": 6,
+    "formal_max": 96,
+    "total_starts_max": 104,
+    "additional_references": 0,
+    "launch_authorized": false
+  },
+  "current_budget": {
+    "raw_archive_reads": 0,
+    "archived_shadow_requests": 0,
+    "new_replays": 0,
+    "future_starts": 0,
+    "training_updates": 0,
+    "model_fits": 0,
+    "shadow_actions_executed": 0
+  },
+  "runtime_connected": false,
+  "replay_authorized": false,
+  "training_authorized": false,
+  "main_policy_changed": false,
+  "local_return": "Small summary and log only;no trajectories,CSV or checkpoints.",
+  "next_step": "Separately authorize passive/no-op integration engineering before any simulator start or future opening."
+}
