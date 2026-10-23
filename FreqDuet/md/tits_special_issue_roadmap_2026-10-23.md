@@ -156,3 +156,10 @@ cancel direct cuts at subsequent overridden stops;release-only nonharm conflicts
 with observed gaps. See `protocol_v6_v222_holding_response.md`. Next is a common
 observable service-phase/gap reference and a single consistent lower command,
 not another release guard or gain sweep. No new policy,training or replay yet.
+
+V223 seals an isolated common-reference algebraic kernel: measured native gaps
+plus delivered relative launch phases,one .25 request and one quantization.
+See `protocol_v6_v223_common_reference.md`. Synthetic tests precede any passive
+runtime handoff;no archive scan,replay,training,new future or main switch. A1s
+own-phase offset only shifts the continuous request by.25s;do not force a bin
+or mistake algebraic consistency for executable authority or service benefit.
