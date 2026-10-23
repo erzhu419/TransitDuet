@@ -19,3 +19,17 @@ These are trajectory identities,not independent causal effects or efficacy.
 Passenger evidence is limited to existing endpoint waiting/onboard exposure.
 Decision:locate the observed conflict before designing a separately registered
 candidate;do not tune gains or reuse these days as independent confirmation.
+
+Source ec0e6616d7,t211269(high/manual,node006),exit0:8 tests and all4 contexts
+passed accounting;V225 endpoints reproduced. Each pair matches5200 decisions,
+262 physical launches and250 inbound chains plus12 initial-stock launches;
+no matched-role identity or feasibility-set change. Continuous phase corrections
+of0.125--0.25s caused5--15s bin changes. Joint-upper direct/native/net holding
+seconds are(-15,+60,+45),(-5,+10,+5),(-15,-10,-25),(-5,+15,+10).
+Upper-V107 already increases CV2/readiness in all4 and total public delay by
+89/221/83/221s. Day2's upper-only supply decomposition includes+141s propagated
+parent-launch differences and+78/+75s terminal idle,not just extra holding.
+Next:read-only distinguish published-plan waiting from supply/eligibility timing
+in the existing same-bus chains before redesigning upper coordination. Increased
+idle is not automatically avoidable slack. No gain changes,new replay or training.
+Only the45787-byte compact summary returned;all row-level details stay remote.

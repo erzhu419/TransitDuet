@@ -1,0 +1,1288 @@
+{
+  "stage": "v226_read_only_V225_coordination",
+  "source": "ec0e6616d7",
+  "controller_source": "f61f6c9734",
+  "pairs": [
+    [
+      "joint",
+      "upper"
+    ],
+    [
+      "upper",
+      "v107"
+    ],
+    [
+      "joint",
+      "v107"
+    ]
+  ],
+  "inputs": "Only existing V225 joint and V224 v107/upper records+sidecars and V225 small summary.",
+  "analysis": "Occurrence-matched phase/native/clipping/quantization/feasibility holding identity; full-arrival CV2 release/holding/other/covariance decomposition;strict native-event same-bus inbound-return/next-launch chain with initial/unmatched supply separate.",
+  "no_new_replays": true,
+  "training_updates": 0,
+  "parameter_changes": 0,
+  "main_policy_changed": false,
+  "status": "v226_read_only_coordination_complete",
+  "tests": 8,
+  "v225_endpoints_and_holding_reproduced": true,
+  "limitations": "Four consumed contexts,two actors/two demand days;no independent efficacy or CI. State/quantization/supply terms are observed-path accounting,not isolated causal effects. Other elapsed includes movement and nonholding service;no exact per-action passenger exposure or component split is available in these payloads. No new policy or gain selected.",
+  "export_scope": "Compact totals; full phase and row-level details remain on server.",
+  "contexts": [
+    {
+      "context": 0,
+      "actor": 12037,
+      "demand_day": 2151001,
+      "comparisons": {
+        "joint_vs_upper": {
+          "effects": {
+            "passenger_person_s": -1556.0,
+            "journey_min": -0.0012869999999978177,
+            "cv_squared": -5.8380777329392064e-05,
+            "readiness_delay_s": -0.045800999999983105,
+            "public_launch_delay_total_s": -26.0,
+            "holding_s_per_trip": 0.1717559999999878,
+            "waiting_person_s": -2274.0,
+            "onboard_person_s": 718.0,
+            "journey_s": -0.07721999999986906
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 28,
+              "native_decreases": 20,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4360,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": 45.0,
+            "totals": {
+              "native_s": 60.0,
+              "override_s": -15.0,
+              "net_s": 45.0,
+              "forward_s": 5.875,
+              "follower_s": 27.195822688949033,
+              "fallback_target_s": 0.00999272663557349,
+              "branch_change_s": 0.0,
+              "clipping_s": -11.083660151475545,
+              "quantization_s": 38.00284473589092,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 3,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 1,
+              "-5.0": 1,
+              "-15.0": 1
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2546,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": 0.0,
+                "override_s": 5.0,
+                "net_s": 5.0
+              },
+              "later_native": {
+                "decisions": 2651,
+                "native_s": 60.0,
+                "override_s": 0.0,
+                "net_s": 60.0
+              },
+              "later_direct": {
+                "decisions": 2,
+                "native_s": 0.0,
+                "override_s": -20.0,
+                "net_s": -20.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 1,
+              "actual_launch_earlier": 14
+            },
+            "totals": {
+              "actual_launch_delta_s": -26.0,
+              "eligibility_delta_s": -14.0,
+              "readiness_delta_s": -12.0,
+              "public_delay_delta_s": -26.0,
+              "same_chain_parent_launch_delta_s": -19.0,
+              "same_chain_parent_holding_delta_s": 45.0,
+              "same_chain_parent_other_elapsed_delta_s": -8.0,
+              "same_chain_terminal_idle_delta_s": -44.0,
+              "same_chain_launch_delta_s": -26.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 1.3939066714992858e-05,
+            "holding": -0.00017394672166299454,
+            "other": -0.00017739357874605631,
+            "release_holding": -9.258689711325879e-06,
+            "release_other": -8.6952947972286e-05,
+            "holding_other": 0.00037523209404836656,
+            "normalization": 0.0
+          }
+        },
+        "upper_vs_v107": {
+          "effects": {
+            "passenger_person_s": 5673.0,
+            "journey_min": 0.004692999999999614,
+            "cv_squared": 9.820527502605453e-05,
+            "readiness_delay_s": 0.28625900000000115,
+            "public_launch_delay_total_s": 89.0,
+            "holding_s_per_trip": -0.01908399999999233,
+            "waiting_person_s": 4710.0,
+            "onboard_person_s": 963.0,
+            "journey_s": 0.28157999999997685
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 64,
+              "native_decreases": 59,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4360,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": -5.0,
+            "totals": {
+              "native_s": -5.0,
+              "override_s": 0.0,
+              "net_s": -5.0,
+              "forward_s": -54.75,
+              "follower_s": -141.71637618378782,
+              "fallback_target_s": -0.014293408391495177,
+              "branch_change_s": 0.0,
+              "clipping_s": 133.79889009249138,
+              "quantization_s": 57.68177949968795,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 0,
+            "direct_correction_abs_s": {
+              "min": null,
+              "max": null
+            },
+            "direct_bin_delta_histogram": {},
+            "phases": {
+              "no_direct_request": {
+                "decisions": 5200,
+                "native_s": -5.0,
+                "override_s": 0.0,
+                "net_s": -5.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 28,
+              "actual_launch_earlier": 6
+            },
+            "totals": {
+              "actual_launch_delta_s": 86.0,
+              "eligibility_delta_s": 11.0,
+              "readiness_delta_s": 75.0,
+              "public_delay_delta_s": 89.0,
+              "same_chain_parent_launch_delta_s": 56.0,
+              "same_chain_parent_holding_delta_s": -70.0,
+              "same_chain_parent_other_elapsed_delta_s": 55.0,
+              "same_chain_terminal_idle_delta_s": 45.0,
+              "same_chain_launch_delta_s": 86.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 7.982194434531318e-05,
+            "holding": 0.0002150563367386495,
+            "other": 0.00027906181073973337,
+            "release_holding": -0.00015385110878891314,
+            "release_other": 0.00012066815627770577,
+            "holding_other": -0.0004213877784151234,
+            "normalization": -2.1164085871674073e-05
+          }
+        },
+        "joint_vs_v107": {
+          "effects": {
+            "passenger_person_s": 4117.0,
+            "journey_min": 0.0034060000000017965,
+            "cv_squared": 3.9824497696662464e-05,
+            "readiness_delay_s": 0.24045800000001805,
+            "public_launch_delay_total_s": 63.0,
+            "holding_s_per_trip": 0.15267199999999548,
+            "waiting_person_s": 2436.0,
+            "onboard_person_s": 1681.0,
+            "journey_s": 0.2043600000001078
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 52,
+              "native_decreases": 39,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4360,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": 40.0,
+            "totals": {
+              "native_s": 55.0,
+              "override_s": -15.0,
+              "net_s": 40.0,
+              "forward_s": -48.875,
+              "follower_s": -114.5205534948388,
+              "fallback_target_s": -0.004300681755921687,
+              "branch_change_s": 0.0,
+              "clipping_s": 122.71522994101583,
+              "quantization_s": 95.68462423557887,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 3,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 1,
+              "-5.0": 1,
+              "-15.0": 1
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2546,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": -5.0,
+                "override_s": 5.0,
+                "net_s": 0.0
+              },
+              "later_native": {
+                "decisions": 2651,
+                "native_s": 55.0,
+                "override_s": 0.0,
+                "net_s": 55.0
+              },
+              "later_direct": {
+                "decisions": 2,
+                "native_s": 5.0,
+                "override_s": -20.0,
+                "net_s": -15.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 18,
+              "actual_launch_earlier": 9
+            },
+            "totals": {
+              "actual_launch_delta_s": 60.0,
+              "eligibility_delta_s": -3.0,
+              "readiness_delta_s": 63.0,
+              "public_delay_delta_s": 63.0,
+              "same_chain_parent_launch_delta_s": 37.0,
+              "same_chain_parent_holding_delta_s": -25.0,
+              "same_chain_parent_other_elapsed_delta_s": 47.0,
+              "same_chain_terminal_idle_delta_s": 1.0,
+              "same_chain_launch_delta_s": 60.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 9.376644512368155e-05,
+            "holding": 4.1041802966795216e-05,
+            "other": 0.00010159907614780689,
+            "release_holding": -0.0001631134079461004,
+            "release_other": 3.3681310208823294e-05,
+            "holding_other": -4.6009402336454544e-05,
+            "normalization": -2.1141326468164066e-05
+          }
+        }
+      }
+    },
+    {
+      "context": 1,
+      "actor": 12037,
+      "demand_day": 2151002,
+      "comparisons": {
+        "joint_vs_upper": {
+          "effects": {
+            "passenger_person_s": 3032.0,
+            "journey_min": 0.002621999999998792,
+            "cv_squared": 7.615644915345832e-05,
+            "readiness_delay_s": -0.16030499999999392,
+            "public_launch_delay_total_s": -42.0,
+            "holding_s_per_trip": 0.01908399999999233,
+            "waiting_person_s": 3267.0,
+            "onboard_person_s": -235.0,
+            "journey_s": 0.15731999999992752
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 43,
+              "native_decreases": 38,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4356,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": 5.0,
+            "totals": {
+              "native_s": 10.0,
+              "override_s": -5.0,
+              "net_s": 5.0,
+              "forward_s": 4.0,
+              "follower_s": -53.98579515127354,
+              "fallback_target_s": -0.00018198490124632372,
+              "branch_change_s": 0.0,
+              "clipping_s": 11.983364589299818,
+              "quantization_s": 48.002612546874964,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 13,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 6,
+              "-5.0": 7
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2463,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": 0.0,
+                "override_s": 5.0,
+                "net_s": 5.0
+              },
+              "later_native": {
+                "decisions": 2724,
+                "native_s": -5.0,
+                "override_s": 0.0,
+                "net_s": -5.0
+              },
+              "later_direct": {
+                "decisions": 12,
+                "native_s": 15.0,
+                "override_s": -10.0,
+                "net_s": 5.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 5,
+              "actual_launch_earlier": 17
+            },
+            "totals": {
+              "actual_launch_delta_s": -42.0,
+              "eligibility_delta_s": 0.0,
+              "readiness_delta_s": -42.0,
+              "public_delay_delta_s": -42.0,
+              "same_chain_parent_launch_delta_s": -18.0,
+              "same_chain_parent_holding_delta_s": -10.0,
+              "same_chain_parent_other_elapsed_delta_s": -15.0,
+              "same_chain_terminal_idle_delta_s": 1.0,
+              "same_chain_launch_delta_s": -42.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 8.909248502442715e-05,
+            "holding": 0.00018209498975473314,
+            "other": 0.0002462254970053081,
+            "release_holding": -4.389808735772306e-05,
+            "release_other": -1.2814404376006822e-05,
+            "holding_other": -0.00038511315487313496,
+            "normalization": 5.691239758779902e-07
+          }
+        },
+        "upper_vs_v107": {
+          "effects": {
+            "passenger_person_s": -18879.0,
+            "journey_min": -0.016325999999999397,
+            "cv_squared": 6.391938338507624e-05,
+            "readiness_delay_s": 0.8435110000000066,
+            "public_launch_delay_total_s": 221.0,
+            "holding_s_per_trip": -0.13358800000000315,
+            "waiting_person_s": -18557.0,
+            "onboard_person_s": -322.0,
+            "journey_s": -0.9795599999999638
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 89,
+              "native_decreases": 102,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4355,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": -35.0,
+            "totals": {
+              "native_s": -35.0,
+              "override_s": 0.0,
+              "net_s": -35.0,
+              "forward_s": -28.25,
+              "follower_s": 140.23640958369205,
+              "fallback_target_s": -0.706764868898972,
+              "branch_change_s": 3.375,
+              "clipping_s": -16.38666392801005,
+              "quantization_s": -133.26798078678303,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 0,
+            "direct_correction_abs_s": {
+              "min": null,
+              "max": null
+            },
+            "direct_bin_delta_histogram": {},
+            "phases": {
+              "no_direct_request": {
+                "decisions": 5200,
+                "native_s": -35.0,
+                "override_s": 0.0,
+                "net_s": -35.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 33,
+              "actual_launch_earlier": 15
+            },
+            "totals": {
+              "actual_launch_delta_s": 213.0,
+              "eligibility_delta_s": -8.0,
+              "readiness_delta_s": 221.0,
+              "public_delay_delta_s": 221.0,
+              "same_chain_parent_launch_delta_s": 141.0,
+              "same_chain_parent_holding_delta_s": 10.0,
+              "same_chain_parent_other_elapsed_delta_s": -16.0,
+              "same_chain_terminal_idle_delta_s": 78.0,
+              "same_chain_launch_delta_s": 213.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 6.823635167871945e-06,
+            "holding": -0.0002523690038856461,
+            "other": -0.00019947129727190572,
+            "release_holding": -2.7645257291989933e-05,
+            "release_other": 3.593966604093826e-05,
+            "holding_other": 0.0005058595143453548,
+            "normalization": -5.217873719410098e-06
+          }
+        },
+        "joint_vs_v107": {
+          "effects": {
+            "passenger_person_s": -15847.0,
+            "journey_min": -0.013704000000000605,
+            "cv_squared": 0.00014007583253853456,
+            "readiness_delay_s": 0.6832060000000126,
+            "public_launch_delay_total_s": 179.0,
+            "holding_s_per_trip": -0.11450400000001082,
+            "waiting_person_s": -15290.0,
+            "onboard_person_s": -557.0,
+            "journey_s": -0.8222400000000363
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 88,
+              "native_decreases": 96,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4355,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": -30.0,
+            "totals": {
+              "native_s": -25.0,
+              "override_s": -5.0,
+              "net_s": -30.0,
+              "forward_s": -24.0,
+              "follower_s": 86.2506144324185,
+              "fallback_target_s": -0.7069468538002184,
+              "branch_change_s": 3.125,
+              "clipping_s": -4.4032993387102355,
+              "quantization_s": -85.26536823990807,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 13,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 6,
+              "-5.0": 7
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2463,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": 0.0,
+                "override_s": 5.0,
+                "net_s": 5.0
+              },
+              "later_native": {
+                "decisions": 2724,
+                "native_s": -35.0,
+                "override_s": 0.0,
+                "net_s": -35.0
+              },
+              "later_direct": {
+                "decisions": 12,
+                "native_s": 10.0,
+                "override_s": -10.0,
+                "net_s": 0.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 28,
+              "actual_launch_earlier": 16
+            },
+            "totals": {
+              "actual_launch_delta_s": 171.0,
+              "eligibility_delta_s": -8.0,
+              "readiness_delta_s": 179.0,
+              "public_delay_delta_s": 179.0,
+              "same_chain_parent_launch_delta_s": 123.0,
+              "same_chain_parent_holding_delta_s": 0.0,
+              "same_chain_parent_other_elapsed_delta_s": -31.0,
+              "same_chain_terminal_idle_delta_s": 79.0,
+              "same_chain_launch_delta_s": 171.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 9.592565924746807e-05,
+            "holding": -7.025451737815328e-05,
+            "other": 4.678056288400143e-05,
+            "release_holding": -7.154804477988675e-05,
+            "release_other": 2.3123889637759143e-05,
+            "holding_other": 0.00012070512574044524,
+            "normalization": -4.656842812939107e-06
+          }
+        }
+      }
+    },
+    {
+      "context": 2,
+      "actor": 933083,
+      "demand_day": 2151001,
+      "comparisons": {
+        "joint_vs_upper": {
+          "effects": {
+            "passenger_person_s": -98.0,
+            "journey_min": -8.099999999799934e-05,
+            "cv_squared": -7.20515607518929e-05,
+            "readiness_delay_s": -0.10687100000001237,
+            "public_launch_delay_total_s": -14.0,
+            "holding_s_per_trip": -0.09542000000001849,
+            "waiting_person_s": -4.0,
+            "onboard_person_s": -94.0,
+            "journey_s": -0.00485999999987996
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 20,
+              "native_decreases": 28,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4360,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": -25.0,
+            "totals": {
+              "native_s": -10.0,
+              "override_s": -15.0,
+              "net_s": -25.0,
+              "forward_s": -4.875,
+              "follower_s": 17.46041584918611,
+              "fallback_target_s": 0.005522998178093985,
+              "branch_change_s": 0.0,
+              "clipping_s": -27.199109928096785,
+              "quantization_s": 4.608171080732564,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 3,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 1,
+              "-5.0": 1,
+              "-15.0": 1
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2546,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": 0.0,
+                "override_s": 5.0,
+                "net_s": 5.0
+              },
+              "later_native": {
+                "decisions": 2651,
+                "native_s": -10.0,
+                "override_s": 0.0,
+                "net_s": -10.0
+              },
+              "later_direct": {
+                "decisions": 2,
+                "native_s": 0.0,
+                "override_s": -20.0,
+                "net_s": -20.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 6,
+              "actual_launch_earlier": 9
+            },
+            "totals": {
+              "actual_launch_delta_s": -14.0,
+              "eligibility_delta_s": 14.0,
+              "readiness_delta_s": -28.0,
+              "public_delay_delta_s": -14.0,
+              "same_chain_parent_launch_delta_s": -7.0,
+              "same_chain_parent_holding_delta_s": -25.0,
+              "same_chain_parent_other_elapsed_delta_s": -2.0,
+              "same_chain_terminal_idle_delta_s": 20.0,
+              "same_chain_launch_delta_s": -14.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": -3.388534628205426e-05,
+            "holding": -0.00017817509964138437,
+            "other": -0.00024172907871804742,
+            "release_holding": 3.334586357444604e-05,
+            "release_other": -9.157791864383272e-05,
+            "holding_other": 0.00043997001895897987,
+            "normalization": 0.0
+          }
+        },
+        "upper_vs_v107": {
+          "effects": {
+            "passenger_person_s": 4944.0,
+            "journey_min": 0.004090000000001481,
+            "cv_squared": 0.00010502776936303915,
+            "readiness_delay_s": 0.3167940000000158,
+            "public_launch_delay_total_s": 83.0,
+            "holding_s_per_trip": 0.11450400000001082,
+            "waiting_person_s": 3575.0,
+            "onboard_person_s": 1369.0,
+            "journey_s": 0.24540000000008888
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 58,
+              "native_decreases": 45,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4360,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": 30.0,
+            "totals": {
+              "native_s": 30.0,
+              "override_s": 0.0,
+              "net_s": 30.0,
+              "forward_s": -49.375,
+              "follower_s": -136.84867276390636,
+              "fallback_target_s": 0.0016616344464637223,
+              "branch_change_s": 0.0,
+              "clipping_s": 141.8585756755855,
+              "quantization_s": 74.36343545387439,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 0,
+            "direct_correction_abs_s": {
+              "min": null,
+              "max": null
+            },
+            "direct_bin_delta_histogram": {},
+            "phases": {
+              "no_direct_request": {
+                "decisions": 5200,
+                "native_s": 30.0,
+                "override_s": 0.0,
+                "net_s": 30.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 22,
+              "actual_launch_earlier": 5
+            },
+            "totals": {
+              "actual_launch_delta_s": 80.0,
+              "eligibility_delta_s": -3.0,
+              "readiness_delta_s": 83.0,
+              "public_delay_delta_s": 83.0,
+              "same_chain_parent_launch_delta_s": 50.0,
+              "same_chain_parent_holding_delta_s": -35.0,
+              "same_chain_parent_other_elapsed_delta_s": 52.0,
+              "same_chain_terminal_idle_delta_s": 13.0,
+              "same_chain_launch_delta_s": 80.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 0.00010374347287725278,
+            "holding": 0.0002171713499320175,
+            "other": 0.0003112421011343263,
+            "release_holding": -0.0001751616899993636,
+            "release_other": 0.00012298154312231948,
+            "holding_other": -0.00045376935972052797,
+            "normalization": -2.1179647983294878e-05
+          }
+        },
+        "joint_vs_v107": {
+          "effects": {
+            "passenger_person_s": 4846.0,
+            "journey_min": 0.004009000000003482,
+            "cv_squared": 3.297620861114625e-05,
+            "readiness_delay_s": 0.2099230000000034,
+            "public_launch_delay_total_s": 69.0,
+            "holding_s_per_trip": 0.01908399999999233,
+            "waiting_person_s": 3571.0,
+            "onboard_person_s": 1275.0,
+            "journey_s": 0.24054000000020892
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 58,
+              "native_decreases": 53,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4360,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": 5.0,
+            "totals": {
+              "native_s": 20.0,
+              "override_s": -15.0,
+              "net_s": 5.0,
+              "forward_s": -54.25,
+              "follower_s": -119.38825691472026,
+              "fallback_target_s": 0.0071846326245577075,
+              "branch_change_s": 0.0,
+              "clipping_s": 114.65946574748872,
+              "quantization_s": 78.97160653460695,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 3,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 1,
+              "-5.0": 1,
+              "-15.0": 1
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2546,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": -5.0,
+                "override_s": 5.0,
+                "net_s": 0.0
+              },
+              "later_native": {
+                "decisions": 2651,
+                "native_s": 20.0,
+                "override_s": 0.0,
+                "net_s": 20.0
+              },
+              "later_direct": {
+                "decisions": 2,
+                "native_s": 5.0,
+                "override_s": -20.0,
+                "net_s": -15.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 24,
+              "actual_launch_earlier": 10
+            },
+            "totals": {
+              "actual_launch_delta_s": 66.0,
+              "eligibility_delta_s": 11.0,
+              "readiness_delta_s": 55.0,
+              "public_delay_delta_s": 69.0,
+              "same_chain_parent_launch_delta_s": 43.0,
+              "same_chain_parent_holding_delta_s": -60.0,
+              "same_chain_parent_other_elapsed_delta_s": 50.0,
+              "same_chain_terminal_idle_delta_s": 33.0,
+              "same_chain_launch_delta_s": 66.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 6.984491659176263e-05,
+            "holding": 3.892678977342724e-05,
+            "other": 6.941878575321398e-05,
+            "release_holding": -0.00014180282673564995,
+            "release_other": 3.1367923364209596e-05,
+            "holding_other": -1.362782103104993e-05,
+            "normalization": -2.1151559105076833e-05
+          }
+        }
+      }
+    },
+    {
+      "context": 3,
+      "actor": 933083,
+      "demand_day": 2151002,
+      "comparisons": {
+        "joint_vs_upper": {
+          "effects": {
+            "passenger_person_s": 3176.0,
+            "journey_min": 0.002746999999999389,
+            "cv_squared": 7.97716787311678e-05,
+            "readiness_delay_s": -0.16030500000000814,
+            "public_launch_delay_total_s": -42.0,
+            "holding_s_per_trip": 0.03816800000001308,
+            "waiting_person_s": 3266.0,
+            "onboard_person_s": -90.0,
+            "journey_s": 0.16481999999996333
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 42,
+              "native_decreases": 36,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4354,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": 10.0,
+            "totals": {
+              "native_s": 15.0,
+              "override_s": -5.0,
+              "net_s": 10.0,
+              "forward_s": 4.625,
+              "follower_s": -57.65122969933748,
+              "fallback_target_s": -0.004227312406328565,
+              "branch_change_s": 0.0,
+              "clipping_s": 15.76634418846205,
+              "quantization_s": 52.26411282328175,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 13,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 6,
+              "-5.0": 7
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2463,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": 0.0,
+                "override_s": 5.0,
+                "net_s": 5.0
+              },
+              "later_native": {
+                "decisions": 2724,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "later_direct": {
+                "decisions": 12,
+                "native_s": 15.0,
+                "override_s": -10.0,
+                "net_s": 5.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 5,
+              "actual_launch_earlier": 17
+            },
+            "totals": {
+              "actual_launch_delta_s": -42.0,
+              "eligibility_delta_s": 0.0,
+              "readiness_delta_s": -42.0,
+              "public_delay_delta_s": -42.0,
+              "same_chain_parent_launch_delta_s": -18.0,
+              "same_chain_parent_holding_delta_s": -5.0,
+              "same_chain_parent_other_elapsed_delta_s": -15.0,
+              "same_chain_terminal_idle_delta_s": -4.0,
+              "same_chain_launch_delta_s": -42.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 8.891720166815359e-05,
+            "holding": 0.00015828566718589204,
+            "other": 0.00023608535484133093,
+            "release_holding": -4.379583873317862e-05,
+            "release_other": -1.2615749905495091e-05,
+            "holding_other": -0.0003476755513492933,
+            "normalization": 5.705950239943558e-07
+          }
+        },
+        "upper_vs_v107": {
+          "effects": {
+            "passenger_person_s": -18491.0,
+            "journey_min": -0.015990999999999644,
+            "cv_squared": 5.935132892841144e-05,
+            "readiness_delay_s": 0.8435110000000066,
+            "public_launch_delay_total_s": 221.0,
+            "holding_s_per_trip": -0.09542000000001849,
+            "waiting_person_s": -18277.0,
+            "onboard_person_s": -214.0,
+            "journey_s": -0.9594599999999787
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 89,
+              "native_decreases": 100,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4353,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": -25.0,
+            "totals": {
+              "native_s": -25.0,
+              "override_s": 0.0,
+              "net_s": -25.0,
+              "forward_s": -27.0,
+              "follower_s": 139.69746236446247,
+              "fallback_target_s": -0.6875525951409145,
+              "branch_change_s": 3.375,
+              "clipping_s": -19.92138299903243,
+              "quantization_s": -120.46352677028914,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 0,
+            "direct_correction_abs_s": {
+              "min": null,
+              "max": null
+            },
+            "direct_bin_delta_histogram": {},
+            "phases": {
+              "no_direct_request": {
+                "decisions": 5200,
+                "native_s": -25.0,
+                "override_s": 0.0,
+                "net_s": -25.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 33,
+              "actual_launch_earlier": 15
+            },
+            "totals": {
+              "actual_launch_delta_s": 213.0,
+              "eligibility_delta_s": -8.0,
+              "readiness_delta_s": 221.0,
+              "public_delay_delta_s": 221.0,
+              "same_chain_parent_launch_delta_s": 141.0,
+              "same_chain_parent_holding_delta_s": 20.0,
+              "same_chain_parent_other_elapsed_delta_s": -23.0,
+              "same_chain_terminal_idle_delta_s": 75.0,
+              "same_chain_launch_delta_s": 213.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 7.057371332883929e-06,
+            "holding": -0.00025923500373340336,
+            "other": -0.0002033483959093182,
+            "release_holding": -2.74407381475889e-05,
+            "release_other": 3.5656260940842724e-05,
+            "holding_other": 0.0005118928291051525,
+            "normalization": -5.230994660248353e-06
+          }
+        },
+        "joint_vs_v107": {
+          "effects": {
+            "passenger_person_s": -15315.0,
+            "journey_min": -0.013244000000000256,
+            "cv_squared": 0.00013912300765957925,
+            "readiness_delay_s": 0.6832059999999984,
+            "public_launch_delay_total_s": 179.0,
+            "holding_s_per_trip": -0.05725200000000541,
+            "waiting_person_s": -15011.0,
+            "onboard_person_s": -304.0,
+            "journey_s": -0.7946400000000153
+          },
+          "holding": {
+            "matched": 5200,
+            "repeated_occurrences": 0,
+            "current_only": 0,
+            "reference_only": 0,
+            "current_only_holding_s": 0.0,
+            "reference_only_holding_s": 0.0,
+            "counts": {
+              "same_physical_bus": 5200,
+              "feasible_bins_changed": 0,
+              "native_increases": 87,
+              "native_decreases": 92,
+              "front_both_supported": 5200,
+              "front_identity_changed": 0,
+              "follower_both_supported": 4353,
+              "follower_identity_changed": 0
+            },
+            "total_holding_delta_s": -15.0,
+            "totals": {
+              "native_s": -10.0,
+              "override_s": -5.0,
+              "net_s": -15.0,
+              "forward_s": -22.125,
+              "follower_s": 82.04623266512499,
+              "fallback_target_s": -0.6917799075472431,
+              "branch_change_s": 3.125,
+              "clipping_s": -4.15503881057038,
+              "quantization_s": -68.19941394700739,
+              "feasibility_s": 0.0
+            },
+            "direct_changed_commands": 13,
+            "direct_correction_abs_s": {
+              "min": 0.125,
+              "max": 0.25
+            },
+            "direct_bin_delta_histogram": {
+              "5.0": 6,
+              "-5.0": 7
+            },
+            "phases": {
+              "before_first_direct": {
+                "decisions": 2463,
+                "native_s": 0.0,
+                "override_s": 0.0,
+                "net_s": 0.0
+              },
+              "first_direct": {
+                "decisions": 1,
+                "native_s": 0.0,
+                "override_s": 5.0,
+                "net_s": 5.0
+              },
+              "later_native": {
+                "decisions": 2724,
+                "native_s": -20.0,
+                "override_s": 0.0,
+                "net_s": -20.0
+              },
+              "later_direct": {
+                "decisions": 12,
+                "native_s": 10.0,
+                "override_s": -10.0,
+                "net_s": 0.0
+              }
+            }
+          },
+          "supply_chain": {
+            "counts": {
+              "same_physical_bus": 262,
+              "same_inbound_trip": 250,
+              "initial_stock_both": 12,
+              "unmatched_supply": 0,
+              "actual_launch_later": 28,
+              "actual_launch_earlier": 16
+            },
+            "totals": {
+              "actual_launch_delta_s": 171.0,
+              "eligibility_delta_s": -8.0,
+              "readiness_delta_s": 179.0,
+              "public_delay_delta_s": 179.0,
+              "same_chain_parent_launch_delta_s": 123.0,
+              "same_chain_parent_holding_delta_s": 15.0,
+              "same_chain_parent_other_elapsed_delta_s": -38.0,
+              "same_chain_terminal_idle_delta_s": 71.0,
+              "same_chain_launch_delta_s": 171.0
+            }
+          },
+          "arrival_cv2_parts": {
+            "release": 9.598409328876943e-05,
+            "holding": -0.0001009323890382873,
+            "other": 3.2762236386377184e-05,
+            "release_holding": -7.124126606326965e-05,
+            "release_other": 2.3039160277937357e-05,
+            "holding_other": 0.0001641800524358525,
+            "normalization": -4.668879627655296e-06
+          }
+        }
+      }
+    }
+  ]
+}
