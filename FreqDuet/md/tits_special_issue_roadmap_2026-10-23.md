@@ -179,3 +179,7 @@ The user has now authorized V224's8 passive slots. Source17043d5c03,t211255
 (high/manual,node006) passed24 tests and started the c0 pair;only their exact
 trajectory/endpoint AND recording gates can open the other6. V223 stays shadow
 only. Native inline AVL provenance is documented in the V224 protocol.
+V224 collection is complete:all8 exact-legacy AND recording gates pass,exit0.
+Upper-only shadow bin differences are3/11/3/11;V107 all0. No new lower action
+was executed,so no efficacy claim follows. Next separately budget actual-action
+execution smoke,not a gain sweep or independent-future matrix yet.

@@ -105,3 +105,13 @@ tests including frozen-runtime interfaces,then started ONLY c0_v107/c0_upper.
 The controller gates the other6 on both exact legacy payloads and complete
 sidecars. The earlier t211251 ran23 synthetic tests only,consuming0 paths.
 No V223 shadow action executes;failed starts cannot automatically replay.
+
+All8 paths completed under that same task with exit0 and no retries. Every
+legacy key/value,action,clock and endpoint exactly matches its V221 archive;
+every path has5240 prepares,5200 completely joined queries and40 unused
+prepares retained. RNG/observer-call checks pass. Four V107 paths have0 shadow
+bin differences;upper-only c0/c1/c2/c3 have3/11/3/11,respectively. All are
+UNEXECUTED requests,not new control outcomes. Only the13724-byte final summary
+returned locally;raw trajectories/sidecars remain remote. No fitting,training,
+new future or main switch occurred. Next requires a separately sealed actual-
+action smoke budget;do not open efficacy confirmation from this passive result.
