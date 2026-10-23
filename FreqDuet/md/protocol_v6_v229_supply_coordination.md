@@ -84,3 +84,14 @@ Limitations:two consumed actors x two days do not identify a deployable value
 model or prove frequency benefit. Ready coverage is not a future reservation;
 no complete-return uncertainty interval is assumed valid. This stage audits
 source interfaces only,not empirical archive coverage or passive equivalence.
+
+Sealed source aa48aa173e by t211282(high/manual,node006),exit0;7 tests passed.
+The live query already exposes the required inventory,plans,onboard load and
+executed-holding prefix. V224 query sidecars do not retain those five payloads.
+The AST summary lists literal missing keys:time_s/base_bin/context and other
+aliases can already be obtained from query_s/native_bin/the joined prepare;
+they are not separate missing-state findings. Next seal a minimal passive
+capture of the missing payloads,terminal-mask status,upper-version and physical
+cycle links,with exact legacy equality and its own started-path budget.
+No archive scans,collection,replays,fits,training or new futures were started;
+the selector and main remain unchanged. Only the small summary returned locally.
