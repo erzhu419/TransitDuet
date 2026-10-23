@@ -27,3 +27,8 @@ motivates separately registered independent futures. No tuning or main switch.
 All frozen models/calibrations/window/quantiles remain unchanged. scheduler
 high/manual,node001--006;raw data stay remote. This seal job tests synthetic
 budget/gates and zero-phase/bidirectional-law behavior only.
+
+Sealed source e258ea546a,t211260(high/manual,node006),exit0:7 synthetic tests
+passed. Started paths/archive scans/training/new futures all0;only the compact
+status/log returned. Next:implement the live executor,then authorize the c0-gated
+four-path budget separately. No new control outcome exists from this seal.
