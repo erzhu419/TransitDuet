@@ -183,7 +183,7 @@ def aggregate(root, source):
     if all(r['passed'] and r['source'] == source for r in checks.values()):
         import run_freqduet_v230_resource_capture as resource
         legacy = resource.frozen().legacy
-        fields = ('arm', 'anchor', 'future', 'physical_contract', 'ledger', 'completion',
+        fields = ('arm', 'tick_s', 'anchor', 'future', 'physical_contract', 'ledger', 'completion',
                   'uniforms', 'execution', 'tasks', 'dispatches', 'launch_plans',
                   'requests', 'main_policy_changed')
         data = {}
