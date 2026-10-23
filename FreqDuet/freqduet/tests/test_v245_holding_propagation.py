@@ -4,6 +4,7 @@ import numpy as np
 
 from audit_freqduet_v245_holding_propagation import (
     edge_accounting, four_way_parts, paired_holding, restore_label, series, unique)
+from audit_freqduet_v245_elapsed_components import split
 
 
 def fixture(times, order=(0, 1, 2, 3), direct=None):
@@ -61,6 +62,25 @@ class HoldingPropagationTest(unittest.TestCase):
     def test_duplicate_occurrences_are_not_silently_overwritten(self):
         with self.assertRaises(AssertionError):
             unique([dict(id=1),dict(id=1)], lambda r:r['id'])
+
+    def test_observed_stop_excludes_holding_and_current_stop(self):
+        arrivals, departures = [], []
+        for trip, shift in enumerate((0, 10, 23)):
+            for station, time, holding, dep, dep_hold in ((1, shift+1, 0, shift+6, 2),
+                                                        (2, shift+9, 2, shift+13, 3)):
+                common = dict(trip_id=trip, station_id=station, direction=False, release=shift)
+                arrivals.append(dict(common,time_s=time,realized_holding=holding,other_elapsed=time-shift-holding))
+                departures.append(dict(common,time_s=dep,realized_holding=dep_hold,other_elapsed=dep-shift-dep_hold))
+        r = split(dict(arrivals=arrivals,departures=departures))
+        self.assertAlmostEqual(r['cv2'], np.var([10.,13.,10.,13.])/np.mean([10.,13.,10.,13.])**2)
+        self.assertEqual(r['edges'][2,False,0,1]['x'][2], 0.)
+
+    def test_negative_nonholding_stop_is_not_clipped_to_zero(self):
+        common = dict(trip_id=0,station_id=1,direction=False,release=0)
+        trace = dict(arrivals=[dict(common,time_s=1,realized_holding=0,other_elapsed=1)],
+            departures=[dict(common,time_s=2,realized_holding=3,other_elapsed=-1)])
+        with self.assertRaises(AssertionError):
+            split(trace)
 
 
 if __name__ == '__main__':
