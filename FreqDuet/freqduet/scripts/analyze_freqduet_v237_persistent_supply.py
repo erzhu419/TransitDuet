@@ -66,10 +66,14 @@ def version_intervals(queries, versions, cycles):
             nwrite = bisect_left(writes, seq)-bisect_left(writes, before)
             delta = view['executed_holding_s']-old['executed_holding_s']
             assert delta == view['delta_executed_since_last_sample_s'] >= 0
+            old_p, new_p = (v['own_association']['obligation'] for v in (old, view))
+            own_revised = (old_p is not None and new_p is not None and old_p['trip_id'] == new_p['trip_id']
+                           and old_p['last_write_version'] != new_p['last_write_version'])
+            assert not own_revised or nwrite > 0
             kind = 'actual_write' if nwrite else 'callback_without_write' if ncallback else 'no_callback'
             row = dict(cycle_key=list(key), previous_query_seq=before, query_seq=seq,
                 kind=kind, callbacks=ncallback, writes=nwrite,
-                prior_H_s=old['executed_holding_s'], interval_delta_H_s=delta,
+                prior_H_s=old['executed_holding_s'], interval_delta_H_s=delta, own_plan_revised=own_revised,
                 pressure_cleared=bool(old['target_profile']['uncovered_due']) and
                     not view['target_profile']['uncovered_due'])
             rows.append(row)
@@ -82,6 +86,8 @@ def version_intervals(queries, versions, cycles):
         closed_holding_s=total, groups={name: dict(intervals=len(values),
             cycles=len({tuple(r['cycle_key']) for r in values}),
             carrying_positive_H=sum(r['prior_H_s'] > 0 for r in values),
+            own_plan_revised=sum(r['own_plan_revised'] for r in values),
+            own_plan_revised_with_positive_H=sum(r['own_plan_revised'] and r['prior_H_s'] > 0 for r in values),
             max_prior_H_s=max(r['prior_H_s'] for r in values),
             interval_delta_H_s=sum(r['interval_delta_H_s'] for r in values),
             pressure_cleared=sum(r['pressure_cleared'] for r in values))

@@ -21,6 +21,8 @@ at launch. Observed waiting is not transferable slack. Keep missing next launche
 Report compensation/return-binding overlap,not holding-caused departure delay.
 
 Use actual nonempty plan writes separately from callbacks without writes.
+Separate all-plan writes from changes to the same associated obligation's own
+last-write version;other-trip/direction writes do not count as own revisions.
 Track positive H across these intervals,first-own-due prefixes and exact
 prefix-increment/return-remainder closure. Interval delta H is not assigned to
 the latest risk/plan. Compare upper/V107 only on matched physical chains,

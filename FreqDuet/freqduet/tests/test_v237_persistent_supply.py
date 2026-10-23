@@ -7,7 +7,7 @@ from analyze_freqduet_v237_persistent_supply import (
 def view(seq, holding, delta, due=False):
     return dict(view=dict(cycle_key=[1, 10, 0], native_event_seq=seq,
         executed_holding_s=holding, delta_executed_since_last_sample_s=delta,
-        target_profile=dict(uncovered_due=[20] if due else [])))
+        target_profile=dict(uncovered_due=[20] if due else []), own_association=dict(obligation=None)))
 
 
 class PersistentSupplyTest(unittest.TestCase):
@@ -41,6 +41,8 @@ class PersistentSupplyTest(unittest.TestCase):
 
     def test_actual_writes_are_not_confused_with_no_write_callbacks(self):
         qs = [view(2, 5., 5.), view(5, 10., 5.), view(8, 15., 5.)]
+        for q, version in zip(qs, ('initial', 3, 3)):
+            q['view']['own_association']['obligation'] = dict(trip_id=20, last_write_version=version)
         vs = [dict(initial=False, native_event_seq=3, changes=[dict(trip_id=20)]),
               dict(initial=False, native_event_seq=6, changes=[])]
         cycles = [dict(after_last_query_s=5., executed_holding_s=20.)]
@@ -48,6 +50,8 @@ class PersistentSupplyTest(unittest.TestCase):
         self.assertEqual([r['kind'] for r in rows], ['actual_write', 'callback_without_write'])
         self.assertEqual(summary['closed_holding_s'], 20.)
         self.assertEqual(summary['groups']['actual_write']['carrying_positive_H'], 1)
+        self.assertEqual(summary['groups']['actual_write']['own_plan_revised_with_positive_H'], 1)
+        self.assertEqual(summary['groups']['callback_without_write']['own_plan_revised'], 0)
 
     def test_interval_holding_delta_not_reassigned_to_current_pressure(self):
         qs = [view(2, 5., 5.), view(5, 10., 5., due=True), view(8, 15., 5.)]
