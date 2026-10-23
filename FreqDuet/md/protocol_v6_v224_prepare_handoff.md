@@ -99,3 +99,9 @@ trip IDs:join the selected physical bus to trip/direction copied at entry to
 that SAME native update,not at query. Record this provenance explicitly. Its
 prepare argument supplies the pre-action clock;do not add a missing native bus
 attribute or claim it was present. No estimator,control rule or clock changes.
+
+Collector source17043d5c03,t211255(high/manual,node006,two workers) passed24
+tests including frozen-runtime interfaces,then started ONLY c0_v107/c0_upper.
+The controller gates the other6 on both exact legacy payloads and complete
+sidecars. The earlier t211251 ran23 synthetic tests only,consuming0 paths.
+No V223 shadow action executes;failed starts cannot automatically replay.

@@ -174,3 +174,8 @@ legacy clock exactly;every original action,timing and endpoint field must
 reproduce. Static seal tests alone do not establish runtime equivalence.
 V224 source282f0d884b sealed on node006,t211242(high/manual,exit0),with8
 contract tests passed and0 paths started. Collection remains unauthorized.
+
+The user has now authorized V224's8 passive slots. Source17043d5c03,t211255
+(high/manual,node006) passed24 tests and started the c0 pair;only their exact
+trajectory/endpoint AND recording gates can open the other6. V223 stays shadow
+only. Native inline AVL provenance is documented in the V224 protocol.
