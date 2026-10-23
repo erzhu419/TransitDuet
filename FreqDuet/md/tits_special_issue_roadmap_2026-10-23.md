@@ -143,3 +143,10 @@ V221 seals16 total replay slots,with a four-context first-query same-reserved-bu
 actual-release gate BEFORE lower/joint paths. High/manual t211222 is running on
 node006 after25 tests passed. See `protocol_v6_v221_release_smoke.md`;no training,
 new future bank or main switch is authorized by this execution smoke.
+
+V221 finished all16 paths with exact references and same-bus1s execution,but
+failed every per-context joint gate. Average gains do not remove the day-level
+CV2 harm or the journey/readiness/delay tradeoff versus lower-only. Preserve
+the verified projection as an execution component,not a promoted controller.
+Next is own-trip holding-response/proxy-versus-observed-gap analysis of saved
+records only;no gain escalation,new replay,training or independent-future bank.

@@ -42,4 +42,33 @@ High/manual t211222 launched on node006 with4 workers,source2b0115af7b.
 All25 tests passed;the four reference paths have started. Initial t211221
 exited during import before tests or any path,consuming0 slots. Its repaired
 PYTHONPATH also includes frozen V211 c45b2d0a93 source and native runtime scripts,
-as used by the original V218 task. No gate result is available yet.
+as used by the original V218 task. At dispatch,the gate was not yet evaluated.
+
+## Completed result and decision
+
+t211222 exited0: all4 references reproduce archived actions/inputs/plans/timing
+and endpoints exactly;all16 slots completed. High/manual read-only t211228 on
+node006 exited0 with4 audit tests. Only70557 bytes of JSON summaries returned.
+Upper and joint EACH execute22/22 ready-backed tasks on the reserved bus,as
+that bus's first post-query use,with the proposed plan and1s actual advance.
+The four first-query common-state gates pass. These22 departures are also1s
+early versus the original public timetable,not recovery of late departures.
+
+Four-context mean deltas versus V107 (negative is better):
+
+| Arm | Journey s/pax | Actual CV2 | Readiness s/trip | Public delay s/day |
+| --- | ---: | ---: | ---: | ---: |
+| Upper | -.353 | +.00008163 | +.573 | +153.5 |
+| Lower | -.741 | +.00003170 | -1.235 | -327.0 |
+| Joint | -.688 | -.00001644 | -1.048 | -278.0 |
+
+All4 joint gates fail: day2151001 has worse CV2 for both actors;day2151002 has
+worse journey/readiness/public delay versus lower-only. Lower/joint execute
+218/214 reductions. On day2151002,joint directly decrements395s versus its live
+bilateral requests,but matched task trips net only-90s;other trips contribute
++30/-55s,leaving total-60/-145s. This is accounting,not proof all305s of the
+task residual is later rebound. Do not promote or enlarge this candidate.
+Next: read-only align own-trip decisions to split native bilateral state
+response from direct decrements and later requests,and compare the release
+proxy with observable bilateral gaps/realized regularity. No retuning on these
+two consumed days,no replay/training/new futures or main switch.
