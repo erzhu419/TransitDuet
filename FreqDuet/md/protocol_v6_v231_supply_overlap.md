@@ -28,3 +28,26 @@ accounting,not causal mediation. No action/value model or selector is defined.
 Next decision:use observed overlap and native-response/supply-chain evidence
 to specify a separate persistent-coordination hypothesis and budget,or name
 the missing causal evidence. This analysis alone admits no intervention.
+
+Completed source2dc70e4bf7,t211297(high/manual,node004),exit0;5 tests and all8
+paths passed holding/supply accounting. Only the34KB summary returned locally.
+Each path has721--898 pressure-positive queries;82--155 link to the then-uncovered
+obligation,most instead supply a future posted trip. There are46--67 unique
+cycles that match an uncovered obligation at least once;each next launch is
+exactly1 native tick after return. All supported positive requests have local
+benefit versus0,but none has a smaller feasible bin with delta R<=0.
+On day2151002,both actors have33 later next launches,total+249s:inbound launch
+124s,holding120s,other trip time5s,post-return waiting0s. Whole-day holding falls
+35/25s,yet public-total delay rises221s. All4 contexts worsen CV2/public delay.
+
+Next:separately preregister persistent vehicle-cycle coordination using current
+posted obligations,positions and executed prefixes,not a terminal-wide boolean
+cut or a strict local-R-only guard. Keep actual next-trip labels out of the
+rule;no intervention budget is opened here.
+
+Limitations:2 consumed days/2 actors,not independent efficacy. Local R and
+query-onboard-times-holding are immediate proxies,not actual CV2 or passenger
+delay. Tight observed return/launch timing does not prove a removable action.
+The scheduler started a second instance on node006 after node004 completed;
+it stopped at the existing output directory before trajectory reads. Preserve
+both logs and the completed node004 summary;no replay or extra archive scan.
