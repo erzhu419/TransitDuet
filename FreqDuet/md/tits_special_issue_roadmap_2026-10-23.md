@@ -138,3 +138,8 @@ Static t211219 passes:18 tests,352 exact native snapshots,3/8/3/8 admitted
 ready-backed queries. Each advances only1 executable second. Next is separately
 budgeted actual-launch authority smoke before lower/joint execution,not a gain
 sweep or efficacy claim. See `protocol_v6_v220_supply_projection.md`;main stays frozen.
+
+V221 seals16 total replay slots,with a four-context first-query same-reserved-bus
+actual-release gate BEFORE lower/joint paths. High/manual t211222 is running on
+node006 after25 tests passed. See `protocol_v6_v221_release_smoke.md`;no training,
+new future bank or main switch is authorized by this execution smoke.

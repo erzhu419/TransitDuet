@@ -37,3 +37,9 @@ Main,actors,critics,duals,predictors,calibration and filters stay frozen. Run vi
 scheduler high/manual on node001--006, maximum4 workers;return small summaries
 only. The runtime/source dependencies are the sealed V218 source_b09088f636
 bundle and original optimized V9 runtime,not current mutable runtime files.
+
+High/manual t211222 launched on node006 with4 workers,source2b0115af7b.
+All25 tests passed;the four reference paths have started. Initial t211221
+exited during import before tests or any path,consuming0 slots. Its repaired
+PYTHONPATH also includes frozen V211 c45b2d0a93 source and native runtime scripts,
+as used by the original V218 task. No gate result is available yet.
