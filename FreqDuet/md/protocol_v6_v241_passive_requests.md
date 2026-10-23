@@ -26,3 +26,10 @@ Scheduler high/manual,node001--006;small JSON/log locally,all details remote.
 Next gate:separately authorize passive_c0_v107 against accepted V236 originals;
 only a full equality/recording pass permits passive_c0_upper_only. Synthetic
 success is implementation evidence,not empirical path equality or control gain.
+
+Completed:source fcb5efdcf0,task t211344,node004,high priority,manual dispatch
+invoked;exit0 and all10 synthetic tests passed. The complete four old payloads,
+native return,RNG and call counts are unchanged in the synthetic fixture;both
+H=0 aliases match native. No archive scan,path start,shadow execution or training
+occurred. All104 reserved starts remain available. Actual-path equivalence is
+still pending the separately authorized passive gate above.
