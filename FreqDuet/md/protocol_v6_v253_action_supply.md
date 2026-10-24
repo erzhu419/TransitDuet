@@ -3,6 +3,9 @@
 Design and synthetic seal only. Original12 vehicles,seven native-feasible
 bins,V238 `b4b1d00203`,main and all trained/prediction components unchanged.
 No archive scan,replay,training,fit,online selector or future reservation.
+Sealed source `4667fd4668`,task `t211423`,node004,high/manual,one attempt,
+exit 0;11 synthetic accounting/isolation/gate tests passed. Only the 1,031-byte
+summary and log were returned;all execution budgets remain zero.
 
 Later atomic experiment:at the first supported nonterminal positive-native
 query after 7200s,enumerate every legal bin at the SAME pre-command state.
