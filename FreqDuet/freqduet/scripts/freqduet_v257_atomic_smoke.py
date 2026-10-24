@@ -140,6 +140,10 @@ def atomic_audit(base, repeated, event, joint):
             assert tuple(runner._runtime_numpy_streams()) == STREAMS
             self.atomic_runner = runner
 
+        def rollout_kwargs(self, credit_observer):
+            return dict(probability_rule=self, trace_observer=self,
+                        event_uniforms=self.uniforms, credit_observer=credit_observer)
+
         def __call__(self, policy, states, features, theta):
             native = super().__call__(policy, states, features, theta)
             row = self.pulse_capture.queries[-1]

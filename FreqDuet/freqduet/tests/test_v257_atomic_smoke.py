@@ -107,6 +107,7 @@ class Fixture(PulseFixture):
             _runtime_numpy_streams=lambda:streams,_active_timetable_plans={False:dict(action=np.array([0.]))},
             _pending_lower_action_context={})
         self.audit.attach(self.runner)
+        self.rollout_kwargs=self.audit.rollout_kwargs(NS())
         self.physical,self.running,self.return_times,self.draws = {},{},{},[]
         self.ready_directions = dict.fromkeys(range(12),False)
         self.supported,self.mask = supported,list(range(7)) if mask is None else mask
@@ -160,7 +161,7 @@ class Fixture(PulseFixture):
         self.runner._pending_lower_action_context[bus] = copy.deepcopy(q['context'])
         value = a(self.policy,torch.zeros((1,4)),np.zeros(2),[0.]*4)
         self.returned_values.append(value is self.policy.last_return)
-        key,u = self.uniforms.draw(b.trip_id,b.last_station.station_id,b.direction)
+        key,u = self.rollout_kwargs['event_uniforms'].draw(b.trip_id,b.last_station.station_id,b.direction)
         selected = event.categorical_index(value.numpy()[0],u)
         amount = atomic.ACTIONS[selected]
         self.uniforms.records[key] = dict(uniform=u,order=len(self.uniforms.records),time_s=now,action_s=amount)
@@ -229,6 +230,13 @@ class AtomicSmokeTests(unittest.TestCase):
         for branch in (*report['plan']['masked'],*report['plan']['aliases']):
             with self.subTest(branch=branch),self.assertRaises(AssertionError):
                 self.make(branch,ref,mask=[0,2,4])
+
+    def test_rollout_binding_uses_the_exact_forked_uniform_object(self):
+        f=self.make(); f.complete()
+        self.assertIs(f.rollout_kwargs['event_uniforms'],f.audit.uniforms)
+        self.assertIs(f.rollout_kwargs['probability_rule'],f.audit)
+        self.assertIs(f.rollout_kwargs['trace_observer'],f.audit)
+        self.assertEqual(f.rollout_kwargs['event_uniforms'].seed,atomic.SMOKE_ROOT+10000000)
 
     def test_one_original_call_prefix_and_native_object_are_preserved(self):
         for branch in ('native','forced_native'):

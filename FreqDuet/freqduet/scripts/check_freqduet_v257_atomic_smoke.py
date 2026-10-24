@@ -29,8 +29,10 @@ def main():
     frozen,pulse,old,cycles,requests=passive.runtime_interfaces()
     joint=old.legacy.passive.prior
     repeated,event=joint.repeated,old.legacy.pilot.event
-    assert 'frozen_future_c45b2d0a93' in repeated.__file__
-    assert 'frozen_future_c45b2d0a93' in event.__file__
+    sealed=Path(joint.__file__).parent
+    assert 'protocol_v6_v211_joint_resources_c45b2d0a93/source/scripts' in str(sealed), str(sealed)
+    assert Path(repeated.__file__)==sealed/'run_freqduet_v68_repeated_continuations.py', repeated.__file__
+    assert Path(event.__file__)==sealed/'run_freqduet_v69_event_coupling.py', event.__file__
     assert tuple(spec['runtime_stream_names'])==adapter.STREAMS
     base=pulse.recording_audit(frozen.observer.recording_audit(
         requests.recording_audit(cycles.recording_audit(old.RecordingAudit))),'observer_only')
