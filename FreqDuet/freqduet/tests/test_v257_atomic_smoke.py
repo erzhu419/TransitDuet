@@ -306,7 +306,9 @@ class AtomicSmokeTests(unittest.TestCase):
                     if d['identity']['trip_id']==q['identity']['trip_id'] and d['identity']['station_id']==q['identity']['station_id']:
                         d['completed']['timing']['realized_holding']+=1.
             elif field=='missing': x['payloads']['v248']['departures']=[]
-            else: x['requests'][-1]['selected_bin']=0
+            else:
+                q=x['requests'][-1]
+                q['selected_bin']=next(b for b in q['feasible_bins'] if b!=q['native_bin'])
             bad=copy.deepcopy(b); bad['native']=x
             with self.subTest(field=field),self.assertRaises(AssertionError):
                 atomic.validate_smoke(bad,same,event.alignment)
