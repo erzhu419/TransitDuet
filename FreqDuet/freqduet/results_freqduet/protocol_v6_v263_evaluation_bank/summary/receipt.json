@@ -1,0 +1,135 @@
+{
+  "source": "e414070e27",
+  "status": "v263_evaluation_collector_synthetic_passed",
+  "tests": 15,
+  "failures": 0,
+  "errors": 0,
+  "S_source": "357e60fd70",
+  "S_seal_source": "65bdd96938",
+  "locked_contrasts": [
+    {
+      "context": 0,
+      "contrast_id": "c0:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 1,
+      "contrast_id": "c1:b2_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "b2",
+      "chosen_bin": 2,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 2,
+      "contrast_id": "c2:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 3,
+      "contrast_id": "c3:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    }
+  ],
+  "manifest_source": "eaba2513da",
+  "adapter_source": "263593f7e8",
+  "evaluation_units": 32,
+  "evaluation_start_cap": 224,
+  "per_unit_start_cap": 7,
+  "max_workers": 8,
+  "runtime_primitives": {
+    "SAME": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v211_joint_resources_c45b2d0a93/source/scripts/run_freqduet_protocol_v6_checkpoint_trajectory.py",
+    "RNG": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v211_joint_resources_c45b2d0a93/source/scripts/run_freqduet_v36_lower_credit.py",
+    "REPEATED": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v211_joint_resources_c45b2d0a93/source/scripts/run_freqduet_v68_repeated_continuations.py",
+    "EVENT": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v211_joint_resources_c45b2d0a93/source/scripts/run_freqduet_v69_event_coupling.py",
+    "RESOURCE": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v211_joint_resources_c45b2d0a93/source/scripts/run_freqduet_v211_joint_resources.py"
+  },
+  "collection_authorized": false,
+  "authorization_written": false,
+  "real_simulator_starts": 0,
+  "real_future_starts": 0,
+  "real_evaluation_starts": 0,
+  "raw_payloads_opened": 0,
+  "S_seal_metadata_unchanged": true,
+  "selection_recomputed": false,
+  "training_updates": 0,
+  "model_fits": 0,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "next_gate": "Separate explicit E launch authorization only after synthetic admission; all legal bins, S-locked primary, no reselection.",
+  "task_id": "t211535",
+  "node": "node004",
+  "priority": "high",
+  "manual_dispatch_invoked": true,
+  "backend_exit_code": 0,
+  "automatic_retry": false
+}
