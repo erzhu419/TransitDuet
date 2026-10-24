@@ -16,3 +16,8 @@ Only small status/summary files return locally; raw records remain remote.
 
 After all32 units, aggregate S before separately sealing offline contrasts.
 E remains closed; no training, online selector or main/V238 policy change.
+
+First wave: t211485(c0),t211486(c1),t211487(c2),t211488(c3), all S0,
+node004/high; manual dispatch invoked for all four. Launch snapshot: all running,
+one dispatch attempt each, no-auto-requeue; four native starts, no completed
+path checks or units yet. Remaining28 units are not submitted pending S0 admission.
