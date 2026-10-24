@@ -1,0 +1,43 @@
+{
+  "status": "v249_v107_passed_upper_dispatch_pending",
+  "source": "96960db57a",
+  "protocol_source": "e74d381e62",
+  "observer_source": "b83f1c5db4",
+  "integration_task": "t211401",
+  "integration_tests_passed": 4,
+  "node": "node004",
+  "priority": "high",
+  "manual_dispatch_requested": true,
+  "paths": [
+    {
+      "arm": "v107",
+      "task": "t211402",
+      "server_exit_code": 0,
+      "passed": true,
+      "all_five_old_payloads_exact": true,
+      "recording_complete": true,
+      "prepare_occurrences": 5240,
+      "query_occurrences": 5200,
+      "unused_prepares": 40,
+      "zero_holding_prepares": 1058,
+      "supported_fronts": 5200,
+      "unknown_fronts": 40,
+      "zero_query_cycles": 2,
+      "open_cycles": 0,
+      "clock_domains_separated": true,
+      "observer_rng_and_calls_unchanged": true,
+      "prepare_to_query_h_increases": 0,
+      "same_cycle_same_front_transitions": 4940
+    }
+  ],
+  "started_paths": 1,
+  "max_started_paths": 2,
+  "automatic_retry": false,
+  "extra_reference_paths": 0,
+  "new_futures": 0,
+  "intervention_paths": 0,
+  "training_updates": 0,
+  "shadow_actions_executed": 0,
+  "main_policy_changed": false,
+  "v238_changed": false
+}
