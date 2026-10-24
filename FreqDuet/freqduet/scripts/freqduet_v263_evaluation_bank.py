@@ -219,6 +219,8 @@ def claim_slot(root, unit, branch, source, locks):
         assert not list(started.glob('*.json')), 'native first; no restart'
     else:
         native = json.loads((checks/'native.json').read_text())
+        assert native['passed'] and native['unit'] == unit and native['source'] == source
+        assert native['locked_contrast'] == locks[unit['context']]
         assert native['plan'] == locks[unit['context']]['plan']
         order = native['plan']['physical']
         for earlier in order[:order.index(branch)]:
