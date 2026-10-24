@@ -1,0 +1,31 @@
+{
+  "status": "v255_passive_noop_synthetic_passed",
+  "source": "9f4afff2f3",
+  "parent_source": "eaba2513da",
+  "task": {
+    "id": "t211435",
+    "node": "node004",
+    "priority": "high",
+    "manual_dispatch": true,
+    "dispatch_attempt_count": 1,
+    "no_auto_requeue": true,
+    "verified_exit_code": 0
+  },
+  "tests": 10,
+  "failures": 0,
+  "errors": 0,
+  "evidence_scope": "Synthetic producer exercising the six existing observers and independent pulse adapter; not real-trajectory equality or control-effect evidence.",
+  "collector_implemented": true,
+  "runtime_connected": false,
+  "selector_defined": false,
+  "simulator_starts": 0,
+  "future_starts": 0,
+  "training_updates": 0,
+  "model_fits": 0,
+  "raw_payloads_opened": 0,
+  "launch_authorized": false,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "server_summary": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v255_passive_pulse/synthetic_9f4afff2f3/summary.json",
+  "next_gate": "Separate approval for original-future c0/V107 observer-only passive slot; exact six-payload and complete-record gates before native no-op. No smoke or S/E admission."
+}

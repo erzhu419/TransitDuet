@@ -17,6 +17,12 @@ unused/open cycles. Acceptance uses full six-payload equality plus recursive
 type checks and independent reconstruction from old sidecars,not action traces
 misread as query snapshots. Missing anchor or any mismatch stops admission.
 
+Server acceptance:source `9f4afff2f3`,task `t211435`,node004,high priority,
+explicit manual dispatch,one launch,no automatic requeue;exit sentinel0.
+All10 synthetic tests passed (0 failures/errors). No raw payload was opened;
+simulator/future starts,training updates and model fits remain0. Small receipt:
+`freqduet/results_freqduet/protocol_v6_v255_passive_pulse/summary/receipt.json`.
+
 Only synthetic checks are authorized here;V254's2/8/224/224 real-path caps stay
 unconsumed. Next:separately approve the c0/V107 original-future observer-only
 passive path;require exact six-payload and recording gates before its native
