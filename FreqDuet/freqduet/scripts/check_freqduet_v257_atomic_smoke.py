@@ -42,6 +42,9 @@ def main():
                     REPEATED=repeated.fork_future,EVENT=event.alignment,RESOURCE=joint.resource_snapshot)
     for name,function in primitives.items():
         os.environ['FREQDUET_V257_'+name]=inspect.getsourcefile(function)
+    from env.bus import Bus
+    kernels={name:inspect.getsourcefile(getattr(Bus,name)) for name in ('_start_dwelling','_process_dwelling')}
+    assert all('FreqDuet-v6-engineering-v9-runtime-optimized/FreqDuet/freqduet/env/bus.py' in v for v in kernels.values())
     a.out_root.mkdir(parents=True,exist_ok=False)
     suite=unittest.defaultTestLoader.discover(str(Path(__file__).resolve().parents[1]/'tests'),
                                             pattern='test_v257_atomic_smoke.py')
@@ -54,7 +57,7 @@ def main():
         simulator_starts=0,future_starts=0,real_smoke_starts=0,formal_starts=0,training_updates=0,
         raw_payloads_opened=0,launch_authorized=False,runtime_connected=False,selector_defined=False,
         main_policy_changed=False,v238_changed=False,
-        frozen_primitives={k:inspect.getsourcefile(v) for k,v in primitives.items()},
+        frozen_primitives={k:inspect.getsourcefile(v) for k,v in primitives.items()},holding_kernels=kernels,
         next_gate='Separate real-smoke approval and start ledger;native then forced-native alias '
             'then only legal nonalias fixed bins. No formal bank or policy promotion.')
     (a.out_root/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')

@@ -126,7 +126,6 @@ class Fixture(PulseFixture):
             setattr(b,k,copy.deepcopy(v))
         b._headway_recorder = self.env.headway_events
         b._normalize_action = MethodType(Bus._normalize_action,b)
-        b._record_executed_holding_action = MethodType(Bus._record_executed_holding_action,b)
 
     def launch(self,bus,trip,direction,now):
         super().launch(bus,trip,direction,now)
