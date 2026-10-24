@@ -46,22 +46,29 @@ def check_file(root, branch):
     return root/'checks'/(slot(branch)+'.json')
 
 
-def accepted(root, branch, source):
+def accepted(root, branch, source, native_gate=None):
     value = read(check_file(root, branch))
+    if branch == 'native' and native_gate is not None:
+        assert value['source'] == '140949bcf8' and not value['passed']
+        assert value['failure'] == 'AssertionError: checkpoint value differs: V258_archived_authority.scenario_tape_id'
+        assert native_gate['source'] == '22bd7999c5' and native_gate['data_source'] == '140949bcf8'
+        assert native_gate['status'] == 'v258_completed_native_readonly_recheck_passed' and native_gate['passed']
+        assert native_gate['original_check_preserved'] and native_gate['original_failed_start_debit'] == 1
+        return native_gate
     assert value['source'] == source and value['branch'] == branch and value['passed']
     return value
 
 
-def claim_slot(root, branch, source):
+def claim_slot(root, branch, source, native_gate=None):
     assert root.name == COLLECTION
     if branch == 'native':
         assert not list((root/'started').glob('*.json')), 'native must be first'
     else:
-        native = accepted(root, 'native', source)
+        native = accepted(root, 'native', source, native_gate)
         order = native['plan']['physical']
         assert branch in order, 'masked bins/native aliases never start'
         for previous in order[:order.index(branch)]:
-            accepted(root, previous, source)
+            accepted(root, previous, source, native_gate)
     assert len(list((root/'started').glob('*.json'))) < 8
     marker = root/'started'/(slot(branch)+'.json')
     marker.parent.mkdir(parents=True, exist_ok=True)
@@ -168,32 +175,42 @@ def path_check(data, reference, joint):
         metrics={k:data['results'][k] for k in METRICS})
 
 
-def update_status(root, source, gate=None):
+def update_status(root, source, gate=None, native_gate=None):
     rows = {p.stem.removeprefix('c0_smoke_f0_'):read(p) for p in sorted((root/'checks').glob('*.json'))}
     starts = len(list((root/'started').glob('*.json')))
     failures = sum(not r['passed'] for r in rows.values())
-    native = rows.get('native',{})
+    effective = dict(rows)
+    if native_gate is not None:
+        effective['native'] = accepted(root,'native',source,native_gate)
+    native = effective.get('native',{})
     planned = native.get('plan',{}).get('physical', ['native'])
-    complete = set(rows) == set(planned) and all(r['passed'] for r in rows.values())
-    state = 'stopped' if failures else 'engineering_passed_formal_closed' if gate else 'paths_passed_gate_pending' if complete else 'native_passed_remaining_pending'
+    complete = set(effective) == set(planned) and all(r['passed'] for r in effective.values())
+    current_failures = sum(not r['passed'] for r in effective.values())
+    if current_failures:
+        state = 'stopped'
+    elif gate is not None:
+        state = 'engineering_passed_formal_closed' if gate['passed'] else 'engineering_failed'
+    else:
+        state = 'paths_passed_gate_pending' if complete else 'native_passed_remaining_pending'
     result = dict(status='v258_smoke_'+state, source=source, adapter_source='263593f7e8',
         manifest_source='eaba2513da', paths=rows, started_smoke_paths=starts,
         failed_starts=failures, max_smoke_paths=8, remaining_smoke_cap=8-starts,
         automatic_retry=False, formal_starts=0, training_updates=0, main_policy_changed=False,
-        v238_changed=False, selector_defined=False, gate=gate,
+        v238_changed=False, selector_defined=False, gate=gate, native_readonly_recheck=native_gate,
+        engineering_path_passes={b:r['passed'] for b,r in effective.items()},
         interpretation='One consumed c0/day and one smoke future; engineering/descriptive evidence only.')
     if native.get('passed'):
         result['descriptive_delta_vs_native'] = {b:{k:r['metrics'][k]-native['metrics'][k] for k in METRICS}
-            for b,r in rows.items() if r['passed']}
+            for b,r in effective.items() if r['passed']}
     write(root/'summary/status.json',result)
     print('V258_STATUS '+json.dumps(result),flush=True)
     return result
 
 
-def collect(a, branch):
+def collect(a, branch, native_gate=None):
     root, source = a.out_root, a.source
     assert not check_file(root,branch).exists(), 'completed slot is read-only; no restart'
-    claim_slot(root,branch,source)
+    claim_slot(root,branch,source,native_gate)
     print('V258_STARTED '+slot(branch),flush=True)
     rule = None
     output = root/'records'/(slot(branch)+'.pkl.gz')
@@ -229,7 +246,7 @@ def collect(a, branch):
         result.update(passed=False,reference_ready=False,failure=type(exc).__name__+': '+str(exc),
             observed_time_s=None if rule is None or not hasattr(rule,'env') else float(rule.env.current_time))
     write(check_file(root,branch),result)
-    update_status(root,source)
+    update_status(root,source,native_gate=native_gate)
     print('V258_PATH_CHECK '+json.dumps(result),flush=True)
     if not result['passed']:
         raise SystemExit(1)

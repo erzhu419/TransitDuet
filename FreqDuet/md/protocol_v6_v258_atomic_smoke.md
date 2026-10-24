@@ -27,3 +27,8 @@ the old-future ID. The authority object also mixes in final generated demand.
 Preserve this failed debit (1/8) and stop remaining paths. A separate server-only
 read-only recheck compares fixed authority, validates each tape's registered
 seed/version, and compares the six stored prefixes, not old-future endpoints.
+The user subsequently approved continuing only the remaining seven after this
+read-only gate passes, with no native retry or extra slot. Keep the original
+failed check/debit separate from recovered engineering acceptance. The explicit
+continuation entrypoint requires the sealed recheck and checks only the new
+recovery-slot cases before dispatch; forced-native remains first.

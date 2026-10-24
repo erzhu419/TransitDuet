@@ -1,3 +1,5 @@
+from contextlib import redirect_stdout
+import io
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -17,7 +19,8 @@ class Slots(unittest.TestCase):
 
     def pass_branch(self, branch, plan=None):
         driver.write(driver.check_file(self.root,branch),dict(source=self.source,branch=branch,
-            passed=True,plan=plan or smoke_plan(1,[0,1,2,3,4,5,6])))
+            passed=True,plan=plan or smoke_plan(1,[0,1,2,3,4,5,6]),
+            metrics={m:0. for m in driver.METRICS}))
 
     def test_native_debit_and_no_retry(self):
         driver.claim_slot(self.root,'native',self.source)
@@ -102,6 +105,41 @@ class Authority(unittest.TestCase):
         data['contract']['scenario_tape_id'] = 'v1:2151001'
         with self.assertRaises(AssertionError):
             self.check(data,old)
+
+
+class RecoveredSlots(unittest.TestCase):
+    setUp = Slots.setUp
+    pass_branch = Slots.pass_branch
+
+    def test_recovered_native_can_fund_only_unstarted_seven(self):
+        driver.claim_slot(self.root,'native','140949bcf8')
+        driver.write(driver.check_file(self.root,'native'),dict(source='140949bcf8',branch='native',
+            passed=False,failure='AssertionError: checkpoint value differs: V258_archived_authority.scenario_tape_id'))
+        gate = dict(source='22bd7999c5',data_source='140949bcf8',passed=True,
+            status='v258_completed_native_readonly_recheck_passed',original_check_preserved=True,
+            original_failed_start_debit=1,plan=smoke_plan(1,list(range(7))),
+            metrics={m:0. for m in driver.METRICS})
+        original = driver.read(driver.check_file(self.root,'native'))
+        for b in gate['plan']['physical'][1:]:
+            driver.claim_slot(self.root,b,self.source,gate)
+            self.pass_branch(b)
+        self.assertEqual(len(list((self.root/'started').glob('*.json'))),8)
+        self.assertEqual(driver.read(driver.check_file(self.root,'native')),original)
+        with redirect_stdout(io.StringIO()):
+            summary = driver.update_status(self.root,self.source,{'passed':True},gate)
+        self.assertEqual(summary['failed_starts'],1)
+        self.assertFalse(summary['paths']['native']['passed'])
+        self.assertTrue(all(summary['engineering_path_passes'].values()))
+        self.assertEqual(summary['status'],'v258_smoke_engineering_passed_formal_closed')
+        with self.assertRaises(AssertionError):
+            driver.claim_slot(self.root,'native',self.source,gate)
+
+    def test_unrelated_native_failure_cannot_use_readonly_recovery(self):
+        driver.claim_slot(self.root,'native','140949bcf8')
+        driver.write(driver.check_file(self.root,'native'),dict(source='140949bcf8',branch='native',
+            passed=False,failure='missing anchor'))
+        with self.assertRaises(AssertionError):
+            driver.accepted(self.root,'native',self.source,{'passed':True})
 
 
 if __name__ == '__main__':
