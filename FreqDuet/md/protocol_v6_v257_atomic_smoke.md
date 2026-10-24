@@ -17,3 +17,14 @@ Only frozen-interface and synthetic tests are authorized now. Synthetic fixtures
 use the actual six-observer/V255 chain,V68/V69 definitions and bus holding methods.
 No real path,smoke,formal bank,training,V238/main change or raw data transfer.
 Next:separate real-smoke start authorization after synthetic acceptance.
+
+## Server acceptance
+
+Task t211460, source 263593f7e8, node004, high priority; manual dispatch invoked,
+one launch attempt, automatic requeue disabled. All 11 synthetic tests passed
+(0 failures/errors, backend exit 0). Earlier synthetic revisions stopped on a
+source-path assumption, a frozen Bus fixture mismatch, and an ineffective
+negative-test mutation; each was corrected without weakening the gates.
+Real smoke/formal/training starts remain 0. Only the small log/receipt was
+retrieved. V238 and the main policy are unchanged; real-smoke authorization
+and its start ledger remain the next gate.
