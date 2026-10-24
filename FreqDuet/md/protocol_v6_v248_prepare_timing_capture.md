@@ -11,8 +11,11 @@ producer. They compare all five original payloads and check delayed/repeated
 queries, plan changes, unused PREPAREs, missing front support, open/zero-query
 cycles, hook returns, RNG/native-call invariance and detach restoration.
 
-Server verification pending. No real archive scan, collection, replay, training,
-online selector or shadow action execution is authorized. V238/main are unchanged.
+Source `b83f1c5db4`: scheduler high/manual task `t211400` on node004, exit 0,
+**25 tests passed** (15 frozen mapping tests plus 10 callback-chain tests).
+Both synthetic native arms preserve all five original payloads exactly.
+No real archive scan, collection, replay, training, online selector or shadow
+action execution occurred. V238/main and both reserved real-path slots are unchanged.
 
 Next: after synthetic acceptance, obtain separate approval for c0/V107 real
 passive equality preflight. Upper-only still requires every first-path gate to pass.
