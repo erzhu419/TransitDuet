@@ -1,0 +1,34 @@
+{
+  "stage": "v261_remaining_S_collection",
+  "source": "a6762c34e3",
+  "collector_source": "357e60fd70",
+  "s0_admission_task": "t211497",
+  "s0_admission_exit_code": 0,
+  "s0_paths_passed": 28,
+  "s0_failed_starts": 0,
+  "status": "eight_shards_running",
+  "tasks_by_shard": [
+    "t211499", "t211501", "t211503", "t211504",
+    "t211505", "t211506", "t211507", "t211508"
+  ],
+  "nodes_by_shard": [
+    "node004", "node004", "node004", "node004",
+    "node005", "node005", "node005", "node005"
+  ],
+  "priority": "high",
+  "manual_dispatch_invoked": true,
+  "dispatch_attempts_per_task": 1,
+  "units_per_shard": [4, 4, 4, 4, 3, 3, 3, 3],
+  "remaining_units": 28,
+  "max_workers": 8,
+  "remaining_start_cap": 196,
+  "total_S_start_cap": 224,
+  "automatic_retry": false,
+  "failures_consume_slots": true,
+  "evaluation_authorized": false,
+  "offline_choices_made": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "next_gate": "Aggregate all 32 S units and account for every start before sealing frozen offline contrasts; E remains closed."
+}

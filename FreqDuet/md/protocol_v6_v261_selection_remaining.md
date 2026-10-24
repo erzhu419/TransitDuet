@@ -19,3 +19,7 @@ S0 admission t211497 passed: all4 contexts/28 paths,5200 common logical events
 per path,0 uniform mismatches, exact executed seven-bin doses and cleared trips.
 All28 start markers/checks/unit summaries agree; no failed or extra starts.
 The4.4KB admission receipt is local; raw traces and checkpoints remain remote.
+
+Remaining28 units: eight high-priority tasks, manual dispatch invoked for all;
+t211499,t211501,t211503,t211504 on node004; t211505-t211508 on node005.
+Launch snapshot: all8 running, one attempt each, automatic requeue disabled.
