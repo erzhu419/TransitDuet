@@ -3,6 +3,7 @@ import unittest
 
 from preregister_freqduet_v247_prepare_timing import (
     OLD_PAYLOADS, join_query, map_prepare, prepare_sample, registration)
+from preregister_freqduet_v246_compensation_supply import persistent_change
 
 
 def fixture():
@@ -36,6 +37,23 @@ class PrepareTimingTests(unittest.TestCase):
         before = copy.deepcopy((old, sample))
         map_prepare(old, sample)
         self.assertEqual((old, sample), before)
+
+    def test_same_front_persists_across_stations(self):
+        old, sample = fixture()
+        first = map_prepare(old, sample)
+        old['current']['station_id'] = old['front']['station_id'] = 8
+        old['clock'].update(prepare_s=1100., record_read_s=1100.,
+                            legacy_prepare_event_seq=22, handoff_order=1300)
+        old['front'].update(departure_s=1000., departure_order=1250)
+        sample['native'].update(station_id=8, time_s=1100., event_seq=22)
+        sample.update(read_s=1100., holding_s=70., counter_s=370.)
+        sample['completed_front']['timing'].update(station_id=8, time_s=1000.,
+            realized_holding=50., other_elapsed=950.)
+        second = map_prepare(old, sample)
+        self.assertEqual(first['front_identity'], second['front_identity'])
+        delta = persistent_change(first, second)
+        self.assertEqual(delta['status'], 'same_physical_cycle_and_front')
+        self.assertEqual(sum(delta['parts'].values()), 0.)
 
     def test_zero_holding_is_supported(self):
         old, sample = fixture()

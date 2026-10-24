@@ -55,7 +55,7 @@ def map_prepare(old, sample):
     front, observed = old['front'], sample['completed_front']
     assert front['status'] == 'supported'
     assert front['station_id'] == own['station_id'] and front['direction'] == own['direction']
-    row['front_identity'] = {k: front[k] for k in IDENTITY}
+    row['front_identity'] = {k: front[k] for k in ('bus_id', 'trip_id', 'direction')}
     row['front_status'] = 'completed_timing_unavailable'
     if observed is None:
         return row
@@ -125,6 +125,8 @@ def registration(source):
                 'After original V224 prepare callback returns,join its packet by '
                 'legacy_prepare_event_seq. Match front bus/trip/station/direction,departure_s,'
                 'original departure_order and launch_order,actual release/H/nonholding elapsed. '
+                'Persistent front identity is bus/trip/direction;station belongs to the '
+                'observation join,not the cross-station identity. '
                 'Use an independent completed-event index when implementing;never rescan the '
                 'full history per PREPARE or add marks to the old sidecar.',
             clocks='Native actual launch seq,prepare seq and query seq stay in EventClock. '

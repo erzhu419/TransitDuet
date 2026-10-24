@@ -14,6 +14,7 @@ runtime recorder or action selector.
   Missing front timing remains unavailable, never zero or backfilled.
 - Native event seq and V224 sidecar order are distinct domains. For supported
   rows, verify `F = launch gap + executed-H gap + nonholding elapsed gap`.
+  Cross-station front identity is bus/trip/direction; station is a timing join.
   Keep all PREPAREs, including unused ones, and every query occurrence.
 
 ## Reserved Preflight
