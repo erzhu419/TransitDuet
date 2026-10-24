@@ -23,6 +23,12 @@ def accepted(row):
     return row.get('passed') is True and all(row.get(k) is True for k in GATES)
 
 
+def path_output(root, mode):
+    assert root.name == COLLECTION and mode in SLOTS
+    # Frozen optimized_runtime resolves its proof relative to out_root.parent.
+    return root.with_name(root.name+'_'+mode)
+
+
 def claim_slot(root, mode, source):
     assert root.name == COLLECTION and mode in SLOTS
     if mode == 'forced_native_once':
@@ -62,8 +68,11 @@ def collect(a, frozen, pulse, old, cycles, requests):
         assert saved['source'] == a.source and saved['mode'] == mode
         return saved
     assert not (root/'started'/f'{slot}.json').exists(), 'started slot cannot restart'
-    path_root = root/'paths'/mode
+    path_root = path_output(root, mode)
     assert not path_root.exists(), 'path output already exists;inspect without restarting'
+    proof = path_root.parent/'runtime_optimization_20261014'
+    assert (proof/'benchmark_summary.json').is_file()
+    assert (proof/'training_equivalence/summary.json').is_file()
     legacy = old.legacy
     reference = {k: legacy.prior.read(a.archive_root/folder/'c0_v107.json.gz')
                  for k,folder in pulse.PAYLOADS.items()}

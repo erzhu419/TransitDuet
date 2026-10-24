@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from run_freqduet_v256_passive_pulse import COLLECTION, GATES, accepted, claim_slot
+from run_freqduet_v256_passive_pulse import COLLECTION, GATES, accepted, claim_slot, path_output
 
 
 class PassivePulseSlotsTests(unittest.TestCase):
@@ -25,6 +25,15 @@ class PassivePulseSlotsTests(unittest.TestCase):
         claim_slot(self.root, 'observer_only', 'source')
         with self.assertRaises(FileExistsError):
             claim_slot(self.root, 'observer_only', 'source')
+
+    def test_path_preserves_frozen_runtime_proof_parent(self):
+        for mode in ('observer_only','forced_native_once'):
+            output = path_output(self.root, mode)
+            self.assertEqual(output.parent, self.root.parent)
+            self.assertEqual(output.parent/'runtime_optimization_20261014',
+                             self.root.parent/'runtime_optimization_20261014')
+        self.assertNotEqual(path_output(self.root, 'observer_only'),
+                            path_output(self.root, 'forced_native_once'))
 
     def test_noop_needs_every_first_path_gate(self):
         with self.assertRaises(FileNotFoundError):

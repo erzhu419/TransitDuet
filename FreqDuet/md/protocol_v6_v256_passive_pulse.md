@@ -12,5 +12,14 @@ Failures consume their fixed slots;no automatic retries,extra references or
 replacement queries. Maximum2 starts,one worker;no new future,smoke,formal matrix
 or training. Raw files stay remote;only small checks/status/logs return locally.
 
+Source `fb30e41bae`:server entrypoint task `t211437` passed14 tests. Observer
+task `t211438` consumed its slot but stopped before runner construction:the new
+nested output directory misplaced the frozen runtime's relative proof lookup.
+No action/timing/endpoint equivalence was evaluated;native no-op was not submitted.
+The entrypoint is repaired to use sibling path outputs under the existing results
+root,and regression-tested without replay. The spent slot remains spent;the old
+failed receipt and integration result are retained. No retry or budget expansion
+is authorized by this repair. A new observer attempt needs explicit extra approval.
+
 Next gate depends on both real receipts;passive equality alone is not control
 benefit and does not authorize the reserved smoke or selection/evaluation banks.
