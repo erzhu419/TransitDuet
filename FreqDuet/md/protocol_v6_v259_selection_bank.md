@@ -21,3 +21,14 @@ separate source-bound selection_authorization.json; this stage does not write it
 Every claimed path burns its slot before runtime construction, including failure;
 no retries or unit/root replacement. Scheduler high priority, manual server
 dispatch, small summaries only. Main/V238, S/E starts and training stay unchanged.
+
+Server acceptance: t211483, source357e60fd70, node004/high/manual dispatch;
+14 tests passed,0 failures/errors,backend exit0. The formal collection directory
+and authorization file are absent; real S/E starts remain0. Tests cover all four
+contexts, cross-S prefixes, disjoint derived streams, legal execution and224-slot
+accounting; incomplete banks cannot seal contrasts or open E.
+Earlier t211481 also passed14 tests/exit0 but its expected negative-test traceback
+triggered scheduler failure scanning. Only that fixture now captures its expected
+logs and verifies the saved failure; production error reporting is unchanged.
+Next: separate explicit S collection authorization; E stays closed until all S
+units and the locked contrasts are sealed. No smoke-based tuning or policy change.
