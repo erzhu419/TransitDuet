@@ -1,4 +1,6 @@
 import copy
+from contextlib import redirect_stderr, redirect_stdout
+import io
 import json
 from pathlib import Path
 import random
@@ -217,12 +219,17 @@ class MetadataAndBudget(unittest.TestCase):
     def test_failed_attempt_burns_slot_and_has_no_automatic_retry(self):
         unit = bank.selection_unit(0,0)
         a = NS(out_root=self.root,source=self.source)
-        with patch.object(runner,'interfaces',side_effect=RuntimeError('synthetic load failure')) as load:
+        output = io.StringIO()
+        with redirect_stdout(output),redirect_stderr(output),patch.object(
+                runner,'interfaces',side_effect=RuntimeError('synthetic load failure')) as load:
             with self.assertRaises(SystemExit):
                 runner.collect_path(a,unit,'native',None)
             with self.assertRaises(AssertionError):
                 runner.collect_path(a,unit,'native',None)
             self.assertEqual(load.call_count,1)
+        failed = runner.read(self.root/'checks'/bank.unit_key(unit)/'native.json')
+        self.assertEqual(failed['failure'],'RuntimeError: synthetic load failure')
+        self.assertIn('synthetic load failure',output.getvalue())
         with self.assertRaises(AssertionError):
             bank.claim_slot(self.root,unit,'b0',self.source)
         self.assertEqual(len(list((self.root/'started').glob('*/*.json'))),1)
