@@ -98,6 +98,8 @@ class SyntheticPaths(unittest.TestCase):
             paths[branch] = self.completed(self.make(unit, branch, self.reference(native), ctx, lock))
         other = next(b for b in paths if b not in ('native',primary))
         paths[other]['results']['passenger_person_s'] = -1000000.
+        harmful = next(b for b in paths if b not in ('native',primary,other))
+        paths[harmful]['results']['passenger_person_s'] = native['results']['passenger_person_s']+1000.
         before = copy.deepcopy(lock)
         result = bank.validate_unit(paths, unit, lock, frozen.same, frozen.event.alignment)
         self.assertEqual(result['primary_branch'], primary)
