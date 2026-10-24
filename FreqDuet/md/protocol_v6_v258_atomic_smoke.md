@@ -1,0 +1,21 @@
+# V258: authorized V253/V254 real smoke
+
+Use the accepted V257 adapter (263593f7e8), unchanged V238/main, frozen V256
+observer chain and original 12-vehicle/seven-bin authority. Only c0 (actor12037,
+day2151001), prefix402112137 and reserved smoke root3540999999 are authorized.
+
+Run server-only driver/slot synthetic checks, then one native path. Require the
+first eligible query to match V256's accepted stored prefix, preserve the current
+physical window and event occurrences, switch future once, close measured H and
+clear all trips. Do not compare the new-future endpoint with the old future.
+
+After native acceptance, run forced-native then legal nonalias bins in bin order.
+Each path debits a marker before runtime construction; failures stop, never retry
+or replace slots. Native-bin labels alias native; masked labels stay unstarted.
+At most eight real starts, one worker. Full payloads stay server-side; only small
+logs/checks/summary return locally. Aggregate in the remaining-path job.
+
+Require exact same-new-future native alias, common prefix/future, event-keyed
+coupling and sampled/issued/measured H closure, with at least one nonzero actual
+pulse difference. Outcomes are descriptive, not used to select or tune actions.
+Formal selection/evaluation banks and training remain closed.
