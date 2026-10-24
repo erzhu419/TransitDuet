@@ -32,3 +32,9 @@ read-only gate passes, with no native retry or extra slot. Keep the original
 failed check/debit separate from recovered engineering acceptance. The explicit
 continuation entrypoint requires the sealed recheck and checks only the new
 recovery-slot cases before dispatch; forced-native remains first.
+
+Read-only task t211464 passed all stored-prefix/authority/execution checks and
+three authority tests (exit0); no new path. Continuation tests t211466 passed
+both new recovery-slot tests (exit0). The approved seven-path job is t211467,
+source eb7e4ac0dd, high priority, manual dispatch to node004, no auto-requeue.
+This launch receipt is not a final smoke verdict. Formal banks/training stay closed.
