@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the two explicitly approved V254 passive slots,one manual task at a time."""
+"""V254 passive slots plus the explicitly approved single engineering repair start."""
 
 import argparse
 import json
@@ -9,7 +9,8 @@ import unittest
 
 
 COLLECTION = 'protocol_v6_v256_passive_pulse_collection'
-SLOTS = dict(observer_only='passive_c0_v107', forced_native_once='noop_c0_v107')
+SLOTS = dict(observer_only='passive_c0_v107', observer_repair1='passive_c0_v107_repair1',
+             forced_native_once='noop_c0_v107')
 GATES = ('six_payloads_exact', 'recording_complete', 'clock_domains_preserved',
          'native_calls_and_rng_unchanged')
 
@@ -31,8 +32,14 @@ def path_output(root, mode):
 
 def claim_slot(root, mode, source):
     assert root.name == COLLECTION and mode in SLOTS
+    if mode == 'observer_repair1':
+        failed = json.loads((root/'checks/passive_c0_v107.json').read_text())
+        assert failed['source'] == 'fb30e41bae' and failed['passed'] is False
+        assert (root/'started/passive_c0_v107.json').is_file()
+        auth = json.loads((root/'repair_authorization.json').read_text())
+        assert auth['source'] == source and auth['extra_observer_starts'] == 1
     if mode == 'forced_native_once':
-        first = json.loads((root/'checks/passive_c0_v107.json').read_text())
+        first = json.loads((root/'checks/passive_c0_v107_repair1.json').read_text())
         assert first['source'] == source and first['mode'] == 'observer_only' and accepted(first)
     started = root/'started'/f'{SLOTS[mode]}.json'
     started.parent.mkdir(parents=True, exist_ok=True)
@@ -60,15 +67,16 @@ def payloads(audit, complete):
 
 
 def collect(a, frozen, pulse, old, cycles, requests):
-    root, mode = a.out_root, a.command
-    slot = SLOTS[mode]
+    root, command = a.out_root, a.command
+    mode = 'observer_only' if command == 'observer_repair1' else command
+    slot = SLOTS[command]
     check = root/'checks'/f'{slot}.json'
     if check.exists():
         saved = json.loads(check.read_text())
         assert saved['source'] == a.source and saved['mode'] == mode
         return saved
     assert not (root/'started'/f'{slot}.json').exists(), 'started slot cannot restart'
-    path_root = path_output(root, mode)
+    path_root = path_output(root, command)
     assert not path_root.exists(), 'path output already exists;inspect without restarting'
     proof = path_root.parent/'runtime_optimization_20261014'
     assert (proof/'benchmark_summary.json').is_file()
@@ -88,9 +96,10 @@ def collect(a, frozen, pulse, old, cycles, requests):
         return audit
 
     original = legacy.ReleaseAudit
-    claim_slot(root, mode, a.source)
+    claim_slot(root, command, a.source)
     print('V256_STARTED '+slot, flush=True)
-    result = dict(source=a.source, slot=slot, mode=mode, passed=False, automatic_retry=False)
+    result = dict(source=a.source, slot=slot, mode=mode, command=command,
+                  passed=False, automatic_retry=False)
     try:
         legacy.ReleaseAudit = factory
         legacy.run_item(path_root, a.v216_root, (0, 'v107'))
@@ -129,16 +138,19 @@ def collect(a, frozen, pulse, old, cycles, requests):
     write(check, result)
     rows = [json.loads(p.read_text()) for p in sorted((root/'checks').glob('*.json'))]
     started = len(list((root/'started').glob('*.json')))
-    status = dict(status='v256_passive_pair_passed' if len(rows) == 2 and all(accepted(r) for r in rows)
-        else 'v256_'+mode+('_passed' if accepted(result) else '_stopped'),
+    pair = [r for r in rows if r['slot'] in ('passive_c0_v107_repair1','noop_c0_v107')]
+    status = dict(status='v256_repair_passive_pair_passed' if len(pair) == 2 and all(accepted(r) for r in pair)
+        else 'v256_'+command+('_passed' if accepted(result) else '_stopped'),
         source=a.source, adapter_source='9f4afff2f3', manifest_source='eaba2513da', paths=rows,
-        started_paths=started, max_started_paths=2, remaining_slots=2-started,
+        started_paths=started, original_max_started_paths=2, approved_extra_observer_starts=1,
+        max_started_paths=3, remaining_slots=3-started,
+        failed_starts=sum(r['passed'] is False for r in rows),
         automatic_retry=False, extra_reference_paths=0, future_starts=0,
         smoke_starts=0, formal_starts=0, training_updates=0, model_fits=0,
         main_policy_changed=False, v238_changed=False)
     write(root/'summary/status.json', status)
     print('V256_PATH_CHECK '+json.dumps(result), flush=True)
-    print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=len(rows), total=2,
+    print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=len(rows), total=3,
         unit='path', phase=status['status'])), flush=True)
     return result
 
@@ -153,14 +165,14 @@ def main():
     assert a.out_root.name == COLLECTION
     spec = json.loads((a.v254_root/'manifest.json').read_text())
     assert spec['source'] == 'eaba2513da' and spec['physical_start_caps']['passive'] == 2
-    assert spec['preflight']['slots'] == list(SLOTS.values())
+    assert spec['preflight']['slots'] == [SLOTS['observer_only'],SLOTS['forced_native_once']]
     assert a.archive_root.name == spec['preflight']['reference_collection']
     parent = json.loads((a.v255_root/'summary.json').read_text())
     assert (parent['status'],parent['source'],parent['tests']) == ('v255_passive_noop_synthetic_passed','9f4afff2f3',10)
     ref = json.loads((a.archive_root/'summary/status.json').read_text())
     assert (ref['source'],ref['status']) == ('96960db57a','v249_passive_pair_passed')
     frozen, pulse, old, cycles, requests = runtime_interfaces()
-    integration = a.out_root/'integration_preflight.json'
+    integration = a.out_root/'integration_repair_preflight.json'
     if a.command == 'tests':
         suite = unittest.TestSuite([
             unittest.defaultTestLoader.loadTestsFromName('test_v255_passive_pulse'),
@@ -176,12 +188,16 @@ def main():
     ready = json.loads(integration.read_text())
     assert ready['source'] == a.source and ready['status'] == 'v256_frozen_interfaces_and_slots_passed'
     auth = dict(source=a.source, manifest_source='eaba2513da', adapter_source='9f4afff2f3',
-        slots=list(SLOTS.values()), max_started_paths=2, max_workers=1,
-        authorization='User approved original-future c0/V107 observer-only then native no-op conditional on all exact gates.',
+        slots=[SLOTS['observer_repair1'],SLOTS['forced_native_once']], max_started_paths=3, max_workers=1,
+        original_max_started_paths=2, original_spent_starts=1, extra_observer_starts=1,
+        authorization='User explicitly approved ONE additional observer-only after t211438 directory failure; '
+            'only after exact pass use the original reserved native-noop slot. Preserve the failed debit.',
         failures_consume_slots=True, automatic_retry=False, extra_reference_paths=0,
         smoke_authorized=False, formal_authorized=False, training_authorized=False,
         main_policy_changed=False, v238_changed=False)
-    auth_file = a.out_root/'execution_authorization.json'
+    failed = json.loads((a.out_root/'checks/passive_c0_v107.json').read_text())
+    assert failed['source'] == 'fb30e41bae' and failed['passed'] is False
+    auth_file = a.out_root/'repair_authorization.json'
     if auth_file.exists():
         assert json.loads(auth_file.read_text()) == auth
     else:

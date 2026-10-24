@@ -18,8 +18,14 @@ nested output directory misplaced the frozen runtime's relative proof lookup.
 No action/timing/endpoint equivalence was evaluated;native no-op was not submitted.
 The entrypoint is repaired to use sibling path outputs under the existing results
 root,and regression-tested without replay. The spent slot remains spent;the old
-failed receipt and integration result are retained. No retry or budget expansion
-is authorized by this repair. A new observer attempt needs explicit extra approval.
+failed receipt and integration result are retained.
+
+The user then explicitly approved ONE additional observer-only attempt. Amended
+cap:original2 + extra observer1 =3 starts,including the spent failure. Slot
+`passive_c0_v107_repair1` requires the original failed debit and a separate repair
+authorization;its exact pass alone admits the original `noop_c0_v107` slot.
+No repeated repair,extra no-op,context/future expansion or automatic requeue.
+Repair integration and authorization are separate files;old records stay intact.
 
 Next gate depends on both real receipts;passive equality alone is not control
 benefit and does not authorize the reserved smoke or selection/evaluation banks.
