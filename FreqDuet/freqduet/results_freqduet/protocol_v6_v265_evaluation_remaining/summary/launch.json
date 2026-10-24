@@ -1,0 +1,336 @@
+{
+  "source": "85399b1050",
+  "collector_source": "e414070e27",
+  "admission_task": "t211559",
+  "admission_exit_code": 0,
+  "first_wave_tasks": [
+    "t211538",
+    "t211539",
+    "t211540",
+    "t211541"
+  ],
+  "first_wave_exit_codes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "stage": "remaining28_E",
+  "priority": "high",
+  "max_workers": 8,
+  "automatic_retry": false,
+  "failures_consume_slots": true,
+  "selection_recomputed": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "tasks": [
+    {
+      "shard": 0,
+      "task_id": "t211560",
+      "preferred_node": "node004",
+      "units": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211560",
+        "status": "running",
+        "node": "node004",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 1,
+      "task_id": "t211561",
+      "preferred_node": "node004",
+      "units": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          5
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211561",
+        "status": "running",
+        "node": "node004",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 2,
+      "task_id": "t211562",
+      "preferred_node": "node004",
+      "units": [
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          3,
+          6
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211562",
+        "status": "running",
+        "node": "node004",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 3,
+      "task_id": "t211563",
+      "preferred_node": "node004",
+      "units": [
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          7
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211563",
+        "status": "running",
+        "node": "node004",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 4,
+      "task_id": "t211564",
+      "preferred_node": "node005",
+      "units": [
+        [
+          0,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          7
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211564",
+        "status": "running",
+        "node": "node005",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 5,
+      "task_id": "t211565",
+      "preferred_node": "node005",
+      "units": [
+        [
+          0,
+          6
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211565",
+        "status": "running",
+        "node": "node005",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 6,
+      "task_id": "t211566",
+      "preferred_node": "node005",
+      "units": [
+        [
+          0,
+          7
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          2
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211566",
+        "status": "running",
+        "node": "node005",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    },
+    {
+      "shard": 7,
+      "task_id": "t211567",
+      "preferred_node": "node005",
+      "units": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "scheduler_snapshot": {
+        "id": "t211567",
+        "status": "running",
+        "node": "node005",
+        "pid": null,
+        "priority": "high",
+        "dispatch_attempts": null,
+        "no_auto_requeue": true,
+        "exit_code": null,
+        "backend_exit_code": null,
+        "allowed_nodes": [
+          "node004",
+          "node005"
+        ],
+        "auto_retry": null,
+        "failure_reason": null
+      }
+    }
+  ],
+  "status": "eight_shards_running",
+  "manual_dispatch_invoked": true,
+  "manual_dispatch_exit_code": 0
+}

@@ -1,0 +1,379 @@
+{
+  "source": "85399b1050",
+  "collector_source": "e414070e27",
+  "status": "v265_E0_admitted_remaining28",
+  "passed": true,
+  "contexts": [
+    {
+      "context": 0,
+      "paths": 7,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      },
+      "queries_per_path": 5200,
+      "common_uniform_mismatches": 0,
+      "collector_prefix_and_future_checks_passed": true,
+      "actual_execution_complete": true,
+      "primary_contrast_id": "c0:native_vs_native_b1",
+      "actual_holding_s": {
+        "native": 5.0,
+        "b0": 0.0,
+        "b2": 10.0,
+        "b3": 15.0,
+        "b4": 20.0,
+        "b5": 30.0,
+        "b6": 45.0
+      }
+    },
+    {
+      "context": 1,
+      "paths": 7,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      },
+      "queries_per_path": 5200,
+      "common_uniform_mismatches": 0,
+      "collector_prefix_and_future_checks_passed": true,
+      "actual_execution_complete": true,
+      "primary_contrast_id": "c1:b2_vs_native_b1",
+      "actual_holding_s": {
+        "native": 5.0,
+        "b0": 0.0,
+        "b2": 10.0,
+        "b3": 15.0,
+        "b4": 20.0,
+        "b5": 30.0,
+        "b6": 45.0
+      }
+    },
+    {
+      "context": 2,
+      "paths": 7,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      },
+      "queries_per_path": 5200,
+      "common_uniform_mismatches": 0,
+      "collector_prefix_and_future_checks_passed": true,
+      "actual_execution_complete": true,
+      "primary_contrast_id": "c2:native_vs_native_b1",
+      "actual_holding_s": {
+        "native": 5.0,
+        "b0": 0.0,
+        "b2": 10.0,
+        "b3": 15.0,
+        "b4": 20.0,
+        "b5": 30.0,
+        "b6": 45.0
+      }
+    },
+    {
+      "context": 3,
+      "paths": 7,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      },
+      "queries_per_path": 5200,
+      "common_uniform_mismatches": 0,
+      "collector_prefix_and_future_checks_passed": true,
+      "actual_execution_complete": true,
+      "primary_contrast_id": "c3:native_vs_native_b1",
+      "actual_holding_s": {
+        "native": 5.0,
+        "b0": 0.0,
+        "b2": 10.0,
+        "b3": 15.0,
+        "b4": 20.0,
+        "b5": 30.0,
+        "b6": 45.0
+      }
+    }
+  ],
+  "physical_starts": 28,
+  "failed_starts": 0,
+  "physical_start_cap": 224,
+  "remaining_units": 28,
+  "shards": [
+    [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    [
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        5
+      ]
+    ],
+    [
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        6
+      ]
+    ],
+    [
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        7
+      ]
+    ],
+    [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        2,
+        7
+      ]
+    ],
+    [
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        7
+      ],
+      [
+        3,
+        1
+      ]
+    ],
+    [
+      [
+        0,
+        7
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        2
+      ]
+    ],
+    [
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        3
+      ]
+    ]
+  ],
+  "max_workers": 8,
+  "locked_contrasts": [
+    {
+      "context": 0,
+      "contrast_id": "c0:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 1,
+      "contrast_id": "c1:b2_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "b2",
+      "chosen_bin": 2,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 2,
+      "contrast_id": "c2:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 3,
+      "contrast_id": "c3:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    }
+  ],
+  "evidence": "Source-bound unit/check/slot summaries; frozen collector enforces prefix and future equality at fork. No raw trace rescan.",
+  "admission_uses_outcome_quality": false,
+  "selection_recomputed": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "v238_changed": false
+}
