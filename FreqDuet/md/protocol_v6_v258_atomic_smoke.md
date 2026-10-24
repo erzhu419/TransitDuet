@@ -38,3 +38,13 @@ three authority tests (exit0); no new path. Continuation tests t211466 passed
 both new recovery-slot tests (exit0). The approved seven-path job is t211467,
 source eb7e4ac0dd, high priority, manual dispatch to node004, no auto-requeue.
 This launch receipt is not a final smoke verdict. Formal banks/training stay closed.
+
+Final: t211467 exited0; all eight engineering paths passed, forced-native is
+fully identical, all 5200 paired events per branch have zero uniform mismatches,
+and all anchor doses/execution chains close. Eight starts spent, no native retry;
+the original failed check/debit and its separate read-only acceptance are preserved.
+On this single smoke future, 15s/45s have joint descriptive improvements of only
+about0.16s journey per passenger; 30s improves journey/CV but worsens readiness
+and total dispatch delay. Zero pulse leaves total daily H unchanged. These are
+not action-selection results. See summary/final_receipt.json for the small table.
+Next: frozen S-bank collector/synthetic admission, with formal S/E still closed.
