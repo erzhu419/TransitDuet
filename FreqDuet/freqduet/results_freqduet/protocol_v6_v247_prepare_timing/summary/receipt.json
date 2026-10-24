@@ -1,0 +1,51 @@
+{
+  "status": "v247_prepare_mapping_and_minimal_budget_sealed",
+  "source": "e74d381e62",
+  "parent_source": "1828d9cd02",
+  "reference_source": "c6710744f9",
+  "task": "t211394",
+  "node": "node004",
+  "priority": "high",
+  "manual_dispatch_requested": true,
+  "server_exit_code": 0,
+  "tests_passed": 15,
+  "server_seal_root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v247_prepare_timing/seal_e74d381e62",
+  "source_interfaces_verified": true,
+  "preserved_payloads": ["legacy", "v224", "v230", "v235", "v241"],
+  "runtime_equivalence_verified": false,
+  "current_budget": {
+    "archive_scans": 0,
+    "passive_paths": 0,
+    "intervention_paths": 0,
+    "new_futures": 0,
+    "model_fits": 0,
+    "training_updates": 0,
+    "shadow_actions": 0
+  },
+  "reserved_preflight": {
+    "max_started_paths": 2,
+    "order": ["c0_v107", "c0_upper"],
+    "extra_reference_paths": 0,
+    "max_workers": 1,
+    "launch_authorized": false,
+    "failures_consume_slots": true,
+    "automatic_retry": false
+  },
+  "initial_synthetic_submission": {
+    "task": "t211389",
+    "source": "184d158cee",
+    "server_exit_code": 1,
+    "stage": "import_before_tests",
+    "cause": "Repeated --env options retained only the final variable; PYTHONPATH was absent.",
+    "fix": "Submit one --env followed by all KEY=VALUE entries; include frozen pure-reference dependencies in the source bundle.",
+    "simulator_starts": 0
+  },
+  "cancelled_before_start": ["t211392"],
+  "collector_implemented": false,
+  "runtime_connected": false,
+  "selector_defined": false,
+  "collection_authorized": false,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "next_step": "Implement the independent passive recorder and synthetic checks; obtain separate approval before real paths."
+}

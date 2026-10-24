@@ -33,9 +33,11 @@ Any mismatch stops progression; no tolerance or ignored fields.
 
 ## Status
 
-Server synthetic/source checks pending. This turn starts zero real paths and
-performs no archive scan, training, fitting or online selection. V238, main,
-fleet, seven-bin authority and all other frozen components remain unchanged.
+Sealed source `e74d381e62`: scheduler high/manual task `t211394`, node004,
+exit 0, **15 synthetic tests passed** and source interfaces verified. This turn
+started zero real paths and performed no archive scan, training, fitting or
+online selection. V238, main, fleet and seven-bin authority remain unchanged.
+The compact receipt records the corrected environment-submission failure too.
 
 Next: implement the independent passive recorder and run synthetic checks;
 real-path execution needs separate approval. Runtime equivalence is not yet tested.
