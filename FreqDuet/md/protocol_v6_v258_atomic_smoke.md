@@ -19,3 +19,11 @@ Require exact same-new-future native alias, common prefix/future, event-keyed
 coupling and sampled/issued/measured H closure, with at least one nonzero actual
 pulse difference. Outcomes are descriptive, not used to select or tune actions.
 Formal selection/evaluation banks and training remain closed.
+
+Native task t211462 completed with anchor7218s/query661/native5s, one future
+switch, 5200 closed query execution chains and no incomplete/unlaunched trips.
+Its original check failed because it compared the final new-future tape ID to
+the old-future ID. The authority object also mixes in final generated demand.
+Preserve this failed debit (1/8) and stop remaining paths. A separate server-only
+read-only recheck compares fixed authority, validates each tape's registered
+seed/version, and compares the six stored prefixes, not old-future endpoints.

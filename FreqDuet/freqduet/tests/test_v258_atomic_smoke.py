@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
 
 from freqduet_v257_atomic_smoke import smoke_plan
@@ -70,6 +71,37 @@ class Slots(unittest.TestCase):
         loaded = driver.load_record(path)
         self.assertEqual(loaded['native_bin'],1)
         np.testing.assert_array_equal(loaded['prefix'][(1,2,False)],value['prefix'][(1,2,False)])
+
+
+class Authority(unittest.TestCase):
+    def values(self):
+        fixed = dict(protocol_version='v6',clock=dict(end_s=50000),fleet_target=12,
+            physical_vehicle_count=12,fleet_inventory_mode='finite',dt_s=1.)
+        old = dict(physical_contract=dict(fixed,scenario_tape_id='v1:2151001',passengers_generated=1000))
+        data = dict(contract=dict(fixed,scenario_tape_id='v1:3540999999',passengers_generated=1003),
+            anchor=dict(scenario=dict(seed=2151001,version='v1')),future=dict(root=3540999999))
+        return data,old
+
+    def check(self,data,old):
+        return driver.archived_authority(data,old,lambda a,b,label:self.assertEqual(a,b,label),
+            lambda seed,version:SimpleNamespace(identifier=f'{version}:{seed}'))
+
+    def test_new_future_identity_and_population_are_not_old_endpoint_equalities(self):
+        result = self.check(*self.values())
+        self.assertTrue(result['fixed_authority_exact'])
+        self.assertEqual(result['new_future_passengers_generated'],1003)
+
+    def test_fixed_authority_changes_are_still_rejected(self):
+        data,old = self.values()
+        data['contract']['physical_vehicle_count'] = 13
+        with self.assertRaises(AssertionError):
+            self.check(data,old)
+
+    def test_wrong_future_identity_is_rejected(self):
+        data,old = self.values()
+        data['contract']['scenario_tape_id'] = 'v1:2151001'
+        with self.assertRaises(AssertionError):
+            self.check(data,old)
 
 
 if __name__ == '__main__':

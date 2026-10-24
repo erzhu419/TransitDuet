@@ -82,6 +82,19 @@ def interfaces():
     return legacy, joint, atomic.atomic_audit(base, joint.repeated, legacy.pilot.event, joint)
 
 
+def archived_authority(data, old, same, tape_class):
+    keys = ('protocol_version','clock','fleet_target','physical_vehicle_count','fleet_inventory_mode','dt_s')
+    new_contract,old_contract = data['contract'],old['physical_contract']
+    assert set(new_contract) == set(old_contract) == set(keys)|{'scenario_tape_id','passengers_generated'}
+    same({k:new_contract[k] for k in keys},{k:old_contract[k] for k in keys},'V258_archived_fixed_authority')
+    scenario = data['anchor']['scenario']
+    assert old_contract['scenario_tape_id'] == tape_class(seed=scenario['seed'],version=scenario['version']).identifier
+    assert new_contract['scenario_tape_id'] == tape_class(seed=data['future']['root'],version=scenario['version']).identifier
+    return dict(fixed_authority_exact=True, old_and_new_tape_ids_match_their_registered_seeds=True,
+        old_future_passengers_generated=old_contract['passengers_generated'],
+        new_future_passengers_generated=new_contract['passengers_generated'])
+
+
 def archived_prefix(data, v256_root, legacy, same):
     """Compare stored pre-fork fields only; the old future endpoint is not a comparator."""
     archive = v256_root.with_name(v256_root.name+'_observer_repair1')
@@ -101,7 +114,8 @@ def archived_prefix(data, v256_root, legacy, same):
     same(data['actions'][:n], old['trace']['lower_actions'][:n], 'V258_archived_sampled_prefix')
     uniforms = [[list(k),v] for k,v in prefix['event_uniforms']['records'].items()]
     same(uniforms, old['trace']['action_uniforms'][:len(uniforms)], 'V258_archived_uniforms')
-    same(data['contract'], old['physical_contract'], 'V258_archived_authority')
+    from env.scenario import ScenarioTape
+    authority = archived_authority(data,old,same,ScenarioTape)
     from seal_freqduet_v254_action_manifest import PAYLOADS
     lists = dict(v224=('events','prepares','queries'),
         v230=('query_extensions','upper_versions','cycle_events','supply_outcomes'),
@@ -112,7 +126,7 @@ def archived_prefix(data, v256_root, legacy, same):
         for key in keys:
             values = prefix[name][key]
             same(values, saved[key][:len(values)], 'V258_archived_'+name+'_'+key)
-    return dict(archived_stored_prefix_exact=True, archived_endpoint_compared=False)
+    return dict(archived_stored_prefix_exact=True, archived_endpoint_compared=False, **authority)
 
 
 def path_check(data, reference, joint):
