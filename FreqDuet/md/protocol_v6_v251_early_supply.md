@@ -2,6 +2,9 @@
 
 Design/synthetic seal only. No archive scan,shadow request,replay,fit or training;
 V238 `b4b1d00203`,main,fleet and seven-bin permissions remain unchanged.
+Sealed source `7e9faca963` via `t211409`,node004,high/manual,one attempt,
+exit 0;11 synthetic tests passed. Only the 1,034-byte summary/log was pulled;
+full protocol stays on the server. All trajectory/execution budgets remain zero.
 
 Reuse V232 current-plan/ready-FIFO/incoming-position association. Start a WATCH
 at the first observed unbacked future link;it is not known future shortage.
