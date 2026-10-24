@@ -1,31 +1,30 @@
-# V256: two real original-future V254 passive slots
+# V256: real original-future passive/no-op acceptance
 
-Actor12037,day2151001,sampler402112137,c0/V107 only. Reuse V249's six
-accepted reference files and frozen runtime/observer chain;append V255
-`9f4afff2f3` without altering V238 or the main controller.
+Actor12037,day2151001,sampler402112137,c0/V107. Reuse V249's six accepted
+reference files and frozen runtime/observers;append V255 `9f4afff2f3` only.
+Dispatch observer-only first;its complete exact pass admits native no-op.
 
-Server interface/slot tests first. Manually dispatch observer-only alone.
-Require exact old actions,timing,endpoints and six full payloads,complete new
-records,first qualified anchor and unchanged native calls/RNG. Only a complete
-pass admits a separately dispatched native no-op in the same original future.
-Failures consume their fixed slots;no automatic retries,extra references or
-replacement queries. Maximum2 starts,one worker;no new future,smoke,formal matrix
-or training. Raw files stay remote;only small checks/status/logs return locally.
+Initial source `fb30e41bae`:interface task `t211437` passed14 tests;observer
+`t211438` failed before runner construction because nested output misplaced
+the frozen runtime proof lookup. That failed start and original records remain.
+The user explicitly approved ONE extra observer start,not a free retry.
 
-Source `fb30e41bae`:server entrypoint task `t211437` passed14 tests. Observer
-task `t211438` consumed its slot but stopped before runner construction:the new
-nested output directory misplaced the frozen runtime's relative proof lookup.
-No action/timing/endpoint equivalence was evaluated;native no-op was not submitted.
-The entrypoint is repaired to use sibling path outputs under the existing results
-root,and regression-tested without replay. The spent slot remains spent;the old
-failed receipt and integration result are retained.
+Source `aa8616bcfb` uses sibling outputs under the original results parent.
+Repair integration `t211439` passed16 tests. Separate repair authorization and
+integration records preserve old ones. Budget:original2 + approved observer1 =3.
+No automatic requeue,extra references,context/future substitution or more starts.
 
-The user then explicitly approved ONE additional observer-only attempt. Amended
-cap:original2 + extra observer1 =3 starts,including the spent failure. Slot
-`passive_c0_v107_repair1` requires the original failed debit and a separate repair
-authorization;its exact pass alone admits the original `noop_c0_v107` slot.
-No repeated repair,extra no-op,context/future expansion or automatic requeue.
-Repair integration and authorization are separate files;old records stay intact.
+Observer repair `t211440` passed;only then native no-op `t211445` was submitted.
+Both backend exit sentinels are0. Both preserve all six old payloads,actions,
+timing,endpoints,native calls and RNG exactly;new records are complete.
+Each has5,200 queries,5,240 PREPAREs and40 unused PREPAREs. Same first anchor:
+7218s,query index661/event1487,cycle[11,35,1261],native bin1=5s,
+PREPARE/query H=15s. Observer records0 commands;no-op records1 unchanged command.
+Both have0 action changes and0 future switches. All tasks use high/manual,node004.
 
-Next gate depends on both real receipts;passive equality alone is not control
-benefit and does not authorize the reserved smoke or selection/evaluation banks.
+Final:3/3 starts consumed,including1 startup failure;0 remaining. No new future,
+smoke,formal matrix,training or policy/V238 change. Raw data stay remote;local
+receipt:`freqduet/results_freqduet/protocol_v6_v256_passive_pulse/summary/receipt.json`.
+
+Next:separate approval before any reserved smoke or S/E bank. This proves
+passive/native-no-op equivalence,not control benefit or a deployable selector.

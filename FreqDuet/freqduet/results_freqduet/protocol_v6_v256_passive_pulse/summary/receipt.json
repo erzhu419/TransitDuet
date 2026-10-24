@@ -1,0 +1,53 @@
+{
+  "status": "v256_repair_passive_pair_passed",
+  "source": "aa8616bcfb",
+  "adapter_source": "9f4afff2f3",
+  "manifest_source": "eaba2513da",
+  "context": {"actor": 12037, "demand_day": 2151001, "sampler": 402112137, "engine_arm": "v107"},
+  "execution": {"node": "node004", "priority": "high", "manual_dispatch": true, "automatic_retry": false},
+  "integration": [
+    {"task": "t211437", "source": "fb30e41bae", "tests_passed": 14},
+    {"task": "t211439", "source": "aa8616bcfb", "tests_passed": 16}
+  ],
+  "starts": [
+    {
+      "task": "t211438", "slot": "passive_c0_v107", "source": "fb30e41bae",
+      "passed": false, "verified_exit_code": 1,
+      "failure": "Nested output directory misplaced frozen runtime proof lookup; FileNotFoundError before runner construction.",
+      "debit_preserved": true
+    },
+    {"task": "t211440", "slot": "passive_c0_v107_repair1", "passed": true, "verified_exit_code": 0, "command_records": 0},
+    {"task": "t211445", "slot": "noop_c0_v107", "passed": true, "verified_exit_code": 0, "command_records": 1}
+  ],
+  "both_passed_paths": {
+    "six_payloads_exact": true,
+    "recording_complete": true,
+    "clock_domains_preserved": true,
+    "native_calls_and_rng_unchanged": true,
+    "queries": 5200,
+    "prepare_occurrences": 5240,
+    "unused_prepares": 40,
+    "anchor_query_index": 661,
+    "anchor_query_seq": 1487,
+    "anchor_s": 7218.0,
+    "anchor_cycle": [11, 35, 1261],
+    "native_bin": 1,
+    "native_holding_s": 5.0,
+    "prepare_H_s": 15.0,
+    "query_H_s": 15.0,
+    "action_changes": 0,
+    "future_switches": 0
+  },
+  "budget": {"original_max_started_paths": 2, "user_approved_extra_observer_starts": 1, "started_paths": 3, "max_started_paths": 3, "failed_starts": 1, "remaining_slots": 0},
+  "extra_reference_paths": 0,
+  "future_starts": 0,
+  "smoke_starts": 0,
+  "formal_starts": 0,
+  "training_updates": 0,
+  "model_fits": 0,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "local_transfer": "Small logs and metadata only; no raw payloads, CSV or checkpoints.",
+  "server_summary": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v256_passive_pulse_collection/summary/status.json",
+  "next_gate": "No further passive starts. Separate approval before any reserved smoke or selection/evaluation bank; equality is engineering evidence,not control efficacy."
+}
