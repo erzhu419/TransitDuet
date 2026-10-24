@@ -13,3 +13,9 @@ Engineering validity alone releases that batch, never E outcome quality.
 At most224 physical starts,7 per unit; failures consume slots with no automatic
 retry, replacement, extra reference or budget transfer. No reselection, tuning,
 training or main/V238 change. Only small receipts return; raw data stay remote.
+
+Authorization t211537 completed exit0. E0 tasks t211538-t211541: c0/c1 on
+node004,c2/c3 on node005,all high/manual,one attempt,no-auto-requeue,running.
+Snapshot:4 native starts,0 completed checks/units,0 failures; remaining28 not
+submitted. Their conditional authorization is already granted; E0 admission
+is still pending and must not be replaced with an outcome-quality screen.
