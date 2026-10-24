@@ -24,6 +24,20 @@ After separate admission,smoke uses its own root and checks the common fork,
 native alias,legal actual execution and physical closure before any S path.
 All S results/contrast IDs must be locked before any E path;no evaluation reselection.
 
+## Server Seal
+Source `eaba2513da`;task `t211430`,node004,high priority,manual dispatch,
+one attempt,exit0;8 synthetic tests passed. Freshness audit read35,982 canonical
+metadata files,checked128,932 artifact names and16,889 scheduler records:
+65 roots/845 root-and-derived seeds,zero collisions and zero audit errors.
+Selection32,evaluation32 and smoke1 are disjoint. The six V249 reference files
+exist;their payloads were not opened in this metadata-only audit.
+
+All458 physical starts remain reserved,not authorized or consumed;simulator
+starts,future starts,training updates and model fits are all zero.
+Small local receipt:`freqduet/results_freqduet/protocol_v6_v254_action_manifest/summary/receipt.json`.
+Full manifest and slot ledger remain on the server in
+`protocol_v6_v254_action_manifest/seal_eaba2513da/`.
+
 ## Next Gate And Limitations
 Implement only the sealed passive/no-op interface and synthetic checks next.
 Real paths require separate approval. A true resource-aware/blind coordinator

@@ -1,0 +1,56 @@
+{
+  "stage": "v254_action_manifest",
+  "status": "v254_manifest_reserved_no_replay",
+  "source": "eaba2513da",
+  "protocol_source": "4667fd4668",
+  "task": {
+    "id": "t211430",
+    "node": "node004",
+    "priority": "high",
+    "manual_dispatch": true,
+    "attempts": 1,
+    "exit_code": 0,
+    "synthetic_tests_passed": 8
+  },
+  "contexts": [
+    {"context": 0, "actor": 12037, "demand_day": 2151001, "prefix_sampler": 402112137},
+    {"context": 1, "actor": 12037, "demand_day": 2151002, "prefix_sampler": 402112237},
+    {"context": 2, "actor": 933083, "demand_day": 2151001, "prefix_sampler": 403033183},
+    {"context": 3, "actor": 933083, "demand_day": 2151002, "prefix_sampler": 403033283}
+  ],
+  "context_scope": "Consumed development day prefixes; not new demand days. Checkpoint199, native B200 upper and V107 bilateral025 lower.",
+  "future_reservation": {
+    "selection_root_formula": "3540000000 + 100*context + i, i=0..7",
+    "evaluation_root_formula": "3540000000 + 100*context + 20 + i, i=0..7",
+    "evaluation_halves": "A:i=0..3; B:i=4..7",
+    "smoke_root": 3540999999,
+    "selection_roots": 32,
+    "evaluation_roots": 32,
+    "smoke_roots": 1,
+    "total_roots": 65,
+    "root_and_derived_seeds": 845,
+    "all_phase_and_context_seed_sets_disjoint": true
+  },
+  "freshness": {
+    "decision": "fresh",
+    "metadata_files": 35982,
+    "artifact_names_checked": 128932,
+    "scheduler_records": 16889,
+    "collisions": 0,
+    "errors": 0,
+    "scope": "Known server FreqDuet canonical metadata/receipts, raw artifact names, scheduler hot and archived task metadata; no raw payload content opened."
+  },
+  "physical_start_caps": {"passive": 2, "smoke": 8, "selection": 224, "evaluation": 224, "total": 458},
+  "logical_slot_labels": 523,
+  "reference_payload_files_available": 6,
+  "raw_payloads_opened": 0,
+  "execution": {"simulator_starts": 0, "future_starts": 0, "training_updates": 0, "model_fits": 0},
+  "launch_authorized": false,
+  "collector_implemented": false,
+  "runtime_connected": false,
+  "selector_defined": false,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "server_output": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v254_action_manifest/seal_eaba2513da",
+  "next_gate": "Implement frozen passive/no-op interface and synthetic tests only; real passive paths, smoke, selection and evaluation each still require separate launch approval."
+}
