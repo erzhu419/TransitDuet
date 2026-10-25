@@ -38,3 +38,12 @@ This is a development screen,not a field deployment or a realtime guarantee.
 Observed supported-query p95 is about2.73s. Do not repair forecasts,weights or
 windows on pilot outcomes;failure closes this frozen candidate. A development
 pass permits proposing independent confirmation,not switching the main policy.
+
+Execution source07e565545a:server task t211639 passed7 synthetic checks,exit0.
+Matrix reference p0 in t211640 exactly reproduced V271,including5200 requests
+and acknowledgments,38930s executed H and all query/action/timing endpoints.
+Eight high/manual units t211640-t211647 cover all12 reserved paths. Results and
+the joint gate remain pending;the independent confirmation bank stays closed.
+All8 units started on node004/005 with no failure record at dispatch inspection.
+Bridge progress retains its V271_NOOP_QUERIES label;the V272 wrapper executes
+the current selected action through the native policy output and checks its receipt.

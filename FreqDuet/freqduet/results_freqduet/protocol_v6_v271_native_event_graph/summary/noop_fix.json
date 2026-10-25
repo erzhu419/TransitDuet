@@ -1,0 +1,63 @@
+{
+  "source": "40eddb8fb6",
+  "graph_source": "0a68748858",
+  "status": "noop_native_equivalence_passed",
+  "physical_slots_consumed": 3,
+  "physical_slot_cap": 3,
+  "native_queries": 5200,
+  "actual_commands": 5200,
+  "wall_s": 1532.2963175978512,
+  "native_query_latency_s": {
+    "mean": 0.0015377664793497668,
+    "p95": 0.0020025257021188737,
+    "max": 0.008545960299670696
+  },
+  "callback_latency_s": {
+    "mean": 0.2796967902738386,
+    "p95": 2.272482395777479,
+    "max": 2.8359593264758587,
+    "total": 1454.4233094239607
+  },
+  "endpoint_metrics": {
+    "passenger_person_s": 19776507.0,
+    "journey_min": 16.54998,
+    "cv_squared": 0.05426478371403589,
+    "readiness_delay_s": 111.206107,
+    "public_launch_delay_total_s": 29136.0
+  },
+  "queries": 5200,
+  "completed_visits": 5460,
+  "first_arrivals_without_gap": 42,
+  "nonpositive_gap_visits": 0,
+  "statuses": {
+    "model_improvement": 332,
+    "retain_native": 364,
+    "unsupported_prefix": 4504
+  },
+  "unsupported_reasons": {
+    "capacity-censored APC demand needs an observable arrival forecast": 4284,
+    "fewer than three completed visits at (False, 2)": 220
+  },
+  "pending_locks": 257,
+  "model_locks_verified": 35,
+  "shadow_action_differences": 166,
+  "bridge_latency_s": {
+    "mean": 0.2779335459266216,
+    "p95": 2.269144330266863,
+    "max": 2.8327306676656008,
+    "total": 1445.2544388184324
+  },
+  "optimizing_query_latency_s": {
+    "count": 616,
+    "mean": 2.2273652475136756,
+    "p95": 2.7267446420155466,
+    "max": 2.8327306676656008
+  },
+  "raw_query_records_remain_server_side": true,
+  "executed_shadow_actions": 0,
+  "raw_traces_remain_server_side": true,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "matrix_started": false,
+  "automatic_retry": false
+}

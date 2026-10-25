@@ -1,0 +1,133 @@
+{
+  "source": "07e565545a",
+  "graph_source": "0a68748858",
+  "method_seal": "b4c9fd23e3",
+  "native_preflight_task": "t211635",
+  "synthetic_check_task": "t211639",
+  "unique_paths": 12,
+  "physical_start_cap": 12,
+  "reserved_before_submission": 12,
+  "max_concurrent": 8,
+  "items": [
+    {
+      "index": 0,
+      "day": 2071001,
+      "arm": "fixed360_bilateral025"
+    },
+    {
+      "index": 1,
+      "day": 2071002,
+      "arm": "fixed360_bilateral025"
+    },
+    {
+      "index": 2,
+      "day": 2071003,
+      "arm": "fixed360_bilateral025"
+    },
+    {
+      "index": 3,
+      "day": 2071004,
+      "arm": "fixed360_bilateral025"
+    },
+    {
+      "index": 4,
+      "day": 2071001,
+      "arm": "event_graph_apc"
+    },
+    {
+      "index": 5,
+      "day": 2071002,
+      "arm": "event_graph_apc"
+    },
+    {
+      "index": 6,
+      "day": 2071003,
+      "arm": "event_graph_apc"
+    },
+    {
+      "index": 7,
+      "day": 2071004,
+      "arm": "event_graph_apc"
+    },
+    {
+      "index": 8,
+      "day": 2071001,
+      "arm": "event_graph_homogeneous_cost"
+    },
+    {
+      "index": 9,
+      "day": 2071002,
+      "arm": "event_graph_homogeneous_cost"
+    },
+    {
+      "index": 10,
+      "day": 2071003,
+      "arm": "event_graph_homogeneous_cost"
+    },
+    {
+      "index": 11,
+      "day": 2071004,
+      "arm": "event_graph_homogeneous_cost"
+    }
+  ],
+  "shards": [
+    [
+      0,
+      8
+    ],
+    [
+      1,
+      9
+    ],
+    [
+      2,
+      10
+    ],
+    [
+      3,
+      11
+    ],
+    [
+      4
+    ],
+    [
+      5
+    ],
+    [
+      6
+    ],
+    [
+      7
+    ]
+  ],
+  "actor_seed": 12011,
+  "sampler_seed": 27011001,
+  "demand_days": [
+    2071001,
+    2071002,
+    2071003,
+    2071004
+  ],
+  "arms": [
+    "fixed360_bilateral025",
+    "event_graph_apc",
+    "event_graph_homogeneous_cost"
+  ],
+  "independent_traffic_days": 4,
+  "independent_future_replications": 0,
+  "deduplication_explicitly_approved": true,
+  "former_two_sampler_seeds_are_deterministic_aliases": true,
+  "bootstrap": {
+    "unit": "demand_day",
+    "draws": 10000,
+    "seed": 2700201,
+    "shared_contrast_resamples": true
+  },
+  "gate": "APC passenger upper95<0; actual CV2/readiness/total public delay upper95<=0 versus BOTH controls; no extra unfinished service on any paired day",
+  "automatic_retry": false,
+  "confirmation_started": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "engineering_slots_previously_consumed": 3,
+  "raw_traces_remain_server_side": true
+}
