@@ -20,7 +20,7 @@ times and next launches,while allowing existing passengers to finish earlier.
 An independent uniform cut does not preserve these coupled event phases.
 This is an allocation hypothesis,not a claim that recorded H is removable slack.
 
-The constructed three-vehicle,two-control-position certificate uses upstream
+The constructed three-vehicle,two-interior-control-position certificate uses upstream
 commands(30,20,10) and downstream(10,10,10). Moving to(20,10,0)/(20,20,20)
 retains per-vehicle totals(40,30,20). Forty passengers per vehicle alight between
 positions;the later control is empty. Intermediate headway moments are preserved,
@@ -44,6 +44,8 @@ The slow planner proposes feasible phase trajectories through the same vehicle's
 next release,using LF demand and completed-prefix service/run information. The
 fast controller updates the affected graph with observed AVL/APC/HF innovations
 and executes ONLY its current legal first command;future decisions are recourse.
+Every later query uses the updated graph too,not an old bilateral continuation
+that cancels the planned allocation. No post-terminal holding node is invented.
 Do not assume the existing small shared-scalar upper learned useful authority.
 The fixed-public integration tests allocation first;frequency benefit is separate.
 
@@ -71,6 +73,8 @@ fixed+unchanged bilateral,and the SAME graph/constraints with homogeneous rather
 than APC/location-specific onboard costs. Record actual H amounts and exposures;
 equal model H does not establish equal realized H. Reject forecasts or allocations
 that require hidden terminal waits,extra stock or changing executed commands.
+Freeze causal forecast inputs before the pilot;do not repair them on evaluation
+outcomes or turn a failed pilot into a new calibration/recording series.
 Only repeatable actual passenger/CV2/readiness/public-delay joint benefit merits
 fresh independent confirmation,then matched-budget frequency ablations.
 
@@ -82,3 +86,11 @@ forecast reliability,full-day service superiority or novel literature priority.
 Future field inputs must be causal;fixture future quantities are never runtime
 features. No traffic integration or new-path budget is released by this test.
 Main and all frozen historical experiments remain unchanged.
+
+Run (2026-10-25):source22cb0a6acb,high/manual t211613 on node004,exit0;
+7 tests passed. Each constructed case examines117649 native allocations.
+The alighting case selects(20,10,0)/(20,20,20):model passenger exposure-1200
+person-s,CV2/waiting/readiness/public delay unchanged,per-vehicle H and subsequent
+return/launch clocks exact. Its14 universal-offset aliases yield no joint gain.
+Through/saturated/committed cases retain the reference. Only5642 summary bytes
+returned locally. Traffic paths,new fits and main-policy changes:all0.

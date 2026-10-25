@@ -1,0 +1,264 @@
+{
+  "source": "22cb0a6acb",
+  "status": "v269_event_graph_model_certificate_complete",
+  "tests": 7,
+  "cases": [
+    {
+      "case": "alighting",
+      "baseline_actions": [
+        30,
+        20,
+        10,
+        10,
+        10,
+        10
+      ],
+      "selected_actions": [
+        20,
+        10,
+        0,
+        20,
+        20,
+        20
+      ],
+      "allocations_examined": 117649,
+      "feasible_matched_amount_allocations": 7,
+      "strict_improvement": true,
+      "model_effects": {
+        "model_passenger_variable_person_s": -1200.0,
+        "model_waiting_person_s": 0.0,
+        "model_onboard_variable_person_s": -1200.0,
+        "model_cv_squared": 0.0,
+        "model_readiness_mean_s": 0.0,
+        "model_public_delay_total_s": 0.0
+      },
+      "per_vehicle_holding_before": [
+        40,
+        30,
+        20
+      ],
+      "per_vehicle_holding_after": [
+        40,
+        30,
+        20
+      ],
+      "model_return_times_before": [
+        343,
+        713,
+        1083
+      ],
+      "model_return_times_after": [
+        343,
+        713,
+        1083
+      ],
+      "model_launch_times_before": [
+        344,
+        714,
+        1084
+      ],
+      "model_launch_times_after": [
+        344,
+        714,
+        1084
+      ],
+      "universal_offset_aliases": 14,
+      "universal_offset_joint_improvements": 0
+    },
+    {
+      "case": "through",
+      "baseline_actions": [
+        30,
+        20,
+        10,
+        10,
+        10,
+        10
+      ],
+      "selected_actions": [
+        30,
+        20,
+        10,
+        10,
+        10,
+        10
+      ],
+      "allocations_examined": 117649,
+      "feasible_matched_amount_allocations": 7,
+      "strict_improvement": false,
+      "model_effects": {
+        "model_passenger_variable_person_s": 0.0,
+        "model_waiting_person_s": 0.0,
+        "model_onboard_variable_person_s": 0.0,
+        "model_cv_squared": 0.0,
+        "model_readiness_mean_s": 0.0,
+        "model_public_delay_total_s": 0.0
+      },
+      "per_vehicle_holding_before": [
+        40,
+        30,
+        20
+      ],
+      "per_vehicle_holding_after": [
+        40,
+        30,
+        20
+      ],
+      "model_return_times_before": [
+        303,
+        673,
+        1043
+      ],
+      "model_return_times_after": [
+        303,
+        673,
+        1043
+      ],
+      "model_launch_times_before": [
+        304,
+        674,
+        1044
+      ],
+      "model_launch_times_after": [
+        304,
+        674,
+        1044
+      ],
+      "universal_offset_aliases": 14,
+      "universal_offset_joint_improvements": 0
+    },
+    {
+      "case": "saturated",
+      "baseline_actions": [
+        30,
+        20,
+        10,
+        45,
+        45,
+        45
+      ],
+      "selected_actions": [
+        30,
+        20,
+        10,
+        45,
+        45,
+        45
+      ],
+      "allocations_examined": 117649,
+      "feasible_matched_amount_allocations": 1,
+      "strict_improvement": false,
+      "model_effects": {
+        "model_passenger_variable_person_s": 0.0,
+        "model_waiting_person_s": 0.0,
+        "model_onboard_variable_person_s": 0.0,
+        "model_cv_squared": 0.0,
+        "model_readiness_mean_s": 0.0,
+        "model_public_delay_total_s": 0.0
+      },
+      "per_vehicle_holding_before": [
+        75,
+        65,
+        55
+      ],
+      "per_vehicle_holding_after": [
+        75,
+        65,
+        55
+      ],
+      "model_return_times_before": [
+        378,
+        748,
+        1118
+      ],
+      "model_return_times_after": [
+        378,
+        748,
+        1118
+      ],
+      "model_launch_times_before": [
+        379,
+        749,
+        1119
+      ],
+      "model_launch_times_after": [
+        379,
+        749,
+        1119
+      ],
+      "universal_offset_aliases": 18,
+      "universal_offset_joint_improvements": 0
+    },
+    {
+      "case": "committed",
+      "baseline_actions": [
+        30,
+        20,
+        10,
+        10,
+        10,
+        10
+      ],
+      "selected_actions": [
+        30,
+        20,
+        10,
+        10,
+        10,
+        10
+      ],
+      "allocations_examined": 117649,
+      "feasible_matched_amount_allocations": 1,
+      "strict_improvement": false,
+      "model_effects": {
+        "model_passenger_variable_person_s": 0.0,
+        "model_waiting_person_s": 0.0,
+        "model_onboard_variable_person_s": 0.0,
+        "model_cv_squared": 0.0,
+        "model_readiness_mean_s": 0.0,
+        "model_public_delay_total_s": 0.0
+      },
+      "per_vehicle_holding_before": [
+        40,
+        30,
+        20
+      ],
+      "per_vehicle_holding_after": [
+        40,
+        30,
+        20
+      ],
+      "model_return_times_before": [
+        343,
+        713,
+        1083
+      ],
+      "model_return_times_after": [
+        343,
+        713,
+        1083
+      ],
+      "model_launch_times_before": [
+        344,
+        714,
+        1084
+      ],
+      "model_launch_times_after": [
+        344,
+        714,
+        1084
+      ],
+      "universal_offset_aliases": 14,
+      "universal_offset_joint_improvements": 0
+    }
+  ],
+  "traffic_rollouts": 0,
+  "new_model_fits": 0,
+  "policy_parameter_search": false,
+  "real_controller_implemented": false,
+  "field_forecast_validated": false,
+  "main_policy_changed": false,
+  "confirmation_started": false,
+  "interpretation": "Constructed event-graph mechanisms only, not traffic effectiveness or a causal deployed policy. Equal future H is a model comparison, not an online right to spend accumulated H. The exact six-control enumeration is a small reference solver, not a full-fleet runtime optimizer."
+}
+
