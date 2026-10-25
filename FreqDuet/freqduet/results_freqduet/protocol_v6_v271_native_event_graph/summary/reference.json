@@ -1,0 +1,34 @@
+{
+  "source": "83d681d0ae",
+  "graph_source": "0a68748858",
+  "status": "reference_cached_parity_passed",
+  "physical_slots_consumed": 1,
+  "physical_slot_cap": 2,
+  "native_queries": 5200,
+  "actual_commands": 5200,
+  "wall_s": 76.43305585067719,
+  "native_query_latency_s": {
+    "mean": 0.0014031877553162093,
+    "p95": 0.0015762869268655777,
+    "max": 0.008466186933219433
+  },
+  "callback_latency_s": {
+    "mean": 0.0014310705980572563,
+    "p95": 0.0016082708723843097,
+    "max": 0.008581568486988544,
+    "total": 7.441567109897733
+  },
+  "endpoint_metrics": {
+    "passenger_person_s": 19776507.0,
+    "journey_min": 16.54998,
+    "cv_squared": 0.05426478371403589,
+    "readiness_delay_s": 111.206107,
+    "public_launch_delay_total_s": 29136.0
+  },
+  "cached_actions_timing_endpoints_exact": true,
+  "raw_traces_remain_server_side": true,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "matrix_started": false,
+  "automatic_retry": false
+}

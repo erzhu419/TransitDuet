@@ -48,3 +48,10 @@ cap to3;the failed noop and both original starts remain charged and unchanged.
 Reuse the accepted83d681d0ae reference,not a fresh reference run. No additional
 scene,future,training,matrix or main-policy change;failure remains charged with
 no automatic retry.
+
+Padded-buffer regression t211634 passed7 checks on node004 without a physical
+start. The approved correction t211635 was manually dispatched high to node004
+from40eddb8fb6,using its own noop_fix artifacts. At the last inspection it was
+running beyond1750 native queries with no failure record;full-day equivalence,
+model-supported queries and solver latency remain pending. The reference is
+reused;no matrix,training or policy change has started.
