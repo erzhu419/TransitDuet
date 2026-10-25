@@ -1,12 +1,14 @@
 """Causal inputs, physical invariants and bounded joint search, not traffic efficacy."""
 
 from dataclasses import replace
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 import numpy as np
 
 import freqduet_causal_event_graph as graph
+import freqduet_event_graph_design as v269
 
 
 def fixture():
@@ -76,7 +78,9 @@ class CausalGraphTests(unittest.TestCase):
         self.assertEqual(base['launches'], moved['launches'])
         self.assertAlmostEqual(moved['onboard'] - base['onboard'], -1200.)
         self.assertEqual(base['waiting'], moved['waiting'])
-        self.assertTrue(graph.feasible(moved, base))
+        # Equal H and earlier alighting do not imply no-harm to the NEXT headway.
+        self.assertGreater(moved['cv2'], base['cv2'])
+        self.assertFalse(graph.feasible(moved, base))
 
     def test_homogeneous_control_changes_no_physical_forecast(self):
         g = graph.assemble(self.snapshot, self.visits)
@@ -160,6 +164,39 @@ class CausalGraphTests(unittest.TestCase):
         with patch.object(graph, 'MAX_EVALUATIONS', 1):
             bounded = graph.solve(g)
         self.assertEqual((bounded['action_s'], bounded['evaluations']), (30, 1))
+
+    def test_bounded_solver_finds_v269_known_feasible_joint_transfer(self):
+        # The old finite mathematical certificate is a solver regression only;
+        # its prescribed future prepares are never inputs to the causal assembler.
+        spec = v269.fixture('alighting')
+        keys = [(i, i, station) for station in (0, 1) for i in range(3)]
+
+        class Reference:
+            snapshot = SimpleNamespace(current_bus=0, native_action_s=30,
+                vehicles=tuple(graph.Vehicle(i, i, False, 0, 'prepare', 40.) for i in range(3)),
+                routes={False: (graph.Stop(0), graph.Stop(1))})
+
+            def evaluate(self, commands=None, homogeneous=False):
+                self_check.assertFalse(homogeneous)
+                commands = commands or {}
+                h = np.array([commands.get(k, spec['baseline'][j]) for j, k in enumerate(keys)])
+                values = v269.model(h, spec)
+                times = [*spec['prepare'], *(values['arrival_a'][0] + spec['service'])]
+                return dict(cost=float(values['model_passenger_variable_person_s'][0]),
+                    cv2=float(values['model_cv_squared'][0]),
+                    returns=dict(enumerate(values['ready'][0])), next_launch=dict(enumerate(values['launch'][0])),
+                    delays=dict(enumerate(values['launch'][0] - spec['published'])),
+                    actions={k: (times[j], int(h[j])) for j, k in enumerate(keys)},
+                    legal={k: tuple(graph.ACTIONS) for k in keys}, missing_commands=set(),
+                    coverage=True, failure=None)
+
+        self_check = self
+        result = graph.solve(Reference())
+        self.assertEqual(result['status'], 'model_improvement')
+        self.assertTrue(graph.feasible(result['selected'], result['reference']))
+        self.assertLess(result['selected']['cost'], result['reference']['cost'])
+        self.assertNotEqual(result['action_s'], 30)
+        self.assertLessEqual(result['evaluations'], graph.MAX_EVALUATIONS)
 
     def test_online_proposals_are_not_executed_commands(self):
         planner = graph.OnlinePlanner()

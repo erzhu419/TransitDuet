@@ -253,10 +253,10 @@ def _simulate(graph, commands, homogeneous):
         if kind == 'dispatch':
             for d in (False, True):
                 while pending[d] and pending[d][0].release_s <= now and ready[d]:
-                    p = pending[d].pop(0)
                     ready[d].sort()  # Current FIFO return time, then physical fleet order.
                     if ready[d][0][0] + 1 > now:
                         break
+                    p = pending[d].pop(0)
                     _, chosen = ready[d].pop(0)
                     v = vehicles[chosen]
                     launches[p.trip] = (now, chosen)
@@ -337,7 +337,8 @@ def _simulate(graph, commands, homogeneous):
     coverage = (initial <= returned.keys() and initial <= next_launch.keys()
                 and releases.keys() <= launches.keys() and releases.keys() <= completed_trips)
     return dict(cost=waiting + onboard, waiting=waiting, onboard=onboard, cv2=cv2,
-        returns={b: returned[b] for b in initial if b in returned}, next_launch=next_launch,
+        returns={b: returned[b] for b in initial if b in returned},
+        next_launch={b: next_launch[b] for b in initial if b in next_launch},
         launches=launches, delays=delays, actions=actions, legal=legal, nodes=nodes,
         initial_queue=initial_queue, boardings=boardings, return_events=return_events, arrivals=arrivals,
         missing_commands=set(commands) - used, coverage=bool(coverage), failure=invalid,
