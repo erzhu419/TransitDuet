@@ -40,4 +40,11 @@ physical fleet size. Native max_agent_num is a policy buffer of at least30;
 the physical fleet remains12. The regression fixture now uses that native layout.
 Both physical slots are consumed. No-op equivalence,its endpoint comparison and
 solver latency remain UNCONFIRMED;the failed partial path is not a zero effect.
-Only a synthetic correction check is permitted now;no physical retry or matrix.
+At that point only a synthetic correction check was permitted;no retry was made.
+
+The user subsequently approved exactly ONE extra no-op after the padded-agent
+regression passes. Its independent noop_fix reservation raises the engineering
+cap to3;the failed noop and both original starts remain charged and unchanged.
+Reuse the accepted83d681d0ae reference,not a fresh reference run. No additional
+scene,future,training,matrix or main-policy change;failure remains charged with
+no automatic retry.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exactly two V270 engineering slots; no matrix, intervention or training entry."""
+"""V270 engineering admission, including one approved no-op correction slot."""
 
 import argparse
 import gzip
@@ -12,6 +12,7 @@ import traceback
 
 SEED, DAY, FUTURE = 12011, 2071001, 27011001
 GRAPH_SOURCE, SEAL = '0a68748858', 'b4c9fd23e3'
+REFERENCE_SOURCE = '83d681d0ae'
 
 
 def read(path):
@@ -32,9 +33,9 @@ def run(a):
     reservation = read(account/'budget'/f'{a.command}.json')
     assert reservation['source'] == a.source and not reservation['automatic_retry']
     write(account/'started'/f'{a.command}.json', dict(source=a.source, physical_slot=a.command))
-    if a.command == 'noop':
+    if a.command != 'reference':
         gate = read(a.root/'summary/reference.json')
-        assert gate['source'] == a.source and gate['status'] == 'reference_cached_parity_passed'
+        assert gate['source'] == REFERENCE_SOURCE and gate['status'] == 'reference_cached_parity_passed'
     import numpy as np
     import run_freqduet_v267_bilateral_factorial as fixed
     from freqduet_native_event_graph import NativeNoop, native_query
@@ -49,7 +50,7 @@ def run(a):
 
         def attach(self, runner):
             super().attach(runner)
-            if a.command == 'noop':
+            if a.command != 'reference':
                 from env.bus import Bus
                 self.bridge = NativeNoop(runner.env, self.launches, credit)
                 self.bridge.attach(Bus)
@@ -116,11 +117,11 @@ def run(a):
         assert extra['queries'] == len(audit.native_queries)
         assert sum(q['evaluations'] > 0 for q in audit.bridge.queries) > 0, 'no query reached the graph evaluator'
         assert extra['pending_locks'] > 0 and extra['model_locks_verified'] > 0, 'no irreversible pending command was modeled'
-        with gzip.open(a.root/'traces/graph_queries.pkl.gz', 'xb') as stream:
+        with gzip.open(a.root/'traces'/f'graph_queries_{a.command}.pkl.gz', 'xb') as stream:
             pickle.dump(dict(queries=audit.bridge.queries, completed_visits=audit.bridge.prefix.visits), stream)
         status = 'noop_native_equivalence_passed'
     write(a.root/'summary'/f'{a.command}.json', dict(source=a.source, graph_source=GRAPH_SOURCE, status=status,
-        physical_slots_consumed=len(list((account/'budget').glob('*.json'))), physical_slot_cap=2,
+        physical_slots_consumed=len(list((account/'budget').glob('*.json'))), physical_slot_cap=reservation['physical_slot_cap'],
         native_queries=len(audit.native_queries), actual_commands=len(holds), wall_s=time.perf_counter()-start,
         native_query_latency_s=dict(mean=float(np.mean(audit.native_wall)), p95=float(np.quantile(audit.native_wall,.95)),
                                     max=float(max(audit.native_wall))),
@@ -134,7 +135,7 @@ def run(a):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=('reference', 'noop'))
+    p.add_argument('command', choices=('reference', 'noop', 'noop_fix'))
     p.add_argument('--root', type=Path, required=True)
     p.add_argument('--results-root', type=Path, required=True)
     p.add_argument('--source', required=True)
