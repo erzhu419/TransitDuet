@@ -178,7 +178,7 @@ class NativeNoop:
         profile = dict(time_s=now, bus=int(bus.bus_id), trip=int(bus.trip_id), station=int(bus.last_station.station_id),
             strict_visits=len(visits), max_completed_s=max((v.completed_s for v in visits), default=None),
             max_available_s=max((v.available_s for v in visits), default=None), pending_locks=len(locks),
-            model_locks_verified=verified, status=result['status'], evaluations=result['evaluations'],
+            model_locks_verified=verified, status=result['status'], reason=result.get('reason'), evaluations=result['evaluations'],
             shadow_action_s=int(result['action_s']), native_action_s=int(native_action),
             build_s=build_s, total_s=time.perf_counter()-start)
         self.queries.append(profile)
@@ -193,10 +193,12 @@ class NativeNoop:
             first_arrivals_without_gap=self.prefix.first_visits,
             nonpositive_gap_visits=sum(v.gap_s <= 0 for v in self.prefix.visits),
             statuses={s: sum(r['status'] == s for r in self.queries) for s in sorted({r['status'] for r in self.queries})},
+            unsupported_reasons={s: sum(r['reason'] == s for r in self.queries)
+                                 for s in sorted({r['reason'] for r in self.queries if r['reason'] is not None})},
             pending_locks=sum(r['pending_locks'] for r in self.queries),
             model_locks_verified=sum(r['model_locks_verified'] for r in self.queries),
             shadow_action_differences=sum(r['shadow_action_s'] != r['native_action_s'] for r in self.queries),
-            query_latency_s=dict(mean=float(np.mean(timings)), p95=float(np.quantile(timings, .95)),
+            bridge_latency_s=dict(mean=float(np.mean(timings)), p95=float(np.quantile(timings, .95)),
                                  max=float(max(timings)), total=float(sum(timings))),
             optimizing_query_latency_s=None if not active else dict(count=len(active), mean=float(np.mean(active)),
                 p95=float(np.quantile(active, .95)), max=float(max(active))),

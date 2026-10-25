@@ -57,6 +57,17 @@ class NativeBridgeTests(unittest.TestCase):
         self.assertEqual((value.vehicles[1].index, value.vehicles[1].remaining_fraction), (1, .25))
         self.assertIsNone(value.vehicles[1].arrival_s)
 
+    def test_reverse_direction_uses_its_physical_station_order(self):
+        env = fake_env()
+        env.bus_all[0].direction = False
+        env.bus_all[0].last_station, env.bus_all[0].next_station = env.stations[4:6]
+        prefix = CompletedPrefix({i: dict(time_s=100., holding_counter_at_launch=0.) for i in (0, 1)})
+        for bus in env.bus_all[:2]:
+            prefix.arrival(bus, 150., bus.last_station.station_id, bus.direction, 10)
+        value, _ = snapshot(env, prefix, native_routes(env), 0, (0, 5), 0, [], {})
+        self.assertEqual([s.station for s in value.routes[False]], [2, 1, 0])
+        self.assertEqual(value.vehicles[0].index, 0)
+
     def test_prefix_requires_both_clocks_strictly_completed(self):
         prefix = CompletedPrefix({i: dict(time_s=100.) for i in (0, 1)})
         bus = NS(bus_id=0, trip_id=0, last_board_count=3, passengers=[None]*8, capacity=50.)

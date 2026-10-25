@@ -44,7 +44,7 @@ def run(a):
     class Audit(fixed.BenchmarkAudit):
         def __init__(self):
             super().__init__(SEED, 'fixed_bilateral025')
-            self.native_queries, self.native_wall = [], []
+            self.native_queries, self.native_wall, self.callback_wall = [], [], []
             self.bridge = None
 
         def attach(self, runner):
@@ -65,6 +65,7 @@ def run(a):
             self.native_queries.append(native_query(self.env, bus, legal, action, credit.stream.pending_commands))
             if self.bridge is not None:
                 self.bridge.observe(bus, legal, action)
+            self.callback_wall.append(time.perf_counter()-start)
             # The SAME original tensor returns to native categorical/quantization.
             return law
 
@@ -123,6 +124,8 @@ def run(a):
         native_queries=len(audit.native_queries), actual_commands=len(holds), wall_s=time.perf_counter()-start,
         native_query_latency_s=dict(mean=float(np.mean(audit.native_wall)), p95=float(np.quantile(audit.native_wall,.95)),
                                     max=float(max(audit.native_wall))),
+        callback_latency_s=dict(mean=float(np.mean(audit.callback_wall)), p95=float(np.quantile(audit.callback_wall,.95)),
+                                max=float(max(audit.callback_wall)), total=float(sum(audit.callback_wall))),
         endpoint_metrics={k:row[k] for k in fixed.KEYS}, **extra,
         raw_traces_remain_server_side=True, training_updates=0, main_policy_changed=False,
         matrix_started=False, automatic_retry=False))
