@@ -62,6 +62,8 @@ class CompleteDayLearning(unittest.TestCase):
         self.assertFalse(result['per_day_joint_improvement'])
         self.assertLessEqual(len(seen), 16)
         self.assertEqual(len(seen), len(set(seen)))
+        self.assertEqual(len(result['evaluations']), len(seen))
+        self.assertTrue(any(r['mean_cost_changes'][1] > 0. for r in result['evaluations']))
 
     def test_true_full_day_joint_improvement_is_retained_without_q(self):
         def evaluate(theta, index):

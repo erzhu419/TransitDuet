@@ -150,7 +150,14 @@ def optimize(a):
                 fixed.pilot.joint.assert_same_state(row['contract'], old['contract'], 'V268_matched_development_contract')
             return [r['results'] for r in rows]
         result = learn.search(evaluate, a.family)
+    selected = next(v['index'] for v in vectors if v['theta'] == result['theta'])
+    if selected:
+        action_changes = [fixed.read(a.root / 'paths' / f'{a.family}_v{selected}_d{day}.json')['same_state_actions']
+                          for day in DAYS]
+    else:
+        action_changes = [dict(decisions=r['execution']['decisions'], increases=0, decreases=0) for r in references]
     result.update(source=a.source, days=DAYS, vectors=vectors,
+        selected_vector_index=selected, selected_same_state_actions=action_changes,
         status='bounded_complete_day_search_finished', base_actor_updates=0, dual_updates=0,
         main_policy_changed=False, confirmation_started=False, controller_admitted=False)
     fixed.write_new(a.root / 'search' / a.family / 'done.json', result)

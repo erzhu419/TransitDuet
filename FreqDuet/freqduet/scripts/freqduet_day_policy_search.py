@@ -82,6 +82,8 @@ def search(evaluate, family):
         parameter_budget=MAX_VECTORS, solver_success=bool(result.success),
         solver_message=str(result.message), generations=int(result.nit),
         mean_cost_changes=effects.mean(0).tolist(), day_cost_changes=effects.tolist(),
+        evaluations=[dict(parameters=list(theta), mean_cost_changes=(values-reference).mean(0).tolist(),
+                          day_cost_changes=(values-reference).tolist()) for theta, values in cache.items()],
         cost_names=['passenger_person_s', *CONSTRAINTS],
         update_identified=bool(np.any(selected)),
         per_day_joint_improvement=bool(np.all(effects[:, 0] < 0.) and np.all(effects[:, 1:] <= 0.)),
