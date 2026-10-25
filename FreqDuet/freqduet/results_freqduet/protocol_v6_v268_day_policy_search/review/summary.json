@@ -1,0 +1,2707 @@
+{
+  "source": "c00a29013a",
+  "review_source": "2d12cf52c0",
+  "status": "frozen_v268_endpoint_and_action_review_complete",
+  "development_task": "t211591",
+  "development_exit_code": 0,
+  "physical_starts": 123,
+  "preflight_passed": true,
+  "frozen_search_summaries_reproduced": true,
+  "all_nonzero_paths_service_cleared": true,
+  "max_unexecuted_holding_s": 0.0,
+  "baseline_absolute_means": {
+    "passenger_person_s": 19086805.5,
+    "journey_min": 16.194304,
+    "cv_squared": 0.062171969601424903,
+    "readiness_delay_s": 123.48854975,
+    "public_launch_delay_total_s": 32354.0,
+    "holding_s_per_trip": 156.38835875,
+    "waiting_person_s": 5335952.75,
+    "onboard_person_s": 13750852.75,
+    "trips_unlaunched": 0.0,
+    "trips_incomplete": 0.0
+  },
+  "days": [
+    2071001,
+    2071002,
+    2071003,
+    2071004
+  ],
+  "frozen_runtime_seed": 12011,
+  "families": {
+    "conditional": {
+      "selected": {
+        "index": 0,
+        "mean_effects": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0,
+          "holding_s_per_trip": 0.0,
+          "waiting_person_s": 0.0,
+          "onboard_person_s": 0.0,
+          "trips_unlaunched": 0.0,
+          "trips_incomplete": 0.0
+        },
+        "day_effects": [
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          },
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          },
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          },
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          }
+        ],
+        "same_state_actions": {
+          "decisions": 20800,
+          "increases": 0,
+          "decreases": 0
+        },
+        "mean_executed_holding_change_s": 0.0,
+        "mean_feasible": true,
+        "mean_joint_improvement": false,
+        "per_day_joint_improvement": false
+      },
+      "vectors": [
+        {
+          "index": 0,
+          "mean_effects": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 0,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 0.0,
+          "mean_feasible": true,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 1,
+          "mean_effects": {
+            "passenger_person_s": 3569995.5,
+            "journey_min": 3.0222982500000013,
+            "cv_squared": -0.017147740716558914,
+            "readiness_delay_s": 1333.1898855,
+            "public_launch_delay_total_s": 349295.75,
+            "holding_s_per_trip": 245.89694675,
+            "waiting_person_s": 2307958.5,
+            "onboard_person_s": 1262037.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 3762015.0,
+              "journey_min": 3.146654999999999,
+              "cv_squared": -0.011982285108679415,
+              "readiness_delay_s": 1239.225191,
+              "public_launch_delay_total_s": 324677.0,
+              "holding_s_per_trip": 249.217558,
+              "waiting_person_s": 2500966.0,
+              "onboard_person_s": 1261049.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2467032.0,
+              "journey_min": 2.131972000000001,
+              "cv_squared": -0.033327904828306054,
+              "readiness_delay_s": 1307.91603,
+              "public_launch_delay_total_s": 342674.0,
+              "holding_s_per_trip": 245.687023,
+              "waiting_person_s": 1221883.0,
+              "onboard_person_s": 1245149.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3360954.0,
+              "journey_min": 2.8509720000000023,
+              "cv_squared": -0.015530099042360211,
+              "readiness_delay_s": 1338.8931300000002,
+              "public_launch_delay_total_s": 350790.0,
+              "holding_s_per_trip": 244.541985,
+              "waiting_person_s": 2125887.0,
+              "onboard_person_s": 1235067.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 4689981.0,
+              "journey_min": 3.9595940000000027,
+              "cv_squared": -0.007750673886889978,
+              "readiness_delay_s": 1446.725191,
+              "public_launch_delay_total_s": 379042.0,
+              "holding_s_per_trip": 244.141221,
+              "waiting_person_s": 3383098.0,
+              "onboard_person_s": 1306883.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 15190,
+            "decreases": 475
+          },
+          "mean_executed_holding_change_s": 64425.0,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 2,
+          "mean_effects": {
+            "passenger_person_s": -789614.25,
+            "journey_min": -0.6685262499999998,
+            "cv_squared": 0.1029720263847188,
+            "readiness_delay_s": -79.28625975,
+            "public_launch_delay_total_s": -20773.0,
+            "holding_s_per_trip": -131.03053425000002,
+            "waiting_person_s": 61580.75,
+            "onboard_person_s": -851195.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": -959008.0,
+              "journey_min": -0.8021410000000007,
+              "cv_squared": 0.07363089100586395,
+              "readiness_delay_s": -72.568702,
+              "public_launch_delay_total_s": -19013.0,
+              "holding_s_per_trip": -127.46183199999999,
+              "waiting_person_s": -92454.0,
+              "onboard_person_s": -866554.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -619440.0,
+              "journey_min": -0.5353100000000008,
+              "cv_squared": 0.1221526735282174,
+              "readiness_delay_s": -68.88549699999999,
+              "public_launch_delay_total_s": -18048.0,
+              "holding_s_per_trip": -135.572519,
+              "waiting_person_s": 245146.0,
+              "onboard_person_s": -864586.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -676905.0,
+              "journey_min": -0.5741929999999993,
+              "cv_squared": 0.08637948480317473,
+              "readiness_delay_s": -80.198474,
+              "public_launch_delay_total_s": -21012.0,
+              "holding_s_per_trip": -130.935114,
+              "waiting_person_s": 177851.0,
+              "onboard_person_s": -854756.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -903104.0,
+              "journey_min": -0.7624609999999983,
+              "cv_squared": 0.12972505620161914,
+              "readiness_delay_s": -95.49236599999998,
+              "public_launch_delay_total_s": -25019.0,
+              "holding_s_per_trip": -130.152672,
+              "waiting_person_s": -84220.0,
+              "onboard_person_s": -818884.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 0,
+            "decreases": 10156
+          },
+          "mean_executed_holding_change_s": -34330.0,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 3,
+          "mean_effects": {
+            "passenger_person_s": 686353.5,
+            "journey_min": 0.5824090000000002,
+            "cv_squared": 0.01424650636978377,
+            "readiness_delay_s": 21.207061000000003,
+            "public_launch_delay_total_s": 5556.25,
+            "holding_s_per_trip": 59.875954,
+            "waiting_person_s": 176820.0,
+            "onboard_person_s": 509533.5,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 651967.0,
+              "journey_min": 0.5453229999999998,
+              "cv_squared": 0.007881581822013685,
+              "readiness_delay_s": 18.88549599999999,
+              "public_launch_delay_total_s": 4948.0,
+              "holding_s_per_trip": 67.97709900000001,
+              "waiting_person_s": 81474.0,
+              "onboard_person_s": 570493.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 691685.0,
+              "journey_min": 0.5977439999999987,
+              "cv_squared": 0.017757650972704903,
+              "readiness_delay_s": 18.870228999999995,
+              "public_launch_delay_total_s": 4944.0,
+              "holding_s_per_trip": 63.435114,
+              "waiting_person_s": 174707.0,
+              "onboard_person_s": 516978.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 777799.0,
+              "journey_min": 0.6597780000000029,
+              "cv_squared": 0.018472433881529464,
+              "readiness_delay_s": 31.851145000000002,
+              "public_launch_delay_total_s": 8345.0,
+              "holding_s_per_trip": 59.31297699999999,
+              "waiting_person_s": 267449.0,
+              "onboard_person_s": 510350.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 623963.0,
+              "journey_min": 0.5267909999999993,
+              "cv_squared": 0.01287435880288703,
+              "readiness_delay_s": 15.221374000000026,
+              "public_launch_delay_total_s": 3988.0,
+              "holding_s_per_trip": 48.778626,
+              "waiting_person_s": 183650.0,
+              "onboard_person_s": 440313.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 8166,
+            "decreases": 4892
+          },
+          "mean_executed_holding_change_s": 15687.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 4,
+          "mean_effects": {
+            "passenger_person_s": 18245799.25,
+            "journey_min": 15.446626249999998,
+            "cv_squared": 1.9270691803625497,
+            "readiness_delay_s": 2651.81965625,
+            "public_launch_delay_total_s": 694776.75,
+            "holding_s_per_trip": 328.4112595,
+            "waiting_person_s": 15398621.25,
+            "onboard_person_s": 2847178.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 21126374.0,
+              "journey_min": 17.670692999999996,
+              "cv_squared": 2.2001815493062296,
+              "readiness_delay_s": 2625.919847,
+              "public_launch_delay_total_s": 687991.0,
+              "holding_s_per_trip": 323.70229,
+              "waiting_person_s": 18249142.0,
+              "onboard_person_s": 2877232.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 13454336.0,
+              "journey_min": 11.627032,
+              "cv_squared": 1.6872757294760952,
+              "readiness_delay_s": 2248.946564,
+              "public_launch_delay_total_s": 589224.0,
+              "holding_s_per_trip": 311.58396899999997,
+              "waiting_person_s": 10805497.0,
+              "onboard_person_s": 2648839.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 16727008.0,
+              "journey_min": 14.188898000000002,
+              "cv_squared": 2.036215351041793,
+              "readiness_delay_s": 2576.675572,
+              "public_launch_delay_total_s": 675089.0,
+              "holding_s_per_trip": 324.694657,
+              "waiting_person_s": 13988475.0,
+              "onboard_person_s": 2738533.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 21675479.0,
+              "journey_min": 18.299882,
+              "cv_squared": 1.7846040916260812,
+              "readiness_delay_s": 3155.7366420000003,
+              "public_launch_delay_total_s": 826803.0,
+              "holding_s_per_trip": 353.664122,
+              "waiting_person_s": 18551371.0,
+              "onboard_person_s": 3124108.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 9868,
+            "decreases": 800
+          },
+          "mean_executed_holding_change_s": 86043.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 5,
+          "mean_effects": {
+            "passenger_person_s": 22560128.5,
+            "journey_min": 19.0940245,
+            "cv_squared": 1.2747866653639806,
+            "readiness_delay_s": 3435.071565,
+            "public_launch_delay_total_s": 899988.75,
+            "holding_s_per_trip": 369.22709925000004,
+            "waiting_person_s": 18990114.5,
+            "onboard_person_s": 3570014.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 28109142.0,
+              "journey_min": 23.511276999999996,
+              "cv_squared": 1.0599018092620505,
+              "readiness_delay_s": 3970.610687,
+              "public_launch_delay_total_s": 1040300.0,
+              "holding_s_per_trip": 411.54580200000004,
+              "waiting_person_s": 24205169.0,
+              "onboard_person_s": 3903973.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 16087430.0,
+              "journey_min": 13.902512000000002,
+              "cv_squared": 1.5859231740632767,
+              "readiness_delay_s": 2756.110687,
+              "public_launch_delay_total_s": 722101.0,
+              "holding_s_per_trip": 338.51144999999997,
+              "waiting_person_s": 12792697.0,
+              "onboard_person_s": 3294733.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 22258322.0,
+              "journey_min": 18.880905,
+              "cv_squared": 1.0976765507343147,
+              "readiness_delay_s": 3654.442748,
+              "public_launch_delay_total_s": 957464.0,
+              "holding_s_per_trip": 383.70229,
+              "waiting_person_s": 18614843.0,
+              "onboard_person_s": 3643479.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 23785620.0,
+              "journey_min": 20.081404000000003,
+              "cv_squared": 1.3556451273962802,
+              "readiness_delay_s": 3359.122138,
+              "public_launch_delay_total_s": 880090.0,
+              "holding_s_per_trip": 343.148855,
+              "waiting_person_s": 20347749.0,
+              "onboard_person_s": 3437871.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 11066,
+            "decreases": 707
+          },
+          "mean_executed_holding_change_s": 96737.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 6,
+          "mean_effects": {
+            "passenger_person_s": 7046477.0,
+            "journey_min": 5.97413925,
+            "cv_squared": 1.315030802472385,
+            "readiness_delay_s": 496.93893125,
+            "public_launch_delay_total_s": 130198.0,
+            "holding_s_per_trip": 132.44274825,
+            "waiting_person_s": 5913776.0,
+            "onboard_person_s": 1132701.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 7354082.0,
+              "journey_min": 6.151160999999998,
+              "cv_squared": 1.347177751777298,
+              "readiness_delay_s": 488.1564880000001,
+              "public_launch_delay_total_s": 127897.0,
+              "holding_s_per_trip": 136.450382,
+              "waiting_person_s": 6159262.0,
+              "onboard_person_s": 1194820.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 6404634.0,
+              "journey_min": 5.5347870000000015,
+              "cv_squared": 1.0593479814788413,
+              "readiness_delay_s": 444.290076,
+              "public_launch_delay_total_s": 116404.0,
+              "holding_s_per_trip": 145.38167899999996,
+              "waiting_person_s": 5268237.0,
+              "onboard_person_s": 1136397.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 7560497.0,
+              "journey_min": 6.413288000000001,
+              "cv_squared": 1.493422650502657,
+              "readiness_delay_s": 489.427481,
+              "public_launch_delay_total_s": 128230.0,
+              "holding_s_per_trip": 127.78626000000003,
+              "waiting_person_s": 6467560.0,
+              "onboard_person_s": 1092937.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 6866695.0,
+              "journey_min": 5.797321,
+              "cv_squared": 1.360174826130743,
+              "readiness_delay_s": 565.88168,
+              "public_launch_delay_total_s": 148261.0,
+              "holding_s_per_trip": 120.15267200000002,
+              "waiting_person_s": 5760045.0,
+              "onboard_person_s": 1106650.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 7266,
+            "decreases": 3003
+          },
+          "mean_executed_holding_change_s": 34700.0,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 7,
+          "mean_effects": {
+            "passenger_person_s": 19107002.0,
+            "journey_min": 16.16621925,
+            "cv_squared": 0.0044286051173730925,
+            "readiness_delay_s": 3700.8062975,
+            "public_launch_delay_total_s": 969611.25,
+            "holding_s_per_trip": 411.28339700000004,
+            "waiting_person_s": 15261426.0,
+            "onboard_person_s": 3845576.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 21956626.0,
+              "journey_min": 18.365138999999996,
+              "cv_squared": 0.018648920211624988,
+              "readiness_delay_s": 3700.385496,
+              "public_launch_delay_total_s": 969501.0,
+              "holding_s_per_trip": 421.698474,
+              "waiting_person_s": 18025297.0,
+              "onboard_person_s": 3931329.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 11762213.0,
+              "journey_min": 10.164725,
+              "cv_squared": -0.018084814447713086,
+              "readiness_delay_s": 3438.526717,
+              "public_launch_delay_total_s": 900894.0,
+              "holding_s_per_trip": 403.587786,
+              "waiting_person_s": 8103538.0,
+              "onboard_person_s": 3658675.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 19290671.0,
+              "journey_min": 16.363558000000005,
+              "cv_squared": 0.008044924137260274,
+              "readiness_delay_s": 3803.194656,
+              "public_launch_delay_total_s": 996437.0,
+              "holding_s_per_trip": 410.133588,
+              "waiting_person_s": 15403140.0,
+              "onboard_person_s": 3887531.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 23418498.0,
+              "journey_min": 19.771455,
+              "cv_squared": 0.009105390568320194,
+              "readiness_delay_s": 3861.118321,
+              "public_launch_delay_total_s": 1011613.0,
+              "holding_s_per_trip": 409.71374000000003,
+              "waiting_person_s": 19513729.0,
+              "onboard_person_s": 3904769.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 17908,
+            "decreases": 350
+          },
+          "mean_executed_holding_change_s": 107756.25,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 8,
+          "mean_effects": {
+            "passenger_person_s": 1098551.25,
+            "journey_min": 0.9301862500000002,
+            "cv_squared": 0.029659463388526534,
+            "readiness_delay_s": 84.14217525000001,
+            "public_launch_delay_total_s": 22045.25,
+            "holding_s_per_trip": 60.64408400000001,
+            "waiting_person_s": 359519.0,
+            "onboard_person_s": 739032.25,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 1193815.0,
+              "journey_min": 0.9985399999999984,
+              "cv_squared": 0.026823606097661955,
+              "readiness_delay_s": 83.51145,
+              "public_launch_delay_total_s": 21880.0,
+              "holding_s_per_trip": 65.11450400000001,
+              "waiting_person_s": 412464.0,
+              "onboard_person_s": 781351.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 791425.0,
+              "journey_min": 0.6839380000000013,
+              "cv_squared": 0.024554169883498386,
+              "readiness_delay_s": 64.782442,
+              "public_launch_delay_total_s": 16973.0,
+              "holding_s_per_trip": 62.003817,
+              "waiting_person_s": 83872.0,
+              "onboard_person_s": 707553.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1115892.0,
+              "journey_min": 0.9465690000000002,
+              "cv_squared": 0.02991608722369659,
+              "readiness_delay_s": 86.82442699999999,
+              "public_launch_delay_total_s": 22748.0,
+              "holding_s_per_trip": 60.61068700000001,
+              "waiting_person_s": 370444.0,
+              "onboard_person_s": 745448.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1293073.0,
+              "journey_min": 1.091698000000001,
+              "cv_squared": 0.0373439903492492,
+              "readiness_delay_s": 101.45038200000002,
+              "public_launch_delay_total_s": 26580.0,
+              "holding_s_per_trip": 54.847328000000005,
+              "waiting_person_s": 571296.0,
+              "onboard_person_s": 721777.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 8753,
+            "decreases": 4196
+          },
+          "mean_executed_holding_change_s": 15888.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 9,
+          "mean_effects": {
+            "passenger_person_s": 562600.0,
+            "journey_min": 0.47603375000000003,
+            "cv_squared": 0.002903713067770675,
+            "readiness_delay_s": 57.98664125000001,
+            "public_launch_delay_total_s": 15192.5,
+            "holding_s_per_trip": 66.55534349999999,
+            "waiting_person_s": 238418.0,
+            "onboard_person_s": 324182.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 556791.0,
+              "journey_min": 0.4657159999999969,
+              "cv_squared": 0.0035430095036632567,
+              "readiness_delay_s": 37.97709900000001,
+              "public_launch_delay_total_s": 9950.0,
+              "holding_s_per_trip": 69.40839700000001,
+              "waiting_person_s": 204249.0,
+              "onboard_person_s": 352542.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 308075.0,
+              "journey_min": 0.26623400000000075,
+              "cv_squared": -0.012992781059035619,
+              "readiness_delay_s": 44.38549600000002,
+              "public_launch_delay_total_s": 11629.0,
+              "holding_s_per_trip": 64.23664099999999,
+              "waiting_person_s": 23183.0,
+              "onboard_person_s": 284892.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 607034.0,
+              "journey_min": 0.5149240000000006,
+              "cv_squared": 0.009990816241880272,
+              "readiness_delay_s": 75.725191,
+              "public_launch_delay_total_s": 19840.0,
+              "holding_s_per_trip": 67.82442800000001,
+              "waiting_person_s": 269468.0,
+              "onboard_person_s": 337566.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 778500.0,
+              "journey_min": 0.6572610000000019,
+              "cv_squared": 0.01107380758457479,
+              "readiness_delay_s": 73.85877900000003,
+              "public_launch_delay_total_s": 19351.0,
+              "holding_s_per_trip": 64.75190799999999,
+              "waiting_person_s": 456772.0,
+              "onboard_person_s": 321728.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 6896,
+            "decreases": 5079
+          },
+          "mean_executed_holding_change_s": 17437.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 10,
+          "mean_effects": {
+            "passenger_person_s": 2923189.25,
+            "journey_min": 2.472697,
+            "cv_squared": 0.6409350943569034,
+            "readiness_delay_s": 159.02576324999998,
+            "public_launch_delay_total_s": 41664.75,
+            "holding_s_per_trip": 85.2958015,
+            "waiting_person_s": 2596067.75,
+            "onboard_person_s": 327121.5,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 3191806.0,
+              "journey_min": 2.6697159999999975,
+              "cv_squared": 0.7262681957944619,
+              "readiness_delay_s": 192.061069,
+              "public_launch_delay_total_s": 50320.0,
+              "holding_s_per_trip": 98.79771,
+              "waiting_person_s": 2794822.0,
+              "onboard_person_s": 396984.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1629871.0,
+              "journey_min": 1.4085099999999997,
+              "cv_squared": 0.26959555672951274,
+              "readiness_delay_s": 107.48473200000001,
+              "public_launch_delay_total_s": 28161.0,
+              "holding_s_per_trip": 97.5,
+              "waiting_person_s": 1402346.0,
+              "onboard_person_s": 227525.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2887518.0,
+              "journey_min": 2.4493740000000024,
+              "cv_squared": 0.6707501199745245,
+              "readiness_delay_s": 144.07633599999997,
+              "public_launch_delay_total_s": 37748.0,
+              "holding_s_per_trip": 63.072519,
+              "waiting_person_s": 2611011.0,
+              "onboard_person_s": 276507.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3983562.0,
+              "journey_min": 3.363188000000001,
+              "cv_squared": 0.8971265049291144,
+              "readiness_delay_s": 192.480916,
+              "public_launch_delay_total_s": 50430.0,
+              "holding_s_per_trip": 81.81297699999999,
+              "waiting_person_s": 3576092.0,
+              "onboard_person_s": 407470.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 6849,
+            "decreases": 4903
+          },
+          "mean_executed_holding_change_s": 22347.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 11,
+          "mean_effects": {
+            "passenger_person_s": 10680795.0,
+            "journey_min": 9.03033675,
+            "cv_squared": -0.008943513459421567,
+            "readiness_delay_s": 2579.5601145000005,
+            "public_launch_delay_total_s": 675844.75,
+            "holding_s_per_trip": 342.43320600000004,
+            "waiting_person_s": 7794553.25,
+            "onboard_person_s": 2886241.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 12529028.0,
+              "journey_min": 10.479630999999998,
+              "cv_squared": 0.004166262308367662,
+              "readiness_delay_s": 2620.351145,
+              "public_launch_delay_total_s": 686532.0,
+              "holding_s_per_trip": 353.072519,
+              "waiting_person_s": 9565395.0,
+              "onboard_person_s": 2963633.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 5410234.0,
+              "journey_min": 4.675442,
+              "cv_squared": -0.02610592544845411,
+              "readiness_delay_s": 2331.5343510000002,
+              "public_launch_delay_total_s": 610862.0,
+              "holding_s_per_trip": 333.015267,
+              "waiting_person_s": 2642562.0,
+              "onboard_person_s": 2767672.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 10520303.0,
+              "journey_min": 8.923981000000001,
+              "cv_squared": -0.0015555882153786976,
+              "readiness_delay_s": 2680.057252,
+              "public_launch_delay_total_s": 702175.0,
+              "holding_s_per_trip": 342.900763,
+              "waiting_person_s": 7576883.0,
+              "onboard_person_s": 2943420.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 14263615.0,
+              "journey_min": 12.042293,
+              "cv_squared": -0.012278802482221123,
+              "readiness_delay_s": 2686.2977100000003,
+              "public_launch_delay_total_s": 703810.0,
+              "holding_s_per_trip": 340.744275,
+              "waiting_person_s": 11393373.0,
+              "onboard_person_s": 2870242.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 19986,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 89717.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 12,
+          "mean_effects": {
+            "passenger_person_s": 26985468.25,
+            "journey_min": 22.86747575,
+            "cv_squared": 1.785832973095675,
+            "readiness_delay_s": 3672.08206075,
+            "public_launch_delay_total_s": 962085.5,
+            "holding_s_per_trip": 396.29770975,
+            "waiting_person_s": 23424504.0,
+            "onboard_person_s": 3560964.25,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 26453615.0,
+              "journey_min": 22.126547,
+              "cv_squared": 1.8767252746604073,
+              "readiness_delay_s": 3464.576336,
+              "public_launch_delay_total_s": 907719.0,
+              "holding_s_per_trip": 391.20229,
+              "waiting_person_s": 23070898.0,
+              "onboard_person_s": 3382717.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 22021276.0,
+              "journey_min": 19.030451000000003,
+              "cv_squared": 2.228949118760842,
+              "readiness_delay_s": 3350.316793,
+              "public_launch_delay_total_s": 877783.0,
+              "holding_s_per_trip": 363.778626,
+              "waiting_person_s": 18847447.0,
+              "onboard_person_s": 3173829.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 26755583.0,
+              "journey_min": 22.695764000000004,
+              "cv_squared": 1.2404171630594893,
+              "readiness_delay_s": 3754.561068,
+              "public_launch_delay_total_s": 983695.0,
+              "holding_s_per_trip": 429.847328,
+              "waiting_person_s": 22769667.0,
+              "onboard_person_s": 3985916.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 32711399.0,
+              "journey_min": 27.617141,
+              "cv_squared": 1.7972403359019606,
+              "readiness_delay_s": 4118.874046,
+              "public_launch_delay_total_s": 1079145.0,
+              "holding_s_per_trip": 400.36259500000006,
+              "waiting_person_s": 29010004.0,
+              "onboard_person_s": 3701395.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 10773,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 103830.0,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 13,
+          "mean_effects": {
+            "passenger_person_s": 25670881.75,
+            "journey_min": 21.72585925,
+            "cv_squared": 1.4244727925098604,
+            "readiness_delay_s": 3830.03816775,
+            "public_launch_delay_total_s": 1003470.0,
+            "holding_s_per_trip": 420.682252,
+            "waiting_person_s": 22043238.75,
+            "onboard_person_s": 3627643.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 31922175.0,
+              "journey_min": 26.700605,
+              "cv_squared": 1.5346369372541562,
+              "readiness_delay_s": 4227.39313,
+              "public_launch_delay_total_s": 1107577.0,
+              "holding_s_per_trip": 473.377863,
+              "waiting_person_s": 27899988.0,
+              "onboard_person_s": 4022187.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 18299679.0,
+              "journey_min": 15.814302999999999,
+              "cv_squared": 1.0058953271426871,
+              "readiness_delay_s": 3751.282442,
+              "public_launch_delay_total_s": 982836.0,
+              "holding_s_per_trip": 416.832061,
+              "waiting_person_s": 14858288.0,
+              "onboard_person_s": 3441391.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 24246141.0,
+              "journey_min": 20.567098,
+              "cv_squared": 1.5842502565527252,
+              "readiness_delay_s": 3551.175572,
+              "public_launch_delay_total_s": 930408.0,
+              "holding_s_per_trip": 401.98473299999995,
+              "waiting_person_s": 20659202.0,
+              "onboard_person_s": 3586939.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 28215532.0,
+              "journey_min": 23.821431,
+              "cv_squared": 1.5731086490898731,
+              "readiness_delay_s": 3790.301527,
+              "public_launch_delay_total_s": 993059.0,
+              "holding_s_per_trip": 390.534351,
+              "waiting_person_s": 24755477.0,
+              "onboard_person_s": 3460055.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 12000,
+            "decreases": 152
+          },
+          "mean_executed_holding_change_s": 110218.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 14,
+          "mean_effects": {
+            "passenger_person_s": 31104797.0,
+            "journey_min": 26.338929750000002,
+            "cv_squared": 0.07361452092551711,
+            "readiness_delay_s": 5089.3244275,
+            "public_launch_delay_total_s": 1333403.0,
+            "holding_s_per_trip": 558.792939,
+            "waiting_person_s": 26383725.75,
+            "onboard_person_s": 4721071.25,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 34807700.0,
+              "journey_min": 29.114138999999998,
+              "cv_squared": 0.08483696721810854,
+              "readiness_delay_s": 5141.244275,
+              "public_launch_delay_total_s": 1347006.0,
+              "holding_s_per_trip": 568.3206110000001,
+              "waiting_person_s": 29981614.0,
+              "onboard_person_s": 4826086.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 23028461.0,
+              "journey_min": 19.900845,
+              "cv_squared": 0.06074136026884666,
+              "readiness_delay_s": 4845.992366,
+              "public_launch_delay_total_s": 1269650.0,
+              "holding_s_per_trip": 551.4885489999999,
+              "waiting_person_s": 18505126.0,
+              "onboard_person_s": 4523335.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 31758040.0,
+              "journey_min": 26.939162000000003,
+              "cv_squared": 0.07018055127561817,
+              "readiness_delay_s": 5192.622137,
+              "public_launch_delay_total_s": 1360467.0,
+              "holding_s_per_trip": 555.916031,
+              "waiting_person_s": 26959218.0,
+              "onboard_person_s": 4798822.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 34824987.0,
+              "journey_min": 29.401573000000003,
+              "cv_squared": 0.07869920493949506,
+              "readiness_delay_s": 5177.438932,
+              "public_launch_delay_total_s": 1356489.0,
+              "holding_s_per_trip": 559.4465650000001,
+              "waiting_person_s": 30088945.0,
+              "onboard_person_s": 4736042.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 18964,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 146403.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 15,
+          "mean_effects": {
+            "passenger_person_s": 3350305.5,
+            "journey_min": 2.836105250000001,
+            "cv_squared": -0.02064268930574425,
+            "readiness_delay_s": 1294.9856867500002,
+            "public_launch_delay_total_s": 339286.25,
+            "holding_s_per_trip": 254.6994275,
+            "waiting_person_s": 2242180.25,
+            "onboard_person_s": 1108125.25,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 3624095.0,
+              "journey_min": 3.031295,
+              "cv_squared": -0.01559417252561026,
+              "readiness_delay_s": 1178.347328,
+              "public_launch_delay_total_s": 308727.0,
+              "holding_s_per_trip": 258.759542,
+              "waiting_person_s": 2535250.0,
+              "onboard_person_s": 1088845.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2262794.0,
+              "journey_min": 1.9554720000000003,
+              "cv_squared": -0.03871457782628087,
+              "readiness_delay_s": 1263.206106,
+              "public_launch_delay_total_s": 330960.0,
+              "holding_s_per_trip": 254.427481,
+              "waiting_person_s": 1154892.0,
+              "onboard_person_s": 1107902.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3391833.0,
+              "journey_min": 2.8771650000000015,
+              "cv_squared": -0.01579115699967692,
+              "readiness_delay_s": 1389.332061,
+              "public_launch_delay_total_s": 364005.0,
+              "holding_s_per_trip": 252.557252,
+              "waiting_person_s": 2252320.0,
+              "onboard_person_s": 1139513.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 4122500.0,
+              "journey_min": 3.480489000000002,
+              "cv_squared": -0.012470849871408965,
+              "readiness_delay_s": 1349.057252,
+              "public_launch_delay_total_s": 353453.0,
+              "holding_s_per_trip": 253.053435,
+              "waiting_person_s": 3026259.0,
+              "onboard_person_s": 1096241.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 14131,
+            "decreases": 1536
+          },
+          "mean_executed_holding_change_s": 66731.25,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        }
+      ],
+      "evaluated_vectors": 16,
+      "nonzero_mean_feasible": 0,
+      "nonzero_mean_joint_improvements": 0,
+      "passenger_improvements": 1,
+      "passenger_improvements_with_cv_harm": 1,
+      "cv_improvements_with_passenger_harm": 3,
+      "vectors_with_both_increases_and_decreases": 11,
+      "solver_message": "Maximum number of iterations has been exceeded.",
+      "solver_generations": 1
+    },
+    "uniform": {
+      "selected": {
+        "index": 0,
+        "mean_effects": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0,
+          "holding_s_per_trip": 0.0,
+          "waiting_person_s": 0.0,
+          "onboard_person_s": 0.0,
+          "trips_unlaunched": 0.0,
+          "trips_incomplete": 0.0
+        },
+        "day_effects": [
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          },
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          },
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          },
+          {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0,
+            "trips_incomplete": 0
+          }
+        ],
+        "same_state_actions": {
+          "decisions": 20800,
+          "increases": 0,
+          "decreases": 0
+        },
+        "mean_executed_holding_change_s": 0.0,
+        "mean_feasible": true,
+        "mean_joint_improvement": false,
+        "per_day_joint_improvement": false
+      },
+      "vectors": [
+        {
+          "index": 0,
+          "mean_effects": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0,
+            "holding_s_per_trip": 0.0,
+            "waiting_person_s": 0.0,
+            "onboard_person_s": 0.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 0.0,
+              "journey_min": 0.0,
+              "cv_squared": 0.0,
+              "readiness_delay_s": 0.0,
+              "public_launch_delay_total_s": 0.0,
+              "holding_s_per_trip": 0.0,
+              "waiting_person_s": 0.0,
+              "onboard_person_s": 0.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 0,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 0.0,
+          "mean_feasible": true,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 1,
+          "mean_effects": {
+            "passenger_person_s": 1345708.75,
+            "journey_min": 1.1391559999999998,
+            "cv_squared": 0.007735114102191777,
+            "readiness_delay_s": 220.67748075,
+            "public_launch_delay_total_s": 57817.5,
+            "holding_s_per_trip": 113.13931299999999,
+            "waiting_person_s": 642595.0,
+            "onboard_person_s": 703113.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 1090762.0,
+              "journey_min": 0.9123439999999974,
+              "cv_squared": 0.004791798586992677,
+              "readiness_delay_s": 146.480916,
+              "public_launch_delay_total_s": 38378.0,
+              "holding_s_per_trip": 115.992367,
+              "waiting_person_s": 374350.0,
+              "onboard_person_s": 716412.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 715422.0,
+              "journey_min": 0.6182569999999998,
+              "cv_squared": -0.011302247549724226,
+              "readiness_delay_s": 148.13740400000003,
+              "public_launch_delay_total_s": 38812.0,
+              "holding_s_per_trip": 108.70229,
+              "waiting_person_s": 79793.0,
+              "onboard_person_s": 635629.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1595640.0,
+              "journey_min": 1.3535220000000017,
+              "cv_squared": 0.022887342519037714,
+              "readiness_delay_s": 248.68320599999998,
+              "public_launch_delay_total_s": 65155.0,
+              "holding_s_per_trip": 114.82824399999998,
+              "waiting_person_s": 844801.0,
+              "onboard_person_s": 750839.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1981011.0,
+              "journey_min": 1.6725010000000005,
+              "cv_squared": 0.014563562852460944,
+              "readiness_delay_s": 339.40839700000004,
+              "public_launch_delay_total_s": 88925.0,
+              "holding_s_per_trip": 113.03435099999999,
+              "waiting_person_s": 1271436.0,
+              "onboard_person_s": 709575.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 18543,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 29642.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 2,
+          "mean_effects": {
+            "passenger_person_s": -729242.75,
+            "journey_min": -0.6172167499999999,
+            "cv_squared": 0.09178322597138422,
+            "readiness_delay_s": -76.16125975,
+            "public_launch_delay_total_s": -19954.25,
+            "holding_s_per_trip": -127.45706100000001,
+            "waiting_person_s": 43425.5,
+            "onboard_person_s": -772668.25,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": -935818.0,
+              "journey_min": -0.782745000000002,
+              "cv_squared": 0.06044953092116696,
+              "readiness_delay_s": -70.034351,
+              "public_launch_delay_total_s": -18349.0,
+              "holding_s_per_trip": -123.96946499999999,
+              "waiting_person_s": -151394.0,
+              "onboard_person_s": -784424.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -554141.0,
+              "journey_min": -0.4788800000000002,
+              "cv_squared": 0.10642070799980569,
+              "readiness_delay_s": -66.763359,
+              "public_launch_delay_total_s": -17492.0,
+              "holding_s_per_trip": -132.72900800000002,
+              "waiting_person_s": 232900.0,
+              "onboard_person_s": -787041.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -616324.0,
+              "journey_min": -0.5228049999999982,
+              "cv_squared": 0.07330614925935286,
+              "readiness_delay_s": -76.717558,
+              "public_launch_delay_total_s": -20100.0,
+              "holding_s_per_trip": -127.385496,
+              "waiting_person_s": 161494.0,
+              "onboard_person_s": -777818.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -810688.0,
+              "journey_min": -0.6844369999999991,
+              "cv_squared": 0.12695651570521135,
+              "readiness_delay_s": -91.12977099999998,
+              "public_launch_delay_total_s": -23876.0,
+              "holding_s_per_trip": -125.744275,
+              "waiting_person_s": -69298.0,
+              "onboard_person_s": -741390.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 0,
+            "decreases": 10268
+          },
+          "mean_executed_holding_change_s": -33393.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 3,
+          "mean_effects": {
+            "passenger_person_s": 4011692.75,
+            "journey_min": 3.395975,
+            "cv_squared": -0.0016360696565883084,
+            "readiness_delay_s": 1272.00190825,
+            "public_launch_delay_total_s": 333264.5,
+            "holding_s_per_trip": 231.33587825,
+            "waiting_person_s": 2403915.25,
+            "onboard_person_s": 1607777.5,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 4074403.0,
+              "journey_min": 3.407944999999998,
+              "cv_squared": -0.002927738126252584,
+              "readiness_delay_s": 1156.251908,
+              "public_launch_delay_total_s": 302938.0,
+              "holding_s_per_trip": 235.896947,
+              "waiting_person_s": 2457195.0,
+              "onboard_person_s": 1617208.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2624835.0,
+              "journey_min": 2.2683430000000016,
+              "cv_squared": -0.01263537504718723,
+              "readiness_delay_s": 1166.061068,
+              "public_launch_delay_total_s": 305508.0,
+              "holding_s_per_trip": 226.29771,
+              "waiting_person_s": 1081447.0,
+              "onboard_person_s": 1543388.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3954425.0,
+              "journey_min": 3.3543909999999997,
+              "cv_squared": -0.0011909910852439115,
+              "readiness_delay_s": 1329.076336,
+              "public_launch_delay_total_s": 348218.0,
+              "holding_s_per_trip": 231.58397000000002,
+              "waiting_person_s": 2305449.0,
+              "onboard_person_s": 1648976.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 5393108.0,
+              "journey_min": 4.553221000000001,
+              "cv_squared": 0.010209825632330492,
+              "readiness_delay_s": 1436.6183210000002,
+              "public_launch_delay_total_s": 376394.0,
+              "holding_s_per_trip": 231.56488599999997,
+              "waiting_person_s": 3771570.0,
+              "onboard_person_s": 1621538.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 20271,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 60610.0,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 4,
+          "mean_effects": {
+            "passenger_person_s": 27911037.25,
+            "journey_min": 23.6314625,
+            "cv_squared": 0.019246729191184947,
+            "readiness_delay_s": 4861.93129775,
+            "public_launch_delay_total_s": 1273826.0,
+            "holding_s_per_trip": 579.341603,
+            "waiting_person_s": 23713641.75,
+            "onboard_person_s": 4197395.5,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 30738167.0,
+              "journey_min": 25.710266999999998,
+              "cv_squared": 0.0302568780944747,
+              "readiness_delay_s": 4825.522901,
+              "public_launch_delay_total_s": 1264287.0,
+              "holding_s_per_trip": 585.7824430000001,
+              "waiting_person_s": 26509719.0,
+              "onboard_person_s": 4228448.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 20016589.0,
+              "journey_min": 17.298030999999998,
+              "cv_squared": -0.01044181240002022,
+              "readiness_delay_s": 4633.091603,
+              "public_launch_delay_total_s": 1213870.0,
+              "holding_s_per_trip": 571.927481,
+              "waiting_person_s": 15993415.0,
+              "onboard_person_s": 4023174.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 27694455.0,
+              "journey_min": 23.492175000000003,
+              "cv_squared": 0.01622740728052268,
+              "readiness_delay_s": 4892.572519,
+              "public_launch_delay_total_s": 1281854.0,
+              "holding_s_per_trip": 576.6984729999999,
+              "waiting_person_s": 23457793.0,
+              "onboard_person_s": 4236662.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 33194938.0,
+              "journey_min": 28.025377000000002,
+              "cv_squared": 0.04094444378976262,
+              "readiness_delay_s": 5096.538168,
+              "public_launch_delay_total_s": 1335293.0,
+              "holding_s_per_trip": 582.958015,
+              "waiting_person_s": 28893640.0,
+              "onboard_person_s": 4301298.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 19589,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 151787.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 5,
+          "mean_effects": {
+            "passenger_person_s": 11993740.5,
+            "journey_min": 10.143173,
+            "cv_squared": 0.0029686391773295386,
+            "readiness_delay_s": 2856.3711829999997,
+            "public_launch_delay_total_s": 748369.25,
+            "holding_s_per_trip": 387.83874075,
+            "waiting_person_s": 9186417.5,
+            "onboard_person_s": 2807323.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 14298603.0,
+              "journey_min": 11.959754,
+              "cv_squared": 0.018052074599863292,
+              "readiness_delay_s": 2856.419847,
+              "public_launch_delay_total_s": 748382.0,
+              "holding_s_per_trip": 401.04961899999995,
+              "waiting_person_s": 11422452.0,
+              "onboard_person_s": 2876151.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 6815255.0,
+              "journey_min": 5.88964,
+              "cv_squared": -0.015667465192924106,
+              "readiness_delay_s": 2794.374045,
+              "public_launch_delay_total_s": 732126.0,
+              "holding_s_per_trip": 383.187023,
+              "waiting_person_s": 4059889.0,
+              "onboard_person_s": 2755366.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 11352286.0,
+              "journey_min": 9.629721,
+              "cv_squared": 0.003915933787009322,
+              "readiness_delay_s": 2867.290076,
+              "public_launch_delay_total_s": 751230.0,
+              "holding_s_per_trip": 384.618321,
+              "waiting_person_s": 8527423.0,
+              "onboard_person_s": 2824863.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 15508818.0,
+              "journey_min": 13.093577,
+              "cv_squared": 0.0055740135153696455,
+              "readiness_delay_s": 2907.400764,
+              "public_launch_delay_total_s": 761739.0,
+              "holding_s_per_trip": 382.5,
+              "waiting_person_s": 12735906.0,
+              "onboard_person_s": 2772912.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 20162,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 101613.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 6,
+          "mean_effects": {
+            "passenger_person_s": 27994997.5,
+            "journey_min": 23.702408500000004,
+            "cv_squared": 0.02761706711323362,
+            "readiness_delay_s": 4872.51526725,
+            "public_launch_delay_total_s": 1276599.0,
+            "holding_s_per_trip": 580.1574427500001,
+            "waiting_person_s": 23794118.75,
+            "onboard_person_s": 4200878.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 30975659.0,
+              "journey_min": 25.908911999999997,
+              "cv_squared": 0.05961127815872821,
+              "readiness_delay_s": 4857.240458,
+              "public_launch_delay_total_s": 1272597.0,
+              "holding_s_per_trip": 585.038168,
+              "waiting_person_s": 26736440.0,
+              "onboard_person_s": 4239219.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 20120294.0,
+              "journey_min": 17.387651,
+              "cv_squared": -0.009501185358472164,
+              "readiness_delay_s": 4647.591603,
+              "public_launch_delay_total_s": 1217669.0,
+              "holding_s_per_trip": 573.8167940000001,
+              "waiting_person_s": 16094401.0,
+              "onboard_person_s": 4025893.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 27704760.0,
+              "journey_min": 23.500916000000004,
+              "cv_squared": 0.015459329808835277,
+              "readiness_delay_s": 4890.557252,
+              "public_launch_delay_total_s": 1281326.0,
+              "holding_s_per_trip": 576.8702290000001,
+              "waiting_person_s": 23470203.0,
+              "onboard_person_s": 4234557.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 33179277.0,
+              "journey_min": 28.012155000000003,
+              "cv_squared": 0.04489884584384316,
+              "readiness_delay_s": 5094.671756,
+              "public_launch_delay_total_s": 1334804.0,
+              "holding_s_per_trip": 584.90458,
+              "waiting_person_s": 28875431.0,
+              "onboard_person_s": 4303846.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 19476,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 152001.25,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 7,
+          "mean_effects": {
+            "passenger_person_s": 7764886.0,
+            "journey_min": 6.56674075,
+            "cv_squared": -0.0026891612605466804,
+            "readiness_delay_s": 2160.6030530000003,
+            "public_launch_delay_total_s": 566078.0,
+            "holding_s_per_trip": 319.47996175000003,
+            "waiting_person_s": 5463487.25,
+            "onboard_person_s": 2301398.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 9060655.0,
+              "journey_min": 7.578586999999999,
+              "cv_squared": 0.011397981973004463,
+              "readiness_delay_s": 2175.637404,
+              "public_launch_delay_total_s": 570017.0,
+              "holding_s_per_trip": 328.244275,
+              "waiting_person_s": 6702788.0,
+              "onboard_person_s": 2357867.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 4208190.0,
+              "journey_min": 3.636654,
+              "cv_squared": -0.028237273451620644,
+              "readiness_delay_s": 2002.099236,
+              "public_launch_delay_total_s": 524550.0,
+              "holding_s_per_trip": 312.15648799999997,
+              "waiting_person_s": 1994079.0,
+              "onboard_person_s": 2214111.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 7915029.0,
+              "journey_min": 6.714024000000002,
+              "cv_squared": 0.007098686672129116,
+              "readiness_delay_s": 2332.248091,
+              "public_launch_delay_total_s": 611049.0,
+              "holding_s_per_trip": 323.645038,
+              "waiting_person_s": 5526922.0,
+              "onboard_person_s": 2388107.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 9875670.0,
+              "journey_min": 8.337698,
+              "cv_squared": -0.001016040235699657,
+              "readiness_delay_s": 2132.427481,
+              "public_launch_delay_total_s": 558696.0,
+              "holding_s_per_trip": 313.874046,
+              "waiting_person_s": 7630160.0,
+              "onboard_person_s": 2245510.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 20279,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 83703.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 8,
+          "mean_effects": {
+            "passenger_person_s": 1107014.5,
+            "journey_min": 0.9369589999999999,
+            "cv_squared": 0.007634617942731582,
+            "readiness_delay_s": 162.47328225,
+            "public_launch_delay_total_s": 42568.0,
+            "holding_s_per_trip": 100.80629775,
+            "waiting_person_s": 487146.75,
+            "onboard_person_s": 619867.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 1033288.0,
+              "journey_min": 0.8642709999999987,
+              "cv_squared": 0.007399092219580801,
+              "readiness_delay_s": 119.274809,
+              "public_launch_delay_total_s": 31250.0,
+              "holding_s_per_trip": 102.53816800000001,
+              "waiting_person_s": 385998.0,
+              "onboard_person_s": 647290.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 592320.0,
+              "journey_min": 0.5118739999999988,
+              "cv_squared": -0.00964457183240236,
+              "readiness_delay_s": 120.17175500000002,
+              "public_launch_delay_total_s": 31485.0,
+              "holding_s_per_trip": 97.88167899999996,
+              "waiting_person_s": 13000.0,
+              "onboard_person_s": 579320.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1420482.0,
+              "journey_min": 1.2049420000000026,
+              "cv_squared": 0.029958328088750867,
+              "readiness_delay_s": 199.087786,
+              "public_launch_delay_total_s": 52161.0,
+              "holding_s_per_trip": 105.82061099999999,
+              "waiting_person_s": 745752.0,
+              "onboard_person_s": 674730.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1381968.0,
+              "journey_min": 1.1667489999999994,
+              "cv_squared": 0.002825623294997019,
+              "readiness_delay_s": 211.358779,
+              "public_launch_delay_total_s": 55376.0,
+              "holding_s_per_trip": 96.984733,
+              "waiting_person_s": 803837.0,
+              "onboard_person_s": 578131.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 16844,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 26411.25,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 9,
+          "mean_effects": {
+            "passenger_person_s": 25315.5,
+            "journey_min": 0.021492750000000616,
+            "cv_squared": -0.000228928869637662,
+            "readiness_delay_s": 3.060114500000001,
+            "public_launch_delay_total_s": 801.75,
+            "holding_s_per_trip": 2.681297749999999,
+            "waiting_person_s": 7625.5,
+            "onboard_person_s": 17690.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 20406.0,
+              "journey_min": 0.017067999999998307,
+              "cv_squared": -0.0005101334024276566,
+              "readiness_delay_s": 1.8435109999999924,
+              "public_launch_delay_total_s": 483.0,
+              "holding_s_per_trip": 2.6717560000000162,
+              "waiting_person_s": 4393.0,
+              "onboard_person_s": 16013.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 22974.0,
+              "journey_min": 0.019854000000000482,
+              "cv_squared": -0.0004503476121589106,
+              "readiness_delay_s": 1.6106870000000129,
+              "public_launch_delay_total_s": 422.0,
+              "holding_s_per_trip": 2.251907999999986,
+              "waiting_person_s": 10672.0,
+              "onboard_person_s": 12302.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 45484.0,
+              "journey_min": 0.03858200000000167,
+              "cv_squared": 0.00043162982094046426,
+              "readiness_delay_s": 6.519083999999992,
+              "public_launch_delay_total_s": 1708.0,
+              "holding_s_per_trip": 3.4732830000000092,
+              "waiting_person_s": 15929.0,
+              "onboard_person_s": 29555.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 12398.0,
+              "journey_min": 0.010467000000002002,
+              "cv_squared": -0.00038686428490454505,
+              "readiness_delay_s": 2.2671760000000063,
+              "public_launch_delay_total_s": 594.0,
+              "holding_s_per_trip": 2.3282439999999838,
+              "waiting_person_s": -492.0,
+              "onboard_person_s": 12890.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 400,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 702.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 10,
+          "mean_effects": {
+            "passenger_person_s": 3823546.25,
+            "journey_min": 3.2369425000000005,
+            "cv_squared": 0.0010028756070259506,
+            "readiness_delay_s": 1219.7213737499999,
+            "public_launch_delay_total_s": 319567.0,
+            "holding_s_per_trip": 226.27385475,
+            "waiting_person_s": 2269214.5,
+            "onboard_person_s": 1554331.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 3803938.0,
+              "journey_min": 3.1817209999999996,
+              "cv_squared": 0.0011670984590278488,
+              "readiness_delay_s": 1095.358778,
+              "public_launch_delay_total_s": 286984.0,
+              "holding_s_per_trip": 229.25572499999998,
+              "waiting_person_s": 2257957.0,
+              "onboard_person_s": 1545981.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2548980.0,
+              "journey_min": 2.2027900000000002,
+              "cv_squared": -0.011097965989384978,
+              "readiness_delay_s": 1150.057251,
+              "public_launch_delay_total_s": 301315.0,
+              "holding_s_per_trip": 224.007633,
+              "waiting_person_s": 1022956.0,
+              "onboard_person_s": 1526024.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3614984.0,
+              "journey_min": 3.0664560000000023,
+              "cv_squared": 0.002082129691028882,
+              "readiness_delay_s": 1222.965649,
+              "public_launch_delay_total_s": 320417.0,
+              "holding_s_per_trip": 224.44656500000002,
+              "waiting_person_s": 2057255.0,
+              "onboard_person_s": 1557729.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 5326283.0,
+              "journey_min": 4.496803,
+              "cv_squared": 0.01186024026743205,
+              "readiness_delay_s": 1410.503817,
+              "public_launch_delay_total_s": 369552.0,
+              "holding_s_per_trip": 227.38549600000002,
+              "waiting_person_s": 3738690.0,
+              "onboard_person_s": 1587593.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 20185,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 59283.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 11,
+          "mean_effects": {
+            "passenger_person_s": 3229214.75,
+            "journey_min": 2.7332255000000005,
+            "cv_squared": 0.015761473926873756,
+            "readiness_delay_s": 954.49141225,
+            "public_launch_delay_total_s": 250076.75,
+            "holding_s_per_trip": 194.971374,
+            "waiting_person_s": 1888153.5,
+            "onboard_person_s": 1341061.25,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 3086774.0,
+              "journey_min": 2.581864999999997,
+              "cv_squared": 0.016845173576699658,
+              "readiness_delay_s": 892.3167940000001,
+              "public_launch_delay_total_s": 233787.0,
+              "holding_s_per_trip": 199.427481,
+              "waiting_person_s": 1730282.0,
+              "onboard_person_s": 1356492.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1943551.0,
+              "journey_min": 1.6795870000000015,
+              "cv_squared": 0.005861379946454651,
+              "readiness_delay_s": 727.40458,
+              "public_launch_delay_total_s": 190580.0,
+              "holding_s_per_trip": 188.35877799999997,
+              "waiting_person_s": 691785.0,
+              "onboard_person_s": 1251766.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3281410.0,
+              "journey_min": 2.7834980000000016,
+              "cv_squared": 0.01873716273576457,
+              "readiness_delay_s": 1010.961832,
+              "public_launch_delay_total_s": 264872.0,
+              "holding_s_per_trip": 197.709924,
+              "waiting_person_s": 1937985.0,
+              "onboard_person_s": 1343425.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 4605124.0,
+              "journey_min": 3.887952000000002,
+              "cv_squared": 0.021602179448576155,
+              "readiness_delay_s": 1187.282443,
+              "public_launch_delay_total_s": 311068.0,
+              "holding_s_per_trip": 194.389313,
+              "waiting_person_s": 3192562.0,
+              "onboard_person_s": 1412562.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 19536,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 51082.5,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 12,
+          "mean_effects": {
+            "passenger_person_s": -523283.0,
+            "journey_min": -0.44286999999999965,
+            "cv_squared": 0.033309415917330644,
+            "readiness_delay_s": -54.795801749999995,
+            "public_launch_delay_total_s": -14356.5,
+            "holding_s_per_trip": -74.82347324999999,
+            "waiting_person_s": -64108.25,
+            "onboard_person_s": -459174.75,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": -637022.0,
+              "journey_min": -0.5328230000000005,
+              "cv_squared": 0.017078094074944185,
+              "readiness_delay_s": -53.129771000000005,
+              "public_launch_delay_total_s": -13920.0,
+              "holding_s_per_trip": -74.408397,
+              "waiting_person_s": -153984.0,
+              "onboard_person_s": -483038.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -376273.0,
+              "journey_min": -0.3251690000000007,
+              "cv_squared": 0.049656218886945463,
+              "readiness_delay_s": -45.22900799999999,
+              "public_launch_delay_total_s": -11850.0,
+              "holding_s_per_trip": -78.03435100000002,
+              "waiting_person_s": 93960.0,
+              "onboard_person_s": -470233.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -454746.0,
+              "journey_min": -0.385743999999999,
+              "cv_squared": 0.02078161725489485,
+              "readiness_delay_s": -56.15648900000001,
+              "public_launch_delay_total_s": -14713.0,
+              "holding_s_per_trip": -74.465649,
+              "waiting_person_s": -13606.0,
+              "onboard_person_s": -441140.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -625091.0,
+              "journey_min": -0.5277439999999984,
+              "cv_squared": 0.04572173345253807,
+              "readiness_delay_s": -64.66793899999999,
+              "public_launch_delay_total_s": -16943.0,
+              "holding_s_per_trip": -72.385496,
+              "waiting_person_s": -182803.0,
+              "onboard_person_s": -442288.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 0,
+            "decreases": 10775
+          },
+          "mean_executed_holding_change_s": -19603.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 13,
+          "mean_effects": {
+            "passenger_person_s": 3482426.25,
+            "journey_min": 2.9487275000000004,
+            "cv_squared": 0.006281761491476655,
+            "readiness_delay_s": 1076.6975187500002,
+            "public_launch_delay_total_s": 282094.75,
+            "holding_s_per_trip": 208.03912225,
+            "waiting_person_s": 2044238.75,
+            "onboard_person_s": 1438187.5,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 3260361.0,
+              "journey_min": 2.7270579999999995,
+              "cv_squared": 0.0016142997558583408,
+              "readiness_delay_s": 979.251908,
+              "public_launch_delay_total_s": 256564.0,
+              "holding_s_per_trip": 210.38168000000002,
+              "waiting_person_s": 1838270.0,
+              "onboard_person_s": 1422091.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2316279.0,
+              "journey_min": 2.0016929999999995,
+              "cv_squared": -0.005405038386181088,
+              "readiness_delay_s": 915.1374040000001,
+              "public_launch_delay_total_s": 239766.0,
+              "holding_s_per_trip": 202.919847,
+              "waiting_person_s": 953716.0,
+              "onboard_person_s": 1362563.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 3489911.0,
+              "journey_min": 2.9603610000000025,
+              "cv_squared": 0.0030571354526706535,
+              "readiness_delay_s": 1118.7290070000001,
+              "public_launch_delay_total_s": 293107.0,
+              "holding_s_per_trip": 206.354962,
+              "waiting_person_s": 2014092.0,
+              "onboard_person_s": 1475819.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 4863154.0,
+              "journey_min": 4.105798,
+              "cv_squared": 0.025860649143558713,
+              "readiness_delay_s": 1293.6717560000002,
+              "public_launch_delay_total_s": 338942.0,
+              "holding_s_per_trip": 212.49999999999997,
+              "waiting_person_s": 3370877.0,
+              "onboard_person_s": 1492277.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 19864,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 54506.25,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 14,
+          "mean_effects": {
+            "passenger_person_s": 1707770.5,
+            "journey_min": 1.4448730000000003,
+            "cv_squared": 0.005930713847588415,
+            "readiness_delay_s": 392.390267,
+            "public_launch_delay_total_s": 102806.25,
+            "holding_s_per_trip": 132.14217574999998,
+            "waiting_person_s": 835215.0,
+            "onboard_person_s": 872555.5,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": 1450279.0,
+              "journey_min": 1.2130539999999996,
+              "cv_squared": 0.00650800324161336,
+              "readiness_delay_s": 309.148855,
+              "public_launch_delay_total_s": 80997.0,
+              "holding_s_per_trip": 134.637405,
+              "waiting_person_s": 535280.0,
+              "onboard_person_s": 914999.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 814887.0,
+              "journey_min": 0.7042129999999993,
+              "cv_squared": -0.018054586712011753,
+              "readiness_delay_s": 207.679389,
+              "public_launch_delay_total_s": 54412.0,
+              "holding_s_per_trip": 125.55343499999998,
+              "waiting_person_s": 56626.0,
+              "onboard_person_s": 758261.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 1845643.0,
+              "journey_min": 1.5655900000000003,
+              "cv_squared": 0.016779611629586876,
+              "readiness_delay_s": 456.58396899999997,
+              "public_launch_delay_total_s": 119625.0,
+              "holding_s_per_trip": 135.70610699999997,
+              "waiting_person_s": 920020.0,
+              "onboard_person_s": 925623.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": 2720273.0,
+              "journey_min": 2.296635000000002,
+              "cv_squared": 0.018489827231165178,
+              "readiness_delay_s": 596.148855,
+              "public_launch_delay_total_s": 156191.0,
+              "holding_s_per_trip": 132.671756,
+              "waiting_person_s": 1828934.0,
+              "onboard_person_s": 891339.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 19457,
+            "decreases": 0
+          },
+          "mean_executed_holding_change_s": 34621.25,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        },
+        {
+          "index": 15,
+          "mean_effects": {
+            "passenger_person_s": -451147.75,
+            "journey_min": -0.38185124999999953,
+            "cv_squared": 0.02775167042547739,
+            "readiness_delay_s": -47.423664249999995,
+            "public_launch_delay_total_s": -12425.0,
+            "holding_s_per_trip": -62.80057275,
+            "waiting_person_s": -66160.75,
+            "onboard_person_s": -384987.0,
+            "trips_unlaunched": 0.0,
+            "trips_incomplete": 0.0
+          },
+          "day_effects": [
+            {
+              "passenger_person_s": -522530.0,
+              "journey_min": -0.4370590000000014,
+              "cv_squared": 0.0152762657182351,
+              "readiness_delay_s": -43.847328000000005,
+              "public_launch_delay_total_s": -11488.0,
+              "holding_s_per_trip": -61.27862599999999,
+              "waiting_person_s": -133673.0,
+              "onboard_person_s": -388857.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -324260.0,
+              "journey_min": -0.2802199999999999,
+              "cv_squared": 0.03970744078695469,
+              "readiness_delay_s": -39.23664199999999,
+              "public_launch_delay_total_s": -10280.0,
+              "holding_s_per_trip": -65.17175600000002,
+              "waiting_person_s": 75745.0,
+              "onboard_person_s": -400005.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -372023.0,
+              "journey_min": -0.31557299999999877,
+              "cv_squared": 0.02028398727526614,
+              "readiness_delay_s": -47.664122000000006,
+              "public_launch_delay_total_s": -12488.0,
+              "holding_s_per_trip": -63.244275,
+              "waiting_person_s": -5577.0,
+              "onboard_person_s": -366446.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            },
+            {
+              "passenger_person_s": -585778.0,
+              "journey_min": -0.494552999999998,
+              "cv_squared": 0.03573898792145363,
+              "readiness_delay_s": -58.94656499999999,
+              "public_launch_delay_total_s": -15444.0,
+              "holding_s_per_trip": -61.507633999999996,
+              "waiting_person_s": -201138.0,
+              "onboard_person_s": -384640.0,
+              "trips_unlaunched": 0,
+              "trips_incomplete": 0
+            }
+          ],
+          "same_state_actions": {
+            "decisions": 20800,
+            "increases": 0,
+            "decreases": 10665
+          },
+          "mean_executed_holding_change_s": -16453.75,
+          "mean_feasible": false,
+          "mean_joint_improvement": false,
+          "per_day_joint_improvement": false
+        }
+      ],
+      "evaluated_vectors": 16,
+      "nonzero_mean_feasible": 0,
+      "nonzero_mean_joint_improvements": 0,
+      "passenger_improvements": 3,
+      "passenger_improvements_with_cv_harm": 3,
+      "cv_improvements_with_passenger_harm": 3,
+      "vectors_with_both_increases_and_decreases": 0,
+      "solver_message": "Maximum number of iterations has been exceeded.",
+      "solver_generations": 1
+    }
+  },
+  "same_bias_initial_pairs": [
+    {
+      "index": 1,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": 2224286.75,
+        "journey_min": 1.8831422500000015,
+        "cv_squared": -0.02488285481875069,
+        "readiness_delay_s": 1112.5124047499999,
+        "public_launch_delay_total_s": 291478.25,
+        "holding_s_per_trip": 132.75763375000002,
+        "waiting_person_s": 1665363.5,
+        "onboard_person_s": 558923.25,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    },
+    {
+      "index": 2,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": -60371.5,
+        "journey_min": -0.0513094999999999,
+        "cv_squared": 0.011188800413334588,
+        "readiness_delay_s": -3.125,
+        "public_launch_delay_total_s": -818.75,
+        "holding_s_per_trip": -3.5734732500000064,
+        "waiting_person_s": 18155.25,
+        "onboard_person_s": -78526.75,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    },
+    {
+      "index": 3,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": -3325339.25,
+        "journey_min": -2.813566,
+        "cv_squared": 0.01588257602637208,
+        "readiness_delay_s": -1250.79484725,
+        "public_launch_delay_total_s": -327708.25,
+        "holding_s_per_trip": -171.45992425,
+        "waiting_person_s": -2227095.25,
+        "onboard_person_s": -1098244.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    },
+    {
+      "index": 4,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": -9665238.0,
+        "journey_min": -8.184836250000004,
+        "cv_squared": 1.9078224511713648,
+        "readiness_delay_s": -2210.1116415,
+        "public_launch_delay_total_s": -579049.25,
+        "holding_s_per_trip": -250.93034349999994,
+        "waiting_person_s": -8315020.5,
+        "onboard_person_s": -1350217.5,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    },
+    {
+      "index": 5,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": 10566388.0,
+        "journey_min": 8.950851499999999,
+        "cv_squared": 1.271818026186651,
+        "readiness_delay_s": 578.7003820000004,
+        "public_launch_delay_total_s": 151619.5,
+        "holding_s_per_trip": -18.611641499999962,
+        "waiting_person_s": 9803697.0,
+        "onboard_person_s": 762691.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    },
+    {
+      "index": 6,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": -20948520.5,
+        "journey_min": -17.728269250000004,
+        "cv_squared": 1.2874137353591513,
+        "readiness_delay_s": -4375.576336,
+        "public_launch_delay_total_s": -1146401.0,
+        "holding_s_per_trip": -447.71469450000006,
+        "waiting_person_s": -17880342.75,
+        "onboard_person_s": -3068177.75,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    },
+    {
+      "index": 7,
+      "same_initial_bias": true,
+      "conditional_minus_uniform": {
+        "passenger_person_s": 11342116.0,
+        "journey_min": 9.5994785,
+        "cv_squared": 0.007117766377919773,
+        "readiness_delay_s": 1540.2032444999995,
+        "public_launch_delay_total_s": 403533.25,
+        "holding_s_per_trip": 91.80343525,
+        "waiting_person_s": 9797938.75,
+        "onboard_person_s": 1544177.25,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "holding_amount_matched": false
+    }
+  ],
+  "public_total_over_readiness_mean_range": [
+    261.9999971530179,
+    262.0000032685311
+  ],
+  "confirmation_eligible": false,
+  "confirmation_started": false,
+  "new_rollouts": 0,
+  "new_model_fits": 0,
+  "main_policy_changed": false,
+  "interpretation": "Selected zero vectors are literal baseline reuse, not estimated equivalence. Nonzero vectors and same-bias pairs are descriptive development results, not new winners. Same-state changes compare the original bilateral rule at each visited state; they do not match whole trajectories or total holding. No actor-axis inference or post-selection CI."
+}
+

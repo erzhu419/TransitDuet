@@ -60,3 +60,36 @@ no auto-requeue. Final-source8 tests also pass. At the launch snapshot,one of
 three engineering paths has started(neutral cached replay),none is accepted yet.
 Only passing all three releases the two four-worker searches and aggregation
 within this same job. Confirmation remains closed;no efficacy result yet.
+
+Outcome:development t211591 exited0,exactly123 starts/results;all120 nonzero
+policy paths cleared service with zero unexecuted holding. High/manual read-only
+review t211604(source2d12cf52c0) exited0 and reproduced the frozen cost summaries.
+Both families measured16 vectors and retained vector0,the unchanged baseline.
+Each had zero nonzero mean-feasible candidates,so failure precedes the stricter
+every-development-day gate. Conditional had1 passenger-improving candidate;
+uniform had3;all worsened mean CV2. Each family had3 CV2-improving candidates,
+all with higher passenger cost. Eleven conditional vectors increased and reduced
+actions relative to the bilateral rule at their own visited states;uniform had0.
+
+Same-initial-bias vector2 is diagnostic,not a newly selected candidate. Four-day
+means below are candidate minus fixed+bilateral025:
+
+| Tested policy | Journey min | Actual CV2 | Readiness s | Public delay,total s | Holding s/trip |
+| --- | --- | --- | --- | --- | --- |
+| Conditional v2 | -0.668526 | +0.102972 | -79.2863 | -20773.00 | -131.0305 |
+| Uniform v2 | -0.617217 | +0.091783 | -76.1613 | -19954.25 | -127.4571 |
+
+Conditional v2 made10156 decreases and zero increases over20800 decisions.
+Its additional journey saving versus uniform is0.05131min,but holding also falls
+3.5735s/trip and CV2 increases0.011189. This is not holding-amount-matched evidence
+of useful state information. Its waiting cost rises61580.75 person-s while onboard
+cost falls851195.00 person-s. The service/regularity tradeoff remains.
+
+Decision:no independent confirmation,no rescue sweep or main switch;close this
+bounded policy family. Retain V107 and fixed+bilateral as references. Review:
+results_freqduet/protocol_v6_v268_day_policy_search/review/summary.json.
+Limitations:four consumed development days,one frozen runtime seed,one generation
+with16 vectors per family,not optimizer convergence. The iteration-limit message
+is the registered budget stop,not a task failure. In this fixed-schedule panel,
+public total delay is approximately262 times mean readiness delay;the two columns
+are not independent evidence. No claim that conditional control is impossible.
