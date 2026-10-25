@@ -31,3 +31,13 @@ local artifacts are small acceptance summaries. Synthetic checks consume0 slots.
 The budget lives under V270/engineering;V271's output is a direct child of
 results_freqduet,as required by the existing verified-runtime loader. This does
 not create a fresh two-slot budget in the V271 output directory.
+
+Admission83d681d0ae:high/manual t211631 passed7 synthetic checks;t211632
+reproduced all5200 native queries/commands and cached actions,timing,endpoints.
+Reference wall76.43s,callback mean1.43ms/p951.61ms. The second slot,t211633,
+failed at its first snapshot:the bridge incorrectly equated max_agent_num with
+physical fleet size. Native max_agent_num is a policy buffer of at least30;
+the physical fleet remains12. The regression fixture now uses that native layout.
+Both physical slots are consumed. No-op equivalence,its endpoint comparison and
+solver latency remain UNCONFIRMED;the failed partial path is not a zero effect.
+Only a synthetic correction check is permitted now;no physical retry or matrix.

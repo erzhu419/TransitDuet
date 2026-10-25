@@ -71,7 +71,8 @@ def native_routes(env):
 
 def snapshot(env, prefix, routes, current_bus, legal, native_action, pending, masks):
     captured = capture_fleet(env)
-    assert captured['buses'] == len(captured['fleet']) == 12
+    # max_agent_num is a padded policy buffer (at least 30), not fleet stock.
+    assert len(captured['fleet']) == len({r['bus_id'] for r in captured['fleet']}) == 12
     rows = {r['bus_id']: r for r in captured['fleet']}
     indices = {d: {s.station: i for i, s in enumerate(route)} for d, route in routes.items()}
     cursors = {}

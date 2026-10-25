@@ -17,7 +17,7 @@ def fake_env():
             dwelling_time=0., holding_time=0., last_station=stations[1], next_station=stations[2],
             last_board_count=0, last_board_time=150., next_station_dis=500., current_route=NS(distance=500.),
             episode_hold_vehicle_seconds=20.))
-    return NS(current_time=200., max_agent_num=12, bus_all=buses, timetables=[], stations=stations,
+    return NS(current_time=200., max_agent_num=30, bus_all=buses, timetables=[], stations=stations,
               routes=[NS(distance=500.)]*6, protocol=NS(evaluation_end_time_s=5000.))
 
 
@@ -37,6 +37,7 @@ class NativeBridgeTests(unittest.TestCase):
         self.assertEqual(env.bus_all[1].dwelling_time, 0.)
         self.assertEqual(own.executed_h_s, 20.)
         self.assertEqual(len(value.vehicles), 12)
+        self.assertEqual(env.max_agent_num, 30)
 
     def test_zero_pending_uses_native_transition_tick(self):
         env = fake_env()
