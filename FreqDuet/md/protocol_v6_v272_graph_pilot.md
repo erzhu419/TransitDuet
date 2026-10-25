@@ -42,8 +42,27 @@ pass permits proposing independent confirmation,not switching the main policy.
 Execution source07e565545a:server task t211639 passed7 synthetic checks,exit0.
 Matrix reference p0 in t211640 exactly reproduced V271,including5200 requests
 and acknowledgments,38930s executed H and all query/action/timing endpoints.
-Eight high/manual units t211640-t211647 cover all12 reserved paths. Results and
-the joint gate remain pending;the independent confirmation bank stays closed.
-All8 units started on node004/005 with no failure record at dispatch inspection.
+Eight high/manual units t211640-t211647 completed all12 reserved paths,exit0,
+without failed/replacement paths. No unlaunched or incomplete trips remained.
 Bridge progress retains its V271_NOOP_QUERIES label;the V272 wrapper executes
 the current selected action through the native policy output and checks its receipt.
+
+## Result And Decision
+
+High/manual read-only analysis t211720,node004,exit0,source9ef6acdd3f used the
+original07e565545a aggregate and10000-draw paired day bootstrap. Both gates failed;
+full intervals and four-day values are in summary/results.json.
+
+APC versus bilateral:passenger+832 person-s/day,CI[-5789.75,11855.25];readiness
+and public delay worsened on all4 days,total delay+122.5s/day,CI[70,204.25].
+Versus homogeneous cost:passenger-7385.75 person-s/day,CI[-16053.25,-89],but CV2
+increased on all4 days,mean+0.0002474,CI[0.0000990,0.0003666].
+APC changed368/20800 requests(156 up,212 down),net+255s in the same visited
+states. Actual H was+206.25s/day versus bilateral;fallback92.51%(homogeneous
+92.13%),mainly capacity censoring. Details:summary/executed_diagnostics.json.
+
+Decision:close this frozen candidate,no confirmation or outcome-driven retuning.
+Retain the partial APC load-cost signal and strong rule comparator. Any next
+method needs a separate design and new development data;main/training stay frozen.
+Limitations:4 consumed days,one actor,no independent futures. Same-state H
+accounting does not identify the cause of the actual full-day constraint losses.

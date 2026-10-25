@@ -1,0 +1,385 @@
+{
+  "source": "07e565545a",
+  "status": "twelve_unique_development_paths_complete",
+  "effects": {
+    "apc_vs_fixed360_bilateral025": {
+      "metrics": {
+        "passenger_person_s": {
+          "mean": 832.0,
+          "ci95": [
+            -5789.75,
+            11855.25
+          ],
+          "by_day": {
+            "2071001": -6721.0,
+            "2071002": 17188.0,
+            "2071003": -2996.0,
+            "2071004": -4143.0
+          }
+        },
+        "journey_min": {
+          "mean": 0.0007979999999996323,
+          "ci95": [
+            -0.004852000000001411,
+            0.010265999999999664
+          ],
+          "by_day": {
+            "2071001": -0.005622000000002458,
+            "2071002": 0.0148539999999997,
+            "2071003": -0.002541999999998268,
+            "2071004": -0.003498000000000445
+          }
+        },
+        "cv_squared": {
+          "mean": -0.00012649281623213632,
+          "ci95": [
+            -0.0007949061003459448,
+            0.0005419204678816722
+          ],
+          "by_day": {
+            "2071001": -0.0005371601472171361,
+            "2071002": 0.000876342367113106,
+            "2071003": -0.0010526520534747535,
+            "2071004": 0.0002074985686502384
+          }
+        },
+        "readiness_delay_s": {
+          "mean": 0.46755725000000226,
+          "ci95": [
+            0.26717549999999335,
+            0.7795800000000064
+          ],
+          "by_day": {
+            "2071001": 0.2900759999999991,
+            "2071002": 0.9427480000000088,
+            "2071003": 0.24427499999998759,
+            "2071004": 0.3931300000000135
+          }
+        },
+        "public_launch_delay_total_s": {
+          "mean": 122.5,
+          "ci95": [
+            70.0,
+            204.25
+          ],
+          "by_day": {
+            "2071001": 76.0,
+            "2071002": 247.0,
+            "2071003": 64.0,
+            "2071004": 103.0
+          }
+        },
+        "trips_unlaunched": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2071001": 0.0,
+            "2071002": 0.0,
+            "2071003": 0.0,
+            "2071004": 0.0
+          }
+        },
+        "trips_incomplete": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2071001": 0.0,
+            "2071002": 0.0,
+            "2071003": 0.0,
+            "2071004": 0.0
+          }
+        },
+        "holding_s_per_trip": {
+          "mean": 0.7872135,
+          "ci95": [
+            0.20515250000000407,
+            1.1164119999999969
+          ],
+          "by_day": {
+            "2071001": 1.1259540000000072,
+            "2071002": 1.1068699999999865,
+            "2071003": 1.0114499999999964,
+            "2071004": -0.09541999999999007
+          }
+        },
+        "holding_person_s": {
+          "mean": 543.75,
+          "ci95": [
+            -1798.75,
+            2657.5
+          ],
+          "by_day": {
+            "2071001": 3500.0,
+            "2071002": 130.0,
+            "2071003": 1415.0,
+            "2071004": -2870.0
+          }
+        },
+        "waiting_person_s": {
+          "mean": -420.75,
+          "ci95": [
+            -4106.0,
+            4597.75
+          ],
+          "by_day": {
+            "2071001": -5179.0,
+            "2071002": 7004.0,
+            "2071003": -2621.0,
+            "2071004": -887.0
+          }
+        },
+        "onboard_person_s": {
+          "mean": 1252.75,
+          "ci95": [
+            -2535.75,
+            7252.5
+          ],
+          "by_day": {
+            "2071001": -1542.0,
+            "2071002": 10184.0,
+            "2071003": -375.0,
+            "2071004": -3256.0
+          }
+        }
+      },
+      "joint_development_gate": false
+    },
+    "apc_vs_event_graph_homogeneous_cost": {
+      "metrics": {
+        "passenger_person_s": {
+          "mean": -7385.75,
+          "ci95": [
+            -16053.25,
+            -89.0
+          ],
+          "by_day": {
+            "2071001": -20553.0,
+            "2071002": -8812.0,
+            "2071003": 2376.0,
+            "2071004": -2554.0
+          }
+        },
+        "journey_min": {
+          "mean": -0.006236750000000679,
+          "ci95": [
+            -0.013432250000001034,
+            -7.050000000141665e-05
+          ],
+          "by_day": {
+            "2071001": -0.0171910000000004,
+            "2071002": -0.007614999999999483,
+            "2071003": 0.0020150000000001,
+            "2071004": -0.0021560000000029333
+          }
+        },
+        "cv_squared": {
+          "mean": 0.00024738044244075087,
+          "ci95": [
+            9.897832145385442e-05,
+            0.00036660798707705694
+          ],
+          "by_day": {
+            "2071001": 0.00029082136012360815,
+            "2071002": 0.00040138109028305113,
+            "2071003": 3.503064189726984e-05,
+            "2071004": 0.00026228867745907436
+          }
+        },
+        "readiness_delay_s": {
+          "mean": -0.5973282499999968,
+          "ci95": [
+            -1.0295804999999945,
+            -0.14790074999999803
+          ],
+          "by_day": {
+            "2071001": 0.07251899999999978,
+            "2071002": -0.8091599999999914,
+            "2071003": -0.4198470000000043,
+            "2071004": -1.2328249999999912
+          }
+        },
+        "public_launch_delay_total_s": {
+          "mean": -156.5,
+          "ci95": [
+            -269.75,
+            -38.75
+          ],
+          "by_day": {
+            "2071001": 19.0,
+            "2071002": -212.0,
+            "2071003": -110.0,
+            "2071004": -323.0
+          }
+        },
+        "trips_unlaunched": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2071001": 0.0,
+            "2071002": 0.0,
+            "2071003": 0.0,
+            "2071004": 0.0
+          }
+        },
+        "trips_incomplete": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2071001": 0.0,
+            "2071002": 0.0,
+            "2071003": 0.0,
+            "2071004": 0.0
+          }
+        },
+        "holding_s_per_trip": {
+          "mean": -0.35305375000000083,
+          "ci95": [
+            -0.615458249999989,
+            -0.16221400000000585
+          ],
+          "by_day": {
+            "2071001": -0.15267199999999548,
+            "2071002": -0.17175600000001623,
+            "2071003": -0.3244280000000117,
+            "2071004": -0.7633589999999799
+          }
+        },
+        "holding_person_s": {
+          "mean": -5940.0,
+          "ci95": [
+            -9268.75,
+            -3537.5
+          ],
+          "by_day": {
+            "2071001": -5515.0,
+            "2071002": -3510.0,
+            "2071003": -3565.0,
+            "2071004": -11170.0
+          }
+        },
+        "waiting_person_s": {
+          "mean": -958.75,
+          "ci95": [
+            -6889.0,
+            4971.5
+          ],
+          "by_day": {
+            "2071001": -9141.0,
+            "2071002": -4637.0,
+            "2071003": 3305.0,
+            "2071004": 6638.0
+          }
+        },
+        "onboard_person_s": {
+          "mean": -6427.0,
+          "ci95": [
+            -10302.0,
+            -2552.0
+          ],
+          "by_day": {
+            "2071001": -11412.0,
+            "2071002": -4175.0,
+            "2071003": -929.0,
+            "2071004": -9192.0
+          }
+        }
+      },
+      "joint_development_gate": false
+    }
+  },
+  "joint_development_gate": false,
+  "independent_demand_days": 4,
+  "independent_future_replications": 0,
+  "event_uniform_alignment": {
+    "2071001_event_graph_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 941,
+      "time_shifted": 1248,
+      "action_differences": 356,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071001_event_graph_homogeneous_cost": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 961,
+      "time_shifted": 1179,
+      "action_differences": 406,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071002_event_graph_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 1616,
+      "time_shifted": 1683,
+      "action_differences": 484,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071002_event_graph_homogeneous_cost": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 1712,
+      "time_shifted": 1592,
+      "action_differences": 526,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071003_event_graph_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 696,
+      "time_shifted": 730,
+      "action_differences": 213,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071003_event_graph_homogeneous_cost": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 665,
+      "time_shifted": 735,
+      "action_differences": 229,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071004_event_graph_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 1077,
+      "time_shifted": 1609,
+      "action_differences": 318,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2071004_event_graph_homogeneous_cost": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 1335,
+      "time_shifted": 1703,
+      "action_differences": 406,
+      "native_only": 0,
+      "alternative_only": 0
+    }
+  },
+  "physical_paths": 12,
+  "confirmation_started": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "controller_admitted": false,
+  "scope": "Consumed-day deterministic development screen, not independent-future or actor confirmation."
+}
