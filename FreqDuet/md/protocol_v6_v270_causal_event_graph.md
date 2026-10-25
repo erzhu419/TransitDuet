@@ -12,6 +12,8 @@ next stop, remaining link fraction, executed H, legal actions, observed arrival
 and APC boarding count. It does not read passenger destinations, latent queues,
 future simulator durations, future vehicle assignments or evaluation labels.
 The pure capture adapter does not install callbacks in the native simulator.
+The cursor is the CURRENT stop in stopped phases and NEXT stop while traveling;
+it must not blindly use the native `next_station` field in both phases.
 
 Run, alighting fraction and uncensored boarded/gap demand forecasts use only
 visits whose completion AND label-availability clocks are strictly before query.
@@ -70,6 +72,14 @@ future halves must support the frozen joint gate. An equal-budget homogeneous
 control tests whether APC allocation adds anything beyond broad holding changes.
 Failure closes this pilot; no forecast, weight or window repair on its outcomes.
 
+Statistical seal:10000 percentile bootstrap draws,seed2700201; independently
+resample4 demand days and2 runtime seeds with replacement,then take their crossed
+product. Share draw indices across all arms. For BOTH APC-vs-bilateral and
+APC-vs-homogeneous,require passenger delta upper95<0 and CV2/readiness/total-public-
+delay delta upper95<=0,no extra unlaunched/incomplete trips. Each runtime half
+must also have negative mean passenger delta and nonpositive guard deltas.
+These are8 development pairs,not independent actor replication or confirmation.
+
 ## Limitations
 
 This is a causal fluid forecast and bounded optimizer, not validated field ETA,
@@ -77,3 +87,17 @@ an exact simulator model or proof of traffic improvement. The support/censor
 fallback may restrict use heavily. Native query-to-cursor/APC prefix wiring and
 runtime cost require engineering preflight before any physical pilot release.
 No full-day run, policy training, new frequency claim or main switch occurs here.
+
+## Synthetic Acceptance
+
+Final source0a68748858,t211623,high/manual,node004,exit0:19 checks passed.
+The V269 finite reference admits a useful joint transfer;the two-vehicle causal
+fixture correctly retains native when its faster alighting would harm CV2.
+The 12-vehicle/23-stop-per-direction query uses128 evaluations and1.81s on this
+node under the frozen smaller search core;this is not a real-time guarantee.
+Only4374 summary/protocol bytes returned locally. Traffic starts and training:0.
+Earlier synthetic attempts remain recorded:t211619 entry import failed;t211620
+caught a dropped pending trip and an incorrect test expectation;t211621 passed17
+checks before native-tick alignment;t211622 passed18 before the APC-clock check.
+Next is native query/prefix wiring and observational no-op equivalence,not matrix
+execution. The sealed26-path cap is unreleased and has consumed0 physical slots.
