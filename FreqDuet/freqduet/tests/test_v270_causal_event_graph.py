@@ -76,7 +76,7 @@ class CausalGraphTests(unittest.TestCase):
         self.assertTrue(base['coverage'] and moved['coverage'])
         self.assertEqual(base['returns'], moved['returns'])
         self.assertEqual(base['launches'], moved['launches'])
-        self.assertAlmostEqual(moved['onboard'] - base['onboard'], -1200.)
+        self.assertAlmostEqual(moved['onboard'] - base['onboard'], -1160.)
         self.assertEqual(base['waiting'], moved['waiting'])
         # Equal H and earlier alighting do not imply no-harm to the NEXT headway.
         self.assertGreater(moved['cv2'], base['cv2'])

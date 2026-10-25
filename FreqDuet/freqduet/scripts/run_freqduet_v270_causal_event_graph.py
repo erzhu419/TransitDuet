@@ -29,7 +29,8 @@ def protocol():
         forecasts='strict completed current-day APC/AVL visits per direction/stop; minimum 3; '
                   'last 3 visits must be uncensored for boarded/gap rate; all completed alight/incoming and mean run; '
                   'no future queues or destinations',
-        horizon='query + longest route upper bound (mean run +104 service +45 legal holding per stop) '
+        horizon='query + longest route upper bound (ceil mean run +104 nonterminal service, '
+                'native query/transition ticks, up to45 legal holding) '
                 '+360*fleet+1; launches with public release <= query+360*fleet; fixed across candidates',
         solver=dict(beam_width=graph.BEAM_WIDTH, variables=graph.MAX_VARIABLES,
                     evaluations=graph.MAX_EVALUATIONS, events=graph.MAX_EVENTS,

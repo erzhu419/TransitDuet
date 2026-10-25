@@ -151,7 +151,9 @@ def assemble(snapshot, visits):
             raise ValueError('the terminal is a return event, never a holding control')
         if len({s.station for s in route}) != len(route):
             raise ValueError('route station IDs must be unique within direction')
-        longest = max(longest, sum(forecasts[d, s.station]['run_s'] + 104 + (45 if s.control else 0) for s in route))
+        max_service = 2 * max(v.capacity for v in snapshot.vehicles) + 4
+        longest = max(longest, sum(math.ceil(forecasts[d, s.station]['run_s']) +
+            (0 if s.terminal else max_service + 1 + (45 if s.control else 1)) for s in route))
     for v in snapshot.vehicles:
         if v.phase not in ('terminal', 'travel', 'service', 'prepare', 'hold') or not 0 <= v.load <= v.capacity:
             raise ValueError('invalid current phase or APC load')

@@ -31,7 +31,8 @@ from the previous tick. Simultaneous vehicle events retain physical fleet order.
 
 The graph extends through active vehicles' next launches and completion of the
 included future trips. The horizon is query plus the longest predicted route
-upper bound (mean run +104 service +45 legal holding per stop), plus360*fleet+1.
+upper bound (rounded run,104 nonterminal service,native transition ticks and up
+to45 legal holding), plus360*fleet+1.
 Include published releases through query+360*fleet. Incomplete modeled coverage
 cannot produce a feasible allocation. Prediction boundaries stay fixed per query.
 
