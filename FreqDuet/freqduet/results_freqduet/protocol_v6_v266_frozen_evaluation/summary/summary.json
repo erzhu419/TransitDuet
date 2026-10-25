@@ -1,0 +1,2014 @@
+{
+  "source": "4390eb9b26",
+  "status": "v266_frozen_E_analysis_complete",
+  "protocol_source": "4667fd4668",
+  "collector_source": "e414070e27",
+  "S_seal_source": "65bdd96938",
+  "complete_units": 32,
+  "physical_starts": 224,
+  "failed_starts": 0,
+  "queries_per_path_range": [
+    5200,
+    5200
+  ],
+  "uniform_mismatches": 0,
+  "actual_execution_complete": true,
+  "locked_contrasts": [
+    {
+      "context": 0,
+      "contrast_id": "c0:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 1,
+      "contrast_id": "c1:b2_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "b2",
+      "chosen_bin": 2,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 2,
+      "contrast_id": "c2:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    },
+    {
+      "context": 3,
+      "contrast_id": "c3:native_vs_native_b1",
+      "native_bin": 1,
+      "chosen_branch": "native",
+      "chosen_bin": 1,
+      "plan": {
+        "physical": [
+          "native",
+          "b0",
+          "b2",
+          "b3",
+          "b4",
+          "b5",
+          "b6"
+        ],
+        "aliases": {
+          "b1": "native"
+        },
+        "masked": [],
+        "max_starts": 7
+      }
+    }
+  ],
+  "cohorts": {
+    "full": {
+      "primary": {
+        "crossed_actor_day": {
+          "passenger_person_s": {
+            "mean": -781.375,
+            "ci95": [
+              -3125.5,
+              0.0
+            ]
+          },
+          "journey_min": {
+            "mean": -0.0006704999999999073,
+            "ci95": [
+              -0.002681999999999629,
+              0.0
+            ]
+          },
+          "waiting_person_s": {
+            "mean": -689.71875,
+            "ci95": [
+              -2758.875,
+              0.0
+            ]
+          },
+          "onboard_person_s": {
+            "mean": -91.65625,
+            "ci95": [
+              -366.625,
+              0.0
+            ]
+          },
+          "cv_squared": {
+            "mean": -3.208152271488699e-05,
+            "ci95": [
+              -0.00012832609085954797,
+              0.0
+            ]
+          },
+          "readiness_delay_s": {
+            "mean": -0.024093468749999847,
+            "ci95": [
+              -0.09637387499999939,
+              0.0
+            ]
+          },
+          "readiness_delay_total_s": {
+            "mean": -6.3125,
+            "ci95": [
+              -25.25,
+              0.0
+            ]
+          },
+          "public_launch_delay_total_s": {
+            "mean": -5.625,
+            "ci95": [
+              -22.5,
+              0.0
+            ]
+          },
+          "holding_s_per_trip": {
+            "mean": -0.023854968749999372,
+            "ci95": [
+              -0.09541987499999749,
+              0.0
+            ]
+          },
+          "trips_unlaunched": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "trips_incomplete": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "conditional_future": {
+          "passenger_person_s": {
+            "mean": -781.375,
+            "ci95": [
+              -1903.03515625,
+              28.46875
+            ]
+          },
+          "journey_min": {
+            "mean": -0.0006704999999999073,
+            "ci95": [
+              -0.0016277539062498736,
+              2.4438281250141458e-05
+            ]
+          },
+          "waiting_person_s": {
+            "mean": -689.71875,
+            "ci95": [
+              -1623.578125,
+              6.625
+            ]
+          },
+          "onboard_person_s": {
+            "mean": -91.65625,
+            "ci95": [
+              -242.125,
+              24.001562499999977
+            ]
+          },
+          "cv_squared": {
+            "mean": -3.208152271488699e-05,
+            "ci95": [
+              -7.580678725025407e-05,
+              2.122746598706704e-07
+            ]
+          },
+          "readiness_delay_s": {
+            "mean": -0.024093468749999847,
+            "ci95": [
+              -0.05272540078124952,
+              -0.0014312812499999161
+            ]
+          },
+          "readiness_delay_total_s": {
+            "mean": -6.3125,
+            "ci95": [
+              -13.814062499999999,
+              -0.375
+            ]
+          },
+          "public_launch_delay_total_s": {
+            "mean": -5.625,
+            "ci95": [
+              -13.75,
+              0.25
+            ]
+          },
+          "holding_s_per_trip": {
+            "mean": -0.023854968749999372,
+            "ci95": [
+              -0.06321565625000058,
+              0.004174625000004539
+            ]
+          },
+          "trips_unlaunched": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "trips_incomplete": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "point_joint": true,
+      "interval_joint": {
+        "crossed_actor_day": false,
+        "conditional_future": false
+      },
+      "axes": {
+        "actor": {
+          "12037": {
+            "passenger_person_s": -1562.75,
+            "journey_min": -0.0013409999999998146,
+            "cv_squared": -6.416304542977399e-05,
+            "readiness_delay_s": -0.048186937499999694,
+            "public_launch_delay_total_s": -11.25
+          },
+          "933083": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          }
+        },
+        "demand_day": {
+          "2151001": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "2151002": {
+            "passenger_person_s": -1562.75,
+            "journey_min": -0.0013409999999998146,
+            "cv_squared": -6.416304542977399e-05,
+            "readiness_delay_s": -0.048186937499999694,
+            "public_launch_delay_total_s": -11.25
+          }
+        }
+      },
+      "descriptive_all_arms": {
+        "native": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        },
+        "b0": {
+          "passenger_person_s": -1276.46875,
+          "journey_min": -0.0010626249999998727,
+          "cv_squared": 4.4113785440008744e-05,
+          "readiness_delay_s": -0.13442271875000067,
+          "public_launch_delay_total_s": -32.5
+        },
+        "b2": {
+          "passenger_person_s": -2638.375,
+          "journey_min": -0.002215656250000031,
+          "cv_squared": -2.9567963403920317e-05,
+          "readiness_delay_s": -0.11211831250000115,
+          "public_launch_delay_total_s": -30.3125
+        },
+        "b3": {
+          "passenger_person_s": -1812.96875,
+          "journey_min": -0.0015345312499999708,
+          "cv_squared": 5.671668135096139e-06,
+          "readiness_delay_s": -0.027671750000001882,
+          "public_launch_delay_total_s": -5.1875
+        },
+        "b4": {
+          "passenger_person_s": -712.15625,
+          "journey_min": -0.0006178124999997592,
+          "cv_squared": 6.549667202885635e-05,
+          "readiness_delay_s": -0.003816812500001543,
+          "public_launch_delay_total_s": 3.125
+        },
+        "b5": {
+          "passenger_person_s": 1104.09375,
+          "journey_min": 0.0009045937500000711,
+          "cv_squared": 6.038025213793235e-05,
+          "readiness_delay_s": 0.08098756249999894,
+          "public_launch_delay_total_s": 27.21875
+        },
+        "b6": {
+          "passenger_person_s": 1812.15625,
+          "journey_min": 0.0014983437500000751,
+          "cv_squared": -8.582052743180083e-07,
+          "readiness_delay_s": 0.1583969374999996,
+          "public_launch_delay_total_s": 46.375
+        }
+      },
+      "mechanism": {
+        "holding_context_average": {
+          "direct_executed_delta_s": 1.25,
+          "later_same_cycle_delta_s": 0.0,
+          "other_cycles_delta_s": -7.5,
+          "all_cycles_delta_s": -6.25
+        },
+        "active_paths": 8,
+        "supply_status_counts": {
+          "same_first_next_obligation": 8
+        },
+        "active_supply": {
+          "return_delta_s": {
+            "supported": 8,
+            "missing": 0,
+            "mean": 6.375,
+            "earlier": 0,
+            "later": 8
+          },
+          "first_next_delta_s": {
+            "supported": 8,
+            "missing": 0,
+            "mean": 0.0,
+            "earlier": 0,
+            "later": 0
+          },
+          "return_to_next_wait_delta_s": {
+            "supported": 8,
+            "missing": 0,
+            "mean": -6.375,
+            "earlier": 8,
+            "later": 0
+          },
+          "public_delay_delta_s": {
+            "supported": 8,
+            "missing": 0,
+            "mean": 0.0,
+            "earlier": 0,
+            "later": 0
+          }
+        },
+        "query_due_matches": 0
+      }
+    },
+    "A": {
+      "primary": {
+        "crossed_actor_day": {
+          "passenger_person_s": {
+            "mean": -1588.375,
+            "ci95": [
+              -6353.5,
+              0.0
+            ]
+          },
+          "journey_min": {
+            "mean": -0.001363000000000003,
+            "ci95": [
+              -0.005452000000000012,
+              0.0
+            ]
+          },
+          "waiting_person_s": {
+            "mean": -1383.875,
+            "ci95": [
+              -5535.5,
+              0.0
+            ]
+          },
+          "onboard_person_s": {
+            "mean": -204.5,
+            "ci95": [
+              -818.0,
+              0.0
+            ]
+          },
+          "cv_squared": {
+            "mean": -6.40437016535475e-05,
+            "ci95": [
+              -0.00025617480661419,
+              0.0
+            ]
+          },
+          "readiness_delay_s": {
+            "mean": -0.04532437499999986,
+            "ci95": [
+              -0.18129749999999945,
+              0.0
+            ]
+          },
+          "readiness_delay_total_s": {
+            "mean": -11.875,
+            "ci95": [
+              -47.5,
+              0.0
+            ]
+          },
+          "public_launch_delay_total_s": {
+            "mean": -11.375,
+            "ci95": [
+              -45.5,
+              0.0
+            ]
+          },
+          "holding_s_per_trip": {
+            "mean": -0.05248093750000038,
+            "ci95": [
+              -0.20992375000000152,
+              0.0
+            ]
+          },
+          "trips_unlaunched": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "trips_incomplete": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "conditional_future": {
+          "passenger_person_s": {
+            "mean": -1588.375,
+            "ci95": [
+              -3205.0,
+              28.25
+            ]
+          },
+          "journey_min": {
+            "mean": -0.001363000000000003,
+            "ci95": [
+              -0.002750250000000065,
+              2.4250000000058947e-05
+            ]
+          },
+          "waiting_person_s": {
+            "mean": -1383.875,
+            "ci95": [
+              -2774.0,
+              6.25
+            ]
+          },
+          "onboard_person_s": {
+            "mean": -204.5,
+            "ci95": [
+              -431.0,
+              22.0
+            ]
+          },
+          "cv_squared": {
+            "mean": -6.40437016535475e-05,
+            "ci95": [
+              -0.0001280663257782668,
+              -2.10775288281978e-08
+            ]
+          },
+          "readiness_delay_s": {
+            "mean": -0.04532437499999986,
+            "ci95": [
+              -0.08778624999999884,
+              -0.0028625000000008782
+            ]
+          },
+          "readiness_delay_total_s": {
+            "mean": -11.875,
+            "ci95": [
+              -23.0,
+              -0.75
+            ]
+          },
+          "public_launch_delay_total_s": {
+            "mean": -11.375,
+            "ci95": [
+              -24.1875,
+              0.25
+            ]
+          },
+          "holding_s_per_trip": {
+            "mean": -0.05248093750000038,
+            "ci95": [
+              -0.11450381250000241,
+              0.002385500000002594
+            ]
+          },
+          "trips_unlaunched": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "trips_incomplete": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "point_joint": true,
+      "interval_joint": {
+        "crossed_actor_day": false,
+        "conditional_future": false
+      },
+      "axes": {
+        "actor": {
+          "12037": {
+            "passenger_person_s": -3176.75,
+            "journey_min": -0.002726000000000006,
+            "cv_squared": -0.000128087403307095,
+            "readiness_delay_s": -0.09064874999999972,
+            "public_launch_delay_total_s": -22.75
+          },
+          "933083": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          }
+        },
+        "demand_day": {
+          "2151001": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "2151002": {
+            "passenger_person_s": -3176.75,
+            "journey_min": -0.002726000000000006,
+            "cv_squared": -0.000128087403307095,
+            "readiness_delay_s": -0.09064874999999972,
+            "public_launch_delay_total_s": -22.75
+          }
+        }
+      },
+      "descriptive_all_arms": {
+        "native": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        },
+        "b0": {
+          "passenger_person_s": -1240.375,
+          "journey_min": -0.0010583124999999916,
+          "cv_squared": -8.010976927847911e-05,
+          "readiness_delay_s": -0.06703237500000103,
+          "public_launch_delay_total_s": -16.75
+        },
+        "b2": {
+          "passenger_person_s": -1443.5,
+          "journey_min": -0.0012434375000003328,
+          "cv_squared": -7.795092077270789e-05,
+          "readiness_delay_s": -0.03673656250000068,
+          "public_launch_delay_total_s": -11.5
+        },
+        "b3": {
+          "passenger_person_s": -2.6875,
+          "journey_min": -5.5750000000243105e-05,
+          "cv_squared": -3.005830848226915e-05,
+          "readiness_delay_s": 0.1259542499999995,
+          "public_launch_delay_total_s": 36.125
+        },
+        "b4": {
+          "passenger_person_s": 618.6875,
+          "journey_min": 0.0004413125000000129,
+          "cv_squared": -2.0037270320617112e-05,
+          "readiness_delay_s": 0.14813931249999968,
+          "public_launch_delay_total_s": 40.5625
+        },
+        "b5": {
+          "passenger_person_s": 2695.875,
+          "journey_min": 0.0021953749999998884,
+          "cv_squared": -4.034585527919535e-05,
+          "readiness_delay_s": 0.18726149999999997,
+          "public_launch_delay_total_s": 53.0625
+        },
+        "b6": {
+          "passenger_person_s": 4652.6875,
+          "journey_min": 0.003851812499999996,
+          "cv_squared": -2.2314201681358954e-05,
+          "readiness_delay_s": 0.31011462499999976,
+          "public_launch_delay_total_s": 83.375
+        }
+      },
+      "mechanism": {
+        "holding_context_average": {
+          "direct_executed_delta_s": 1.25,
+          "later_same_cycle_delta_s": 0.0,
+          "other_cycles_delta_s": -15.0,
+          "all_cycles_delta_s": -13.75
+        },
+        "active_paths": 4,
+        "supply_status_counts": {
+          "same_first_next_obligation": 4
+        },
+        "active_supply": {
+          "return_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": 5.25,
+            "earlier": 0,
+            "later": 4
+          },
+          "first_next_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": 0.0,
+            "earlier": 0,
+            "later": 0
+          },
+          "return_to_next_wait_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": -5.25,
+            "earlier": 4,
+            "later": 0
+          },
+          "public_delay_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": 0.0,
+            "earlier": 0,
+            "later": 0
+          }
+        },
+        "query_due_matches": 0
+      }
+    },
+    "B": {
+      "primary": {
+        "crossed_actor_day": {
+          "passenger_person_s": {
+            "mean": 25.625,
+            "ci95": [
+              0.0,
+              102.5
+            ]
+          },
+          "journey_min": {
+            "mean": 2.2000000000188535e-05,
+            "ci95": [
+              0.0,
+              8.800000000075414e-05
+            ]
+          },
+          "waiting_person_s": {
+            "mean": 4.4375,
+            "ci95": [
+              0.0,
+              17.75
+            ]
+          },
+          "onboard_person_s": {
+            "mean": 21.1875,
+            "ci95": [
+              0.0,
+              84.75
+            ]
+          },
+          "cv_squared": {
+            "mean": -1.1934377622648332e-07,
+            "ci95": [
+              -4.773751049059333e-07,
+              0.0
+            ]
+          },
+          "readiness_delay_s": {
+            "mean": -0.0028625624999998323,
+            "ci95": [
+              -0.011450249999999329,
+              0.0
+            ]
+          },
+          "readiness_delay_total_s": {
+            "mean": -0.75,
+            "ci95": [
+              -3.0,
+              0.0
+            ]
+          },
+          "public_launch_delay_total_s": {
+            "mean": 0.125,
+            "ci95": [
+              0.0,
+              0.5
+            ]
+          },
+          "holding_s_per_trip": {
+            "mean": 0.004771000000001635,
+            "ci95": [
+              0.0,
+              0.01908400000000654
+            ]
+          },
+          "trips_unlaunched": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "trips_incomplete": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "conditional_future": {
+          "passenger_person_s": {
+            "mean": 25.625,
+            "ci95": [
+              21.9375,
+              27.9375
+            ]
+          },
+          "journey_min": {
+            "mean": 2.2000000000188535e-05,
+            "ci95": [
+              1.8937500000149043e-05,
+              2.4062500000310294e-05
+            ]
+          },
+          "waiting_person_s": {
+            "mean": 4.4375,
+            "ci95": [
+              0.0,
+              13.3125
+            ]
+          },
+          "onboard_person_s": {
+            "mean": 21.1875,
+            "ci95": [
+              14.625,
+              27.0
+            ]
+          },
+          "cv_squared": {
+            "mean": -1.1934377622648332e-07,
+            "ci95": [
+              -1.1272129455397462e-06,
+              8.885253930867795e-07
+            ]
+          },
+          "readiness_delay_s": {
+            "mean": -0.0028625624999998323,
+            "ci95": [
+              -0.008587687499999497,
+              0.0
+            ]
+          },
+          "readiness_delay_total_s": {
+            "mean": -0.75,
+            "ci95": [
+              -2.25,
+              0.0
+            ]
+          },
+          "public_launch_delay_total_s": {
+            "mean": 0.125,
+            "ci95": [
+              0.0,
+              0.375
+            ]
+          },
+          "holding_s_per_trip": {
+            "mean": 0.004771000000001635,
+            "ci95": [
+              0.004770999999998082,
+              0.004771000000005188
+            ]
+          },
+          "trips_unlaunched": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "trips_incomplete": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "point_joint": false,
+      "interval_joint": {
+        "crossed_actor_day": false,
+        "conditional_future": false
+      },
+      "axes": {
+        "actor": {
+          "12037": {
+            "passenger_person_s": 51.25,
+            "journey_min": 4.400000000037707e-05,
+            "cv_squared": -2.3868755245296663e-07,
+            "readiness_delay_s": -0.0057251249999996645,
+            "public_launch_delay_total_s": 0.25
+          },
+          "933083": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          }
+        },
+        "demand_day": {
+          "2151001": {
+            "passenger_person_s": 0.0,
+            "journey_min": 0.0,
+            "cv_squared": 0.0,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "2151002": {
+            "passenger_person_s": 51.25,
+            "journey_min": 4.400000000037707e-05,
+            "cv_squared": -2.3868755245296663e-07,
+            "readiness_delay_s": -0.0057251249999996645,
+            "public_launch_delay_total_s": 0.25
+          }
+        }
+      },
+      "descriptive_all_arms": {
+        "native": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        },
+        "b0": {
+          "passenger_person_s": -1312.5625,
+          "journey_min": -0.0010669374999997538,
+          "cv_squared": 0.0001683373401584966,
+          "readiness_delay_s": -0.2018130625000003,
+          "public_launch_delay_total_s": -48.25
+        },
+        "b2": {
+          "passenger_person_s": -3833.25,
+          "journey_min": -0.003187874999999729,
+          "cv_squared": 1.8814993964867254e-05,
+          "readiness_delay_s": -0.18750006250000162,
+          "public_launch_delay_total_s": -49.125
+        },
+        "b3": {
+          "passenger_person_s": -3623.25,
+          "journey_min": -0.0030133124999996985,
+          "cv_squared": 4.140164475246143e-05,
+          "readiness_delay_s": -0.18129775000000325,
+          "public_launch_delay_total_s": -46.5
+        },
+        "b4": {
+          "passenger_person_s": -2043.0,
+          "journey_min": -0.0016769374999995312,
+          "cv_squared": 0.0001510306143783298,
+          "readiness_delay_s": -0.15577293750000276,
+          "public_launch_delay_total_s": -34.3125
+        },
+        "b5": {
+          "passenger_person_s": -487.6875,
+          "journey_min": -0.0003861874999997461,
+          "cv_squared": 0.00016110635955506004,
+          "readiness_delay_s": -0.02528637500000208,
+          "public_launch_delay_total_s": 1.375
+        },
+        "b6": {
+          "passenger_person_s": -1028.375,
+          "journey_min": -0.0008551249999998456,
+          "cv_squared": 2.0597791132722938e-05,
+          "readiness_delay_s": 0.00667924999999947,
+          "public_launch_delay_total_s": 9.375
+        }
+      },
+      "mechanism": {
+        "holding_context_average": {
+          "direct_executed_delta_s": 1.25,
+          "later_same_cycle_delta_s": 0.0,
+          "other_cycles_delta_s": 0.0,
+          "all_cycles_delta_s": 1.25
+        },
+        "active_paths": 4,
+        "supply_status_counts": {
+          "same_first_next_obligation": 4
+        },
+        "active_supply": {
+          "return_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": 7.5,
+            "earlier": 0,
+            "later": 4
+          },
+          "first_next_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": 0.0,
+            "earlier": 0,
+            "later": 0
+          },
+          "return_to_next_wait_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": -7.5,
+            "earlier": 4,
+            "later": 0
+          },
+          "public_delay_delta_s": {
+            "supported": 4,
+            "missing": 0,
+            "mean": 0.0,
+            "earlier": 0,
+            "later": 0
+          }
+        },
+        "query_due_matches": 0
+      }
+    }
+  },
+  "contexts": [
+    {
+      "context": 0,
+      "actor": 12037,
+      "demand_day": 2151001,
+      "contrast_id": "c0:native_vs_native_b1",
+      "native_alias": true,
+      "S_mean": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mean": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_minus_S": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_sd": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mcse": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "passenger_gain_futures": 0,
+      "joint_gain_futures": 0,
+      "halves": {
+        "A": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        },
+        "B": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        }
+      },
+      "primary_futures": []
+    },
+    {
+      "context": 1,
+      "actor": 12037,
+      "demand_day": 2151002,
+      "contrast_id": "c1:b2_vs_native_b1",
+      "native_alias": false,
+      "S_mean": {
+        "passenger_person_s": -380.25,
+        "journey_min": -0.00033012499999962586,
+        "waiting_person_s": -40.125,
+        "onboard_person_s": -340.125,
+        "cv_squared": -7.5106272951720385e-06,
+        "readiness_delay_s": -0.13358775000000023,
+        "readiness_delay_total_s": -35.0,
+        "public_launch_delay_total_s": -34.125,
+        "holding_s_per_trip": -0.13120224999999763,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mean": {
+        "passenger_person_s": -3125.5,
+        "journey_min": -0.002681999999999629,
+        "waiting_person_s": -2758.875,
+        "onboard_person_s": -366.625,
+        "cv_squared": -0.00012832609085954797,
+        "readiness_delay_s": -0.09637387499999939,
+        "readiness_delay_total_s": -25.25,
+        "public_launch_delay_total_s": -22.5,
+        "holding_s_per_trip": -0.09541987499999749,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_minus_S": {
+        "passenger_person_s": -2745.25,
+        "journey_min": -0.0023518750000000033,
+        "waiting_person_s": -2718.75,
+        "onboard_person_s": -26.5,
+        "cv_squared": -0.00012081546356437593,
+        "readiness_delay_s": 0.03721387500000084,
+        "readiness_delay_total_s": 9.75,
+        "public_launch_delay_total_s": 11.625,
+        "holding_s_per_trip": 0.035782375000000144,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_sd": {
+        "passenger_person_s": 6005.10494734034,
+        "journey_min": 0.005155670802967917,
+        "waiting_person_s": 5182.107856778524,
+        "onboard_person_s": 845.0567077336966,
+        "cv_squared": 0.00024704287053194844,
+        "readiness_delay_s": 0.16432819738510657,
+        "readiness_delay_total_s": 43.053952863155985,
+        "public_launch_delay_total_s": 47.24404724407086,
+        "holding_s_per_trip": 0.22786889317979797,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mcse": {
+        "passenger_person_s": 2123.12521500062,
+        "journey_min": 0.0018228048931720534,
+        "waiting_person_s": 1832.1518031840903,
+        "onboard_person_s": 298.7726642628376,
+        "cv_squared": 8.734284449846552e-05,
+        "readiness_delay_s": 0.05809879135558517,
+        "readiness_delay_total_s": 15.221871013211784,
+        "public_launch_delay_total_s": 16.703293088490064,
+        "holding_s_per_trip": 0.08056381979445408,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "passenger_gain_futures": 2,
+      "joint_gain_futures": 2,
+      "halves": {
+        "A": {
+          "passenger_person_s": -6353.5,
+          "journey_min": -0.005452000000000012,
+          "cv_squared": -0.00025617480661419,
+          "readiness_delay_s": -0.18129749999999945,
+          "public_launch_delay_total_s": -45.5
+        },
+        "B": {
+          "passenger_person_s": 102.5,
+          "journey_min": 8.800000000075414e-05,
+          "cv_squared": -4.773751049059333e-07,
+          "readiness_delay_s": -0.011450249999999329,
+          "public_launch_delay_total_s": 0.5
+        }
+      },
+      "primary_futures": [
+        {
+          "future": 0,
+          "delta": {
+            "passenger_person_s": 162.0,
+            "journey_min": 0.0001390000000007774,
+            "cv_squared": 5.785061961902094e-06,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": 0.0,
+            "all_cycles_delta_s": 5.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 9.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": 4.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -9.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 1,
+          "delta": {
+            "passenger_person_s": 64.0,
+            "journey_min": 5.499999999969418e-05,
+            "cv_squared": -5.953682192527676e-06,
+            "readiness_delay_s": -0.022900000000007026,
+            "public_launch_delay_total_s": 2.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": -5.0,
+            "all_cycles_delta_s": 0.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 5.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": 0.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -5.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 2,
+          "delta": {
+            "passenger_person_s": -13769.0,
+            "journey_min": -0.011871000000001075,
+            "cv_squared": -0.00038191810781315616,
+            "readiness_delay_s": -0.2671749999999946,
+            "public_launch_delay_total_s": -55.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": -70.0,
+            "all_cycles_delta_s": -65.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 4.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": -1.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -4.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 3,
+          "delta": {
+            "passenger_person_s": -11871.0,
+            "journey_min": -0.010130999999999446,
+            "cv_squared": -0.0006426124984129783,
+            "readiness_delay_s": -0.43511499999999614,
+            "public_launch_delay_total_s": -129.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": -165.0,
+            "all_cycles_delta_s": -160.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 3.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": -2.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -3.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 4,
+          "delta": {
+            "passenger_person_s": 113.0,
+            "journey_min": 9.800000000126374e-05,
+            "cv_squared": -4.921379749216193e-06,
+            "readiness_delay_s": -0.045800999999997316,
+            "public_launch_delay_total_s": 2.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": 0.0,
+            "all_cycles_delta_s": 5.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 5.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": 0.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -5.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 5,
+          "delta": {
+            "passenger_person_s": 108.0,
+            "journey_min": 9.299999999967667e-05,
+            "cv_squared": -4.096323815101777e-06,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": 0.0,
+            "all_cycles_delta_s": 5.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 7.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": 2.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -7.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 6,
+          "delta": {
+            "passenger_person_s": 81.0,
+            "journey_min": 7.000000000090267e-05,
+            "cv_squared": 2.053545360897191e-06,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": 0.0,
+            "all_cycles_delta_s": 5.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 4.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": -1.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -4.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        },
+        {
+          "future": 7,
+          "delta": {
+            "passenger_person_s": 108.0,
+            "journey_min": 9.100000000117348e-05,
+            "cv_squared": 5.054657783797045e-06,
+            "readiness_delay_s": 0.0,
+            "public_launch_delay_total_s": 0.0
+          },
+          "holding": {
+            "direct_executed_delta_s": 5.0,
+            "later_same_cycle_delta_s": 0.0,
+            "other_cycles_delta_s": 0.0,
+            "all_cycles_delta_s": 5.0,
+            "holding_rebound_observed": false
+          },
+          "supply": {
+            "return_delta_s": 14.0,
+            "cycle_H_delta_s": 5.0,
+            "nonholding_delta_s": 9.0,
+            "first_next_delta_s": 0.0,
+            "return_to_next_wait_delta_s": -14.0,
+            "public_delay_delta_s": 0.0,
+            "reference_first_next_trip": 45,
+            "alternative_first_next_trip": 45,
+            "serves_query_obligation": true,
+            "query_due_obligation_match": false,
+            "status": "same_first_next_obligation"
+          }
+        }
+      ]
+    },
+    {
+      "context": 2,
+      "actor": 933083,
+      "demand_day": 2151001,
+      "contrast_id": "c2:native_vs_native_b1",
+      "native_alias": true,
+      "S_mean": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mean": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_minus_S": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_sd": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mcse": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "passenger_gain_futures": 0,
+      "joint_gain_futures": 0,
+      "halves": {
+        "A": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        },
+        "B": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        }
+      },
+      "primary_futures": []
+    },
+    {
+      "context": 3,
+      "actor": 933083,
+      "demand_day": 2151002,
+      "contrast_id": "c3:native_vs_native_b1",
+      "native_alias": true,
+      "S_mean": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mean": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_minus_S": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_sd": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "E_mcse": {
+        "passenger_person_s": 0.0,
+        "journey_min": 0.0,
+        "waiting_person_s": 0.0,
+        "onboard_person_s": 0.0,
+        "cv_squared": 0.0,
+        "readiness_delay_s": 0.0,
+        "readiness_delay_total_s": 0.0,
+        "public_launch_delay_total_s": 0.0,
+        "holding_s_per_trip": 0.0,
+        "trips_unlaunched": 0.0,
+        "trips_incomplete": 0.0
+      },
+      "passenger_gain_futures": 0,
+      "joint_gain_futures": 0,
+      "halves": {
+        "A": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        },
+        "B": {
+          "passenger_person_s": 0.0,
+          "journey_min": 0.0,
+          "cv_squared": 0.0,
+          "readiness_delay_s": 0.0,
+          "public_launch_delay_total_s": 0.0
+        }
+      },
+      "primary_futures": []
+    }
+  ],
+  "signal_noise": {
+    "locked_primary": {
+      "mean_effect_squared": {
+        "mean": [
+          2442187.5625,
+          1.7982809999995027e-06,
+          4.11689639882324e-09,
+          0.002321980945628877,
+          126.5625
+        ],
+        "ci95": [
+          [
+            0.0,
+            9768750.25
+          ],
+          [
+            0.0,
+            7.193123999998011e-06
+          ],
+          [
+            0.0,
+            1.646758559529296e-08
+          ],
+          [
+            0.0,
+            0.009287923782515507
+          ],
+          [
+            0.0,
+            506.25
+          ]
+        ]
+      },
+      "single_future_noise_variance": {
+        "mean": [
+          9015321.357142856,
+          6.6452353571439615e-06,
+          1.525754497016626e-08,
+          0.006750939113959635,
+          558.0
+        ],
+        "ci95": [
+          [
+            0.0,
+            36061285.428571425
+          ],
+          [
+            0.0,
+            2.6580941428575846e-05
+          ],
+          [
+            0.0,
+            6.103017988066504e-08
+          ],
+          [
+            0.0,
+            0.02700375645583854
+          ],
+          [
+            0.0,
+            2232.0
+          ]
+        ]
+      },
+      "debiased_signal_squared": {
+        "mean": [
+          1315272.392857143,
+          9.676265803565074e-07,
+          2.209703277552458e-09,
+          0.0014781135563839225,
+          56.8125
+        ],
+        "ci95": [
+          [
+            0.0,
+            5261089.571428572
+          ],
+          [
+            0.0,
+            3.87050632142603e-06
+          ],
+          [
+            0.0,
+            8.838813110209831e-09
+          ],
+          [
+            0.0,
+            0.00591245422553569
+          ],
+          [
+            0.0,
+            227.25
+          ]
+        ]
+      },
+      "E_half_cross_product": {
+        "mean": [
+          -162808.4375,
+          -1.1994400000102817e-07,
+          3.057286879542653e-11,
+          0.000518975424843718,
+          -5.6875
+        ],
+        "ci95": [
+          [
+            -651233.75,
+            0.0
+          ],
+          [
+            -4.797760000041127e-07,
+            0.0
+          ],
+          [
+            0.0,
+            1.2229147518170612e-10
+          ],
+          [
+            0.0,
+            0.002075901699374872
+          ],
+          [
+            -22.75,
+            0.0
+          ]
+        ]
+      },
+      "S_E_cross_product": {
+        "mean": [
+          297117.84375,
+          2.2134881249971853e-07,
+          2.40952360173112e-10,
+          0.0032185922800077975,
+          191.953125
+        ],
+        "ci95": [
+          [
+            0.0,
+            1188471.375
+          ],
+          [
+            0.0,
+            8.853952499988741e-07
+          ],
+          [
+            0.0,
+            9.63809440692448e-10
+          ],
+          [
+            0.0,
+            0.01287436912003119
+          ],
+          [
+            0.0,
+            767.8125
+          ]
+        ]
+      },
+      "single_future_snr": [
+        0.1458930126561767,
+        0.14561208570532574,
+        0.1448269221472515,
+        0.21894932415069035,
+        0.10181451612903226
+      ],
+      "mean8_future_snr": [
+        1.1671441012494137,
+        1.164896685642606,
+        1.158615377178012,
+        1.7515945932055228,
+        0.8145161290322581
+      ],
+      "informative_context_action_pairs": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "same_nonzero_E_half_sign_pairs": [
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      "metrics": [
+        "passenger_person_s",
+        "journey_min",
+        "cv_squared",
+        "readiness_delay_s",
+        "public_launch_delay_total_s"
+      ]
+    },
+    "all_legal_nonnative": {
+      "mean_effect_squared": {
+        "mean": [
+          11930929.445963543,
+          8.221714666666998e-06,
+          7.851682823752431e-09,
+          0.041171591307908546,
+          2902.796223958333
+        ],
+        "ci95": [
+          [
+            396344.9270833333,
+            35256514.875
+          ],
+          [
+            2.9399161458326083e-07,
+            2.408005101302192e-05
+          ],
+          [
+            7.559276331504536e-11,
+            1.806611863686387e-08
+          ],
+          [
+            5.9029905200528514e-05,
+            0.13109026548949565
+          ],
+          [
+            0.4973958333333333,
+            9576.307291666666
+          ]
+        ]
+      },
+      "single_future_noise_variance": {
+        "mean": [
+          138093650.81770834,
+          9.573893795237775e-05,
+          1.0002821918282866e-07,
+          0.37626757285233803,
+          25518.536458333336
+        ],
+        "ci95": [
+          [
+            781855.130952381,
+            426881456.8095238
+          ],
+          [
+            5.829294880948695e-07,
+            0.00029437216900891845
+          ],
+          [
+            2.3267372454942183e-10,
+            3.3626743986667665e-07
+          ],
+          [
+            0.00027106661874703287,
+            1.195602198291485
+          ],
+          [
+            12.645833333333334,
+            80053.6011904762
+          ]
+        ]
+      },
+      "debiased_signal_squared": {
+        "mean": [
+          -5330776.90625,
+          -3.745652577380222e-06,
+          -4.651844574101153e-09,
+          -0.0058618552986336985,
+          -287.0208333333333
+        ],
+        "ci95": [
+          [
+            -18103667.226190478,
+            298613.03571428574
+          ],
+          [
+            -1.271647011309289e-05,
+            2.2112542857140216e-07
+          ],
+          [
+            -2.3967311346470713e-08,
+            5.95912534282545e-09
+          ],
+          [
+            -0.018360009296939987,
+            0.002445578444922676
+          ],
+          [
+            -851.3154761904765,
+            134.70833333333334
+          ]
+        ]
+      },
+      "E_half_cross_product": {
+        "mean": [
+          -7712824.622395834,
+          -5.485734778644157e-06,
+          -1.0271104640871236e-08,
+          7.232090931753705e-05,
+          63.44270833333333
+        ],
+        "ci95": [
+          [
+            -25143692.072916668,
+            2790794.5
+          ],
+          [
+            -1.7564420447910008e-05,
+            1.92734657291741e-06
+          ],
+          [
+            -4.84499125071247e-08,
+            1.0325538756134368e-08
+          ],
+          [
+            -0.0026503852837512962,
+            0.0029345274210520592
+          ],
+          [
+            -126.16666666666667,
+            227.1875
+          ]
+        ]
+      },
+      "S_E_cross_product": {
+        "mean": [
+          25154246.365885414,
+          1.7143496392578885e-05,
+          3.4117373231083968e-09,
+          0.10678896141179173,
+          7689.23046875
+        ],
+        "ci95": [
+          [
+            133029.66927083334,
+            99570003.265625
+          ],
+          [
+            8.90881927085066e-08,
+            6.780646412500352e-05
+          ],
+          [
+            -5.690899005260634e-10,
+            1.2652883048636471e-08
+          ],
+          [
+            -0.001003738849549331,
+            0.4273050899102917
+          ],
+          [
+            -55.252604166666664,
+            30611.955729166668
+          ]
+        ]
+      },
+      "single_future_snr": [
+        -0.03860262129854859,
+        -0.03912360694081833,
+        -0.04650532231908125,
+        -0.015578954237797467,
+        -0.011247542891105095
+      ],
+      "mean8_future_snr": [
+        -0.30882097038838874,
+        -0.31298885552654665,
+        -0.37204257855265,
+        -0.12463163390237973,
+        -0.08998034312884076
+      ],
+      "informative_context_action_pairs": [
+        24,
+        24,
+        24,
+        23,
+        23
+      ],
+      "same_nonzero_E_half_sign_pairs": [
+        12,
+        12,
+        12,
+        9,
+        7
+      ],
+      "metrics": [
+        "passenger_person_s",
+        "journey_min",
+        "cv_squared",
+        "readiness_delay_s",
+        "public_launch_delay_total_s"
+      ]
+    }
+  },
+  "frozen_service_gate_passed": false,
+  "interval_types_both_required": true,
+  "half_gate": "Point passenger improvement and all original constraint nonharm, as in V105; both half interval types also reported.",
+  "primary_only_native_contexts": 3,
+  "primary_non_native_contexts": [
+    1
+  ],
+  "crossed_draws_with_zero_non_native_weight_fraction": 0.447,
+  "bootstrap": {
+    "draws": 5000,
+    "seed": 253,
+    "actor_clusters": 2,
+    "day_clusters": 2,
+    "shared_across_metrics_arms_and_contrasts": true,
+    "future_resampling": "Within each fixed context; all arm/metric pairs share counts."
+  },
+  "selection_recomputed": false,
+  "new_simulator_starts": 0,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "v238_changed": false,
+  "online_selector_defined": false,
+  "resource_specific_claim_admitted": false,
+  "limitations": "Four consumed contexts, two archived actors and two demand days. Futures are new continuations, not new demand days. Native aliases are exact zero controls, not replicated gains. Other bins are descriptive. No distinct supply-blind allocation rule or sustained coordination policy is evaluated."
+}
