@@ -98,7 +98,7 @@ class CausalGraphTests(unittest.TestCase):
         illegal = g.evaluate({(1, 2, 10): 0})
         self.assertIn((1, 2, 10), illegal['missing_commands'])
         departures = [t for t, kind, bus in illegal['nodes'] if kind == 'departure' and bus == 1]
-        self.assertEqual(departures[0], self.snapshot.now_s+20)
+        self.assertEqual(departures[0], self.snapshot.now_s+19)
         self.assertNotIn((1, 2, 10), illegal['legal'])
 
     def test_executed_h_is_not_spendable_slack(self):
@@ -160,7 +160,7 @@ class CausalGraphTests(unittest.TestCase):
         self.assertTrue(graph.feasible(result['selected'], result['reference']))
         self.assertLessEqual(result['selected']['cost'], result['reference']['cost'])
         first_departure = next(t for t, kind, bus in result['selected']['nodes'] if kind == 'departure' and bus == 0)
-        self.assertEqual(first_departure, self.snapshot.now_s + result['action_s'])
+        self.assertEqual(first_departure, self.snapshot.now_s + max(1, result['action_s']))
         with patch.object(graph, 'MAX_EVALUATIONS', 1):
             bounded = graph.solve(g)
         self.assertEqual((bounded['action_s'], bounded['evaluations']), (30, 1))
@@ -214,6 +214,14 @@ class CausalGraphTests(unittest.TestCase):
             result = graph.solve(g)
         self.assertEqual((result['status'], result['action_s']), ('retain_native', 30))
         self.assertEqual(result['reference']['failure'], 'event_limit')
+
+    def test_zero_holding_and_service_query_ticks_are_not_instantaneous(self):
+        g = graph.assemble(self.snapshot, self.visits)
+        result = g.evaluate({(0, 0, 0): 0, (0, 0, 1): 0})
+        q = self.snapshot.now_s
+        own = [(t, kind) for t, kind, bus in result['nodes'] if bus == 0]
+        self.assertEqual(own[:5], [(q, 'prepare'), (q+1, 'departure'), (q+101, 'arrival'),
+                                   (q+146, 'prepare'), (q+147, 'departure')])
 
 
 if __name__ == '__main__':

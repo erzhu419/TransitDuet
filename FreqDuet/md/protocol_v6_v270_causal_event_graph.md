@@ -25,6 +25,9 @@ Executed H is recorded but never converted into slack or spending authority.
 Current service and remaining issued holding are fixed. Public launches use the
 observed physical FIFO pool, original roster and return+1 event ordering. There
 is no terminal hold, new vehicle, reassignment command or speed authority.
+The snapshot is before the query tick's drive: zero holding still consumes the
+native DWELLING transition tick, and observed issued-command countdowns resume
+from the previous tick. Simultaneous vehicle events retain physical fleet order.
 
 The graph extends through active vehicles' next launches and completion of the
 included future trips. The horizon is query plus the longest predicted route

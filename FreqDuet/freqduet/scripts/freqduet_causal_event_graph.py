@@ -203,11 +203,12 @@ def _simulate(graph, commands, homogeneous):
     waiting = onboard = 0.
     homogeneous_load = float(np.mean([v.load for v in s.vehicles if v.phase != 'terminal'])) if initial else 0.
     legal = {}
+    fleet_order = {v.bus: i for i, v in enumerate(s.vehicles)}
 
     def push(t, priority, kind, bus=-1):
         nonlocal serial
         serial += 1
-        heapq.heappush(events, (max(now, float(t)), priority, serial, kind, bus))
+        heapq.heappush(events, (max(now, float(t)), priority, fleet_order.get(bus, -1), serial, kind, bus))
 
     def stage(v, t, kind):
         v['frontier'] = t
@@ -223,12 +224,14 @@ def _simulate(graph, commands, homogeneous):
             ready[v.direction].append((v.ready_s, v.bus))
             push(v.ready_s + 1, 0, 'dispatch')
         elif v.phase == 'travel':
-            stage(row, now + math.ceil(forecast[v.direction, s.routes[v.direction][v.index].station]['run_s'] * v.remaining_fraction), 'arrival')
+            remaining = math.ceil(forecast[v.direction, s.routes[v.direction][v.index].station]['run_s'] * v.remaining_fraction)
+            stage(row, now + max(0, remaining - 1), 'arrival')
         elif v.phase == 'service':
-            stage(row, now + v.remaining_s, 'prepare')
+            control = s.routes[v.direction][v.index].control
+            stage(row, now + max(0, math.ceil(v.remaining_s) - (not control)), 'prepare')
         elif v.phase == 'hold':
             # The remaining part of an irreversible command is never re-optimized.
-            stage(row, now + v.remaining_s, 'departure')
+            stage(row, now + max(0, math.ceil(v.remaining_s) - 1), 'departure')
         else:
             stage(row, now, 'prepare')
         if v.arrival_s is not None:
@@ -236,7 +239,7 @@ def _simulate(graph, commands, homogeneous):
     push(now, 0, 'dispatch')
     invalid = None
     while events and events[0][0] <= end:
-        t, _, _, kind, bus = heapq.heappop(events)
+        t, _, _, _, kind, bus = heapq.heappop(events)
         dt = t - now
         waiting += sum(queues.values()) * dt + sum(f['rate'] for f in forecast.values()) * dt * dt / 2
         if homogeneous:
@@ -285,7 +288,9 @@ def _simulate(graph, commands, homogeneous):
             v['load'] += board - alight
             boardings.append((now, bus, v['trip'], stop.station, board, v['load'], queues[key]))
             v['phase'] = 'service'
-            stage(v, now + math.ceil(max(alight, 2 * board) + 4), 'prepare')
+            # At controlled stops service completion prepares the query; the
+            # command is supplied on the following step, not at the arrival tick.
+            stage(v, now + math.ceil(max(alight, 2 * board) + 4) + stop.control, 'prepare')
         elif kind == 'prepare':
             original = next(r for r in s.vehicles if r.bus == bus)
             initial_node = v['trip'] == original.trip and v['i'] == original.index
@@ -317,7 +322,9 @@ def _simulate(graph, commands, homogeneous):
                 legal[action_key] = tuple(choices)
                 actions[action_key] = (now, int(h))
             v['phase'] = 'hold'
-            stage(v, now + h, 'departure')
+            # Native _start_dwelling sets DWELLING even for zero. It cannot
+            # depart until _process_dwelling on the next physical tick.
+            stage(v, now + max(1, h), 'departure')
         elif kind == 'departure':
             departures[key].append(now)
             v['i'] += 1
