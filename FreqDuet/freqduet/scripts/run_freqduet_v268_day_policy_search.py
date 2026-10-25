@@ -7,6 +7,7 @@ import gzip
 from multiprocessing import get_context
 from pathlib import Path
 import pickle
+from types import SimpleNamespace
 import unittest
 
 import numpy as np
@@ -180,7 +181,7 @@ def aggregate(a):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=('preflight', 'search', 'aggregate'))
+    p.add_argument('command', choices=('preflight', 'search', 'aggregate', 'develop'))
     p.add_argument('--results-root', type=Path, required=True)
     p.add_argument('--source', required=True)
     p.add_argument('--family', choices=learn.FAMILIES)
@@ -191,7 +192,15 @@ def main():
     elif a.command == 'search':
         assert a.family
         optimize(a)
+    elif a.command == 'aggregate':
+        aggregate(a)
     else:
+        preflight(a)
+        with ProcessPoolExecutor(max_workers=2, mp_context=get_context('spawn')) as pool:
+            jobs = [pool.submit(optimize, SimpleNamespace(**{**vars(a), 'family': family}))
+                    for family in learn.FAMILIES]
+            for job in jobs:
+                job.result()
         aggregate(a)
 
 
