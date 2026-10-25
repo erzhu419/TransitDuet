@@ -122,7 +122,7 @@ def assemble(snapshot, visits):
     keys = {(d, s.station) for d, route in snapshot.routes.items() for s in route}
     groups = {k: [] for k in keys}
     for v in visits:
-        if not v.arrival_s <= v.completed_s <= v.available_s:
+        if v.arrival_s > v.completed_s or v.arrival_s > v.available_s:
             raise ValueError('completed APC/AVL clocks are out of order')
         # A label completing or arriving at this tick is not in the strict prefix.
         if v.completed_s < q and v.available_s < q and (v.direction, v.station) in groups:

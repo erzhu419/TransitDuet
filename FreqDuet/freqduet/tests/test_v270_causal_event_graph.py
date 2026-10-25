@@ -47,6 +47,11 @@ class CausalGraphTests(unittest.TestCase):
         result = graph.request(replace(self.snapshot, sampled_s=self.snapshot.now_s-1), self.visits)
         self.assertEqual((result['status'], result['action_s']), ('unsupported_prefix', 30))
 
+    def test_apc_can_be_available_before_the_visit_finishes(self):
+        rows = [replace(r, available_s=r.arrival_s) for r in self.visits]
+        self.assertEqual(graph.assemble(self.snapshot, rows).forecasts,
+                         graph.assemble(self.snapshot, self.visits).forecasts)
+
     def test_support_and_capacity_censor_abstain(self):
         for rows in (self.visits[1:], [replace(r, left_behind=1) for r in self.visits]):
             result = graph.request(self.snapshot, rows)
