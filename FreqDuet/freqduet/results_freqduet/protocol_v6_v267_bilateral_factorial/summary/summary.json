@@ -1,0 +1,1846 @@
+{
+  "source": "25ed615133",
+  "status": "v267_bilateral_factorial_complete",
+  "effects": {
+    "holding_at_learned": {
+      "passenger_person_s": {
+        "mean": 768454.5,
+        "ci95": [
+          606705.125,
+          931069.75
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 0.6505560625000001,
+        "ci95": [
+          0.5196684999999999,
+          0.7820504718750002
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": -0.1448697227644788,
+        "ci95": [
+          -0.16808801215126037,
+          -0.11795506288560696
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 82.9038645625,
+        "ci95": [
+          74.05629775,
+          94.920133821875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 156.784351125,
+        "ci95": [
+          151.02814874999999,
+          161.14882510156252
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": -157450.8125,
+        "ci95": [
+          -325850.625,
+          10224.875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 925905.3125,
+        "ci95": [
+          906360.8125,
+          941988.3078125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 21720.8125,
+        "ci95": [
+          19402.75,
+          24869.074999999997
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 1025294.0625,
+        "ci95": [
+          1007884.6875,
+          1037614.0625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 1.1336538461538446,
+        "ci95": [
+          0.5052884615384414,
+          1.813461538461553
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": -4990.696849112426,
+        "ci95": [
+          -7420.215956915681,
+          -2575.8313285872773
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": -0.038603372563577515,
+        "ci95": [
+          -0.05725740773620533,
+          -0.020042417026162357
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 21694.75,
+        "ci95": [
+          19376.034375,
+          24854.368749999998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 21720.8125,
+        "ci95": [
+          19402.75,
+          24869.074999999997
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "holding_at_fixed": {
+      "passenger_person_s": {
+        "mean": 762238.25,
+        "ci95": [
+          603764.5,
+          920712.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 0.6452897499999999,
+        "ci95": [
+          0.5169989999999993,
+          0.7735805000000004
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": -0.1458060615569767,
+        "ci95": [
+          -0.16863968968756532,
+          -0.1188380192026553
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 82.3101145,
+        "ci95": [
+          73.475191,
+          94.26717499999998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 156.38835875,
+        "ci95": [
+          150.95896925,
+          160.74427500000002
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": -160609.25,
+        "ci95": [
+          -326647.0,
+          5428.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 922847.5,
+        "ci95": [
+          903941.75,
+          940332.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 21565.25,
+        "ci95": [
+          19250.5,
+          24698.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 1023061.25,
+        "ci95": [
+          1007693.75,
+          1035952.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 1.0903846153846075,
+        "ci95": [
+          0.48846153846153584,
+          1.6923076923076792
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": -4995.818624260355,
+        "ci95": [
+          -7340.684637573964,
+          -2650.952610946745
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": -0.03863684146302129,
+        "ci95": [
+          -0.056666598071880236,
+          -0.02060708485416235
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 21565.25,
+        "ci95": [
+          19250.5,
+          24698.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 21565.25,
+        "ci95": [
+          19250.5,
+          24698.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "upper_with_bilateral": {
+      "passenger_person_s": {
+        "mean": 1163.0625,
+        "ci95": [
+          -5675.4375,
+          7677.046874999972
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 0.0009915625000004313,
+        "ci95": [
+          -0.004782812499999567,
+          0.006588840625000194
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": -6.581269891641275e-05,
+        "ci95": [
+          -0.000423332167951674,
+          0.0002473243389496277
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 0.5007155625000017,
+        "ci95": [
+          0.10400731250000561,
+          0.9231930796875017
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 0.39599237499999695,
+        "ci95": [
+          -0.3470897500000021,
+          1.047233000000002
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": -1935.875,
+        "ci95": [
+          -9372.796875,
+          5046.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 3098.9375,
+        "ci95": [
+          -1848.3125,
+          6858.6875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 131.1875,
+        "ci95": [
+          27.25,
+          241.87656249999998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 2232.8125,
+        "ci95": [
+          -3212.742187499999,
+          7371.367187499998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 0.04879807692308091,
+        "ci95": [
+          -0.006256009615379108,
+          0.1480769230769461
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": -20.192746856509217,
+        "ci95": [
+          -76.15046227810691,
+          22.2103291420118
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": -0.0001628081734806363,
+        "ci95": [
+          -0.0006038899246404079,
+          0.00017156518492102363
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 355.125,
+        "ci95": [
+          30.914062500000007,
+          682.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 131.1875,
+        "ci95": [
+          27.25,
+          241.87656249999998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "upper_without_holding": {
+      "passenger_person_s": {
+        "mean": -5053.1875,
+        "ci95": [
+          -12894.6875,
+          606.25
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": -0.004274749999999772,
+        "ci95": [
+          -0.010888124999999693,
+          0.0004722500000001739
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": -0.001002151491414317,
+        "ci95": [
+          -0.0023777269169173837,
+          0.0002557789678420219
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": -0.09303449999999991,
+        "ci95": [
+          -0.19441762499999982,
+          -0.013358937500002277
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": -5094.3125,
+        "ci95": [
+          -13667.625,
+          455.625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 41.125,
+        "ci95": [
+          -2065.4375,
+          1944.125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": -24.375,
+        "ci95": [
+          -50.9375,
+          -3.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 0.005528846153843858,
+        "ci95": [
+          -0.008173076923078781,
+          0.027403846153838174
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": -25.31452200443738,
+        "ci95": [
+          -135.2509649130923,
+          69.11537721893501
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": -0.0001962770729244138,
+        "ci95": [
+          -0.0010506172194146724,
+          0.0005322733970980625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 225.625,
+        "ci95": [
+          -38.599999999999966,
+          492.875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": -24.375,
+        "ci95": [
+          -50.9375,
+          -3.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "bilateral_B200_vs_strong_fixed": {
+      "passenger_person_s": {
+        "mean": 763401.3125,
+        "ci95": [
+          604641.5,
+          924163.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 0.6462813125000003,
+        "ci95": [
+          0.5177607500000001,
+          0.7764656250000006
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": -0.14587187425589312,
+        "ci95": [
+          -0.16881550602372425,
+          -0.11912360076561622
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 82.8108300625,
+        "ci95": [
+          73.986641125,
+          94.84018340468748
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 156.784351125,
+        "ci95": [
+          151.02814874999999,
+          161.14882510156252
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": -162545.125,
+        "ci95": [
+          -327622.5625,
+          3469.75
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 925946.4375,
+        "ci95": [
+          908674.9375,
+          941730.875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 21696.4375,
+        "ci95": [
+          19384.5,
+          24848.128125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 1025294.0625,
+        "ci95": [
+          1007884.6875,
+          1037614.0625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 1.1391826923076884,
+        "ci95": [
+          0.5072055288461411,
+          1.838221153846149
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": -5016.011371116864,
+        "ci95": [
+          -7363.017954095784,
+          -2668.659661612426
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": -0.038799649636501926,
+        "ci95": [
+          -0.056840855198676016,
+          -0.02075480051354197
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 21920.375,
+        "ci95": [
+          19519.5,
+          25133.270312499997
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 21696.4375,
+        "ci95": [
+          19384.5,
+          24848.128125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "interaction": {
+      "passenger_person_s": {
+        "mean": 6216.25,
+        "ci95": [
+          -87.94531249999979,
+          13860.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 0.005266312500000203,
+        "ci95": [
+          -8.132499999873026e-05,
+          0.011747249999998877
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": 0.0009363387924979025,
+        "ci95": [
+          -0.0003625225881161466,
+          0.0022534856236432754
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 0.5937500625000016,
+        "ci95": [
+          0.1698471874999985,
+          1.0066797500000062
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 0.39599237499999695,
+        "ci95": [
+          -0.3470897500000021,
+          1.047233000000002
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": 3158.4375,
+        "ci95": [
+          -4340.6875,
+          11892.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 3057.8125,
+        "ci95": [
+          -1192.625,
+          6714.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 155.5625,
+        "ci95": [
+          44.5,
+          263.75
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 2232.8125,
+        "ci95": [
+          -3212.742187499999,
+          7371.367187499998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 0.043269230769237055,
+        "ci95": [
+          -0.0052884615384556355,
+          0.1250000000000142
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": 5.121775147928162,
+        "ci95": [
+          -87.08764792899467,
+          101.65164862241117
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": 3.346889944377753e-05,
+        "ci95": [
+          -0.0006823208855658318,
+          0.0007708330029645361
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 129.5,
+        "ci95": [
+          10.41093750000001,
+          238.65468749999957
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 155.5625,
+        "ci95": [
+          44.5,
+          263.75
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    }
+  },
+  "absolute": {
+    "learned_bilateral025": {
+      "passenger_person_s": {
+        "mean": 19087968.5625,
+        "ci95": [
+          18615271.56875,
+          19559631.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 16.1952955625,
+        "ci95": [
+          15.9466135,
+          16.444354625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": 0.06210615690250849,
+        "ci95": [
+          0.05555135667489332,
+          0.07206384778952603
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 123.98926531250001,
+        "ci95": [
+          113.96183206250001,
+          139.81416981249998
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 156.784351125,
+        "ci95": [
+          151.02814874999999,
+          161.14882510156252
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": 5334016.875,
+        "ci95": [
+          4976645.125,
+          5690746.25
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 13753951.6875,
+        "ci95": [
+          13540265.75,
+          13870150.4390625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 32485.1875,
+        "ci95": [
+          29858.0,
+          36631.3125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 1025294.0625,
+        "ci95": [
+          1007884.6875,
+          1037614.0625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 361.65552884615386,
+        "ci95": [
+          361.37018028846154,
+          362.06586538461534
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": 4562.970740569526,
+        "ci95": [
+          3783.9071209319527,
+          5350.915730399408
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": 0.03489306629930387,
+        "ci95": [
+          0.02890068502219252,
+          0.040956184177902574
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 32709.125,
+        "ci95": [
+          30045.875,
+          36818.3125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 32485.1875,
+        "ci95": [
+          29858.0,
+          36631.3125
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "learned_zero": {
+      "passenger_person_s": {
+        "mean": 18319514.0625,
+        "ci95": [
+          17929608.1875,
+          18675827.5796875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 15.5447395,
+        "ci95": [
+          15.4110516875,
+          15.6833874109375
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": 0.20697587966698727,
+        "ci95": [
+          0.17535303064104998,
+          0.23678186018652606
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 41.085400750000005,
+        "ci95": [
+          35.502385374999996,
+          46.671278625
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": 5491467.6875,
+        "ci95": [
+          5303147.0,
+          5743504.6875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 12828046.375,
+        "ci95": [
+          12602979.875,
+          12951942.9375
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 10764.375,
+        "ci95": [
+          9301.625,
+          12227.875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 360.521875,
+        "ci95": [
+          360.03171875,
+          361.00865384615383
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": 9553.667589681954,
+        "ci95": [
+          6356.519300110947,
+          12771.59666974852
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": 0.07349643886288137,
+        "ci95": [
+          0.04897179907657176,
+          0.09822126086958964
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 11014.375,
+        "ci95": [
+          9532.3125,
+          12516.375
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 10764.375,
+        "ci95": [
+          9301.625,
+          12227.875
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "fixed_bilateral025": {
+      "passenger_person_s": {
+        "mean": 19086805.5,
+        "ci95": [
+          18614594.75,
+          19556180.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 16.194304000000002,
+        "ci95": [
+          15.9471385,
+          16.4414695
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": 0.062171969601424903,
+        "ci95": [
+          0.05570027881899229,
+          0.07224054780437696
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 123.48854974999999,
+        "ci95": [
+          113.1937025,
+          139.23759524999997
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 156.38835875,
+        "ci95": [
+          150.95896925,
+          160.74427500000002
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": 5335952.75,
+        "ci95": [
+          4979200.5,
+          5692705.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 13750852.75,
+        "ci95": [
+          13540584.25,
+          13865849.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 32354.0,
+        "ci95": [
+          29656.75,
+          36480.25
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 1023061.25,
+        "ci95": [
+          1007693.75,
+          1035952.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 361.60673076923075,
+        "ci95": [
+          361.37307692307695,
+          361.9567307692307
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": 4583.163487426036,
+        "ci95": [
+          3811.9489275147926,
+          5354.378047337279
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": 0.03505587447278451,
+        "ci95": [
+          0.029124125905646045,
+          0.04098762303992297
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 32354.0,
+        "ci95": [
+          29656.75,
+          36480.25
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 32354.0,
+        "ci95": [
+          29656.75,
+          36480.25
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    },
+    "fixed_zero": {
+      "passenger_person_s": {
+        "mean": 18324567.25,
+        "ci95": [
+          17936482.75,
+          18680987.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "journey_min": {
+        "mean": 15.549014249999999,
+        "ci95": [
+          15.41692625,
+          15.6877005
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "cv_squared": {
+        "mean": 0.2079780311584016,
+        "ci95": [
+          0.17661597848238053,
+          0.23727953691942247
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_s": {
+        "mean": 41.17843525,
+        "ci95": [
+          35.6469465,
+          46.709924
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_s_per_trip": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_unlaunched": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "trips_incomplete": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "waiting_person_s": {
+        "mean": 5496562.0,
+        "ci95": [
+          5305847.5,
+          5748144.5
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "onboard_person_s": {
+        "mean": 12828005.25,
+        "ci95": [
+          12604593.75,
+          12950294.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "backlog_trip_s": {
+        "mean": 10788.75,
+        "ci95": [
+          9339.5,
+          12238.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "holding_person_s": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_mean_s": {
+        "mean": 360.51634615384614,
+        "ci95": [
+          360.03076923076924,
+          361.00192307692305
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_gap_variance_s2": {
+        "mean": 9578.98211168639,
+        "ci95": [
+          6462.901538461538,
+          12695.062684911241
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "dispatch_cv_squared": {
+        "mean": 0.0736927159358058,
+        "ci95": [
+          0.049731210759808395,
+          0.09765422111180319
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "public_launch_delay_total_s": {
+        "mean": 10788.75,
+        "ci95": [
+          9339.5,
+          12238.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      },
+      "readiness_delay_total_s": {
+        "mean": 10788.75,
+        "ci95": [
+          9339.5,
+          12238.0
+        ],
+        "n_training_seeds": 4,
+        "n_demand_days": 4
+      }
+    }
+  },
+  "axes": {
+    "seed": {
+      "12011": {
+        "holding_at_learned": {
+          "passenger_person_s": 773625.75,
+          "journey_min": 0.6549335000000007,
+          "cv_squared": -0.14370577329372147,
+          "readiness_delay_s": 82.70419874999999,
+          "public_launch_delay_total_s": 21669.75
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 762238.25,
+          "journey_min": 0.6452897499999999,
+          "cv_squared": -0.1458060615569767,
+          "readiness_delay_s": 82.3101145,
+          "public_launch_delay_total_s": 21565.25
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 1171.0,
+          "journey_min": 0.0010395000000009702,
+          "cv_squared": 0.00021681309824723126,
+          "readiness_delay_s": 0.26049625000000276,
+          "public_launch_delay_total_s": 443.25
+        },
+        "upper_without_holding": {
+          "passenger_person_s": -10216.5,
+          "journey_min": -0.008604249999999869,
+          "cv_squared": -0.001883475165007982,
+          "readiness_delay_s": -0.1335879999999996,
+          "public_launch_delay_total_s": 338.75
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 763409.25,
+          "journey_min": 0.6463292500000009,
+          "cv_squared": -0.14558924845872948,
+          "readiness_delay_s": 82.57061075,
+          "public_launch_delay_total_s": 22008.5
+        },
+        "interaction": {
+          "passenger_person_s": 11387.5,
+          "journey_min": 0.00964375000000084,
+          "cv_squared": 0.002100288263255215,
+          "readiness_delay_s": 0.3940842499999988,
+          "public_launch_delay_total_s": 104.5
+        }
+      },
+      "12049": {
+        "holding_at_learned": {
+          "passenger_person_s": 771091.0,
+          "journey_min": 0.6527695000000002,
+          "cv_squared": -0.14575854710501576,
+          "readiness_delay_s": 82.80916025,
+          "public_launch_delay_total_s": 21695.5
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 762238.25,
+          "journey_min": 0.6452897499999999,
+          "cv_squared": -0.1458060615569767,
+          "readiness_delay_s": 82.3101145,
+          "public_launch_delay_total_s": 21565.25
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 9190.5,
+          "journey_min": 0.007763750000000513,
+          "cv_squared": 3.637320122488498e-05,
+          "readiness_delay_s": 0.4818700000000007,
+          "public_launch_delay_total_s": 137.75
+        },
+        "upper_without_holding": {
+          "passenger_person_s": 337.75,
+          "journey_min": 0.000284000000000173,
+          "cv_squared": -1.114125073607003e-05,
+          "readiness_delay_s": -0.0171757500000016,
+          "public_launch_delay_total_s": 7.5
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 771428.75,
+          "journey_min": 0.6530535000000004,
+          "cv_squared": -0.14576968835575183,
+          "readiness_delay_s": 82.7919845,
+          "public_launch_delay_total_s": 21703.0
+        },
+        "interaction": {
+          "passenger_person_s": 8852.75,
+          "journey_min": 0.00747975000000034,
+          "cv_squared": 4.7514451960953275e-05,
+          "readiness_delay_s": 0.49904575000000406,
+          "public_launch_delay_total_s": 130.25
+        }
+      },
+      "12071": {
+        "holding_at_learned": {
+          "passenger_person_s": 762898.25,
+          "journey_min": 0.6458457499999994,
+          "cv_squared": -0.14640720992684242,
+          "readiness_delay_s": 83.01240475,
+          "public_launch_delay_total_s": 21641.75
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 762238.25,
+          "journey_min": 0.6452897499999999,
+          "cv_squared": -0.1458060615569767,
+          "readiness_delay_s": 82.3101145,
+          "public_launch_delay_total_s": 21565.25
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 472.25,
+          "journey_min": 0.0003479999999997929,
+          "cv_squared": -0.0001733984627894595,
+          "readiness_delay_s": 0.6622137500000029,
+          "public_launch_delay_total_s": 10.75
+        },
+        "upper_without_holding": {
+          "passenger_person_s": -187.75,
+          "journey_min": -0.00020799999999976393,
+          "cv_squared": 0.00042774990707626637,
+          "readiness_delay_s": -0.040076499999999626,
+          "public_launch_delay_total_s": -65.75
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 762710.5,
+          "journey_min": 0.6456377499999997,
+          "cv_squared": -0.1459794600197662,
+          "readiness_delay_s": 82.97232825,
+          "public_launch_delay_total_s": 21576.0
+        },
+        "interaction": {
+          "passenger_person_s": 660.0,
+          "journey_min": 0.0005559999999995568,
+          "cv_squared": -0.0006011483698657311,
+          "readiness_delay_s": 0.7022902500000008,
+          "public_launch_delay_total_s": 76.5
+        }
+      },
+      "12097": {
+        "holding_at_learned": {
+          "passenger_person_s": 766203.0,
+          "journey_min": 0.6486755,
+          "cv_squared": -0.14360736073233554,
+          "readiness_delay_s": 83.08969450000001,
+          "public_launch_delay_total_s": 21772.0
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 762238.25,
+          "journey_min": 0.6452897499999999,
+          "cv_squared": -0.1458060615569767,
+          "readiness_delay_s": 82.3101145,
+          "public_launch_delay_total_s": 21565.25
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": -6181.5,
+          "journey_min": -0.005184999999999551,
+          "cv_squared": -0.00034303863234830777,
+          "readiness_delay_s": 0.5982822500000005,
+          "public_launch_delay_total_s": 828.75
+        },
+        "upper_without_holding": {
+          "passenger_person_s": -10146.25,
+          "journey_min": -0.008570749999999627,
+          "cv_squared": -0.002541739456989482,
+          "readiness_delay_s": -0.18129774999999881,
+          "public_launch_delay_total_s": 622.0
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 756056.75,
+          "journey_min": 0.6401047500000003,
+          "cv_squared": -0.14614910018932503,
+          "readiness_delay_s": 82.90839675,
+          "public_launch_delay_total_s": 22394.0
+        },
+        "interaction": {
+          "passenger_person_s": 3964.75,
+          "journey_min": 0.003385750000000076,
+          "cv_squared": 0.0021987008246411727,
+          "readiness_delay_s": 0.7795800000000028,
+          "public_launch_delay_total_s": 206.75
+        }
+      }
+    },
+    "day": {
+      "2071001": {
+        "holding_at_learned": {
+          "passenger_person_s": 964365.5,
+          "journey_min": 0.8066227500000003,
+          "cv_squared": -0.10244107314641124,
+          "readiness_delay_s": 76.210878,
+          "public_launch_delay_total_s": 19930.25
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 955901.0,
+          "journey_min": 0.7995430000000017,
+          "cv_squared": -0.10362258268150726,
+          "readiness_delay_s": 75.167939,
+          "public_launch_delay_total_s": 19694.0
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 1261.75,
+          "journey_min": 0.0010554999999987658,
+          "cv_squared": -0.00021736168680492468,
+          "readiness_delay_s": 0.9141219999999954,
+          "public_launch_delay_total_s": 461.0
+        },
+        "upper_without_holding": {
+          "passenger_person_s": -7202.75,
+          "journey_min": -0.006024249999999842,
+          "cv_squared": -0.001398871221900952,
+          "readiness_delay_s": -0.12881699999999796,
+          "public_launch_delay_total_s": 224.75
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 957162.75,
+          "journey_min": 0.8005985000000004,
+          "cv_squared": -0.1038399443683122,
+          "readiness_delay_s": 76.08206100000001,
+          "public_launch_delay_total_s": 20155.0
+        },
+        "interaction": {
+          "passenger_person_s": 8464.5,
+          "journey_min": 0.007079749999998608,
+          "cv_squared": 0.0011815095350960203,
+          "readiness_delay_s": 1.0429389999999934,
+          "public_launch_delay_total_s": 236.25
+        }
+      },
+      "2071002": {
+        "holding_at_learned": {
+          "passenger_person_s": 616022.5,
+          "journey_min": 0.5323575000000003,
+          "cv_squared": -0.1644970321031941,
+          "readiness_delay_s": 72.1755725,
+          "public_launch_delay_total_s": 18891.75
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 608975.0,
+          "journey_min": 0.5262670000000007,
+          "cv_squared": -0.16448432876609945,
+          "readiness_delay_s": 71.782443,
+          "public_launch_delay_total_s": 18807.0
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 2274.0,
+          "journey_min": 0.0019657500000000994,
+          "cv_squared": -0.0003531613096691595,
+          "readiness_delay_s": 0.33015225000000825,
+          "public_launch_delay_total_s": 312.25
+        },
+        "upper_without_holding": {
+          "passenger_person_s": -4773.5,
+          "journey_min": -0.004124749999999455,
+          "cv_squared": -0.0003404579725744747,
+          "readiness_delay_s": -0.06297724999999943,
+          "public_launch_delay_total_s": 227.5
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 611249.0,
+          "journey_min": 0.5282327500000008,
+          "cv_squared": -0.1648374900757686,
+          "readiness_delay_s": 72.11259525,
+          "public_launch_delay_total_s": 19119.25
+        },
+        "interaction": {
+          "passenger_person_s": 7047.5,
+          "journey_min": 0.006090499999999555,
+          "cv_squared": -1.2703337094681355e-05,
+          "readiness_delay_s": 0.3931295000000006,
+          "public_launch_delay_total_s": 84.75
+        }
+      },
+      "2071003": {
+        "holding_at_learned": {
+          "passenger_person_s": 598261.75,
+          "journey_min": 0.5074829999999997,
+          "cv_squared": -0.14128009160894894,
+          "readiness_delay_s": 81.941794,
+          "public_launch_delay_total_s": 21437.5
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 598554.0,
+          "journey_min": 0.5077309999999979,
+          "cv_squared": -0.14232228417126894,
+          "readiness_delay_s": 81.65648900000001,
+          "public_launch_delay_total_s": 21394.0
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 630.75,
+          "journey_min": 0.0005350000000015065,
+          "cv_squared": 5.7277135298849924e-05,
+          "readiness_delay_s": 0.1555342499999952,
+          "public_launch_delay_total_s": 259.5
+        },
+        "upper_without_holding": {
+          "passenger_person_s": 923.0,
+          "journey_min": 0.0007829999999997561,
+          "cv_squared": -0.0009849154270211366,
+          "readiness_delay_s": -0.1297707499999987,
+          "public_launch_delay_total_s": 216.0
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 599184.75,
+          "journey_min": 0.5082659999999994,
+          "cv_squared": -0.1422650070359701,
+          "readiness_delay_s": 81.81202325000001,
+          "public_launch_delay_total_s": 21653.5
+        },
+        "interaction": {
+          "passenger_person_s": -292.25,
+          "journey_min": -0.0002479999999982496,
+          "cv_squared": 0.0010421925623199935,
+          "readiness_delay_s": 0.2853049999999939,
+          "public_launch_delay_total_s": 43.5
+        }
+      },
+      "2071004": {
+        "holding_at_learned": {
+          "passenger_person_s": 895168.25,
+          "journey_min": 0.7557610000000001,
+          "cv_squared": -0.1712606941993609,
+          "readiness_delay_s": 101.28721375,
+          "public_launch_delay_total_s": 26519.5
+        },
+        "holding_at_fixed": {
+          "passenger_person_s": 885523.0,
+          "journey_min": 0.7476179999999992,
+          "cv_squared": -0.1727950506090312,
+          "readiness_delay_s": 100.63358699999998,
+          "public_launch_delay_total_s": 26366.0
+        },
+        "upper_with_bilateral": {
+          "passenger_person_s": 485.75,
+          "journey_min": 0.0004100000000013537,
+          "cv_squared": 0.00024999506550958325,
+          "readiness_delay_s": 0.6030537500000079,
+          "public_launch_delay_total_s": 387.75
+        },
+        "upper_without_holding": {
+          "passenger_person_s": -9159.5,
+          "journey_min": -0.007732999999999546,
+          "cv_squared": -0.0012843613441607046,
+          "readiness_delay_s": -0.05057300000000353,
+          "public_launch_delay_total_s": 234.25
+        },
+        "bilateral_B200_vs_strong_fixed": {
+          "passenger_person_s": 886008.75,
+          "journey_min": 0.7480280000000006,
+          "cv_squared": -0.17254505554352162,
+          "readiness_delay_s": 101.23664074999998,
+          "public_launch_delay_total_s": 26753.75
+        },
+        "interaction": {
+          "passenger_person_s": 9645.25,
+          "journey_min": 0.0081430000000009,
+          "cv_squared": 0.0015343564096702775,
+          "readiness_delay_s": 0.6536267500000186,
+          "public_launch_delay_total_s": 153.5
+        }
+      }
+    }
+  },
+  "actors": [
+    12011,
+    12049,
+    12071,
+    12097
+  ],
+  "consumed_days": [
+    2071001,
+    2071002,
+    2071003,
+    2071004
+  ],
+  "physical_paths": 40,
+  "logical_actor_day_arm_cells": 64,
+  "fixed_paths_shared_across_actors": true,
+  "bootstrap": "Existing 5000-draw crossed actor/day bootstrap; all contrasts retain shared fixed day paths.",
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "controller_admitted": false,
+  "scope": "Small consumed-day attribution pilot; no new-day confirmation, equivalence or learned frequency claim."
+}
