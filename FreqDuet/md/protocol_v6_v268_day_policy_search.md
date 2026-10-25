@@ -53,3 +53,10 @@ benefit should matched-budget frequency ablations be considered.
 All tests,preflight,optimization and aggregation run via scheduler high/manual
 on node001--node006. Raw paths and fitted parameters remain server-side;only
 small receipts and final summaries return locally. Original TransitDuet untouched.
+
+Run (2026-10-25):synthetic task t211590 exited0(8 tests). Frozen development
+source c00a29013a;high/manual t211591 launched on node004 with8 CPUs,48GiB RAM,
+no auto-requeue. Final-source8 tests also pass. At the launch snapshot,one of
+three engineering paths has started(neutral cached replay),none is accepted yet.
+Only passing all three releases the two four-worker searches and aggregation
+within this same job. Confirmation remains closed;no efficacy result yet.
