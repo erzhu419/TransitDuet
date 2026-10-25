@@ -36,5 +36,9 @@ One high/manual server task checks flow identities,strict prefixes,tied clocks,
 legacy bridge tests,and two loss-of-future-action counterexamples. No new labels
 are consumed. Next specify the native passive-equivalence budget and an independent
 development cohort before traffic integration;do not retest on V272's four days.
+Execution status:source717483c80d is committed but NOT test-accepted. Deployment
+stopped before remote execution:the configured jtl110gpu route refused SSH and
+jtl110gpu2 timed out during handshake. No scheduler test was submitted and no
+physical slot was consumed. Resume with the one high/manual synthetic task first.
 Limitations:the identities require the complete native arrival roster;no demand
 forecast or finite uncertainty envelope,controller or traffic benefit is claimed.
