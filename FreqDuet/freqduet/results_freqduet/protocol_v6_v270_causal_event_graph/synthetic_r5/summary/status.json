@@ -1,0 +1,45 @@
+{
+  "source": "0a68748858",
+  "status": "v270_causal_graph_synthetic_checks_passed",
+  "tests": 19,
+  "examples": {
+    "apc": {
+      "action_s": 30,
+      "evaluations": 62,
+      "status": "retain_native",
+      "wall_s": 0.018402553163468838,
+      "model_deltas": {
+        "cost": 0.0,
+        "waiting": 0.0,
+        "onboard": 0.0,
+        "cv2": 0.0
+      },
+      "feasible": true
+    },
+    "homogeneous": {
+      "action_s": 30,
+      "evaluations": 62,
+      "status": "retain_native",
+      "wall_s": 0.018592369742691517,
+      "model_deltas": {
+        "cost": 0.0,
+        "waiting": 0.0,
+        "onboard": 0.0,
+        "cv2": 0.0
+      },
+      "feasible": true
+    },
+    "full_fleet_query": {
+      "vehicles": 12,
+      "stops_per_direction": 23,
+      "wall_s": 1.810611443594098,
+      "evaluations": 128,
+      "status": "model_improvement"
+    }
+  },
+  "traffic_paths": 0,
+  "training_updates": 0,
+  "native_simulator_adapter_admitted": false,
+  "main_policy_changed": false,
+  "interpretation": "Causal model and bounded solver checks only; no full-day policy benefit established."
+}

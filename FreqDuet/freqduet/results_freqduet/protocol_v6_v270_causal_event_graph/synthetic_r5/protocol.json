@@ -1,0 +1,70 @@
+{
+  "stage": "v270_complete_day_development_pilot",
+  "release": "sealed_not_started",
+  "arms": [
+    "fixed360_bilateral025",
+    "event_graph_apc",
+    "event_graph_homogeneous_cost"
+  ],
+  "demand_days": [
+    2071001,
+    2071002,
+    2071003,
+    2071004
+  ],
+  "actor_seed": 12011,
+  "independent_runtime_seeds": [
+    27011001,
+    27011002
+  ],
+  "paired_unit": "demand day x runtime seed; common exogenous streams, not shared policy outcomes",
+  "engineering_preflight_cap": 2,
+  "paired_full_days": 8,
+  "matrix_paths": 24,
+  "total_physical_start_cap": 26,
+  "max_concurrent": 8,
+  "automatic_retry": false,
+  "engineering_order": [
+    "fixed360 native replay",
+    "event graph observational no-op"
+  ],
+  "admission": "exact native action/timing/endpoint equivalence, causal query/APC fields and prefix clocks; verify common exogenous streams are indexed independently of policy event counts",
+  "fleet": 12,
+  "action_bins_s": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    30,
+    45
+  ],
+  "upper": "unchanged exact360 public schedule",
+  "forecasts": "strict completed current-day APC/AVL visits per direction/stop; minimum 3; last 3 visits must be uncensored for boarded/gap rate; all completed alight/incoming and mean run; no future queues or destinations",
+  "horizon": "query + longest route upper bound (ceil mean run +104 nonterminal service, native query/transition ticks, up to45 legal holding) +360*fleet+1; launches with public release <= query+360*fleet; fixed across candidates",
+  "solver": {
+    "beam_width": 4,
+    "variables": 6,
+    "evaluations": 128,
+    "events": 12000,
+    "optimality_claim": false,
+    "fallback": "retain native on unsupported prefix or no feasible strict gain"
+  },
+  "operational_obligations": "commands already issued and current service are fixed; first current legal command only; future plan revisable at every query; FIFO native return+1 dispatch, no terminal holding",
+  "model_constraints": "CV2, first return and next launch per active vehicle, and each included public launch delay no worse than same-query bilateral forecast; equal comparison boundaries, no H-as-slack",
+  "statistics": "8 day/runtime pairs, paired means and 95% crossed day/runtime bootstrap; single actor is a development anchor, not an actor-generalization claim",
+  "endpoints": [
+    "once-only waiting+onboard person-seconds",
+    "actual full-day arrival CV2",
+    "vehicle readiness delay",
+    "total public dispatch delay including control waits",
+    "unlaunched/incomplete trips",
+    "actual holding vehicle/person-seconds"
+  ],
+  "continue_gate": "APC arm passenger upper95<0 and CV2/readiness/public-delay upper95<=0 vs unchanged baseline; no extra unfinished service; repeat effect direction in both runtime-seed halves; APC-vs-homogeneous must improve the same tradeoff, otherwise no allocation-information claim",
+  "failure_decision": "close this frozen pilot if joint gate fails; no forecast/window/weight tuning on its outcomes",
+  "independent_confirmation": "new demand days and remaining actors require a separate release after development gain; only then matched-budget frequency ablations",
+  "physical_execution_authorized_now": false,
+  "main_policy_changed": false,
+  "training_started": false
+}
