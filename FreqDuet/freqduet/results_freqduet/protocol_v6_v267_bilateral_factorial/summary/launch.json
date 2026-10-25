@@ -1,0 +1,133 @@
+{
+  "source": "25ed615133",
+  "smoke_task": "t211575",
+  "smoke_exit_code": 0,
+  "smoke_tests": 7,
+  "smoke_starts": 6,
+  "smoke_formal_paths_reused": 4,
+  "formal_unique_paths": 40,
+  "remaining_paths": 36,
+  "physical_start_cap": 42,
+  "max_workers": 8,
+  "priority": "high",
+  "automatic_retry": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "status": "all_eight_shards_started",
+  "tasks": [
+    {
+      "shard": 0,
+      "task_id": "t211577",
+      "preferred_node": "node004",
+      "planned_paths": 5,
+      "scheduler_snapshot": {
+        "id": "t211577",
+        "status": "running",
+        "node": "node004",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 1,
+      "task_id": "t211579",
+      "preferred_node": "node004",
+      "planned_paths": 5,
+      "scheduler_snapshot": {
+        "id": "t211579",
+        "status": "running",
+        "node": "node004",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 2,
+      "task_id": "t211580",
+      "preferred_node": "node004",
+      "planned_paths": 5,
+      "scheduler_snapshot": {
+        "id": "t211580",
+        "status": "running",
+        "node": "node004",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 3,
+      "task_id": "t211581",
+      "preferred_node": "node004",
+      "planned_paths": 5,
+      "scheduler_snapshot": {
+        "id": "t211581",
+        "status": "running",
+        "node": "node004",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 4,
+      "task_id": "t211582",
+      "preferred_node": "node005",
+      "planned_paths": 4,
+      "scheduler_snapshot": {
+        "id": "t211582",
+        "status": "running",
+        "node": "node005",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 5,
+      "task_id": "t211583",
+      "preferred_node": "node005",
+      "planned_paths": 4,
+      "scheduler_snapshot": {
+        "id": "t211583",
+        "status": "running",
+        "node": "node005",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 6,
+      "task_id": "t211584",
+      "preferred_node": "node005",
+      "planned_paths": 4,
+      "scheduler_snapshot": {
+        "id": "t211584",
+        "status": "running",
+        "node": "node005",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    },
+    {
+      "shard": 7,
+      "task_id": "t211585",
+      "preferred_node": "node005",
+      "planned_paths": 4,
+      "scheduler_snapshot": {
+        "id": "t211585",
+        "status": "running",
+        "node": "node005",
+        "priority": "high",
+        "no_auto_requeue": true,
+        "exit_code": null
+      }
+    }
+  ],
+  "manual_dispatch_invoked": true,
+  "manual_dispatch_exit_code": 0
+}

@@ -27,3 +27,11 @@ bootstrap and actor/day means. Keep both signs and crossing-zero uncertainty;
 no winner selection,noninferiority margin,training or main-policy switch.
 All tests/replays/analysis via scheduler high/manual on node001--node006;
 only small markers and the final summary may return locally.
+
+Run:source25ed615133,smoke t211575 on node004 exited0. Seven synthetic tests
+and all six full-day checks pass;the four matrix corners are reusable. Cached
+V107 endpoints/action counts/coverage are exact,fixed bilateral actor traces
+match,and fixed zero matches the original external baseline. No outcome gate.
+Remaining36 paths:t211577,t211579--t211585,all running high/manual with no
+auto-requeue,four each on node004/node005. Snapshot:30 total starts,20 formal
+paths saved,zero completed shards. No efficacy conclusion or policy admission.
