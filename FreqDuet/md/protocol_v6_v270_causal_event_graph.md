@@ -15,7 +15,8 @@ The pure capture adapter does not install callbacks in the native simulator.
 
 Run, alighting fraction and uncensored boarded/gap demand forecasts use only
 visits whose completion AND label-availability clocks are strictly before query.
-Three completed visits per directional stop are required. Missing/currently
+Three completed visits per directional stop are required; demand uses the latest
+three and run/alighting means use the complete strict prefix. Missing/currently
 unavailable fields or capacity-censored demand retain the original native request.
 Current APC boarding is removed from the forecast queue; doors do not reopen
 during holding. Forecast capacity excess stays waiting. Arrival order is rebuilt.

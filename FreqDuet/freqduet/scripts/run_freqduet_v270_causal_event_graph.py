@@ -4,10 +4,13 @@
 import argparse
 import json
 from pathlib import Path
+import sys
 import time
 import unittest
 
 import freqduet_causal_event_graph as graph
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tests'))
 from test_v270_causal_event_graph import fixture
 
 
@@ -23,8 +26,9 @@ def protocol():
         admission='exact native action/timing/endpoint equivalence, causal query/APC fields and prefix clocks; '
                   'verify common exogenous streams are indexed independently of policy event counts',
         fleet=12, action_bins_s=graph.ACTIONS.tolist(), upper='unchanged exact360 public schedule',
-        forecasts='all strict completed current-day APC/AVL visits per direction/stop; minimum 3; '
-                  'uncensored boarded/gap rate, alight/incoming fraction, mean run; no future queues or destinations',
+        forecasts='strict completed current-day APC/AVL visits per direction/stop; minimum 3; '
+                  'last 3 visits must be uncensored for boarded/gap rate; all completed alight/incoming and mean run; '
+                  'no future queues or destinations',
         horizon='query + longest route upper bound (mean run +104 service +45 legal holding per stop) '
                 '+360*fleet+1; launches with public release <= query+360*fleet; fixed across candidates',
         solver=dict(beam_width=graph.BEAM_WIDTH, variables=graph.MAX_VARIABLES,
@@ -32,7 +36,7 @@ def protocol():
                     optimality_claim=False, fallback='retain native on unsupported prefix or no feasible strict gain'),
         operational_obligations='commands already issued and current service are fixed; first current legal command only; '
                                 'future plan revisable at every query; FIFO native return+1 dispatch, no terminal holding',
-        model_constraints='CV2, first return per active vehicle and each included public launch delay no worse than '
+        model_constraints='CV2, first return and next launch per active vehicle, and each included public launch delay no worse than '
                           'same-query bilateral forecast; equal comparison boundaries, no H-as-slack',
         statistics='8 day/runtime pairs, paired means and 95% crossed day/runtime bootstrap; '
                    'single actor is a development anchor, not an actor-generalization claim',
@@ -69,6 +73,22 @@ def main():
             model_deltas={k: selected['selected'][k]-selected['reference'][k]
                           for k in ('cost', 'waiting', 'onboard', 'cv2')},
             feasible=graph.feasible(selected['selected'], selected['reference']))
+    # Detect whether a full-fleet query is computationally usable before wiring a simulator.
+    routes = {d: tuple(graph.Stop(100*int(d)+i, control=i < 22, terminal=i == 22) for i in range(23))
+              for d in (False, True)}
+    visits = [graph.Visit(d, stop.station, snapshot.now_s-gap, snapshot.now_s-gap+4,
+                         snapshot.now_s-gap+5, 20., 40., 0., 40. if i else 0., 360.)
+              for d, stops in routes.items() for i, stop in enumerate(stops) for gap in (1080, 720, 360)]
+    fleet = tuple(graph.Vehicle(i, i, bool(i % 2), 0 if i == 0 else i*2 % 22,
+        'prepare' if i == 0 else 'travel', 40., arrival_s=snapshot.now_s-4 if i == 0 else None,
+        boarded=0. if i == 0 else None) for i in range(12))
+    plans = tuple(graph.Plan(100+2*i+int(d), d, snapshot.now_s+360*(i+1))
+                  for i in range(12) for d in (False, True))
+    large = graph.Snapshot(snapshot.now_s, snapshot.now_s, routes, fleet, plans, 0, 30)
+    start = time.perf_counter()
+    timed = graph.request(large, visits)
+    records['full_fleet_query'] = dict(vehicles=12, stops_per_direction=23,
+        wall_s=time.perf_counter()-start, evaluations=timed['evaluations'], status=timed['status'])
     summary = dict(source=a.source, status='v270_causal_graph_synthetic_checks_passed',
         tests=result.testsRun, examples=records, traffic_paths=0, training_updates=0,
         native_simulator_adapter_admitted=False, main_policy_changed=False,

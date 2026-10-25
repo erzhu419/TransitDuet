@@ -50,6 +50,11 @@ class CausalGraphTests(unittest.TestCase):
             result = graph.request(self.snapshot, rows)
             self.assertEqual((result['action_s'], result['evaluations']), (30, 0))
 
+    def test_old_censor_does_not_disable_the_rest_of_day(self):
+        old = replace(self.visits[0], arrival_s=100., completed_s=104., available_s=105., left_behind=10.)
+        g = graph.assemble(self.snapshot, [old, *self.visits])
+        self.assertEqual(g.forecasts[False, 0]['demand_visits'], 3)
+
     def test_terminal_has_no_holding_authority(self):
         bad = dict(self.snapshot.routes)
         bad[False] = (*bad[False][:-1], graph.Stop(2, control=True, terminal=True))
@@ -130,10 +135,13 @@ class CausalGraphTests(unittest.TestCase):
         self.assertGreater(at_b[6], 0.)  # Future capacity pressure remains in the queue.
 
     def test_arrivals_reorder_instead_of_using_hindsight_neighbors(self):
-        v = graph.Vehicle(2, 3, False, 1, 'travel', 10., remaining_fraction=1.)
+        v = graph.Vehicle(2, 3, False, 0, 'hold', 10., remaining_s=30.,
+                          arrival_s=self.snapshot.now_s-5, boarded=0.)
         g = graph.assemble(replace(self.snapshot, vehicles=(*self.snapshot.vehicles, v)), self.visits)
         a = g.evaluate({(0, 0, 0): 45})
         b = g.evaluate({(0, 0, 0): 0})
+        self.assertEqual([r[1] for r in a['boardings'] if r[2] in (0, 3) and r[3] == 1], [2, 0])
+        self.assertEqual([r[1] for r in b['boardings'] if r[2] in (0, 3) and r[3] == 1], [0, 2])
         for result in (a, b):
             gaps = np.array([x for times in result['arrivals'].values() for x in np.diff(sorted(times))])
             self.assertAlmostEqual(result['cv2'], np.var(gaps) / np.mean(gaps)**2)
@@ -147,6 +155,8 @@ class CausalGraphTests(unittest.TestCase):
         self.assertFalse(result['optimality_claim'])
         self.assertTrue(graph.feasible(result['selected'], result['reference']))
         self.assertLessEqual(result['selected']['cost'], result['reference']['cost'])
+        first_departure = next(t for t, kind, bus in result['selected']['nodes'] if kind == 'departure' and bus == 0)
+        self.assertEqual(first_departure, self.snapshot.now_s + result['action_s'])
         with patch.object(graph, 'MAX_EVALUATIONS', 1):
             bounded = graph.solve(g)
         self.assertEqual((bounded['action_s'], bounded['evaluations']), (30, 1))

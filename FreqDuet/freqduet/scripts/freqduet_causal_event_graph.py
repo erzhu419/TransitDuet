@@ -136,13 +136,14 @@ def assemble(snapshot, visits):
                or not 0 <= r.incoming_load - r.alighted + r.boarded <= r.capacity for r in rows):
             raise ValueError('invalid completed run or APC counts')
         # Board counts identify arrivals only when the station was not capacity censored.
-        if any(r.left_behind or r.incoming_load - r.alighted + r.boarded >= r.capacity for r in rows):
+        demand_rows = rows[-MIN_VISITS:]
+        if any(r.left_behind or r.incoming_load - r.alighted + r.boarded >= r.capacity for r in demand_rows):
             raise Unsupported('capacity-censored APC demand needs an observable arrival forecast')
         incoming = sum(r.incoming_load for r in rows)
         forecasts[key] = dict(run_s=float(np.mean([r.run_s for r in rows])),
-            rate=sum(r.boarded for r in rows) / sum(r.gap_s for r in rows),
+            rate=sum(r.boarded for r in demand_rows) / sum(r.gap_s for r in demand_rows),
             alight=sum(r.alighted for r in rows) / incoming if incoming else 0.,
-            visits=len(rows), days_not_inferred=True)
+            visits=len(rows), demand_visits=len(demand_rows))
         completed[key] = rows
     longest = 0.
     for d, route in snapshot.routes.items():
