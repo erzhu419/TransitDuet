@@ -100,6 +100,8 @@ def collect(a):
     day, arm = ITEMS[a.index]
     protocol = read(a.root/'protocol.json')
     assert protocol['source'] == a.source and protocol['unique_paths'] == 12
+    reservation = read(a.root/'budget'/f'p{a.index}.json')
+    assert reservation['source'] == a.source and (reservation['day'],reservation['arm']) == (day,arm)
     write(a.root/'started'/f'p{a.index}.json', dict(source=a.source, day=day, arm=arm, automatic_retry=False))
     import numpy as np
     import run_freqduet_v267_bilateral_factorial as fixed
@@ -130,6 +132,9 @@ def collect(a):
             old = pickle.load(stream)
         for field in ('holds', 'dispatches', 'arrivals', 'departures', 'uniforms'):
             fixed.pilot.joint.assert_same_state(trace[field], old[field], 'V272_reference_trace_'+field)
+        fixed.pilot.joint.assert_same_state(
+            [{k:v for k,v in q.items() if k != 'executed_request_s'} for q in audit.decisions],
+            old['queries'], 'V272_reference_queries')
         cached_exact = True
     graph_summary = None if audit.bridge is None else audit.bridge.summary()
     if graph_summary is not None:
