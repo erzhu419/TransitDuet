@@ -28,3 +28,6 @@ Reservations are written before scheduler submission;entry creates an exclusive
 physical-start marker. Failure consumes its slot. No automatic retry or fallback
 replay. Only high/manual scheduler jobs on node001-006. Raw traces stay server-side;
 local artifacts are small acceptance summaries. Synthetic checks consume0 slots.
+The budget lives under V270/engineering;V271's output is a direct child of
+results_freqduet,as required by the existing verified-runtime loader. This does
+not create a fresh two-slot budget in the V271 output directory.

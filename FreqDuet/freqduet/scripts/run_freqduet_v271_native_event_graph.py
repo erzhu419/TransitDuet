@@ -28,9 +28,10 @@ def write(path, value):
 def run(a):
     # The scheduler submission has already consumed this slot, including failure
     # before Python entry. This second marker prevents a duplicate physical start.
-    reservation = read(a.root/'budget'/f'{a.command}.json')
+    account = a.results_root/'protocol_v6_v270_causal_event_graph/engineering'
+    reservation = read(account/'budget'/f'{a.command}.json')
     assert reservation['source'] == a.source and not reservation['automatic_retry']
-    write(a.root/'started'/f'{a.command}.json', dict(source=a.source, physical_slot=a.command))
+    write(account/'started'/f'{a.command}.json', dict(source=a.source, physical_slot=a.command))
     if a.command == 'noop':
         gate = read(a.root/'summary/reference.json')
         assert gate['source'] == a.source and gate['status'] == 'reference_cached_parity_passed'
@@ -118,7 +119,7 @@ def run(a):
             pickle.dump(dict(queries=audit.bridge.queries, completed_visits=audit.bridge.prefix.visits), stream)
         status = 'noop_native_equivalence_passed'
     write(a.root/'summary'/f'{a.command}.json', dict(source=a.source, graph_source=GRAPH_SOURCE, status=status,
-        physical_slots_consumed=len(list((a.root/'budget').glob('*.json'))), physical_slot_cap=2,
+        physical_slots_consumed=len(list((account/'budget').glob('*.json'))), physical_slot_cap=2,
         native_queries=len(audit.native_queries), actual_commands=len(holds), wall_s=time.perf_counter()-start,
         native_query_latency_s=dict(mean=float(np.mean(audit.native_wall)), p95=float(np.quantile(audit.native_wall,.95)),
                                     max=float(max(audit.native_wall))),

@@ -19,7 +19,7 @@ def main():
     assert FUTURE == 27011001
     # Resolve the same optimized modules used by rollout, without constructing
     # a Runner, loading a checkpoint, resetting an episode or advancing traffic.
-    _, Runner, _, _ = fixed.pilot.joint.optimized_runtime(a.out_root)
+    _, Runner, _, _ = fixed.pilot.joint.optimized_runtime(a.out_root.parent)
     from env.bus import Bus
     for name in ('exchange_passengers', 'drive', '_start_dwelling', '_process_dwelling'):
         assert callable(getattr(Bus, name))

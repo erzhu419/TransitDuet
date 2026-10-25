@@ -58,13 +58,14 @@ class NativeBridgeTests(unittest.TestCase):
         self.assertIsNone(value.vehicles[1].arrival_s)
 
     def test_prefix_requires_both_clocks_strictly_completed(self):
-        prefix = CompletedPrefix({0: dict(time_s=100.)})
+        prefix = CompletedPrefix({i: dict(time_s=100.) for i in (0, 1)})
         bus = NS(bus_id=0, trip_id=0, last_board_count=3, passengers=[None]*8, capacity=50.)
         prefix.arrival(bus, 150., 1, True, 10)
         prefix.complete(0, 0, 1, True, 160.)
         self.assertEqual(prefix.first_visits, 1)
+        bus.bus_id, bus.trip_id = 1, 1
         prefix.arrival(bus, 180., 1, True, 10)
-        prefix.complete(0, 0, 1, True, 190.)
+        prefix.complete(1, 1, 1, True, 190.)
         self.assertEqual(len(prefix.strict(190.)), 0)
         self.assertEqual(len(prefix.strict(191.)), 1)
         self.assertEqual((prefix.visits[0].incoming_load, prefix.visits[0].boarded, prefix.visits[0].alighted), (10., 3., 5.))
