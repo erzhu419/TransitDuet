@@ -6,6 +6,7 @@ import time
 import numpy as np
 
 import freqduet_causal_event_graph as graph
+from freqduet_apc_flow_evidence import APCArrival
 from freqduet_fleet_observation import capture_fleet
 
 
@@ -24,6 +25,7 @@ class CompletedPrefix:
         self.visits = []
         self.finished = set()
         self.first_visits = 0
+        self.flow_events, self.flow_index = [], {}
 
     def arrival(self, bus, now, station, direction, incoming):
         key = (int(bus.bus_id), int(bus.trip_id), int(station), bool(direction))
@@ -39,6 +41,10 @@ class CompletedPrefix:
         assert 0 <= after <= bus.capacity
         self.current[key] = row
         self.arrivals[stop] = float(now)
+        self.flow_index[key] = len(self.flow_events)
+        self.flow_events.append(APCArrival(len(self.flow_events), key[0], key[1], key[3], key[2],
+            float(now), float(now), None, float(incoming), float(incoming+board-after),
+            float(board), float(bus.capacity)))
 
     def complete(self, bus, trip, station, direction, now):
         key = (int(bus), int(trip), int(station), bool(direction))
@@ -48,6 +54,8 @@ class CompletedPrefix:
         assert row['arrival_s'] <= now
         self.finished.add(key)
         self.departures[key[:2]] = float(now)
+        index = self.flow_index[key]
+        self.flow_events[index] = replace(self.flow_events[index], completed_s=float(now))
         if row['gap_s'] is None:
             self.first_visits += 1
         else:
