@@ -10,7 +10,7 @@ from freqduet_event_graph_design import ACTIONS
 
 
 MIN_VISITS = 3
-BEAM_WIDTH, MAX_VARIABLES, MAX_EVALUATIONS, MAX_EVENTS = 8, 6, 512, 12000
+BEAM_WIDTH, MAX_VARIABLES, MAX_EVALUATIONS, MAX_EVENTS = 4, 6, 128, 12000
 
 
 @dataclass(frozen=True)
@@ -181,6 +181,7 @@ def _simulate(graph, commands, homogeneous):
     now, serial, events = s.now_s, 0, []
     vehicles = {v.bus: dict(bus=v.bus, trip=v.trip, d=v.direction, i=v.index,
         phase=v.phase, load=v.load, cap=v.capacity, legal=v.legal, frontier=now) for v in s.vehicles}
+    originals = {v.bus: v for v in s.vehicles}
     arrivals = {k: [r.arrival_s for r in rows[-2:]] for k, rows in graph.completed.items()}
     departures = {k: sorted(r.completed_s for r in rows)[-2:] for k, rows in graph.completed.items()}
     queues = {}
@@ -204,6 +205,11 @@ def _simulate(graph, commands, homogeneous):
     initial_queue = dict(queues)
     waiting = onboard = 0.
     homogeneous_load = float(np.mean([v.load for v in s.vehicles if v.phase != 'terminal'])) if initial else 0.
+    total_rate = sum(f['rate'] for f in forecast.values())
+    total_queue = sum(queues.values())
+    queue_clock = {k: now for k in queues}
+    total_load = sum(v.load for v in s.vehicles)
+    active_count = len(initial)
     legal = {}
     fleet_order = {v.bus: i for i, v in enumerate(s.vehicles)}
 
@@ -243,13 +249,9 @@ def _simulate(graph, commands, homogeneous):
     while events and events[0][0] <= end:
         t, _, _, _, kind, bus = heapq.heappop(events)
         dt = t - now
-        waiting += sum(queues.values()) * dt + sum(f['rate'] for f in forecast.values()) * dt * dt / 2
-        if homogeneous:
-            onboard += homogeneous_load * sum(v['phase'] != 'terminal' for v in vehicles.values()) * dt
-        else:
-            onboard += sum(v['load'] for v in vehicles.values()) * dt
-        for k in queues:
-            queues[k] += forecast[k]['rate'] * dt
+        waiting += total_queue * dt + total_rate * dt * dt / 2
+        total_queue += total_rate * dt
+        onboard += (homogeneous_load * active_count if homogeneous else total_load) * dt
         now = t
         if len(nodes) >= MAX_EVENTS:
             invalid = 'event_limit'
@@ -268,6 +270,7 @@ def _simulate(graph, commands, homogeneous):
                     if chosen in returned:
                         next_launch.setdefault(chosen, now)
                     v.update(trip=p.trip, d=d, i=0, phase='travel', load=0., legal=tuple(ACTIONS.tolist()))
+                    active_count += 1
                     stage(v, now + math.ceil(forecast[d, s.routes[d][0].station]['run_s']), 'arrival')
             continue
         v = vehicles[bus]
@@ -278,6 +281,8 @@ def _simulate(graph, commands, homogeneous):
             arrivals[key].append(now)
             if stop.terminal:
                 completed_trips.add(v['trip'])
+                total_load -= v['load']
+                active_count -= 1
                 v.update(load=0., phase='terminal', d=not v['d'])
                 returned.setdefault(bus, now)
                 return_events.append((now, bus))
@@ -285,16 +290,20 @@ def _simulate(graph, commands, homogeneous):
                 push(now + 1, 0, 'dispatch')
                 continue
             alight = v['load'] * forecast[key]['alight']
+            queues[key] += forecast[key]['rate'] * (now - queue_clock[key])
+            queue_clock[key] = now
             board = min(queues[key], v['cap'] - (v['load'] - alight))
             queues[key] -= board
+            total_queue -= board
             v['load'] += board - alight
+            total_load += board - alight
             boardings.append((now, bus, v['trip'], stop.station, board, v['load'], queues[key]))
             v['phase'] = 'service'
             # At controlled stops service completion prepares the query; the
             # command is supplied on the following step, not at the arrival tick.
             stage(v, now + math.ceil(max(alight, 2 * board) + 4) + stop.control, 'prepare')
         elif kind == 'prepare':
-            original = next(r for r in s.vehicles if r.bus == bus)
+            original = originals[bus]
             initial_node = v['trip'] == original.trip and v['i'] == original.index
             choices = v['legal'] if initial_node else tuple(ACTIONS.tolist())
             if not stop.control:
@@ -313,7 +322,8 @@ def _simulate(graph, commands, homogeneous):
                     if eta > now:
                         follower.append(eta - now)
                 desired = .25 * ((min(follower) - forward) / 2 if follower else (360 - forward))
-                native = min(choices, key=lambda a: (abs(a - np.clip(desired, 0, 45)), a))
+                desired = min(45., max(0., desired))
+                native = min(choices, key=lambda a: (abs(a - desired), a))
                 if bus == s.current_bus and now == s.now_s:
                     native = s.native_action_s
                 h = commands.get(action_key, native)
@@ -335,9 +345,9 @@ def _simulate(graph, commands, homogeneous):
             stage(v, now + math.ceil(forecast[v['d'], target.station]['run_s']), 'arrival')
     if invalid is None:
         dt = end - now
-        waiting += sum(queues.values()) * dt + sum(f['rate'] for f in forecast.values()) * dt * dt / 2
-        onboard += (homogeneous_load * sum(v['phase'] != 'terminal' for v in vehicles.values()) if homogeneous
-                    else sum(v['load'] for v in vehicles.values())) * dt
+        waiting += total_queue * dt + total_rate * dt * dt / 2
+        total_queue += total_rate * dt
+        onboard += (homogeneous_load * active_count if homogeneous else total_load) * dt
     # Historical left boundaries stay fixed; future service order is candidate-specific.
     gaps = np.array([g for times in arrivals.values() for g in np.diff(sorted(times))], dtype=float)
     cv2 = float(np.var(gaps) / np.mean(gaps) ** 2) if len(gaps) and np.mean(gaps) > 0 else math.inf
@@ -351,7 +361,7 @@ def _simulate(graph, commands, homogeneous):
         launches=launches, delays=delays, actions=actions, legal=legal, nodes=nodes,
         initial_queue=initial_queue, boardings=boardings, return_events=return_events, arrivals=arrivals,
         missing_commands=set(commands) - used, coverage=bool(coverage), failure=invalid,
-        endpoint_queue=sum(queues.values()), endpoint_load=sum(v['load'] for v in vehicles.values()))
+        endpoint_queue=total_queue, endpoint_load=total_load)
 
 
 def feasible(candidate, reference):
@@ -375,9 +385,18 @@ def solve(graph, homogeneous=False, incumbent=None):
         status='retain_native', reference=ref, selected=ref, optimality_claim=False)
     if ref['failure'] or not ref['coverage'] or not math.isfinite(ref['cv2']):
         return fallback
-    active_trips = {(v.bus, v.trip) for v in s.vehicles if v.phase != 'terminal'}
-    keys = [key] + [k for k in sorted(ref['actions'], key=lambda k: (ref['actions'][k][0], k))
-                    if k != key and k[:2] in active_trips]
+    def position(v):
+        return v.index - (v.remaining_fraction if v.phase == 'travel' else 0.)
+
+    peers = [v for v in s.vehicles if v.phase != 'terminal' and v.direction == current.direction and v.bus != current.bus]
+    peers.sort(key=lambda v: (abs(position(v)-position(current)), v.bus))
+    before = next((v for v in peers if position(v) < position(current)), None)
+    after = next((v for v in peers if position(v) >= position(current)), None)
+    neighbors = [v for v in (before, after) if v is not None]
+    neighbors += [v for v in peers if v not in neighbors][:2-len(neighbors)]
+    ordered = sorted(ref['actions'], key=lambda k: (ref['actions'][k][0], k))
+    keys = [k for v in (current, *neighbors)
+            for k in [k for k in ordered if k[:2] == (v.bus, v.trip)][:2]]
     keys = keys[:MAX_VARIABLES]
     beam, best, evaluations = [({}, ref)], ({}, ref), 1
 

@@ -38,8 +38,9 @@ cannot produce a feasible allocation. Prediction boundaries stay fixed per query
 
 ## Solver And Control
 
-The solver uses the current node plus the earliest other active-trip controls,
-up to6 variables, beam8,512 model evaluations and12000 events per evaluation.
+The solver uses two active-trip controls for the current vehicle and its nearest
+observed same-direction predecessor/follower (or remaining nearest peers), up to6
+variables, beam4,128 model evaluations and12000 events per evaluation.
 Same-vehicle equal-total transfer proposals allow coupled moves without requiring
 an individually feasible intermediate. These are proposals, not earned budgets.
 No global optimality is claimed. Retain native unless a strict modeled passenger

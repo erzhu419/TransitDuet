@@ -137,6 +137,14 @@ class CausalGraphTests(unittest.TestCase):
             self.assertFalse(any(row[1:4] == (0, 0, 0) for row in result['boardings']))
         at_b = [r for r in long['boardings'] if r[1:4] == (0, 0, 1)][0]
         self.assertGreater(at_b[6], 0.)  # Future capacity pressure remains in the queue.
+        # Independent closed form verifies the lazy aggregate waiting integral.
+        span = g.horizon_s - self.snapshot.now_s
+        rate = sum(f['rate'] for f in g.forecasts.values())
+        expected = sum(long['initial_queue'].values()) * span + rate * span**2 / 2
+        expected -= sum(r[4] * (g.horizon_s-r[0]) for r in long['boardings'])
+        self.assertAlmostEqual(long['waiting'], expected, places=6)
+        self.assertAlmostEqual(long['endpoint_queue'], sum(long['initial_queue'].values()) + rate*span
+                               - sum(r[4] for r in long['boardings']), places=7)
 
     def test_arrivals_reorder_instead_of_using_hindsight_neighbors(self):
         v = graph.Vehicle(2, 3, False, 0, 'hold', 10., remaining_s=30.,
