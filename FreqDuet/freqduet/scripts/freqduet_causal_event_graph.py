@@ -184,7 +184,7 @@ def finish_assembly(snapshot, forecasts, completed):
     return EventGraph(snapshot, forecasts, completed, horizon)
 
 
-def _simulate(graph, commands, homogeneous):
+def _simulate(graph, commands, homogeneous, continuation=None):
     s, forecast, end = graph.snapshot, graph.forecasts, graph.horizon_s
     now, serial, events = s.now_s, 0, []
     vehicles = {v.bus: dict(bus=v.bus, trip=v.trip, d=v.direction, i=v.index,
@@ -256,6 +256,8 @@ def _simulate(graph, commands, homogeneous):
         if v.arrival_s is not None:
             arrivals[v.direction, s.routes[v.direction][v.index].station].append(v.arrival_s)
     push(now, 0, 'dispatch')
+    if continuation is not None:
+        continuation.initialize(vehicles)
     invalid = None
     while events and events[0][0] <= end:
         t, _, _, _, kind, bus = heapq.heappop(events)
@@ -283,6 +285,8 @@ def _simulate(graph, commands, homogeneous):
                     v.update(trip=p.trip, d=d, i=0, phase='travel', load=0., legal=tuple(ACTIONS.tolist()))
                     active_count += 1
                     stage(v, now + math.ceil(forecast[d, s.routes[d][0].station]['run_s']), 'arrival')
+                    if continuation is not None:
+                        continuation.event('launch', v, now)
             continue
         v = vehicles[bus]
         stop = s.routes[v['d']][v['i']]
@@ -299,6 +303,8 @@ def _simulate(graph, commands, homogeneous):
                 return_events.append((now, bus))
                 ready[v['d']].append((now, bus))
                 push(now + 1, 0, 'dispatch')
+                if continuation is not None:
+                    continuation.event('return', v, now)
                 continue
             alight = v['load'] * forecast[key]['alight']
             queues[key] += forecast[key]['rate'] * (now - queue_clock[key])
@@ -313,6 +319,8 @@ def _simulate(graph, commands, homogeneous):
             # At controlled stops service completion prepares the query; the
             # command is supplied on the following step, not at the arrival tick.
             stage(v, now + math.ceil(max(alight, 2 * board) + 4) + stop.control, 'prepare')
+            if continuation is not None:
+                continuation.event('arrival', v, now, service_s=max(alight, 2 * board) + 4)
         elif kind == 'prepare':
             original = originals[bus]
             initial_node = v['trip'] == original.trip and v['i'] == original.index
@@ -335,7 +343,11 @@ def _simulate(graph, commands, homogeneous):
                 desired = .25 * ((min(follower) - forward) / 2 if follower else (360 - forward))
                 desired = min(45., max(0., desired))
                 native = min(choices, key=lambda a: (abs(a - desired), a))
+                if continuation is not None:
+                    native = continuation.action(v, now, choices)
                 if bus == s.current_bus and now == s.now_s:
+                    if continuation is not None:
+                        assert native == s.native_action_s, 'same-state native continuation mismatch'
                     native = s.native_action_s
                 h = commands.get(action_key, native)
                 if h not in choices:
@@ -354,6 +366,8 @@ def _simulate(graph, commands, homogeneous):
             v['phase'] = 'travel'
             target = s.routes[v['d']][v['i']]
             stage(v, now + math.ceil(forecast[v['d'], target.station]['run_s']), 'arrival')
+            if continuation is not None:
+                continuation.event('departure', v, now)
     if invalid is None:
         dt = end - now
         waiting += total_queue * dt + total_rate * dt * dt / 2

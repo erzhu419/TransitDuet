@@ -144,6 +144,12 @@ class FlowController(NativeNoop):
         self.promise_records, self.pending_promises = [], {}
         self.execution_records = []
 
+    def build_model(self, value, visits):
+        return assemble(value, visits, self.prefix.flow_events)
+
+    def record_prediction(self, result, value):
+        pass
+
     def observe(self, bus, legal, native_action):
         start = time.perf_counter()
         key = int(bus.bus_id), int(bus.trip_id), int(bus.last_station.station_id)
@@ -154,13 +160,14 @@ class FlowController(NativeNoop):
         visits = self.prefix.strict(now)
         detail = {}
         try:
-            model, detail = assemble(value, visits, self.prefix.flow_events)
+            model, detail = self.build_model(value, visits)
             result = choose(model, self.homogeneous, self.proposals)
         except graph.Unsupported as error:
             result = dict(action_s=int(native_action), commands={}, evaluations=0,
                           status='unsupported_prefix', reason=str(error))
         action = int(result['action_s'])
         assert action in legal
+        self.record_prediction(result, value)
         for promised in self.pending_promises.pop(key, []):
             promised.update(status='reached', actual_request_s=action, native_request_s=int(native_action),
                             reached_s=now, fulfilled=action == promised['planned_s'])
