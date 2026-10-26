@@ -1,0 +1,49 @@
+{
+  "source": "bed2255dca",
+  "slot": "flow_passive_c0",
+  "task_id": "t211740",
+  "priority": "high",
+  "node": "node004",
+  "manual_dispatch_invoked": true,
+  "no_auto_requeue": true,
+  "log_path": "/tmp/sched_t211740.log",
+  "physical_start_cap": 1,
+  "physical_slots_consumed": 1,
+  "reference_reruns": 0,
+  "release": {
+    "source": "bed2255dca",
+    "slot": "flow_passive_c0",
+    "seal_source": "d43947ed64",
+    "context": {
+      "actor_seed": 12011,
+      "demand_day": 2071001,
+      "sampler_seed": 27011001,
+      "control": "exact360_fixed_upper_plus_V107_bilateral025",
+      "physical_vehicles": 12,
+      "actions_s": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        30,
+        45
+      ]
+    },
+    "automatic_retry": false,
+    "physical_start_cap": 1,
+    "reference_reruns": 0,
+    "charged_at_submission_attempt": true,
+    "user_authorization": "Explicit approval for the sole V274 passive-equivalence path; failure charged; no retry or expansion; no training or policy switch."
+  },
+  "snapshot": {
+    "scheduler_status": "running",
+    "logged_queries": 1750,
+    "expected_queries": 5200,
+    "final_summary_present": false,
+    "failure_present": false
+  },
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "passive_equivalence_established": false
+}

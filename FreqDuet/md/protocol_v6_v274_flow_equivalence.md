@@ -1,6 +1,6 @@
 # V274: minimum native passive-equivalence seal
 
-Budget:ONE new path `flow_passive_c0`,ZERO released now. Reuse the accepted
+Budget:ONE new path `flow_passive_c0`,ZERO released at the original seal. Reuse the accepted
 V271 `noop_fix` reference(source40eddb8fb6);do not rerun a reference arm.
 Fix actor12011,consumed day2071001,sampler27011001,exact360 upper,V107 bilateral025,
 12 vehicles and seven bins. This is engineering parity,not independent evidence.
@@ -48,6 +48,11 @@ records and reconstruct strict evidence from each captured prefix. It requires a
 separate single-slot release receipt and matching synthetic admission;neither
 the check command nor the seal creates that release. Synthetic acceptance:
 bed2255dca,t211739,high/manual,node004,exit0,37/37 checks(16 new+21 prior).
-Real release/start records remain absent;no runtime construction,raw trace read
+At synthetic acceptance,real release/start records were absent;no runtime construction,raw trace read
 or training occurred. Small receipt:entry_checks/status.json. Native path parity
-is still untested;next obtain explicit release for only flow_passive_c0.
+was still untested at that point.
+
+The user subsequently authorized only flow_passive_c0. Task t211740,source
+bed2255dca,high/manual,node004,is running;1/1 slot charged,no automatic retry,
+replacement or reference rerun. Startup log reached1750/5200 queries without a
+failure record;final parity is pending. Small receipt:launch/flow_passive_c0.json.
