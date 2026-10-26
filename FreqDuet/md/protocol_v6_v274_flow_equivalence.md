@@ -53,6 +53,19 @@ or training occurred. Small receipt:entry_checks/status.json. Native path parity
 was still untested at that point.
 
 The user subsequently authorized only flow_passive_c0. Task t211740,source
-bed2255dca,high/manual,node004,is running;1/1 slot charged,no automatic retry,
-replacement or reference rerun. Startup log reached1750/5200 queries without a
-failure record;final parity is pending. Small receipt:launch/flow_passive_c0.json.
+bed2255dca,high/manual,node004,completed the full path but exited1 at the arrival
+roster check. All prior legacy comparisons had passed;1/1 slot stays charged,
+without retry,replacement or reference rerun. Failure JSON remains unchanged.
+
+Read-only audit38c5b9b085,t211754,high/manual,node004,exit0 confirms exact old
+actions,timing,endpoints,uniforms and graph records(except sealed wall fields).
+Flow5502=5240 nonterminal+262 terminal arrivals;the old headway table contains
+only5240. Their nonterminal projection is exact:the validator wrongly required
+equal whole rosters. All5200 query boundaries,APC and strict clocks passed;
+minimum completion/availability margins1s. Cases:571 full,10 zero-seat,0 tied.
+Full legacy visit/APC/gap/completion multiplicities match5460 records;42 first
+visits are retained. Two terminal first visits have no old individual labels;
+native/flow/whole callback latencies were not persisted before failure.
+Original failed verdict is not rewritten. Next:correct the observation mapping
+and its synthetic regression,then supplement from existing archives only,not a
+new path. Main/training stay frozen. Receipt:readonly_audit_38c5b9b085/results.json.

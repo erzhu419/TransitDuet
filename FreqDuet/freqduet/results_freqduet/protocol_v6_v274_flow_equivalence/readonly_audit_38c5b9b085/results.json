@@ -1,0 +1,139 @@
+{
+  "source": "38c5b9b085",
+  "execution_source": "bed2255dca",
+  "status": "read_only_failed_gate_review_complete",
+  "original_task": "t211740",
+  "original_error": "AssertionError('checkpoint lengths differ: V274_native_arrival_roster')",
+  "original_verdict_preserved": "failed_slot_consumed",
+  "checks": {
+    "legacy_native_schema": true,
+    "legacy_native_holds": true,
+    "legacy_native_dispatches": true,
+    "legacy_native_arrivals": true,
+    "legacy_native_departures": true,
+    "legacy_native_queries": true,
+    "legacy_native_uniforms": true,
+    "legacy_results": true,
+    "legacy_contract": true,
+    "legacy_coverage": true,
+    "legacy_execution": true,
+    "legacy_graph_schema": true,
+    "legacy_graph_visits": true,
+    "legacy_graph_queries_except_wall": true,
+    "literal_frozen_arrival_roster": false,
+    "nonterminal_arrival_projection": true,
+    "contiguous_flow_order": true,
+    "unique_flow_keys": true,
+    "flow_arrival_count": true,
+    "flow_query_count": true,
+    "native_query_count": true,
+    "seat_and_event_clocks": true,
+    "all_visits_complete": true,
+    "actual_trip_vehicle": true,
+    "APC_availability_clock": true,
+    "observed_departure_completion": true,
+    "terminal_return_completion": true,
+    "legacy_APC_gap_completion_projection": true,
+    "first_and_legacy_visit_counts": true,
+    "actual_command_receipts": true,
+    "query_boundary_count": true,
+    "query_order": true,
+    "no_future_arrival_in_prefix": true,
+    "no_missing_past_arrival": true,
+    "exact_query_boundary": true,
+    "current_arrival_visible": true,
+    "query_APC": true,
+    "frozen_flow_derivation": true,
+    "derived_label_clocks_strict": true,
+    "strict_completion_margin": true,
+    "strict_availability_margin": true
+  },
+  "violation_counts": {
+    "literal_frozen_arrival_roster": 1
+  },
+  "first_errors": {
+    "literal_frozen_arrival_roster": "checkpoint lengths differ: literal_frozen_arrival_roster"
+  },
+  "endpoint_deltas": {
+    "passenger_person_s": 0.0,
+    "journey_min": 0.0,
+    "cv_squared": 0.0,
+    "readiness_delay_s": 0.0,
+    "public_launch_delay_total_s": 0.0,
+    "holding_s_per_trip": 0.0,
+    "trips_unlaunched": 0,
+    "trips_incomplete": 0
+  },
+  "counts": {
+    "flow_arrivals": 5502,
+    "native_arrivals": 5240,
+    "queries": 5200,
+    "extra_flow_events": 262,
+    "missing_flow_events": 0,
+    "extra_nonterminal": 0,
+    "extra_terminal": 262,
+    "first_visits": {
+      "nonterminal": 40,
+      "terminal": 2
+    },
+    "legacy_visits": 5460,
+    "full_visits": 571,
+    "zero_seat_visits": 10,
+    "same_clock_intervals": 0,
+    "completions_matched_to_departure": 5240,
+    "terminal_completions_without_departure_record": 262
+  },
+  "arrival_difference": {
+    "by_direction_station": {
+      "(True, 21)": 131,
+      "(False, 0)": 131
+    },
+    "examples": [
+      [
+        0,
+        21,
+        true,
+        1796.0
+      ],
+      [
+        2,
+        21,
+        true,
+        2028.0
+      ],
+      [
+        1,
+        0,
+        false,
+        2040.0
+      ],
+      [
+        4,
+        21,
+        true,
+        2367.0
+      ]
+    ]
+  },
+  "strict_prefix": {
+    "queries_with_unavailable_visits": 5200,
+    "exact_blocks_across_queries": 12326627,
+    "minimum_completion_margin_s": 1.0,
+    "minimum_availability_margin_s": 1.0
+  },
+  "graph_latency_s": {
+    "mean": 0.2568771727793277,
+    "p95": 2.098646250879392,
+    "max": 2.6488240603357553
+  },
+  "native_flow_and_whole_callback_latency": "not persisted before the original failure; cannot recover without new evidence",
+  "physical_slots_consumed": 1,
+  "physical_start_cap": 1,
+  "new_traffic_paths": 0,
+  "training_updates": 0,
+  "automatic_retry": false,
+  "main_policy_changed": false,
+  "controller_admitted": false,
+  "wall_s": 145.24229081906378,
+  "scope": "Read-only archived-path diagnosis; no frozen verdict rewrite, replay, fitting or policy benefit claim."
+}

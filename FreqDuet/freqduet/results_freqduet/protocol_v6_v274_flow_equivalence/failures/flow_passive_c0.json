@@ -1,0 +1,7 @@
+{
+  "source": "bed2255dca",
+  "status": "failed_slot_consumed",
+  "error": "AssertionError('checkpoint lengths differ: V274_native_arrival_roster')",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v274_flow_equivalence/source_bed2255dca/FreqDuet/freqduet/scripts/run_freqduet_v274_passive_flow.py\", line 114, in passive\n    flow_gate = validate_flow(flow,native,graph,same)\n  File \"/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v274_flow_equivalence/source_bed2255dca/FreqDuet/freqduet/scripts/freqduet_v274_passive_flow.py\", line 51, in validate_flow\n    same([(e.trip,e.station,e.direction,e.arrival_s) for e in events],\n  File \"/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v274_flow_equivalence/source_bed2255dca/FreqDuet/freqduet/scripts/run_freqduet_protocol_v6_checkpoint_trajectory.py\", line 293, in assert_same_state\n    raise AssertionError(f\"checkpoint lengths differ: {label}\")\nAssertionError: checkpoint lengths differ: V274_native_arrival_roster\n",
+  "automatic_retry": false
+}
