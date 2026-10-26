@@ -46,4 +46,8 @@ The independent passive entry now records query boundaries beside the unchanged
 NativeNoop prefix. Post-path checks match actual arrival/vehicle/departure/APC
 records and reconstruct strict evidence from each captured prefix. It requires a
 separate single-slot release receipt and matching synthetic admission;neither
-the check command nor the seal creates that release. Synthetic acceptance pending.
+the check command nor the seal creates that release. Synthetic acceptance:
+bed2255dca,t211739,high/manual,node004,exit0,37/37 checks(16 new+21 prior).
+Real release/start records remain absent;no runtime construction,raw trace read
+or training occurred. Small receipt:entry_checks/status.json. Native path parity
+is still untested;next obtain explicit release for only flow_passive_c0.
