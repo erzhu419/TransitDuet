@@ -1,0 +1,64 @@
+{
+  "source": "717483c80d",
+  "status": "flow_evidence_and_recourse_contract_checks_passed",
+  "tests": 21,
+  "example_flow": {
+    "intervals": [
+      {
+        "direction": false,
+        "station": 1,
+        "first_order": 0,
+        "last_order": 1,
+        "start_s": 0.0,
+        "end_s": 60.0,
+        "lower_arrivals": 50.0,
+        "upper_arrivals": null,
+        "point_identified": false
+      },
+      {
+        "direction": false,
+        "station": 1,
+        "first_order": 1,
+        "last_order": 2,
+        "start_s": 60.0,
+        "end_s": 120.0,
+        "lower_arrivals": 0.0,
+        "upper_arrivals": 40.0,
+        "point_identified": false
+      }
+    ],
+    "exact_blocks": [
+      {
+        "direction": false,
+        "station": 1,
+        "first_order": 0,
+        "last_order": 2,
+        "start_s": 0.0,
+        "end_s": 120.0,
+        "arrivals": 90.0,
+        "visits": 2,
+        "max_completed_s": 121.0,
+        "max_available_s": 120.0,
+        "interval_average_rate": 0.75
+      }
+    ],
+    "open_blocks": [],
+    "unavailable_visits": 0,
+    "query_s": 122.0,
+    "future_rate_upper_bound_identified": false
+  },
+  "recourse_counterexample": {
+    "full_plan_feasible": true,
+    "first_only_feasible": false,
+    "full_plan_cv2_delta": 0.0,
+    "first_only_cv2_delta": 0.00012800750977390673
+  },
+  "traffic_paths": 0,
+  "real_data_reads": 0,
+  "model_fits": 0,
+  "interval_fits": 0,
+  "training_updates": 0,
+  "online_action_selector_implemented": false,
+  "main_policy_changed": false,
+  "scope": "Constructed observation identities and loss-of-recourse counterexamples, not an explanation of V272 or traffic benefit."
+}

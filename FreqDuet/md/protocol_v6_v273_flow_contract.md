@@ -36,9 +36,11 @@ One high/manual server task checks flow identities,strict prefixes,tied clocks,
 legacy bridge tests,and two loss-of-future-action counterexamples. No new labels
 are consumed. Next specify the native passive-equivalence budget and an independent
 development cohort before traffic integration;do not retest on V272's four days.
-Execution status:source717483c80d is committed but NOT test-accepted. Deployment
-stopped before remote execution:the configured jtl110gpu route refused SSH and
-jtl110gpu2 timed out during handshake. No scheduler test was submitted and no
-physical slot was consumed. Resume with the one high/manual synthetic task first.
+After connectivity recovered,high/manual task t211737 ran source717483c80d on
+node004 and exited0:all21 synthetic tests passed(14 new and7 legacy bridge).
+The clearance-block example recovered90 arrivals;the full-plan recourse example
+had CV2 delta0 but executing only its first action increased model CV2 by0.000128.
+Small output:summary/status.json. No real-data reads,physical paths,fits,training
+or main switch. Synthetic acceptance does not replace native passive equivalence.
 Limitations:the identities require the complete native arrival roster;no demand
 forecast or finite uncertainty envelope,controller or traffic benefit is claimed.
