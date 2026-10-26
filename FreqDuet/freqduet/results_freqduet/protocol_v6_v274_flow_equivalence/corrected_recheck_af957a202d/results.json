@@ -1,0 +1,58 @@
+{
+  "source": "af957a202d",
+  "execution_source": "bed2255dca",
+  "status": "corrected_mapping_archived_checks_passed",
+  "tests": 43,
+  "original_task": "t211740",
+  "original_error": "AssertionError('checkpoint lengths differ: V274_native_arrival_roster')",
+  "original_verdict_preserved": "failed_slot_consumed",
+  "original_exit_code": 1,
+  "old_actions_timing_endpoints_and_records_exact": true,
+  "corrected_record_validation_passed": true,
+  "flow": {
+    "arrivals": 5502,
+    "queries": 5200,
+    "completed_visits": 5460,
+    "headway_arrivals": 5240,
+    "terminal_arrivals": 262,
+    "terminal_first_visits_without_old_individual_clock": 2,
+    "exact_blocks_across_queries": 12326627,
+    "cases": {
+      "first_arrivals": 42,
+      "full_visits": 571,
+      "zero_seat_visits": 10,
+      "same_clock_intervals": 0
+    },
+    "case_status": {
+      "first_arrivals": "exercised",
+      "full_visits": "exercised",
+      "zero_seat_visits": "exercised",
+      "same_clock_intervals": "not_exercised"
+    },
+    "all_query_clocks_strict": true,
+    "legacy_roster_and_APC_match": true
+  },
+  "endpoint_deltas": {
+    "passenger_person_s": 0.0,
+    "journey_min": 0.0,
+    "cv_squared": 0.0,
+    "readiness_delay_s": 0.0,
+    "public_launch_delay_total_s": 0.0,
+    "holding_s_per_trip": 0.0,
+    "trips_unlaunched": 0,
+    "trips_incomplete": 0
+  },
+  "limitations": [
+    "Two terminal first-return clocks lack independent old individual labels.",
+    "Old native/flow/whole-callback latency arrays were not persisted; no reconstruction is claimed."
+  ],
+  "physical_slots_consumed": 1,
+  "physical_start_cap": 1,
+  "new_traffic_paths": 0,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "controller_admitted": false,
+  "complete_original_protocol_admission": false,
+  "wall_s": 151.81602140329778,
+  "scope": "Supplemental read-only record validation after a mapping correction; not a replay or rewritten original verdict."
+}

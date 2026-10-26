@@ -75,4 +75,13 @@ and require exactly one direction-correct terminal return for every launched tri
 Keep global clock order,all visit/APC/gap checks and strict query prefixes.
 New regressions reject missing/extra terminal trips and incorrect first-return
 clocks. Future timing aggregates save before equality assertions;old missing
-timings stay missing. Synthetic and archive supplement checks are pending.
+timings stay missing.
+
+Correction receipt:af957a202d,t211757,high/manual,node004,exit0. All43 synthetic
+checks and corrected validation of existing archives passed:5502 arrivals,
+5240 headway rows,262 terminal returns and5200 strict-prefix queries. All old
+actions,simulation timing,endpoints and records remain exact. Original failed
+verdict and1/1 charged slot remain unchanged;new traffic paths0,training0.
+The two missing old terminal labels and old callback latencies remain limitations,
+not recovered evidence or full original-protocol admission. Small receipt:
+corrected_recheck_af957a202d/results.json. Main policy remains unchanged.
