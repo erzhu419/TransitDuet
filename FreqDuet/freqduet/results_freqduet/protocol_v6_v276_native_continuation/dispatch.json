@@ -1,0 +1,79 @@
+{
+  "source": "7023e2e784",
+  "check_task": "t211826",
+  "engineering_checks": [
+    {
+      "task": "t211823",
+      "status": "failed_import_before_any_physical_path"
+    },
+    {
+      "task": "t211824",
+      "status": "91_of_92_passed_synthetic_fixture_missing_next_trip"
+    },
+    {
+      "task": "t211826",
+      "status": "92_of_92_passed"
+    }
+  ],
+  "passive_task": "t211827",
+  "passive_status": "exact_equivalence_passed",
+  "same_state_rule_checks": 5200,
+  "metadata_files_checked": 7565,
+  "day_collisions": 0,
+  "unit_tasks": [
+    "t211829",
+    "t211830",
+    "t211831",
+    "t211832",
+    "t211833",
+    "t211834",
+    "t211835",
+    "t211836"
+  ],
+  "aggregate_task": "t211837",
+  "aggregate_status_at_receipt": "waiting_for_eight_unit_receipts",
+  "days": [
+    2076001,
+    2076002,
+    2076003,
+    2076004
+  ],
+  "arms": [
+    "fixed360_bilateral025",
+    "frozen_v275_apc",
+    "native_continuation_apc"
+  ],
+  "unit_nodes": [
+    "node001",
+    "node004",
+    "node001",
+    "node004",
+    "node001",
+    "node004",
+    "node001",
+    "node004"
+  ],
+  "started_development_paths_at_receipt": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "completed_development_paths_at_receipt": 0,
+  "failed_physical_paths_at_receipt": 0,
+  "physical_start_cap": 13,
+  "development_cap": 12,
+  "max_concurrent": 8,
+  "priority": "high",
+  "manually_dispatched": true,
+  "automatic_retry": false,
+  "raw_traces_remain_server_side": true,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "confirmation_started": false,
+  "status": "collecting"
+}

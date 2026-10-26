@@ -29,6 +29,17 @@ and total delay as independent evidence. Do not revise thresholds after results.
 Record predicted reference/full/fallback return,next launch and remaining holding
 for accepted current changes,with query/bus/trip keys and actual outcome labels.
 Actual labels describe the executed branch,not a realized counterfactual baseline.
+The holding field excludes already committed commands and their common residual;
+it records new controllable requests,not all remaining physical hold exposure.
 Small JSON summaries only return locally;raw traces remain on server. A failed
 joint gate closes this candidate;passing permits proposing independent confirmation,
 not switching main or claiming APC/frequency superiority.
+
+Admission completed: source7023e2e784, t211826 passed 92 server checks; 7565 metadata
+files showed zero new-day collisions. Earlier synthetic-only attempts exposed
+the frozen runtime's inline AVL API and a fixture missing its follower's next
+published trip;both were corrected before any physical start. t211827 then
+passed 5200 same-state rule checks and exact cached V275 p0 trace/endpoint parity.
+High/manual t211829--t211836 launched on node001/node004 (max8 concurrent).
+t211837 waits for their eight small receipts. The launch snapshot has p0--p7
+started, no completed development paths and no failures. No control result yet.
