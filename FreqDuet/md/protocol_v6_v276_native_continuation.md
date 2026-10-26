@@ -3,7 +3,9 @@
 Freeze V275 source 894ad14707 and its failed joint gate. Change only the model's
 baseline continuation: reuse native predecessor/departure matching, strict
 spatial follower selection, speed/service proxy, PREPARE clock and legal-bin
-selection. Observe PREPARE inputs before later callback state changes. Future
+selection. Observe actual estimator inputs at PREPARE before later callback
+state changes. The frozen optimized runtime uses the inline fleet roster,
+including same-tick changes by earlier physical vehicles. Future
 AVL is projected from the unchanged completed-prefix running forecasts; it is
 not actual future telemetry. No flow, cost, horizon, beam, budget, fleet, masks,
 action, training, main-policy or acceptance-margin changes.

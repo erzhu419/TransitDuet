@@ -49,11 +49,14 @@ def inventory(root):
 
 def check(a):
     tests=Path(__file__).resolve().parents[1]/'tests'
-    suite=unittest.TestSuite(unittest.defaultTestLoader.discover(str(tests),pattern=p) for p in
-        ('test_v276_native_continuation.py','test_v275_flow_controller.py','test_v270_causal_event_graph.py',
-         'test_v271_native_event_graph.py','test_v272_graph_pilot.py','test_v273_flow_contract.py','test_v274_passive_flow.py'))
+    legacy=a.root.parent/'protocol_v6_v275_flow_controller/source_894ad14707/FreqDuet/freqduet/tests'
+    jobs=[(tests,'test_v276_native_continuation.py')]+[(legacy,p) for p in
+        ('test_v275_flow_controller.py','test_v270_causal_event_graph.py','test_v271_native_event_graph.py',
+         'test_v272_graph_pilot.py','test_v273_flow_contract.py','test_v274_passive_flow.py')]
+    suite=unittest.TestSuite(unittest.defaultTestLoader.discover(str(directory),pattern=p,
+        top_level_dir=str(directory)) for directory,p in jobs)
     result=unittest.TextTestRunner(verbosity=2).run(suite)
-    assert result.wasSuccessful()
+    assert result.wasSuccessful() and result.testsRun>=90
     metadata=inventory(a.root)
     write(a.root/'protocol.json',dict(source=a.source,days=DAYS,arms=ARMS,items=ITEMS,
         actor=SEED,sampler=SAMPLER,physical_start_cap=13,passive_cap=1,development_cap=12,
@@ -213,6 +216,21 @@ def aggregate(a):
         return
     rows=[read(a.root/'pairs'/f'p{i}.json') for i in range(12)]
     assert [(r['day'],r['arm']) for r in rows]==list(ITEMS)
+    assert all(r['source']==a.source for r in rows)
+    import run_freqduet_v267_bilateral_factorial as fixed
+    alignment={}
+    for day in DAYS:
+        cell=[r for r in rows if r['day']==day]
+        traces=[]
+        for r in cell:
+            fixed.pilot.joint.assert_same_state(r['contract'],cell[0]['contract'],'V276_matched_contract')
+            i=ITEMS.index((day,r['arm']))
+            with gzip.open(a.root/'traces'/f'p{i}.pkl.gz','rb') as stream:
+                traces.append(pickle.load(stream)['uniforms'])
+        for r,other in zip(cell[1:],traces[1:]):
+            aligned=fixed.pilot.event.alignment(traces[0],other)
+            assert aligned['uniform_mismatches']==0
+            alignment[str(day)+'_'+r['arm']]=aligned
     cube={(r['day'],r['arm']):r['results'] for r in rows}
     draws=np.random.default_rng(2760201).integers(0,4,(10000,4))
     effects={}
@@ -228,7 +246,8 @@ def aggregate(a):
         effects['candidate_vs_'+base]=dict(metrics=stats,joint_gate=bool(gate))
     passed=all(x['joint_gate'] for x in effects.values())
     write(a.root/'summary/results.json',dict(source=a.source,status='twelve_development_paths_complete',
-        effects=effects,joint_gate=passed,by_day=rows,independent_demand_days=4,independent_futures=0,
+        effects=effects,joint_gate=passed,by_day=rows,event_uniform_alignment=alignment,
+        independent_demand_days=4,independent_futures=0,
         main_policy_changed=False,training_updates=0,confirmation_started=False,
         decision='propose_independent_confirmation' if passed else 'close_candidate_no_expansion'))
     print('V276_AGGREGATE_COMPLETE',passed,flush=True)

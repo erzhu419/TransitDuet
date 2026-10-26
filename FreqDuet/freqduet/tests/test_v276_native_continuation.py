@@ -14,8 +14,8 @@ def packet():
     return dict(bus=0,trip=0,station=0,direction=False,prepare_s=2000.,progress_m=1000.,
         service_s=40.,target_s=360.,predecessor=90,
         departure=dict(trip_id=90,time_s=1700.),avl=(
-            AVLVehicleSnapshot(0,False,True,1000.,1000.,0.,10.,0),
-            AVLVehicleSnapshot(2,False,True,500.,1500.,10.,10.,2)))
+            AVLVehicleSnapshot(0,False,True,1000.,1000.,0.,10.),
+            AVLVehicleSnapshot(2,False,True,500.,1500.,10.,10.)))
 
 
 def model_fixture():
@@ -50,8 +50,8 @@ class NativeContinuationTests(unittest.TestCase):
 
     def test_nearest_spatial_follower_is_not_fastest_eta_or_colocated_bus(self):
         p=packet()
-        p['avl']=(*p['avl'],AVLVehicleSnapshot(3,False,True,900.,1999.,100.,10.,3),
-                  AVLVehicleSnapshot(4,False,True,1000.,1000.,1.,10.,4))
+        p['avl']=(*p['avl'],AVLVehicleSnapshot(3,False,True,900.,1999.,100.,10.),
+                  AVLVehicleSnapshot(4,False,True,1000.,1000.,1.,10.))
         _,_,follower=native_request(p,tuple(graph.ACTIONS))
         self.assertEqual(follower.follower_bus_id,3)
 
@@ -82,7 +82,7 @@ class NativeContinuationTests(unittest.TestCase):
         for key in ('arrivals','returns','next_launch','launches','waiting','onboard','cv2','boardings','nodes'):
             self.assertEqual(old[key],new[key],key)
 
-    def test_projected_departure_is_not_visible_in_same_tick_avl(self):
+    def test_projected_movement_preserves_tick_and_inline_roster_visibility(self):
         _,model=model_fixture()
         state=Continuation(model)
         vehicles={v.bus:dict(bus=v.bus,trip=v.trip,d=v.direction,i=v.index,phase=v.phase,
@@ -95,6 +95,12 @@ class NativeContinuationTests(unittest.TestCase):
         later={v.bus_id:v for v in state.avl(2052.)}
         self.assertEqual(at[0].progress_m,1000.)
         self.assertGreater(later[0].progress_m,1000.)
+        row.update(phase='terminal')
+        state.event('return',row,2060.)
+        before={v.bus_id:v for v in state.avl(2060.,0)}
+        after={v.bus_id:v for v in state.avl(2060.,2)}
+        self.assertTrue(before[0].on_route)
+        self.assertFalse(after[0].on_route)
 
     def test_same_budget_and_fallback_constraints_remain_in_force(self):
         _,model=model_fixture()

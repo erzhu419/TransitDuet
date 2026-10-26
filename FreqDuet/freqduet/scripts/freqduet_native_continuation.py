@@ -1,14 +1,12 @@
 """V276: native bilateral semantics on observed or model-projected AVL state."""
 
-from dataclasses import asdict
-import math
+import importlib
 from types import SimpleNamespace
 
 import numpy as np
 
 import freqduet_causal_event_graph as graph
-from lower.causal_follower_eta import (AVLVehicleSnapshot,
-    estimate_follower_departure_gap, freeze_avl_vehicle_snapshots)
+from lower.causal_follower_eta import AVLVehicleSnapshot, estimate_follower_departure_gap
 from lower.causal_departure_regularity import CausalDepartureRegularityCost
 
 
@@ -38,16 +36,20 @@ def native_request(packet, legal):
 class PrepareEvidence:
     """Record precisely the inputs consumed at PREPARE, not later callback AVL."""
     def __init__(self):
-        self.packets, self.checked = {}, 0
+        self.packets, self.checked, self.samples = {}, 0, {}
 
     def attach(self, Bus):
         self.Bus, self.original = Bus, Bus._update_pre_action_follower_eta
+        self.module=importlib.import_module(Bus.__module__)
+        self.original_estimator=self.module.estimate_follower_departure_gap
+        def estimate(**kwargs):
+            self.samples[kwargs['current_bus_id']]=dict(kwargs,vehicles=tuple(kwargs['vehicles']))
+            return self.original_estimator(**kwargs)
+        self.module.estimate_follower_departure_gap=estimate
         original = self.original
         def update(bus, now, buses):
-            avl = getattr(bus, '_follower_avl_snapshots', None)
-            if avl is None:
-                avl = freeze_avl_vehicle_snapshots(buses)
             result = original(bus, now, buses)
+            sample=self.samples[int(bus.bus_id)]
             recorder = bus._headway_recorder
             self.packets[int(bus.bus_id), int(bus.trip_id), int(bus.last_station.station_id)] = dict(
                 bus=int(bus.bus_id), trip=int(bus.trip_id), station=int(bus.last_station.station_id),
@@ -55,21 +57,21 @@ class PrepareEvidence:
                 service_s=float(bus.last_service_dwell_s), target_s=float(bus._target_headway),
                 predecessor=bus.forward_predecessor_trip_id,
                 departure=recorder.previous_departure_event(int(bus.last_station.station_id), bool(bus.direction)),
-                avl=tuple(avl), expected_forward=bus.pre_action_forward_headway,
+                avl=sample['vehicles'], expected_forward=bus.pre_action_forward_headway,
                 expected_source=bus.pre_action_forward_headway_source,
                 expected_follower=bus.pre_action_follower_departure_gap,
                 expected_follower_id=bus.pre_action_follower_bus_id,
-                expected_follower_source=bus.pre_action_follower_source,
-                calibration_active=bool(bus.pre_action_follower_calibration_active))
+                expected_follower_source=bus.pre_action_follower_source)
             return result
         Bus._update_pre_action_follower_eta = update
 
     def detach(self):
         self.Bus._update_pre_action_follower_eta = self.original
+        self.module.estimate_follower_departure_gap=self.original_estimator
 
     def check(self, bus, legal, native, query_s):
         packet = self.packets[int(bus.bus_id), int(bus.trip_id), int(bus.last_station.station_id)]
-        assert packet['prepare_s'] <= query_s and not packet['calibration_active']
+        assert packet['prepare_s'] <= query_s
         action, context, follower = native_request(packet, legal)
         assert action == native, ('native bin mismatch', packet['bus'], action, native)
         assert context.forward_headway_s == packet['expected_forward']
@@ -120,13 +122,14 @@ class Continuation:
             self.history[v['bus']] = []
             self.predecessors[v['bus']] = row['predecessor']
             self.service[v['bus']] = row['service']
-            self.save(v, now, row['progress'], row['launch'], row['speed'], now)
+            self.save(v, now, row['progress'], row['launch'], row['speed'], now, rank=-2)
 
     def station_progress(self, direction, index):
         return sum(distance for distance,_ in self.data['links'][direction][:index+1])
 
-    def save(self, v, visible, progress, launch, speed, motion_s):
+    def save(self, v, visible, progress, launch, speed, motion_s, rank=None):
         self.history[v['bus']].append(dict(visible=visible, direction=v['d'], on_route=v['phase']!='terminal',
+            rank=self.rank[v['bus']] if rank is None else rank,
             trip=v['trip'], index=v['i'], progress=progress, launch=launch, speed=speed,
             travel=v['phase']=='travel', motion_s=motion_s, arrival_s=v['frontier']))
 
@@ -135,27 +138,29 @@ class Continuation:
         launch = self.history[bid][-1]['launch']
         if kind == 'launch':
             self.service[bid], self.predecessors[bid] = 0., None
-            self.save(v, now, 0., now, self.data['links'][d][0][0]/max(1,v['frontier']-now), now+1)
+            self.save(v, now, 0., now, self.data['links'][d][0][0]/max(1,v['frontier']-now), now+1,rank=-1)
         elif kind == 'return':
-            self.save(v, now+1, 0., launch, 0., now+1)
+            self.save(v, now, 0., launch, 0., now+1)
         elif kind == 'arrival':
             station = self.model.snapshot.routes[d][i].station
             prior = [a for a in self.arrivals if a[:2] == (d,station)]
             self.predecessors[bid] = prior[-1][2] if prior else None
             self.arrivals.append((d,station,v['trip'],now,bid))
             self.service[bid] = service_s
-            self.save(v, now+1, self.station_progress(d,i), launch, 0., now+1)
+            self.save(v, now, self.station_progress(d,i), launch, 0., now+1)
         elif kind == 'departure':
             station = self.model.snapshot.routes[d][i-1].station
             self.departures.append((d,station,v['trip'],now,bid))
             distance = self.data['links'][d][i][0]
-            self.save(v, now+1, self.station_progress(d,i-1), launch,
+            self.save(v, now, self.station_progress(d,i-1), launch,
                 distance/max(1,v['frontier']-now), now+1)
 
-    def avl(self, now):
+    def avl(self, now, reader=None):
         result = []
+        reader_rank=float('inf') if reader is None else self.rank[reader]
         for bid, history in self.history.items():
-            row = next(r for r in reversed(history) if r['visible'] <= now)
+            row = next(r for r in reversed(history) if r['visible'] < now
+                       or r['visible']==now and r['rank']<reader_rank)
             progress = row['progress']
             if row['travel']:
                 endpoint = self.station_progress(row['direction'],row['index'])
@@ -163,7 +168,7 @@ class Continuation:
                 progress += (endpoint-progress)*min(1.,max(0.,(now-row['motion_s'])/span))
             route_speed = self.data['links'][row['direction']][row['index']][1]
             result.append(AVLVehicleSnapshot(bid,row['direction'],row['on_route'],progress,
-                row['launch'],row['speed'],route_speed,row['trip']))
+                row['launch'],row['speed'],route_speed))
         return tuple(result)
 
     def action(self, v, command_s, legal):
@@ -174,13 +179,13 @@ class Continuation:
             packet = self.data['packets'][v['bus'],v['trip'],station]
         else:
             prepare = command_s-1
-            # Native departure matching sees earlier vehicles in this tick, but
-            # follower AVL is frozen before the whole drive loop.
+            # The frozen V275 runtime reads the inline AVL roster: earlier
+            # vehicles have moved this tick; later vehicles have not.
             departures = [r for r in self.departures if r[:2] == (v['d'],station)
                 and (r[3] < prepare or r[3] == prepare and self.rank[r[4]] < self.rank[v['bus']])]
             latest = max(departures,key=lambda r:(r[3],self.rank[r[4]])) if departures else None
             packet = dict(bus=v['bus'],trip=v['trip'],station=station,direction=v['d'],prepare_s=prepare,
                 progress_m=self.station_progress(v['d'],v['i']), service_s=self.service[v['bus']],
-                target_s=360., predecessor=self.predecessors[v['bus']], avl=self.avl(prepare),
+                target_s=360., predecessor=self.predecessors[v['bus']], avl=self.avl(prepare,v['bus']),
                 departure=None if latest is None else dict(trip_id=latest[2],time_s=latest[3]))
         return native_request(packet,legal)[0]
