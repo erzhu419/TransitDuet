@@ -31,3 +31,12 @@ total-delay upper95<=0, without extra unfinished trips on any day. Report day
 values, action counts, executed H, support/fallback, proposal realization and
 latency. A failed gate closes this frozen candidate; a pass only permits proposing
 independent confirmation, not switching main or claiming frequency superiority.
+
+Control source894ad14707: t211773 passed83 server synthetic tests on node004.
+Its day inventory then descended into old cell/log trees; no physical paths
+started. Narrow structured-index check entryf3f15604a5 is prepared but not run.
+Stopping the old running check requires operator confirmation; normal cancel
+refused without force, and no forced cancellation was performed.
+High/manual units t211774--t211781 remain gated on the completed check receipt;
+aggregate t211782 waits for eight small unit receipts. Only those receipts and
+the final summary sync locally. Main/training stay frozen; no traffic result yet.

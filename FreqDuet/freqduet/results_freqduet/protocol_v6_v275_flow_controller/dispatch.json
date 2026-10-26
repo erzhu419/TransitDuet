@@ -1,0 +1,21 @@
+{
+  "control_source": "894ad14707",
+  "check_task": "t211773",
+  "replacement_check_source": "f3f15604a5",
+  "unit_tasks": ["t211774", "t211775", "t211776", "t211777", "t211778", "t211779", "t211780", "t211781"],
+  "aggregate_task": "t211782",
+  "days": [2075001, 2075002, 2075003, 2075004],
+  "arms": ["fixed360_bilateral025", "flow_apc_fallback", "flow_homogeneous_fallback"],
+  "physical_start_cap": 12,
+  "physical_starts_at_receipt": 0,
+  "max_concurrent": 8,
+  "priority": "high",
+  "manually_dispatched": true,
+  "unit_nodes": ["node001", "node004", "node001", "node004", "node001", "node004", "node001", "node004"],
+  "status": "waiting_for_full_check_receipt",
+  "automatic_retry": false,
+  "raw_autosync_enabled": false,
+  "small_unit_and_aggregate_json_autosync_enabled": true,
+  "training_updates": 0,
+  "main_policy_changed": false
+}
