@@ -37,3 +37,9 @@ This stage runs ONLY a high/manual server metadata seal:archive presence and
 V271/V273 admission metadata. It has no replay entry. Before any physical start,
 seal the passive-entry source and obtain explicit release of the single slot.
 No training,interval fitting,control change or independent confirmation release.
+
+Seal receipt:d43947ed64,t211738,high/manual,node004,exit0. Required archives and
+V273 metadata are available. Reference first visits42+legacy visits5460=5502,
+distinct from5200 action queries. checks/status.json is the small local receipt;
+protocol.json stays server-side. Raw trace reads0,physical slots consumed0.
+Next within V274:implement the passive entry and synthetic checks;no real release.
