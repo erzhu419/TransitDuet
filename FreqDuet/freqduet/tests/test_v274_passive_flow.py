@@ -14,7 +14,7 @@ from freqduet_causal_event_graph import Visit
 from freqduet_native_event_graph import NativeNoop
 from freqduet_v274_passive_flow import FlowRecorder, boundary, compare_legacy, validate_flow
 from run_freqduet_protocol_v6_checkpoint_trajectory import assert_same_state as same
-from run_freqduet_v274_passive_flow import make_audit, passive, require_release, SLOT
+from run_freqduet_v274_passive_flow import make_audit, passive, persist_timings, require_release, SLOT
 from seal_freqduet_v274_flow_equivalence import protocol, write
 from test_v271_native_event_graph import fake_env
 
@@ -27,7 +27,8 @@ def event(i, boarded, time=None, completed=None):
 
 def fixture():
     rows = [event(0,10),event(1,50),event(2,40)]
-    rows.append(APCArrival(3,2,2,False,2,180.,180.,180.,40.,40.,0.,50.))
+    rows.extend(APCArrival(i+3,i,i,False,2,t,t,t,float(load),float(load),0.,50.)
+                for i,(t,load) in enumerate(((140.,10),(160.,50),(180.,40))))
     q = dict(time_s=130.,bus=2,trip=2,station=1,direction=False,arrival_s=120.,
              boarded=40,load=40,action_s=5)
     recorder = FlowRecorder()
@@ -35,13 +36,14 @@ def fixture():
     recorder.capture(prefix,q)
     prefix.flow_events = rows
     flow = recorder.bundle(prefix,{False:[NS(station=2)]})
-    trace = dict(arrivals=[dict(trip_id=e.trip,station_id=e.station,direction=e.direction,time_s=e.arrival_s) for e in rows],
-        departures=[dict(trip_id=e.trip,station_id=e.station,direction=e.direction,time_s=e.completed_s) for e in rows],
+    trace = dict(arrivals=[dict(trip_id=e.trip,station_id=e.station,direction=e.direction,time_s=e.arrival_s) for e in rows[:3]],
+        departures=[dict(trip_id=e.trip,station_id=e.station,direction=e.direction,time_s=e.completed_s) for e in rows[:3]],
         dispatches=[dict(trip=i,bus=i,direction=False) for i in range(3)],queries=[q],uniforms={},
         holds=[dict(time_s=130.,bus_id=2,trip_id=2,station_id=1,action_s=5)])
     graph = dict(queries=[dict(time_s=130.,native_action_s=5,shadow_action_s=45,build_s=.1,total_s=.2)],
         completed_visits=[Visit(e.direction,e.station,e.arrival_s,e.completed_s,e.available_s,
-            60.,e.incoming,e.boarded,e.alighted,60.,e.capacity) for e in rows[1:3]])
+            60.,e.incoming,e.boarded,e.alighted,60. if e.station == 1 else 20.,e.capacity)
+            for e in [*rows[1:3],*rows[4:]]])
     return flow,trace,graph
 
 
@@ -49,12 +51,58 @@ class PassiveFlowTests(unittest.TestCase):
     def test_first_and_capacity_censored_visits_remain_in_complete_roster(self):
         flow,trace,graph = fixture()
         result = validate_flow(flow,trace,graph,same)
-        self.assertEqual((result['arrivals'],result['queries'],result['completed_visits']),(4,1,2))
+        self.assertEqual((result['arrivals'],result['queries'],result['completed_visits']),(6,1,4))
+        self.assertEqual((result['headway_arrivals'],result['terminal_arrivals']),(3,3))
+        self.assertEqual(result['terminal_first_visits_without_old_individual_clock'],1)
         self.assertEqual(result['cases']['first_arrivals'],2)
         self.assertEqual(result['cases']['full_visits'],1)
         self.assertEqual(result['case_status']['zero_seat_visits'],'not_exercised')
         rows = [APCArrival(**r) for r in flow['events']]
         self.assertEqual(completed_flow(rows[:3],130.)['exact_blocks'][0]['arrivals'],90.)
+
+    def test_omitted_terminal_cannot_hide_behind_headway_projection(self):
+        flow,trace,graph = fixture()
+        flow['events'].pop()
+        with self.assertRaisesRegex(AssertionError,'V274_terminal_trip_coverage'):
+            validate_flow(flow,trace,graph,same)
+
+    def test_extra_terminal_trip_is_rejected(self):
+        flow,trace,graph = fixture()
+        flow['events'].append(dict(flow['events'][-1],order=6,trip=99,arrival_s=190.,
+                                   available_s=190.,completed_s=190.))
+        with self.assertRaisesRegex(AssertionError,'V274_terminal_trip_coverage'):
+            validate_flow(flow,trace,graph,same)
+
+    def test_nonterminal_clock_still_matches_old_roster_exactly(self):
+        flow,trace,graph = fixture()
+        trace['arrivals'][1]['time_s'] += 1
+        with self.assertRaisesRegex(AssertionError,'V274_nonterminal_arrival_roster'):
+            validate_flow(flow,trace,graph,same)
+
+    def test_first_terminal_return_clock_is_enforced_without_old_headway_label(self):
+        flow,trace,graph = fixture()
+        flow['events'][3]['completed_s'] += 1
+        with self.assertRaisesRegex(AssertionError,'V274_completion_clock'):
+            validate_flow(flow,trace,graph,same)
+
+    def test_terminal_projection_does_not_allow_global_time_reordering(self):
+        flow,trace,graph = fixture()
+        flow['events'][3].update(arrival_s=100.,available_s=100.,completed_s=100.)
+        with self.assertRaisesRegex(AssertionError,'V274_global_arrival_clock_order'):
+            validate_flow(flow,trace,graph,same)
+
+    def test_latency_summary_survives_a_later_validation_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            audit = NS(native_wall=[.1,.2],flow_wall=[.01,.02],callback_wall=[.5,.6])
+            values = persist_timings(root,'entry',audit)
+            flow,trace,graph = fixture()
+            flow['events'].pop()
+            with self.assertRaises(AssertionError):
+                validate_flow(flow,trace,graph,same)
+            import json
+            stored = json.loads((root/'timings'/f'{SLOT}.json').read_text())
+            self.assertEqual(stored,dict(source='entry',**values))
 
     def test_capture_does_not_mutate_prefix_or_old_records(self):
         rows = [event(0,10),event(1,50)]

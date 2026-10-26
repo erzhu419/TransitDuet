@@ -69,3 +69,10 @@ native/flow/whole callback latencies were not persisted before failure.
 Original failed verdict is not rewritten. Next:correct the observation mapping
 and its synthetic regression,then supplement from existing archives only,not a
 new path. Main/training stay frozen. Receipt:readonly_audit_38c5b9b085/results.json.
+
+Mapping correction:compare nonterminal arrivals to the unchanged headway table,
+and require exactly one direction-correct terminal return for every launched trip.
+Keep global clock order,all visit/APC/gap checks and strict query prefixes.
+New regressions reject missing/extra terminal trips and incorrect first-return
+clocks. Future timing aggregates save before equality assertions;old missing
+timings stay missing. Synthetic and archive supplement checks are pending.

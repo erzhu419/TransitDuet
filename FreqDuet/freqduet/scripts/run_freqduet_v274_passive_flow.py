@@ -81,10 +81,20 @@ def save_trace(path, value):
         pickle.dump(value,stream,protocol=pickle.HIGHEST_PROTOCOL)
 
 
+def persist_timings(root, source, audit):
+    import numpy as np
+    def latency(values):
+        return dict(mean=float(np.mean(values)),p95=float(np.quantile(values,.95)),
+                    max=float(max(values)),total=float(sum(values)))
+    values = dict(native_latency_s=latency(audit.native_wall),flow_latency_s=latency(audit.flow_wall),
+                  callback_latency_s=latency(audit.callback_wall))
+    write(root/'timings'/f'{SLOT}.json',dict(source=source,**values))
+    return values
+
+
 def passive(a):
     require_release(a.out_root,a.source)
     try:
-        import numpy as np
         import run_freqduet_v267_bilateral_factorial as fixed
         credit = fixed.pilot.CreditObserver()
         audit = make_audit(fixed,credit)
@@ -104,6 +114,7 @@ def passive(a):
         save_trace(a.out_root/'traces'/f'graph_queries_{SLOT}.pkl.gz',graph)
         save_trace(a.out_root/'traces'/f'flow_{SLOT}.pkl.gz',flow)
         write(a.out_root/'paths'/f'{SLOT}.json',result)
+        timings = persist_timings(a.out_root,a.source,audit)
         old = a.results_root/REFERENCE
         old_result = read(old/'paths/noop_fix.json')
         assert old_result['source'] == OLD_SOURCE
@@ -116,12 +127,8 @@ def passive(a):
         assert len(native['queries']) == len(holds) == 5200
         assert audit.execution['commanded_s'] == audit.execution['executed_s'] == 38930
         assert audit.execution['physical_vehicles'] == 12 and audit.execution['done_reason'] == 'service_cleared'
-        def latency(values):
-            return dict(mean=float(np.mean(values)),p95=float(np.quantile(values,.95)),
-                        max=float(max(values)),total=float(sum(values)))
         write(a.out_root/'summary/passive.json',dict(source=a.source,status='native_passive_equivalence_passed',
-            flow=flow_gate,native_latency_s=latency(audit.native_wall),flow_latency_s=latency(audit.flow_wall),
-            callback_latency_s=latency(audit.callback_wall),wall_s=time.perf_counter()-start,
+            flow=flow_gate,**timings,wall_s=time.perf_counter()-start,
             flow_validation_wall_s=time.perf_counter()-validation_start,
             physical_slots_consumed=1,physical_start_cap=1,automatic_retry=False,
             training_updates=0,main_policy_changed=False,controller_admitted=False,

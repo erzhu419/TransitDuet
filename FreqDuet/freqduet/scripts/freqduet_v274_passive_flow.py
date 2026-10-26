@@ -45,21 +45,28 @@ def compare_legacy(trace, result, graph, old_trace, old_result, old_graph, same)
 
 def validate_flow(data, trace, graph, same):
     events = [APCArrival(**row) for row in data['events']]
+    terminals = set(map(tuple, data['terminals']))
     same([e.order for e in events], list(range(len(events))), 'V274_arrival_order')
+    assert all(a.arrival_s <= b.arrival_s for a,b in zip(events,events[1:])), 'V274_global_arrival_clock_order'
     keys = [(e.trip,e.station,e.direction) for e in events]
     assert len(set(keys)) == len(keys), 'V274_duplicate_arrival'
-    same([(e.trip,e.station,e.direction,e.arrival_s) for e in events],
+    # The frozen headway recorder excludes terminals. Validate those returns
+    # against the launched-trip roster instead of deleting them from the ledger.
+    same([(e.trip,e.station,e.direction,e.arrival_s) for e in events if e.key not in terminals],
          [(r['trip_id'],r['station_id'],r['direction'],r['time_s']) for r in trace['arrivals']],
-         'V274_native_arrival_roster')
+         'V274_nonterminal_arrival_roster')
     launches = {r['trip']:r for r in trace['dispatches']}
+    terminal_by_direction = dict(data['terminals'])
+    same(Counter((e.trip,e.direction,e.station) for e in events if e.key in terminals),
+         Counter((r['trip'],r['direction'],terminal_by_direction[r['direction']]) for r in trace['dispatches']),
+         'V274_terminal_trip_coverage')
     departures = {}
     for r in trace['departures']:
         key = r['trip_id'],r['station_id'],r['direction']
         if key in departures:
             same(departures[key], r['time_s'], 'V274_duplicate_departure_clock')
         departures[key] = r['time_s']
-    terminals = set(map(tuple, data['terminals']))
-    previous, projected, first = {}, [], 0
+    previous, projected, first, terminal_first = {}, [], 0, 0
     for e in events:
         e.validate()
         assert e.completed_s is not None, 'V274_uncompleted_visit_at_cleared_endpoint'
@@ -70,6 +77,7 @@ def validate_flow(data, trace, graph, same):
         same(e.completed_s, completion, 'V274_completion_clock')
         if e.key not in previous:
             first += 1
+            terminal_first += e.key in terminals
         else:
             projected.append((e.direction,e.station,e.arrival_s,e.available_s,e.completed_s,
                               e.incoming,e.boarded,e.alighted,e.capacity,e.arrival_s-previous[e.key]))
@@ -105,6 +113,8 @@ def validate_flow(data, trace, graph, same):
                   zero_seat_visits=sum(e.free_before_boarding == 0 for e in events),
                   same_clock_intervals=same_clock)
     return dict(arrivals=len(events), queries=len(data['queries']), completed_visits=len(projected),
+                headway_arrivals=len(trace['arrivals']), terminal_arrivals=sum(e.key in terminals for e in events),
+                terminal_first_visits_without_old_individual_clock=terminal_first,
                 exact_blocks_across_queries=labels, cases=counts,
                 case_status={k:'exercised' if n else 'not_exercised' for k,n in counts.items()},
                 all_query_clocks_strict=True, legacy_roster_and_APC_match=True)
