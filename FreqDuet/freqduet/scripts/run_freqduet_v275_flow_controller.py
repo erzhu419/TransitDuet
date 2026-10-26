@@ -5,7 +5,6 @@ import argparse
 from collections import Counter
 import gzip
 import json
-import os
 from pathlib import Path
 import pickle
 import re
@@ -26,23 +25,38 @@ SHARDS = tuple(tuple(range(i,len(ITEMS),8)) for i in range(8))
 
 
 def unused_metadata(root):
-    """Check seed-bearing metadata and saved source, never load a raw trace."""
+    """Read experiment indices, not the per-event/cell/log trees they describe."""
     pattern = re.compile(r'(?<![0-9.])(?:'+'|'.join(map(str,DAYS))+r')(?![0-9.])')
     hits, checked = [], 0
-    for directory, dirs, files in os.walk(root.parent):
-        dirs[:] = [d for d in dirs if not d.startswith(('source','recheck_source','conda','checkpoint'))
-                   and d not in ('traces','raw','cache','.git','__pycache__')
-                   and Path(directory)/d != root]
-        for name in files:
-            path = Path(directory)/name
-            if path.suffix not in ('.json','.py'):
-                continue
-            # JSON result/manifest metadata and historical protocol source.
-            if pattern.search(name) or pattern.search(path.read_text(errors='replace')):
+    def consumed(value):
+        if isinstance(value,dict):
+            for key,item in value.items():
+                is_day=(key in ('day','days','scenario_seed','scenario_seeds','demand_seed','demand_seeds')
+                        or key.endswith('_days'))
+                if is_day:
+                    values=item if isinstance(item,list) else [item]
+                    if any(v in DAYS for v in values if isinstance(v,int)):
+                        return True
+                if isinstance(item,(dict,list)) and consumed(item):
+                    return True
+        elif isinstance(value,list):
+            return any(consumed(item) for item in value if isinstance(item,(dict,list)))
+        return False
+    for experiment in root.parent.iterdir():
+        if not experiment.is_dir() or experiment==root:
+            continue
+        files=list(experiment.glob('*.json'))
+        for name in ('budget','started','pairs','reservations','manifests','metadata'):
+            directory=experiment/name
+            if directory.is_dir():
+                files.extend(directory.rglob('*.json'))
+        for path in files:
+            if pattern.search(path.name) or consumed(read(path)):
                 hits.append(str(path.relative_to(root.parent)))
             checked += 1
     assert not hits, ('requested development days already reserved or consumed',hits[:20])
-    return dict(files_checked=checked,collisions=hits,raw_trace_reads=0)
+    return dict(files_checked=checked,collisions=hits,raw_trace_reads=0,
+                scope='Top-level protocol indices,budget,started,pairs,reservations,manifests,metadata;not cell/event/log trees.')
 
 
 def check(a):
@@ -67,7 +81,7 @@ def check(a):
         write(a.root/'budget'/f'p{index}.json',dict(source=a.source,index=index,day=day,arm=arm,
             automatic_retry=False,physical_start_cap=1))
     write(a.root/'checks/status.json',dict(source=a.source,tests=result.testsRun,status='passed',
-        metadata=metadata,physical_starts=0,training_updates=0))
+        check_entry=__file__,metadata=metadata,physical_starts=0,training_updates=0))
     print('V275_CHECK_AND_SEAL_COMPLETE',result.testsRun,flush=True)
 
 

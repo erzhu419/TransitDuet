@@ -1,5 +1,8 @@
 from dataclasses import replace
 from types import SimpleNamespace
+from pathlib import Path
+import json
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -136,6 +139,21 @@ class ContinuationTests(unittest.TestCase):
 
 
 class DevelopmentGridTests(unittest.TestCase):
+    def test_day_inventory_uses_structured_indices_and_does_not_walk_old_logs(self):
+        import run_freqduet_v275_flow_controller as pilot
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'new'
+            root.mkdir()
+            old=Path(temp)/'old'
+            old.mkdir()
+            (old/'protocol.json').write_text(json.dumps(dict(days=[1],passenger_person_s=pilot.DAYS[0])))
+            (old/'logs').mkdir()
+            (old/'logs/broken.json').write_text('not metadata')
+            self.assertEqual(pilot.unused_metadata(root)['files_checked'],1)
+            (old/'protocol.json').write_text(json.dumps(dict(days=[pilot.DAYS[0]])))
+            with self.assertRaises(AssertionError):
+                pilot.unused_metadata(root)
+
     def test_twelve_unique_paths_and_eight_nonoverlapping_units(self):
         import run_freqduet_v275_flow_controller as pilot
         indices=[i for shard in pilot.SHARDS for i in shard]
