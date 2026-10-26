@@ -34,9 +34,14 @@ independent confirmation, not switching main or claiming frequency superiority.
 
 Control source894ad14707: t211773 passed83 server synthetic tests on node004.
 Its day inventory then descended into old cell/log trees; no physical paths
-started. Narrow structured-index check entryf3f15604a5 is prepared but not run.
-Stopping the old running check requires operator confirmation; normal cancel
-refused without force, and no forced cancellation was performed.
-High/manual units t211774--t211781 remain gated on the completed check receipt;
-aggregate t211782 waits for eight small unit receipts. Only those receipts and
-the final summary sync locally. Main/training stay frozen; no traffic result yet.
+started. The user then approved stopping only t211773; scheduler cancellation
+confirmed one running task stopped,zero related tasks and zero kill failures.
+Replacement check t211783 passed84 tests and7527 structured metadata files,
+with zero day collisions and zero raw trace reads. It uses index-only entry
+f3f15604a5 with unchanged894ad14707 control source and original12-path budget;
+high/manual,node004. Its small passed receipt now releases the collection gate.
+High/manual units t211774--t211781 launched on node001/node004. The launch
+snapshot confirms p0--p7 started,zero completed paths and zero failures;the four
+remaining homogeneous paths follow within the same eight sequential units.
+Aggregate t211782 waits for eight small unit receipts. Only those receipts and
+the final summary sync locally. Main/training stay frozen;no traffic conclusion yet.
