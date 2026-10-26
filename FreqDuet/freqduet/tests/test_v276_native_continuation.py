@@ -21,7 +21,8 @@ def packet():
 def model_fixture():
     snap,visits,events=flow_fixture()
     follower=graph.Vehicle(2,2,False,0,'travel',10.,remaining_fraction=.5)
-    snap=replace(snap,vehicles=(*snap.vehicles,follower))
+    snap=replace(snap,vehicles=(*snap.vehicles,follower),
+        plans=(*snap.plans,graph.Plan(13,True,snap.now_s+1080)))
     base,_=flow.assemble(snap,visits,events)
     data=dict(links={d:((1000.,10.),)*3 for d in (False,True)},
         fleet={0:dict(progress=1000.,launch=1000.,speed=0.,service=40.,predecessor=90,target=360.),
@@ -88,6 +89,9 @@ class NativeContinuationTests(unittest.TestCase):
         vehicles={v.bus:dict(bus=v.bus,trip=v.trip,d=v.direction,i=v.index,phase=v.phase,
             frontier=2050.) for v in model.snapshot.vehicles}
         state.initialize(vehicles)
+        early={v.bus_id:v for v in state.avl(2020.,0)}
+        late={v.bus_id:v for v in state.avl(2020.)}
+        self.assertGreater(late[2].progress_m,early[2].progress_m)
         row=vehicles[0]
         row.update(i=1,phase='travel',frontier=2150.)
         state.event('departure',row,2050.)
@@ -105,6 +109,7 @@ class NativeContinuationTests(unittest.TestCase):
     def test_same_budget_and_fallback_constraints_remain_in_force(self):
         _,model=model_fixture()
         result=flow.choose(model)
+        self.assertTrue(result['reference']['coverage'])
         self.assertLessEqual(result['evaluations'],128)
         self.assertTrue(graph.feasible(result['fallback'],result['reference']))
         self.assertLessEqual(result['fallback']['cost'],result['reference']['cost'])

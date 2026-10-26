@@ -165,7 +165,8 @@ class Continuation:
             if row['travel']:
                 endpoint = self.station_progress(row['direction'],row['index'])
                 span = max(1.,row['arrival_s']-row['motion_s']+1)
-                progress += (endpoint-progress)*min(1.,max(0.,(now-row['motion_s'])/span))
+                sampled=now+float(self.rank[bid]<reader_rank)
+                progress += (endpoint-progress)*min(1.,max(0.,(sampled-row['motion_s'])/span))
             route_speed = self.data['links'][row['direction']][row['index']][1]
             result.append(AVLVehicleSnapshot(bid,row['direction'],row['on_route'],progress,
                 row['launch'],row['speed'],route_speed))
