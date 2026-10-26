@@ -102,6 +102,7 @@ class EventGraph:
     forecasts: dict
     completed: dict
     horizon_s: float
+    initial_queues: dict | None = None
 
     def evaluate(self, commands=None, homogeneous=False):
         return _simulate(self, {} if commands is None else commands, homogeneous)
@@ -145,6 +146,13 @@ def assemble(snapshot, visits):
             alight=sum(r.alighted for r in rows) / incoming if incoming else 0.,
             visits=len(rows), demand_visits=len(demand_rows))
         completed[key] = rows
+    return finish_assembly(snapshot, forecasts, completed)
+
+
+def finish_assembly(snapshot, forecasts, completed):
+    """Shared physical validation; demand identification belongs to the assembler."""
+    q = snapshot.now_s
+    vehicles = {v.bus: v for v in snapshot.vehicles}
     longest = 0.
     for d, route in snapshot.routes.items():
         if not route or not route[-1].terminal or route[-1].control:
@@ -186,6 +194,9 @@ def _simulate(graph, commands, homogeneous):
     departures = {k: sorted(r.completed_s for r in rows)[-2:] for k, rows in graph.completed.items()}
     queues = {}
     for k, rows in graph.completed.items():
+        if graph.initial_queues is not None:
+            queues[k] = graph.initial_queues[k]
+            continue
         last, amount = rows[-1].arrival_s, 0.
         observed = sorted((v.arrival_s, v.bus, v.boarded) for v in s.vehicles
                           if v.phase in ('prepare', 'hold', 'service') and
