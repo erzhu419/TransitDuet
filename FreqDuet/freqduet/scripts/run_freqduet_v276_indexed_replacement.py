@@ -69,6 +69,28 @@ def make_audit(fixed,credit):
             from env.bus import Bus
             self.bridge=CheckedIndexedFlowController(self.env,self.launches,credit)
             self.bridge.attach(Bus)
+            self.started_wall=self.last_progress_wall=time.perf_counter()
+            self.supported_count=0
+            self.audit_reported=False
+
+        def __call__(self,*args):
+            begin=time.perf_counter()
+            law=super().__call__(*args)
+            self.supported_count+=self.bridge.queries[-1]['evaluations']>0
+            audit=self.bridge.kernel_audit
+            if audit['verified'] and not self.audit_reported:
+                print('V276_INDEXED_REAL_EQUIVALENCE',json.dumps(audit),flush=True)
+                self.audit_reported=True
+            queries=len(self.decisions)
+            if queries%25==0:
+                now=time.perf_counter()
+                print('V276_INDEXED_PROGRESS',json.dumps(dict(queries=queries,
+                    time_s=float(self.env.current_time),elapsed_s=now-self.started_wall,
+                    last25_s=now-self.last_progress_wall,supported_queries=self.supported_count,
+                    kernel_verified=audit['verified'])),flush=True)
+                self.last_progress_wall=now
+            self.callback_wall[-1]=time.perf_counter()-begin
+            return law
     return Audit()
 
 
