@@ -1,0 +1,597 @@
+{
+  "source": "f96218e214",
+  "frozen_control_source": "7023e2e784",
+  "status": "exact_kernel_and_solver_equivalence_passed",
+  "synthetic_benchmark": true,
+  "physical_rollouts": 0,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "fleet": 12,
+  "stops_per_direction": 21,
+  "observed_departures": 5326,
+  "profiles": {
+    "frozen": {
+      "total_s": 0.7365515539999997,
+      "total_calls": 237877,
+      "top_self": [
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 185,
+          "function": "<listcomp>",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.307993774,
+          "cumulative_s": 0.307993774
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 146,
+          "function": "<listcomp>",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.265183408,
+          "cumulative_s": 0.265183408
+        },
+        {
+          "file": "freqduet_causal_event_graph.py",
+          "line": 187,
+          "function": "_simulate",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.017378735000000003,
+          "cumulative_s": 0.7370373600000001
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 158,
+          "function": "avl",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.013325005000000001,
+          "cumulative_s": 0.031471786
+        },
+        {
+          "file": "arraysetops.py",
+          "line": 524,
+          "function": "in1d",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.012612455000000002,
+          "cumulative_s": 0.034397835
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls": 10504,
+          "calls": 10504,
+          "self_s": 0.009151021,
+          "cumulative_s": 0.0169223
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 187,
+          "function": "<lambda>",
+          "primitive_calls": 55189,
+          "calls": 55189,
+          "self_s": 0.007771279000000001,
+          "cumulative_s": 0.007771279000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+          "primitive_calls": 1685,
+          "calls": 1685,
+          "self_s": 0.006963529,
+          "cumulative_s": 0.006963529
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 13,
+          "function": "native_request",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.005558653,
+          "cumulative_s": 0.07649222700000001
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls": 5028,
+          "calls": 5028,
+          "self_s": 0.005329602,
+          "cumulative_s": 0.005329602
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "primitive_calls": 4203,
+          "calls": 4203,
+          "self_s": 0.0051419840000000005,
+          "cumulative_s": 0.009912739
+        },
+        {
+          "file": "causal_follower_eta.py",
+          "line": 33,
+          "function": "estimate_follower_departure_gap",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.004979186,
+          "cumulative_s": 0.009779318
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 128,
+          "function": "<genexpr>",
+          "primitive_calls": 53535,
+          "calls": 53535,
+          "self_s": 0.004763474,
+          "cumulative_s": 0.004763474
+        },
+        {
+          "file": "run_freqduet_v106_service_tradeoff.py",
+          "line": 30,
+          "function": "rule_action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.004486767,
+          "cumulative_s": 0.013629975
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 175,
+          "function": "action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.003517404,
+          "cumulative_s": 0.43673414600000005
+        }
+      ],
+      "top_cumulative": [
+        {
+          "file": "check_freqduet_v276_indexed.py",
+          "line": 128,
+          "function": "<lambda>",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.0000043480000000000006,
+          "cumulative_s": 0.7376126620000001
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 104,
+          "function": "evaluate",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.000524661,
+          "cumulative_s": 0.737608314
+        },
+        {
+          "file": "freqduet_causal_event_graph.py",
+          "line": 187,
+          "function": "_simulate",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.017378735000000003,
+          "cumulative_s": 0.7370373600000001
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 175,
+          "function": "action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.003517404,
+          "cumulative_s": 0.43673414600000005
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 185,
+          "function": "<listcomp>",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.307993774,
+          "cumulative_s": 0.307993774
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 136,
+          "function": "event",
+          "primitive_calls": 875,
+          "calls": 875,
+          "self_s": 0.0028842580000000002,
+          "cumulative_s": 0.273168242
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 146,
+          "function": "<listcomp>",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.265183408,
+          "cumulative_s": 0.265183408
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 13,
+          "function": "native_request",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.005558653,
+          "cumulative_s": 0.07649222700000001
+        },
+        {
+          "file": "arraysetops.py",
+          "line": 766,
+          "function": "isin",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.001164691,
+          "cumulative_s": 0.036212531
+        },
+        {
+          "file": "arraysetops.py",
+          "line": 524,
+          "function": "in1d",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.012612455000000002,
+          "cumulative_s": 0.034397835
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 158,
+          "function": "avl",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.013325005000000001,
+          "cumulative_s": 0.031471786
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls": 10504,
+          "calls": 10504,
+          "self_s": 0.009151021,
+          "cumulative_s": 0.0169223
+        },
+        {
+          "file": "run_freqduet_v106_service_tradeoff.py",
+          "line": 30,
+          "function": "rule_action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.004486767,
+          "cumulative_s": 0.013629975
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 127,
+          "function": "station_progress",
+          "primitive_calls": 4200,
+          "calls": 4200,
+          "self_s": 0.002739263,
+          "cumulative_s": 0.012637854
+        },
+        {
+          "file": "fromnumeric.py",
+          "line": 71,
+          "function": "_wrapreduction",
+          "primitive_calls": 1680,
+          "calls": 1680,
+          "self_s": 0.003101309,
+          "cumulative_s": 0.011215738000000001
+        }
+      ]
+    },
+    "indexed": {
+      "total_s": 0.13007901100000002,
+      "total_calls": 124988,
+      "top_self": [
+        {
+          "file": "freqduet_causal_event_graph.py",
+          "line": 187,
+          "function": "_simulate",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.015359198000000001,
+          "cumulative_s": 0.130961255
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 158,
+          "function": "avl",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.013637928,
+          "cumulative_s": 0.024805608
+        },
+        {
+          "file": "arraysetops.py",
+          "line": 524,
+          "function": "in1d",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.010923095,
+          "cumulative_s": 0.027457438
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls": 5028,
+          "calls": 5028,
+          "self_s": 0.005712667,
+          "cumulative_s": 0.005712667
+        },
+        {
+          "file": "causal_follower_eta.py",
+          "line": 33,
+          "function": "estimate_follower_departure_gap",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.0053047500000000004,
+          "cumulative_s": 0.010532914
+        },
+        {
+          "file": "freqduet_causal_event_graph.py",
+          "line": 194,
+          "function": "<genexpr>",
+          "primitive_calls": 5368,
+          "calls": 5368,
+          "self_s": 0.004710814000000001,
+          "cumulative_s": 0.004710814000000001
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 13,
+          "function": "native_request",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.00455326,
+          "cumulative_s": 0.06673744100000001
+        },
+        {
+          "file": "run_freqduet_v106_service_tradeoff.py",
+          "line": 30,
+          "function": "rule_action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.004044745000000001,
+          "cumulative_s": 0.012740878
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+          "primitive_calls": 1685,
+          "calls": 1685,
+          "self_s": 0.0038150190000000002,
+          "cumulative_s": 0.0038150190000000002
+        },
+        {
+          "file": "causal_follower_eta.py",
+          "line": 125,
+          "function": "_finite_nonnegative",
+          "primitive_calls": 3176,
+          "calls": 3176,
+          "self_s": 0.003098889,
+          "cumulative_s": 0.003098889
+        },
+        {
+          "file": "causal_departure_regularity.py",
+          "line": 84,
+          "function": "__init__",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.003073104,
+          "cumulative_s": 0.0033225060000000002
+        },
+        {
+          "file": "freqduet_indexed_continuation.py",
+          "line": 39,
+          "function": "event",
+          "primitive_calls": 875,
+          "calls": 875,
+          "self_s": 0.002510347,
+          "cumulative_s": 0.004934145
+        },
+        {
+          "file": "fromnumeric.py",
+          "line": 71,
+          "function": "_wrapreduction",
+          "primitive_calls": 1680,
+          "calls": 1680,
+          "self_s": 0.0024019690000000003,
+          "cumulative_s": 0.007251823
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "primitive_calls": 5301,
+          "calls": 5301,
+          "self_s": 0.002325147,
+          "cumulative_s": 0.00360391
+        },
+        {
+          "file": "freqduet_indexed_continuation.py",
+          "line": 72,
+          "function": "action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.002314745,
+          "cumulative_s": 0.09577742600000001
+        }
+      ],
+      "top_cumulative": [
+        {
+          "file": "check_freqduet_v276_indexed.py",
+          "line": 129,
+          "function": "<lambda>",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.000008833,
+          "cumulative_s": 0.131170538
+        },
+        {
+          "file": "freqduet_indexed_continuation.py",
+          "line": 23,
+          "function": "evaluate",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.000156656,
+          "cumulative_s": 0.13116170500000002
+        },
+        {
+          "file": "freqduet_causal_event_graph.py",
+          "line": 187,
+          "function": "_simulate",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.015359198000000001,
+          "cumulative_s": 0.130961255
+        },
+        {
+          "file": "freqduet_indexed_continuation.py",
+          "line": 72,
+          "function": "action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.002314745,
+          "cumulative_s": 0.09577742600000001
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 13,
+          "function": "native_request",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.00455326,
+          "cumulative_s": 0.06673744100000001
+        },
+        {
+          "file": "arraysetops.py",
+          "line": 766,
+          "function": "isin",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.0010631940000000002,
+          "cumulative_s": 0.029076974000000002
+        },
+        {
+          "file": "arraysetops.py",
+          "line": 524,
+          "function": "in1d",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.010923095,
+          "cumulative_s": 0.027457438
+        },
+        {
+          "file": "freqduet_native_continuation.py",
+          "line": 158,
+          "function": "avl",
+          "primitive_calls": 419,
+          "calls": 419,
+          "self_s": 0.013637928,
+          "cumulative_s": 0.024805608
+        },
+        {
+          "file": "run_freqduet_v106_service_tradeoff.py",
+          "line": 30,
+          "function": "rule_action",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.004044745000000001,
+          "cumulative_s": 0.012740878
+        },
+        {
+          "file": "causal_follower_eta.py",
+          "line": 33,
+          "function": "estimate_follower_departure_gap",
+          "primitive_calls": 420,
+          "calls": 420,
+          "self_s": 0.0053047500000000004,
+          "cumulative_s": 0.010532914
+        },
+        {
+          "file": "fromnumeric.py",
+          "line": 71,
+          "function": "_wrapreduction",
+          "primitive_calls": 1680,
+          "calls": 1680,
+          "self_s": 0.0024019690000000003,
+          "cumulative_s": 0.007251823
+        },
+        {
+          "file": "freqduet_causal_event_graph.py",
+          "line": 194,
+          "function": "<dictcomp>",
+          "primitive_calls": 1,
+          "calls": 1,
+          "self_s": 0.000106008,
+          "cumulative_s": 0.006442307
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sorted>",
+          "primitive_calls": 84,
+          "calls": 84,
+          "self_s": 0.0016394640000000002,
+          "cumulative_s": 0.006350278
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls": 5028,
+          "calls": 5028,
+          "self_s": 0.005712667,
+          "cumulative_s": 0.005712667
+        },
+        {
+          "file": "fromnumeric.py",
+          "line": 53,
+          "function": "_wrapfunc",
+          "primitive_calls": 1260,
+          "calls": 1260,
+          "self_s": 0.001358388,
+          "cumulative_s": 0.005594448
+        }
+      ]
+    }
+  },
+  "fixed_plans": [
+    {
+      "action_s": 0,
+      "frozen_s": 0.5735407285392284,
+      "indexed_s": 0.07428150717169046
+    },
+    {
+      "action_s": 15,
+      "frozen_s": 0.5791365774348378,
+      "indexed_s": 0.07460313942283392
+    },
+    {
+      "action_s": 45,
+      "frozen_s": 0.5850750226527452,
+      "indexed_s": 0.07574118953198195
+    }
+  ],
+  "solver": {
+    "frozen_s": 76.08200922887772,
+    "indexed_s": 10.139959421008825
+  },
+  "solver_speedup": 7.503186755485883,
+  "solver_evaluations": 128,
+  "search_budget": 128,
+  "beam_width": 4,
+  "max_variables": 6,
+  "limitations": "Synthetic workload,not a measured full-day speedup. Existing traffic paths are untouched."
+}

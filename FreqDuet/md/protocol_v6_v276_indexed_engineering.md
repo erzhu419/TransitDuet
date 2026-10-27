@@ -26,3 +26,13 @@ original pairs;do not alter their files. Maximum physical allowance becomes
 query checks every optimized kernel against frozen7023e2e784 before continuing;
 these extra engineering evaluations do not supply additional search candidates.
 Keep128 search evaluations,all seeds and the original acceptance gate unchanged.
+
+Completed validation: t211922/source4a216af00c passed 19 checks. Full 128-evaluation
+synthetic search fell from 75.898s to 6.018s (12.612x); index construction 0.00264s.
+The earlier profile attributed about 78% of frozen kernel time to two history scans.
+All model fields and full solver output matched exactly;real-day speed remains
+to be measured. Old t211829/t211831/t211832 and queued t211837 were cancelled
+with zero related cancellations or kill failures. Replacements t211923--t211925
+run on node001/node004,aggregate t211926 waits for their receipts. Each of the
+three real first searches already passed 128 frozen/indexed kernel comparisons.
+Reuse original pairs0--7 and9; no training, gate change or main-policy promotion.
