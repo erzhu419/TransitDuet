@@ -120,7 +120,9 @@ def profile_call(path,fn):
 def benchmark(a):
     assert json.loads((a.root/'checks/passed.json').read_text())['source']==a.source
     reference=stress_state()
+    begin=time.perf_counter()
     indexed=IndexedNativeGraph(reference,reference.observed)
+    index_build_s=time.perf_counter()-begin
     # Warm imports and require a fully supported model, not an early fallback.
     baseline=reference.evaluate()
     assert baseline['coverage'] and not baseline['failure']
@@ -152,6 +154,7 @@ def benchmark(a):
         physical_rollouts=0,training_updates=0,main_policy_changed=False,
         fleet=12,stops_per_direction=21,observed_departures=len(reference.observed['departures']),
         profiles=dict(frozen=old_profile,indexed=new_profile),fixed_plans=timings,solver=solvers,
+        index_build_s=index_build_s,
         solver_speedup=solvers['frozen_s']/solvers['indexed_s'],
         solver_evaluations=results[0]['evaluations'],search_budget=128,beam_width=4,max_variables=6,
         limitations='Synthetic workload,not a measured full-day speedup. Existing traffic paths are untouched.'))

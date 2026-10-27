@@ -33,6 +33,31 @@ class IndexedContinuationTests(unittest.TestCase):
         reference,indexed=self.models()
         self.assertEqual(flow.choose(reference),flow.choose(indexed))
 
+    def test_first_search_audit_checks_every_kernel_without_changing_search(self):
+        from run_freqduet_v276_indexed_replacement import CheckedIndexedGraph
+        reference,_=self.models()
+        checked=CheckedIndexedGraph(reference)
+        actual=flow.choose(checked)
+        self.assertEqual(actual,flow.choose(reference))
+        self.assertEqual(checked.matches,actual['evaluations'])
+
+    def test_replacement_aggregation_retains_the_frozen_strict_and_nonharm_gates(self):
+        from run_freqduet_v276_indexed_replacement import paired_effects, frozen
+        cube={(day,arm):{m:0. if m.startswith('trips_') else 10. for m in frozen.METRICS}
+              for day,arm in frozen.ITEMS}
+        for day in frozen.DAYS:
+            for m in ('passenger_person_s','cv_squared','readiness_delay_s','public_launch_delay_total_s'):
+                cube[day,frozen.ARMS[2]][m]=9.
+        self.assertTrue(all(x['joint_gate'] for x in paired_effects(cube).values()))
+        cube[frozen.DAYS[0],frozen.ARMS[2]]['trips_unlaunched']=1.
+        self.assertTrue(all(not x['joint_gate'] for x in paired_effects(cube).values()))
+        cube[frozen.DAYS[0],frozen.ARMS[2]]['trips_unlaunched']=0.
+        for day in frozen.DAYS:
+            cube[day,frozen.ARMS[2]]['passenger_person_s']=10.
+        result=paired_effects(cube)
+        self.assertFalse(result['candidate_vs_'+frozen.ARMS[0]]['joint_gate'])
+        self.assertTrue(result['candidate_vs_'+frozen.ARMS[1]]['joint_gate'])
+
     def test_homogeneous_cost_and_existing_committed_hold_are_unchanged(self):
         reference,indexed=self.models()
         fleet=tuple(replace(v,phase='hold',remaining_s=12.,arrival_s=1990.,boarded=0.)
