@@ -3,8 +3,9 @@ import unittest
 
 import freqduet_causal_event_graph as graph
 import freqduet_flow_controller as flow
-from freqduet_indexed_continuation import IndexedContinuation, IndexedNativeGraph
-from test_v276_native_continuation import model_fixture
+from freqduet_indexed_continuation import IndexedContinuation, IndexedNativeGraph, ReusedNativeRule
+from freqduet_native_continuation import native_request
+from test_v276_native_continuation import model_fixture, packet
 
 
 class IndexedContinuationTests(unittest.TestCase):
@@ -18,6 +19,15 @@ class IndexedContinuationTests(unittest.TestCase):
             for second in graph.ACTIONS:
                 commands={(0,0,0):int(first),(0,0,1):int(second)}
                 self.assertEqual(reference.evaluate(commands),indexed.evaluate(commands),commands)
+
+    def test_reused_rule_keeps_all_evidence_fields_and_clears_previous_state(self):
+        rule=ReusedNativeRule()
+        p=packet()
+        cases=(p,dict(p,departure=None),dict(p,predecessor=None),dict(p,avl=()),
+               dict(p,departure=dict(trip_id=123,time_s=1700.)),p)
+        for case in cases:
+            for legal in (tuple(graph.ACTIONS),(0,30),(5,10,20,45)):
+                self.assertEqual(rule(case,legal),native_request(case,legal))
 
     def test_full_solver_and_fallback_are_exact_with_same_evaluation_budget(self):
         reference,indexed=self.models()

@@ -1,7 +1,8 @@
 # V276 indexing: engineering equivalence and performance
 
 Keep control source7023e2e784 and all current physical paths untouched. Optimize
-only historical arrival/departure lookup and route-coordinate construction.
+only historical arrival/departure lookup, route-coordinate construction and
+repeated native-rule object/mask allocation. Reuse the same native functions.
 Use the same native rule functions, clocks, tie order, physical simulator,
 128-evaluation budget, beam4, variables6, objectives and acceptance gate.
 
