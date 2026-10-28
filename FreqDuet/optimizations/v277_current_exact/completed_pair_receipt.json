@@ -1,0 +1,67 @@
+{
+  "status": "read_only_completed_pair_report",
+  "completed_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    13,
+    17
+  ],
+  "missing_indices": [
+    10,
+    11,
+    12,
+    14,
+    15,
+    16,
+    18,
+    19
+  ],
+  "failures": [],
+  "same_metric_completed_pairs": [
+    {
+      "day": 2077002,
+      "endpoints_exact": true,
+      "physical_trace_fields_exact": {
+        "holds": true,
+        "dispatches": true,
+        "arrivals": true,
+        "departures": true,
+        "queries": true,
+        "uniforms": true
+      },
+      "physical_trace_counts": {
+        "holds": 5200,
+        "dispatches": 262,
+        "arrivals": 5240,
+        "departures": 5240,
+        "queries": 5200,
+        "uniforms": 5200
+      },
+      "beam_wall_s": 33409.24221261218,
+      "current_wall_s": 1805.1275627920404,
+      "descriptive_beam_vs_current_wall_ratio": 18.507967470696194,
+      "optimized_current_wall_s": 979.0972870979458,
+      "optimized_vs_current_endpoints_exact": true,
+      "optimized_vs_current_saved_traces_exact": true,
+      "descriptive_beam_vs_optimized_wall_ratio": 34.1224949275853,
+      "descriptive_current_vs_optimized_wall_ratio": 1.8436651664539452
+    }
+  ],
+  "traffic_starts": 0,
+  "training_updates": 0,
+  "old_results_changed": false,
+  "running_tasks_changed": false,
+  "main_policy_changed": false,
+  "scope": "Completed paired days only; physical execution parity is not equality of all predicted plans. Archived timings are descriptive; full four-day eligibility remains with the frozen aggregator.",
+  "scheduler_task": "t212125",
+  "node": "node004",
+  "priority": "high"
+}
