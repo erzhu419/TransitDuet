@@ -1,0 +1,2106 @@
+{
+  "protocol": {
+    "protocol_version": "plan_validity_native_development_v1",
+    "expected_runs": [
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_pointmaze_history_1972110000:pointmaze:history:1972110000",
+        "task": "pointmaze",
+        "method": "history",
+        "optimizer_seed": 1972110000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_pointmaze_threshold_1972110000:pointmaze:threshold:1972110000",
+        "task": "pointmaze",
+        "method": "threshold",
+        "optimizer_seed": 1972110000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_pointmaze_termination_history_1972110000:pointmaze:termination_history:1972110000",
+        "task": "pointmaze",
+        "method": "termination_history",
+        "optimizer_seed": 1972110000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_pointmaze_history_1972120000:pointmaze:history:1972120000",
+        "task": "pointmaze",
+        "method": "history",
+        "optimizer_seed": 1972120000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_pointmaze_threshold_1972120000:pointmaze:threshold:1972120000",
+        "task": "pointmaze",
+        "method": "threshold",
+        "optimizer_seed": 1972120000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_pointmaze_termination_history_1972120000:pointmaze:termination_history:1972120000",
+        "task": "pointmaze",
+        "method": "termination_history",
+        "optimizer_seed": 1972120000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_reacher_tracking_history_1972210000:reacher_tracking:history:1972210000",
+        "task": "reacher_tracking",
+        "method": "history",
+        "optimizer_seed": 1972210000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_reacher_tracking_threshold_1972210000:reacher_tracking:threshold:1972210000",
+        "task": "reacher_tracking",
+        "method": "threshold",
+        "optimizer_seed": 1972210000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_reacher_tracking_termination_history_1972210000:reacher_tracking:termination_history:1972210000",
+        "task": "reacher_tracking",
+        "method": "termination_history",
+        "optimizer_seed": 1972210000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_reacher_tracking_history_1972220000:reacher_tracking:history:1972220000",
+        "task": "reacher_tracking",
+        "method": "history",
+        "optimizer_seed": 1972220000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_reacher_tracking_threshold_1972220000:reacher_tracking:threshold:1972220000",
+        "task": "reacher_tracking",
+        "method": "threshold",
+        "optimizer_seed": 1972220000
+      },
+      {
+        "run_id": "plan_validity_dev_20261028_cost_pilot_reacher_tracking_termination_history_1972220000:reacher_tracking:termination_history:1972220000",
+        "task": "reacher_tracking",
+        "method": "termination_history",
+        "optimizer_seed": 1972220000
+      }
+    ]
+  },
+  "stage": "cost_pilot",
+  "run_name": "plan_validity_dev_20261028",
+  "submission_status": "prepared_not_submitted",
+  "runtime_status": "candidate_interpreter_not_verified_on_execution_nodes",
+  "python_executable": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python",
+  "preregistration": "protocols/plan_validity_preregistration_2026-10-22.json",
+  "preflight_gate": "results/plan_validity_dev_20261028/preflight_gate.json",
+  "cells": [
+    {
+      "task": "pointmaze",
+      "method": "history",
+      "optimizer_seed": 1972110000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972110000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972111000,
+          1972111001,
+          1972111002,
+          1972111003,
+          1972111004,
+          1972111005,
+          1972111006,
+          1972111007
+        ],
+        "selection_seeds": [
+          1972112000,
+          1972112001,
+          1972112002,
+          1972112003,
+          1972112004,
+          1972112005,
+          1972112006,
+          1972112007
+        ],
+        "branch_fit_seeds": [
+          1972113000,
+          1972113001,
+          1972113002,
+          1972113003,
+          1972113004,
+          1972113005,
+          1972113006,
+          1972113007
+        ],
+        "trigger_eval_seeds": [
+          1972115000,
+          1972115001,
+          1972115002,
+          1972115003,
+          1972115004,
+          1972115005,
+          1972115006,
+          1972115007,
+          1972115008,
+          1972115009,
+          1972115010,
+          1972115011,
+          1972115012,
+          1972115013,
+          1972115014,
+          1972115015
+        ],
+        "timing_selection_seeds": [
+          1972114000,
+          1972114001,
+          1972114002,
+          1972114003,
+          1972114004,
+          1972114005,
+          1972114006,
+          1972114007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "history"
+      }
+    },
+    {
+      "task": "pointmaze",
+      "method": "threshold",
+      "optimizer_seed": 1972110000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972110000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972111000,
+          1972111001,
+          1972111002,
+          1972111003,
+          1972111004,
+          1972111005,
+          1972111006,
+          1972111007
+        ],
+        "selection_seeds": [
+          1972112000,
+          1972112001,
+          1972112002,
+          1972112003,
+          1972112004,
+          1972112005,
+          1972112006,
+          1972112007
+        ],
+        "branch_fit_seeds": [
+          1972113000,
+          1972113001,
+          1972113002,
+          1972113003,
+          1972113004,
+          1972113005,
+          1972113006,
+          1972113007
+        ],
+        "trigger_eval_seeds": [
+          1972115000,
+          1972115001,
+          1972115002,
+          1972115003,
+          1972115004,
+          1972115005,
+          1972115006,
+          1972115007,
+          1972115008,
+          1972115009,
+          1972115010,
+          1972115011,
+          1972115012,
+          1972115013,
+          1972115014,
+          1972115015
+        ],
+        "timing_selection_seeds": [
+          1972114000,
+          1972114001,
+          1972114002,
+          1972114003,
+          1972114004,
+          1972114005,
+          1972114006,
+          1972114007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "threshold"
+      }
+    },
+    {
+      "task": "pointmaze",
+      "method": "termination_history",
+      "optimizer_seed": 1972110000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972110000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972111000,
+          1972111001,
+          1972111002,
+          1972111003,
+          1972111004,
+          1972111005,
+          1972111006,
+          1972111007
+        ],
+        "selection_seeds": [
+          1972112000,
+          1972112001,
+          1972112002,
+          1972112003,
+          1972112004,
+          1972112005,
+          1972112006,
+          1972112007
+        ],
+        "branch_fit_seeds": [
+          1972113000,
+          1972113001,
+          1972113002,
+          1972113003,
+          1972113004,
+          1972113005,
+          1972113006,
+          1972113007
+        ],
+        "trigger_eval_seeds": [
+          1972115000,
+          1972115001,
+          1972115002,
+          1972115003,
+          1972115004,
+          1972115005,
+          1972115006,
+          1972115007,
+          1972115008,
+          1972115009,
+          1972115010,
+          1972115011,
+          1972115012,
+          1972115013,
+          1972115014,
+          1972115015
+        ],
+        "timing_selection_seeds": [
+          1972114000,
+          1972114001,
+          1972114002,
+          1972114003,
+          1972114004,
+          1972114005,
+          1972114006,
+          1972114007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "termination_history"
+      }
+    },
+    {
+      "task": "pointmaze",
+      "method": "history",
+      "optimizer_seed": 1972120000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972120000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972121000,
+          1972121001,
+          1972121002,
+          1972121003,
+          1972121004,
+          1972121005,
+          1972121006,
+          1972121007
+        ],
+        "selection_seeds": [
+          1972122000,
+          1972122001,
+          1972122002,
+          1972122003,
+          1972122004,
+          1972122005,
+          1972122006,
+          1972122007
+        ],
+        "branch_fit_seeds": [
+          1972123000,
+          1972123001,
+          1972123002,
+          1972123003,
+          1972123004,
+          1972123005,
+          1972123006,
+          1972123007
+        ],
+        "trigger_eval_seeds": [
+          1972125000,
+          1972125001,
+          1972125002,
+          1972125003,
+          1972125004,
+          1972125005,
+          1972125006,
+          1972125007,
+          1972125008,
+          1972125009,
+          1972125010,
+          1972125011,
+          1972125012,
+          1972125013,
+          1972125014,
+          1972125015
+        ],
+        "timing_selection_seeds": [
+          1972124000,
+          1972124001,
+          1972124002,
+          1972124003,
+          1972124004,
+          1972124005,
+          1972124006,
+          1972124007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "history"
+      }
+    },
+    {
+      "task": "pointmaze",
+      "method": "threshold",
+      "optimizer_seed": 1972120000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972120000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972121000,
+          1972121001,
+          1972121002,
+          1972121003,
+          1972121004,
+          1972121005,
+          1972121006,
+          1972121007
+        ],
+        "selection_seeds": [
+          1972122000,
+          1972122001,
+          1972122002,
+          1972122003,
+          1972122004,
+          1972122005,
+          1972122006,
+          1972122007
+        ],
+        "branch_fit_seeds": [
+          1972123000,
+          1972123001,
+          1972123002,
+          1972123003,
+          1972123004,
+          1972123005,
+          1972123006,
+          1972123007
+        ],
+        "trigger_eval_seeds": [
+          1972125000,
+          1972125001,
+          1972125002,
+          1972125003,
+          1972125004,
+          1972125005,
+          1972125006,
+          1972125007,
+          1972125008,
+          1972125009,
+          1972125010,
+          1972125011,
+          1972125012,
+          1972125013,
+          1972125014,
+          1972125015
+        ],
+        "timing_selection_seeds": [
+          1972124000,
+          1972124001,
+          1972124002,
+          1972124003,
+          1972124004,
+          1972124005,
+          1972124006,
+          1972124007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "threshold"
+      }
+    },
+    {
+      "task": "pointmaze",
+      "method": "termination_history",
+      "optimizer_seed": 1972120000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972120000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972121000,
+          1972121001,
+          1972121002,
+          1972121003,
+          1972121004,
+          1972121005,
+          1972121006,
+          1972121007
+        ],
+        "selection_seeds": [
+          1972122000,
+          1972122001,
+          1972122002,
+          1972122003,
+          1972122004,
+          1972122005,
+          1972122006,
+          1972122007
+        ],
+        "branch_fit_seeds": [
+          1972123000,
+          1972123001,
+          1972123002,
+          1972123003,
+          1972123004,
+          1972123005,
+          1972123006,
+          1972123007
+        ],
+        "trigger_eval_seeds": [
+          1972125000,
+          1972125001,
+          1972125002,
+          1972125003,
+          1972125004,
+          1972125005,
+          1972125006,
+          1972125007,
+          1972125008,
+          1972125009,
+          1972125010,
+          1972125011,
+          1972125012,
+          1972125013,
+          1972125014,
+          1972125015
+        ],
+        "timing_selection_seeds": [
+          1972124000,
+          1972124001,
+          1972124002,
+          1972124003,
+          1972124004,
+          1972124005,
+          1972124006,
+          1972124007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "termination_history"
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "method": "history",
+      "optimizer_seed": 1972210000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972210000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972211000,
+          1972211001,
+          1972211002,
+          1972211003,
+          1972211004,
+          1972211005,
+          1972211006,
+          1972211007
+        ],
+        "selection_seeds": [
+          1972212000,
+          1972212001,
+          1972212002,
+          1972212003,
+          1972212004,
+          1972212005,
+          1972212006,
+          1972212007
+        ],
+        "branch_fit_seeds": [
+          1972213000,
+          1972213001,
+          1972213002,
+          1972213003,
+          1972213004,
+          1972213005,
+          1972213006,
+          1972213007
+        ],
+        "trigger_eval_seeds": [
+          1972215000,
+          1972215001,
+          1972215002,
+          1972215003,
+          1972215004,
+          1972215005,
+          1972215006,
+          1972215007,
+          1972215008,
+          1972215009,
+          1972215010,
+          1972215011,
+          1972215012,
+          1972215013,
+          1972215014,
+          1972215015
+        ],
+        "timing_selection_seeds": [
+          1972214000,
+          1972214001,
+          1972214002,
+          1972214003,
+          1972214004,
+          1972214005,
+          1972214006,
+          1972214007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "history"
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "method": "threshold",
+      "optimizer_seed": 1972210000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972210000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972211000,
+          1972211001,
+          1972211002,
+          1972211003,
+          1972211004,
+          1972211005,
+          1972211006,
+          1972211007
+        ],
+        "selection_seeds": [
+          1972212000,
+          1972212001,
+          1972212002,
+          1972212003,
+          1972212004,
+          1972212005,
+          1972212006,
+          1972212007
+        ],
+        "branch_fit_seeds": [
+          1972213000,
+          1972213001,
+          1972213002,
+          1972213003,
+          1972213004,
+          1972213005,
+          1972213006,
+          1972213007
+        ],
+        "trigger_eval_seeds": [
+          1972215000,
+          1972215001,
+          1972215002,
+          1972215003,
+          1972215004,
+          1972215005,
+          1972215006,
+          1972215007,
+          1972215008,
+          1972215009,
+          1972215010,
+          1972215011,
+          1972215012,
+          1972215013,
+          1972215014,
+          1972215015
+        ],
+        "timing_selection_seeds": [
+          1972214000,
+          1972214001,
+          1972214002,
+          1972214003,
+          1972214004,
+          1972214005,
+          1972214006,
+          1972214007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "threshold"
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "method": "termination_history",
+      "optimizer_seed": 1972210000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972210000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972211000,
+          1972211001,
+          1972211002,
+          1972211003,
+          1972211004,
+          1972211005,
+          1972211006,
+          1972211007
+        ],
+        "selection_seeds": [
+          1972212000,
+          1972212001,
+          1972212002,
+          1972212003,
+          1972212004,
+          1972212005,
+          1972212006,
+          1972212007
+        ],
+        "branch_fit_seeds": [
+          1972213000,
+          1972213001,
+          1972213002,
+          1972213003,
+          1972213004,
+          1972213005,
+          1972213006,
+          1972213007
+        ],
+        "trigger_eval_seeds": [
+          1972215000,
+          1972215001,
+          1972215002,
+          1972215003,
+          1972215004,
+          1972215005,
+          1972215006,
+          1972215007,
+          1972215008,
+          1972215009,
+          1972215010,
+          1972215011,
+          1972215012,
+          1972215013,
+          1972215014,
+          1972215015
+        ],
+        "timing_selection_seeds": [
+          1972214000,
+          1972214001,
+          1972214002,
+          1972214003,
+          1972214004,
+          1972214005,
+          1972214006,
+          1972214007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "termination_history"
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "method": "history",
+      "optimizer_seed": 1972220000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972220000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972221000,
+          1972221001,
+          1972221002,
+          1972221003,
+          1972221004,
+          1972221005,
+          1972221006,
+          1972221007
+        ],
+        "selection_seeds": [
+          1972222000,
+          1972222001,
+          1972222002,
+          1972222003,
+          1972222004,
+          1972222005,
+          1972222006,
+          1972222007
+        ],
+        "branch_fit_seeds": [
+          1972223000,
+          1972223001,
+          1972223002,
+          1972223003,
+          1972223004,
+          1972223005,
+          1972223006,
+          1972223007
+        ],
+        "trigger_eval_seeds": [
+          1972225000,
+          1972225001,
+          1972225002,
+          1972225003,
+          1972225004,
+          1972225005,
+          1972225006,
+          1972225007,
+          1972225008,
+          1972225009,
+          1972225010,
+          1972225011,
+          1972225012,
+          1972225013,
+          1972225014,
+          1972225015
+        ],
+        "timing_selection_seeds": [
+          1972224000,
+          1972224001,
+          1972224002,
+          1972224003,
+          1972224004,
+          1972224005,
+          1972224006,
+          1972224007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "history"
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "method": "threshold",
+      "optimizer_seed": 1972220000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972220000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972221000,
+          1972221001,
+          1972221002,
+          1972221003,
+          1972221004,
+          1972221005,
+          1972221006,
+          1972221007
+        ],
+        "selection_seeds": [
+          1972222000,
+          1972222001,
+          1972222002,
+          1972222003,
+          1972222004,
+          1972222005,
+          1972222006,
+          1972222007
+        ],
+        "branch_fit_seeds": [
+          1972223000,
+          1972223001,
+          1972223002,
+          1972223003,
+          1972223004,
+          1972223005,
+          1972223006,
+          1972223007
+        ],
+        "trigger_eval_seeds": [
+          1972225000,
+          1972225001,
+          1972225002,
+          1972225003,
+          1972225004,
+          1972225005,
+          1972225006,
+          1972225007,
+          1972225008,
+          1972225009,
+          1972225010,
+          1972225011,
+          1972225012,
+          1972225013,
+          1972225014,
+          1972225015
+        ],
+        "timing_selection_seeds": [
+          1972224000,
+          1972224001,
+          1972224002,
+          1972224003,
+          1972224004,
+          1972224005,
+          1972224006,
+          1972224007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "threshold"
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "method": "termination_history",
+      "optimizer_seed": 1972220000,
+      "configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972220000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972221000,
+          1972221001,
+          1972221002,
+          1972221003,
+          1972221004,
+          1972221005,
+          1972221006,
+          1972221007
+        ],
+        "selection_seeds": [
+          1972222000,
+          1972222001,
+          1972222002,
+          1972222003,
+          1972222004,
+          1972222005,
+          1972222006,
+          1972222007
+        ],
+        "branch_fit_seeds": [
+          1972223000,
+          1972223001,
+          1972223002,
+          1972223003,
+          1972223004,
+          1972223005,
+          1972223006,
+          1972223007
+        ],
+        "trigger_eval_seeds": [
+          1972225000,
+          1972225001,
+          1972225002,
+          1972225003,
+          1972225004,
+          1972225005,
+          1972225006,
+          1972225007,
+          1972225008,
+          1972225009,
+          1972225010,
+          1972225011,
+          1972225012,
+          1972225013,
+          1972225014,
+          1972225015
+        ],
+        "timing_selection_seeds": [
+          1972224000,
+          1972224001,
+          1972224002,
+          1972224003,
+          1972224004,
+          1972224005,
+          1972224006,
+          1972224007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "termination_history"
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot pointmaze history root 1972110000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/history/1972110000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972110000/history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972110000/history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot pointmaze threshold root 1972110000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/threshold/1972110000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972110000/threshold/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972110000/threshold/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot pointmaze termination_history root 1972110000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/termination_history/1972110000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972110000/termination_history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972110000/termination_history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot pointmaze history root 1972120000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/history/1972120000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972120000/history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972120000/history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot pointmaze threshold root 1972120000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/threshold/1972120000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972120000/threshold/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972120000/threshold/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot pointmaze termination_history root 1972120000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/termination_history/1972120000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972120000/termination_history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/pointmaze/1972120000/termination_history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot reacher_tracking history root 1972210000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/history/1972210000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972210000/history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972210000/history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot reacher_tracking threshold root 1972210000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/threshold/1972210000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972210000/threshold/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972210000/threshold/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot reacher_tracking termination_history root 1972210000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/termination_history/1972210000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972210000/termination_history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972210000/termination_history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot reacher_tracking history root 1972220000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/history/1972220000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972220000/history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972220000/history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot reacher_tracking threshold root 1972220000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/threshold/1972220000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972220000/threshold/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972220000/threshold/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-PlanValidity-Development",
+      "description": "Freq-HRL native cost_pilot reacher_tracking termination_history root 1972220000",
+      "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/termination_history/1972220000",
+      "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "normal",
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "allow_cpu_training": true,
+      "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972220000/termination_history/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/cost_pilot/reacher_tracking/1972220000/termination_history/public",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+      ],
+      "skip_launch_staging": false,
+      "allow_duplicate": false
+    }
+  ]
+}

@@ -285,7 +285,7 @@ class BudgetTest(unittest.TestCase):
             args.output = Path(folder) / "trial.json"
             with (
                 patch.object(runner, "single_thread_runtime", runtime),
-                patch.object(runner, "train_shared_controller", return_value=({"selected_checkpoint_iteration": 1}, SavedController())),
+                patch.object(runner, "train_shared_controller", return_value=({"selected_checkpoint_iteration": 1, "history": []}, SavedController())),
                 patch.object(runner, "collect_renewal_labels", side_effect=AssertionError("fixed uses no labels")),
                 patch.object(runner, "run_episode", side_effect=episode),
                 patch.object(shared, "_make_task", side_effect=lambda **kw: DenseTask(**{k: v for k, v in kw.items() if k != "env_id"})),

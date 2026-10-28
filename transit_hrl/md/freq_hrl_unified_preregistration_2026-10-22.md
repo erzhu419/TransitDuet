@@ -8,6 +8,8 @@ Unknown costs and operational distance thresholds remain explicit pending fields
 Verification:78 focused tests passed, including development/test separation,
 shared-cost allocation, seed reservation, global alpha and separate C1/C2 logic.
 No task was submitted and no new performance evidence was generated.
+The [native preflight/pilot scheduler scripts](freq_hrl_native_development_scheduler_2026-10-28.md)
+now implement the first two execution stages, without submitting them.
 
 ## Questions And Claims
 

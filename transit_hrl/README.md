@@ -41,6 +41,9 @@ The [unified prospective protocol](md/freq_hrl_unified_preregistration_2026-10-2
 and [machine-readable draft](protocols/plan_validity_preregistration_2026-10-22.json)
 now define the two freezes, reserved seed roles, lifecycle costs and global
 statistical allocation. Missing pilot costs/thresholds/artifacts keep it unlocked.
+The [native development scheduler preparation](md/freq_hrl_native_development_scheduler_2026-10-28.md)
+provides6 preflight and12 pilot intents, one-core unpinned placement and a
+content-checked preflight gate. Blueprints are prepared only, not submitted.
 
 ## Historical Research Mainlines
 

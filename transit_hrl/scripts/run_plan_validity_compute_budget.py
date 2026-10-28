@@ -16,6 +16,7 @@ from freq_hrl.experiments.plan_validity_transfer import (
 from freq_hrl.experiments.pointmaze_budgeted_trigger import fit_budgeted_trigger_predictors
 from freq_hrl.experiments.pointmaze_goal_validation import _json_ready
 from freq_hrl.experiments.pointmaze_plan_validity_branching import _task_options
+from freq_hrl.experiments.pointmaze_plan_value_qualification import _compact_history
 from freq_hrl.experiments.pointmaze_timing_baselines import (
     TimingRule, collect_timing_pairs, fit_capacity_controls, fit_termination,
     select_rule, termination_readiness, threshold_candidates,
@@ -144,6 +145,9 @@ def run_trial(args, task_name):
                     validation_return=float(np.mean([r["episode_return"] for r in rows])),
                     validation_latency=latency.summary(episodes=len(rows), deadline_seconds=time_scale.dt_seconds),
                     controller_selected_iteration=payload["selected_checkpoint_iteration"])
+                result["controller_selection_history"] = _compact_history([
+                    row for row in payload["history"]
+                    if row["iteration"] < 0 or row.get("checkpoint_evaluation_performed")])
                 with measured_phase("artifact_export"):
                     checkpoint = args.output.with_name(f"{args.output.stem}.{task_name}.controller.pt")
                     torch.save(controller.state_dict(), checkpoint)
@@ -161,12 +165,16 @@ def run_trial(args, task_name):
     return result
 
 
-def main(argv=None):
+def build_compute_parser():
     parser = build_timing_parser()
     parser.description = __doc__
     parser.add_argument("--tasks", nargs="+", choices=TASKS, default=list(TASKS))
     parser.add_argument("--method", choices=METHODS, required=True)
-    args = parser.parse_args(argv)
+    return parser
+
+
+def main(argv=None):
+    args = build_compute_parser().parse_args(argv)
     resolved = prepare(args)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     if args.output.exists():
