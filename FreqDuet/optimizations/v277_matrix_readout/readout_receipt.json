@@ -1,0 +1,112 @@
+{
+  "status": "descriptive_partial_matrix_readout",
+  "source": "b9909ddc03",
+  "completed_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    17
+  ],
+  "pending_indices": [
+    8,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18,
+    19
+  ],
+  "failures": [],
+  "current_days": [
+    2077002
+  ],
+  "same_metric_beam_current_paired_days": [],
+  "comparisons": {
+    "current_vs_fixed360_bilateral025": [
+      {
+        "day": 2077002,
+        "delta": {
+          "passenger_person_s": -66569.0,
+          "journey_min": -0.054743000000001985,
+          "cv_squared": -0.002954119965675607,
+          "readiness_delay_s": -2.8435110000000066,
+          "public_launch_delay_total_s": -745.0,
+          "holding_s_per_trip": -1.3167940000000158,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "journey_s_per_passenger": -3.284580000000119
+        },
+        "current_wall_s": 1805.1275627920404,
+        "reference_wall_s": 50.17144746426493,
+        "descriptive_wall_speedup": 0.02779385152518716
+      }
+    ],
+    "current_vs_frozen_v275_apc": [
+      {
+        "day": 2077002,
+        "delta": {
+          "passenger_person_s": -124801.0,
+          "journey_min": -0.10263000000000133,
+          "cv_squared": -0.002384596638638499,
+          "readiness_delay_s": -9.083968999999996,
+          "public_launch_delay_total_s": -2380.0,
+          "holding_s_per_trip": -10.839695000000006,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "journey_s_per_passenger": -6.15780000000008
+        },
+        "current_wall_s": 1805.1275627920404,
+        "reference_wall_s": 6587.6617635069415,
+        "descriptive_wall_speedup": 3.649416196004245
+      }
+    ],
+    "current_vs_frozen_v276_apc": [
+      {
+        "day": 2077002,
+        "delta": {
+          "passenger_person_s": 33811.0,
+          "journey_min": 0.027805000000000746,
+          "cv_squared": 0.00026137186236469684,
+          "readiness_delay_s": 1.0954200000000043,
+          "public_launch_delay_total_s": 287.0,
+          "holding_s_per_trip": 0.5725189999999998,
+          "trips_unlaunched": 0,
+          "trips_incomplete": 0,
+          "journey_s_per_passenger": 1.6683000000000447
+        },
+        "current_wall_s": 1805.1275627920404,
+        "reference_wall_s": 36460.513662583195,
+        "descriptive_wall_speedup": 20.198303108390142
+      }
+    ],
+    "current_vs_arrival_cv_beam": []
+  },
+  "frozen_gates": {
+    "vs_fixed": "passenger upper95<0; CV2/readiness/public-delay upper95<=0",
+    "vs_v275": "readiness/public-delay upper95<0; passenger/CV2 upper95<=0",
+    "vs_v276": "passenger/CV2/readiness/public-delay upper95<=0",
+    "trips": "no extra unlaunched/incomplete trips on any day",
+    "eligibility": "each corrected arm must pass all three historical comparator gates",
+    "enum_vs_beam": "paired description, not selection by model score or automatic promotion"
+  },
+  "gate_evaluation": "reserved_for_original_full_matrix_aggregator",
+  "confidence_intervals_computed": false,
+  "traffic_starts": 0,
+  "training_updates": 0,
+  "old_results_changed": false,
+  "running_tasks_changed": false,
+  "main_policy_changed": false,
+  "limits": "Available paired days only; V276 versus current also changes planner CV2 semantics. No four-day or pure search-simplification claim.",
+  "scheduler_task": "t212119",
+  "node": "node004",
+  "priority": "high"
+}
