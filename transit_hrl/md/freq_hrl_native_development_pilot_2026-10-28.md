@@ -68,10 +68,20 @@ cost IDs retain the interrupted originals; the other9 cells are not resubmitted.
 These3 finite, non-resumable measurements use high priority and loss protection,
 without hard/preferred nodes: they are excluded from normal-priority victims
 and cannot themselves trigger pinned-node priority preemption. Resource eviction
-or process failure remains possible. The scheduler's existing missing-prerequisite
-preemption fix passed9 tests; its working tree was not changed. Project tests:28 passed.
+or process failure remains possible. The bulk API omitted the declared protection
+field, so it was restored only on these3 live task records under the scheduler
+state lock, without changing commands/resources/placement. The scheduler's
+existing missing-prerequisite preemption fix passed9 tests; its source working
+tree was not changed. Project tests:28 passed.
 
 Input: [`inputs/recovery_preempt1.json`](../results/plan_validity_dev_20261028_r2/inputs/recovery_preempt1.json).
+Submitted replacements: t212077 for t212050 (root1972210000 threshold), t212078
+for t212052 (root1972220000 history), t212079 for t212054 (root1972220000
+termination_history); all are Reacher cells.
+All3 launched on node004 by unpinned placement. Native children34266/34356/34362
+were confirmed after about3 minutes at98.9%-99.1% CPU and483-487 MiB RSS;
+their declared protection is persisted. See the
+[`launch receipt`](../results/plan_validity_dev_20261028_r2/analysis/recovery_preempt1_launch.json).
 After completion, run the existing analyzer with `--recovery-bundle` pointing at
 that input to combine the frozen9 originals and the3 declared attempts. It keeps
 interrupted costs unknown and `lifecycle_costs_complete=false`, even if all12
