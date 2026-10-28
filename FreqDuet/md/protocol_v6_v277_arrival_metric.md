@@ -75,3 +75,10 @@ raising the total start cap to28 for the same20 unique paths. Use a separate
 `matrix_repaired/` attempt and the outer experiment root for the legacy runtime
 loader. Before further traffic,all five arm probes must call that actual loader,
 not just import modules. Keep days,controllers and gates unchanged;no auto retry.
+
+Repaired admission b9909ddc03/t212007 passed28 checks and all five actual runtime
+loader probes. Active shards:t212008--t212013,t212020,t212021 on node001/node004;
+aggregate t212022 waits for eight small receipts. At the launch readout,12/20
+paths had started,four fixed references completed and no repaired-path failures
+were present. Old t211999 closed the failed attempt as incomplete,not zero effect.
+The active result root is `matrix_repaired/`,not the failed `matrix/` directory.

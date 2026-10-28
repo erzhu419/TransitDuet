@@ -1,0 +1,121 @@
+{
+  "source": "b9909ddc03",
+  "days": [
+    2077001,
+    2077002,
+    2077003,
+    2077004
+  ],
+  "arms": [
+    "fixed360_bilateral025",
+    "frozen_v275_apc",
+    "frozen_v276_apc",
+    "arrival_cv_beam",
+    "arrival_cv_current"
+  ],
+  "items": [
+    [
+      2077001,
+      "fixed360_bilateral025"
+    ],
+    [
+      2077002,
+      "fixed360_bilateral025"
+    ],
+    [
+      2077003,
+      "fixed360_bilateral025"
+    ],
+    [
+      2077004,
+      "fixed360_bilateral025"
+    ],
+    [
+      2077001,
+      "frozen_v275_apc"
+    ],
+    [
+      2077002,
+      "frozen_v275_apc"
+    ],
+    [
+      2077003,
+      "frozen_v275_apc"
+    ],
+    [
+      2077004,
+      "frozen_v275_apc"
+    ],
+    [
+      2077001,
+      "frozen_v276_apc"
+    ],
+    [
+      2077002,
+      "frozen_v276_apc"
+    ],
+    [
+      2077003,
+      "frozen_v276_apc"
+    ],
+    [
+      2077004,
+      "frozen_v276_apc"
+    ],
+    [
+      2077001,
+      "arrival_cv_beam"
+    ],
+    [
+      2077002,
+      "arrival_cv_beam"
+    ],
+    [
+      2077003,
+      "arrival_cv_beam"
+    ],
+    [
+      2077004,
+      "arrival_cv_beam"
+    ],
+    [
+      2077001,
+      "arrival_cv_current"
+    ],
+    [
+      2077002,
+      "arrival_cv_current"
+    ],
+    [
+      2077003,
+      "arrival_cv_current"
+    ],
+    [
+      2077004,
+      "arrival_cv_current"
+    ]
+  ],
+  "physical_start_cap": 28,
+  "unique_development_paths": 20,
+  "failed_prior_starts": 8,
+  "authorization": "user_approved_20_then_8_identical_startup_replacements",
+  "max_concurrent_paths": 8,
+  "actor": 12011,
+  "sampler": 27011001,
+  "automatic_retry": false,
+  "independent_days": 4,
+  "independent_futures": 0,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "bootstrap_draws": 10000,
+  "bootstrap_seed": 2770201,
+  "gates": {
+    "vs_fixed": "passenger upper95<0; CV2/readiness/public-delay upper95<=0",
+    "vs_v275": "readiness/public-delay upper95<0; passenger/CV2 upper95<=0",
+    "vs_v276": "passenger/CV2/readiness/public-delay upper95<=0",
+    "trips": "no extra unlaunched/incomplete trips on any day",
+    "eligibility": "each corrected arm must pass all three historical comparator gates",
+    "enum_vs_beam": "paired description, not selection by model score or automatic promotion"
+  },
+  "scope": "Development only; no independent confirmation, APC attribution or frequency claim."
+}

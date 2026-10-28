@@ -1,0 +1,81 @@
+{
+  "source": "60e0b7e682",
+  "priority": "high",
+  "automatic_retry": false,
+  "physical_start_cap": 20,
+  "max_concurrent_paths": 8,
+  "shards": [
+    {
+      "shard": 0,
+      "task": "t211991",
+      "indices": [
+        0,
+        8,
+        16
+      ]
+    },
+    {
+      "shard": 1,
+      "task": "t211992",
+      "indices": [
+        1,
+        9,
+        17
+      ]
+    },
+    {
+      "shard": 2,
+      "task": "t211993",
+      "indices": [
+        2,
+        10,
+        18
+      ]
+    },
+    {
+      "shard": 3,
+      "task": "t211994",
+      "indices": [
+        3,
+        11,
+        19
+      ]
+    },
+    {
+      "shard": 4,
+      "task": "t211995",
+      "indices": [
+        4,
+        12
+      ]
+    },
+    {
+      "shard": 5,
+      "task": "t211996",
+      "indices": [
+        5,
+        13
+      ]
+    },
+    {
+      "shard": 6,
+      "task": "t211997",
+      "indices": [
+        6,
+        14
+      ]
+    },
+    {
+      "shard": 7,
+      "task": "t211998",
+      "indices": [
+        7,
+        15
+      ]
+    }
+  ],
+  "aggregate_task": "t211999",
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "status": "submitted_before_manual_dispatch"
+}

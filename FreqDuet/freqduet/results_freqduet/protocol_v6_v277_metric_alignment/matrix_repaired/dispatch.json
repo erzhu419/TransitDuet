@@ -1,0 +1,163 @@
+{
+  "source": "b9909ddc03",
+  "priority": "high",
+  "automatic_retry": false,
+  "unique_development_paths": 20,
+  "original_charged_startup_failures": 8,
+  "total_authorized_start_cap": 28,
+  "max_concurrent_paths": 8,
+  "shards": [
+    {
+      "shard": 0,
+      "task": "t212008",
+      "indices": [
+        0,
+        8,
+        16
+      ]
+    },
+    {
+      "shard": 1,
+      "task": "t212009",
+      "indices": [
+        1,
+        9,
+        17
+      ]
+    },
+    {
+      "shard": 2,
+      "task": "t212010",
+      "indices": [
+        2,
+        10,
+        18
+      ]
+    },
+    {
+      "shard": 3,
+      "task": "t212011",
+      "indices": [
+        3,
+        11,
+        19
+      ]
+    },
+    {
+      "shard": 4,
+      "task": "t212012",
+      "indices": [
+        4,
+        12
+      ]
+    },
+    {
+      "shard": 5,
+      "task": "t212013",
+      "indices": [
+        5,
+        13
+      ]
+    },
+    {
+      "shard": 6,
+      "task": "t212020",
+      "indices": [
+        6,
+        14
+      ]
+    },
+    {
+      "shard": 7,
+      "task": "t212021",
+      "indices": [
+        7,
+        15
+      ]
+    }
+  ],
+  "aggregate_task": "t212022",
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "status": "dispatched",
+  "manual_dispatch_invoked": true,
+  "artifact_snapshot": {
+    "started": [
+      "p0.json",
+      "p1.json",
+      "p10.json",
+      "p11.json",
+      "p2.json",
+      "p3.json",
+      "p4.json",
+      "p5.json",
+      "p6.json",
+      "p7.json",
+      "p8.json",
+      "p9.json"
+    ],
+    "pairs": [
+      "p0.json",
+      "p1.json",
+      "p2.json",
+      "p3.json"
+    ],
+    "failures": []
+  },
+  "task_snapshot": [
+    {
+      "id": "t212008",
+      "status": "running",
+      "node": "node001",
+      "started_at": 1793150806.5655892
+    },
+    {
+      "id": "t212009",
+      "status": "running",
+      "node": "node004",
+      "started_at": 1793150807.7893133
+    },
+    {
+      "id": "t212010",
+      "status": "running",
+      "node": "node001",
+      "started_at": 1793150806.6051514
+    },
+    {
+      "id": "t212011",
+      "status": "running",
+      "node": "node004",
+      "started_at": 1793150807.861734
+    },
+    {
+      "id": "t212012",
+      "status": "running",
+      "node": "node001",
+      "started_at": 1793150806.6107755
+    },
+    {
+      "id": "t212013",
+      "status": "running",
+      "node": "node004",
+      "started_at": 1793150807.85792
+    },
+    {
+      "id": "t212020",
+      "status": "running",
+      "node": "node001",
+      "started_at": 1793151013.679216
+    },
+    {
+      "id": "t212021",
+      "status": "running",
+      "node": "node004",
+      "started_at": 1793151013.6304853
+    },
+    {
+      "id": "t212022",
+      "status": "queued",
+      "node": null,
+      "started_at": null
+    }
+  ]
+}
