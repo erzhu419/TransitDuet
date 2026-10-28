@@ -112,7 +112,7 @@ def prepare(a):
     assert sorted(p.name for p in (failed/'failures').glob('*.json')) == [f'p{i}.json' for i in range(8)]
     assert not list((failed/'pairs').glob('*.json'))
     for i in range(8):
-        assert 'runtime_optimization_20261014/benchmark_summary.json' in read(failed/'failures'/f'p{i}.json')['error']
+        assert 'runtime_optimization_20261014/benchmark_summary.json' in read(failed/'failures'/f'p{i}.json')['traceback']
     modules = {}
     for arm in ARMS:
         subprocess.run(child_args(a,'probe')+['--arm',arm],env=arm_env(a,arm),check=True)
