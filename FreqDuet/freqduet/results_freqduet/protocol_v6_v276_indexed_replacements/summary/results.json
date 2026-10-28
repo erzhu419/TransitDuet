@@ -1,0 +1,2267 @@
+{
+  "source": "4a216af00c",
+  "original_control_source": "7023e2e784",
+  "status": "twelve_development_paths_complete",
+  "effects": {
+    "candidate_vs_fixed360_bilateral025": {
+      "metrics": {
+        "passenger_person_s": {
+          "mean": -73756.5,
+          "ci95": [
+            -133164.0,
+            -14349.0
+          ],
+          "by_day": {
+            "2076001": -28698.0,
+            "2076002": 0.0,
+            "2076003": -160808.0,
+            "2076004": -105520.0
+          }
+        },
+        "journey_min": {
+          "mean": -0.06084549999999922,
+          "ci95": [
+            -0.10927499999999846,
+            -0.012415999999999983
+          ],
+          "by_day": {
+            "2076001": -0.024831999999999965,
+            "2076002": 0.0,
+            "2076003": -0.12878999999999863,
+            "2076004": -0.08975999999999829
+          }
+        },
+        "cv_squared": {
+          "mean": -0.0018965126819899102,
+          "ci95": [
+            -0.0042567664983725485,
+            -0.0003260561281123453
+          ],
+          "by_day": {
+            "2076001": -0.0013042245124493812,
+            "2076002": 0.0,
+            "2076003": -0.005372619888989967,
+            "2076004": -0.0009092063265202927
+          }
+        },
+        "readiness_delay_s": {
+          "mean": -4.080152750000003,
+          "ci95": [
+            -8.148855000000005,
+            -0.85687025
+          ],
+          "by_day": {
+            "2076001": -3.427481,
+            "2076002": 0.0,
+            "2076003": -9.851145000000002,
+            "2076004": -3.041985000000011
+          }
+        },
+        "public_launch_delay_total_s": {
+          "mean": -1069.0,
+          "ci95": [
+            -2135.0,
+            -224.5
+          ],
+          "by_day": {
+            "2076001": -898.0,
+            "2076002": 0.0,
+            "2076003": -2581.0,
+            "2076004": -797.0
+          }
+        },
+        "trips_unlaunched": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2076001": 0.0,
+            "2076002": 0.0,
+            "2076003": 0.0,
+            "2076004": 0.0
+          }
+        },
+        "trips_incomplete": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2076001": 0.0,
+            "2076002": 0.0,
+            "2076003": 0.0,
+            "2076004": 0.0
+          }
+        },
+        "holding_s_per_trip": {
+          "mean": -2.166030500000005,
+          "ci95": [
+            -4.856870250000021,
+            -0.38167950000000417
+          ],
+          "by_day": {
+            "2076001": -0.7633590000000083,
+            "2076002": 0.0,
+            "2076003": -6.221374000000026,
+            "2076004": -1.6793889999999863
+          }
+        },
+        "holding_person_s": {
+          "mean": -29078.75,
+          "ci95": [
+            -52780.0,
+            -5377.5
+          ],
+          "by_day": {
+            "2076001": -10755.0,
+            "2076002": 0.0,
+            "2076003": -62720.0,
+            "2076004": -42840.0
+          }
+        },
+        "waiting_person_s": {
+          "mean": -50191.75,
+          "ci95": [
+            -91235.5,
+            -9148.0
+          ],
+          "by_day": {
+            "2076001": -18296.0,
+            "2076002": 0.0,
+            "2076003": -113359.0,
+            "2076004": -69112.0
+          }
+        },
+        "onboard_person_s": {
+          "mean": -23564.75,
+          "ci95": [
+            -41928.5,
+            -5201.0
+          ],
+          "by_day": {
+            "2076001": -10402.0,
+            "2076002": 0.0,
+            "2076003": -47449.0,
+            "2076004": -36408.0
+          }
+        }
+      },
+      "joint_gate": true
+    },
+    "candidate_vs_frozen_v275_apc": {
+      "metrics": {
+        "passenger_person_s": {
+          "mean": -72801.0,
+          "ci95": [
+            -145080.75,
+            -6295.5
+          ],
+          "by_day": {
+            "2076001": -12591.0,
+            "2076002": 0.0,
+            "2076003": -189244.0,
+            "2076004": -89369.0
+          }
+        },
+        "journey_min": {
+          "mean": -0.05962049999999941,
+          "ci95": [
+            -0.1163975000000006,
+            -0.005447499999998939
+          ],
+          "by_day": {
+            "2076001": -0.010894999999997879,
+            "2076002": 0.0,
+            "2076003": -0.1515650000000015,
+            "2076004": -0.07602199999999826
+          }
+        },
+        "cv_squared": {
+          "mean": 0.0010355207533301256,
+          "ci95": [
+            -0.002436880390664666,
+            0.004189161503001415
+          ],
+          "by_day": {
+            "2076001": 0.002961198415388319,
+            "2076002": 0.0,
+            "2076003": -0.004236239992682328,
+            "2076004": 0.005417124590614511
+          }
+        },
+        "readiness_delay_s": {
+          "mean": -5.8482822500000005,
+          "ci95": [
+            -10.580152249999994,
+            -1.5677480000000017
+          ],
+          "by_day": {
+            "2076001": -4.5229010000000045,
+            "2076002": 0.0,
+            "2076003": -12.59923599999999,
+            "2076004": -6.270992000000007
+          }
+        },
+        "public_launch_delay_total_s": {
+          "mean": -1532.25,
+          "ci95": [
+            -2772.0,
+            -410.75
+          ],
+          "by_day": {
+            "2076001": -1185.0,
+            "2076002": 0.0,
+            "2076003": -3301.0,
+            "2076004": -1643.0
+          }
+        },
+        "trips_unlaunched": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2076001": 0.0,
+            "2076002": 0.0,
+            "2076003": 0.0,
+            "2076004": 0.0
+          }
+        },
+        "trips_incomplete": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "by_day": {
+            "2076001": 0.0,
+            "2076002": 0.0,
+            "2076003": 0.0,
+            "2076004": 0.0
+          }
+        },
+        "holding_s_per_trip": {
+          "mean": -6.7843515,
+          "ci95": [
+            -10.458015500000002,
+            -2.347328249999997
+          ],
+          "by_day": {
+            "2076001": -6.221374999999995,
+            "2076002": 0.0,
+            "2076003": -11.526718000000017,
+            "2076004": -9.389312999999987
+          }
+        },
+        "holding_person_s": {
+          "mean": -46693.75,
+          "ci95": [
+            -74697.5,
+            -15746.25
+          ],
+          "by_day": {
+            "2076001": -37380.0,
+            "2076002": 0.0,
+            "2076003": -86410.0,
+            "2076004": -62985.0
+          }
+        },
+        "waiting_person_s": {
+          "mean": -38008.5,
+          "ci95": [
+            -91786.5,
+            5687.0
+          ],
+          "by_day": {
+            "2076001": 11374.0,
+            "2076002": 0.0,
+            "2076003": -122382.0,
+            "2076004": -41026.0
+          }
+        },
+        "onboard_person_s": {
+          "mean": -34792.5,
+          "ci95": [
+            -57602.5,
+            -11982.5
+          ],
+          "by_day": {
+            "2076001": -23965.0,
+            "2076002": 0.0,
+            "2076003": -66862.0,
+            "2076004": -48343.0
+          }
+        }
+      },
+      "joint_gate": false
+    }
+  },
+  "joint_gate": false,
+  "path_origins": {
+    "0": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "1": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "2": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "3": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "4": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "5": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "6": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "7": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "8": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_indexed_replacements",
+      "source": "4a216af00c"
+    },
+    "9": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_native_continuation",
+      "source": "7023e2e784"
+    },
+    "10": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_indexed_replacements",
+      "source": "4a216af00c"
+    },
+    "11": {
+      "root": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v276_indexed_replacements",
+      "source": "4a216af00c"
+    }
+  },
+  "by_day": [
+    {
+      "source": "7023e2e784",
+      "day": 2076001,
+      "arm": "fixed360_bilateral025",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076001,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 19929043.0,
+        "journey_min": 17.253043,
+        "cv_squared": 0.06348895286254795,
+        "readiness_delay_s": 123.549618,
+        "holding_s_per_trip": 159.847328,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2369,
+          "5": 721,
+          "10": 671,
+          "15": 546,
+          "20": 502,
+          "30": 284,
+          "45": 107
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5192,
+          "cross_trip_bootstraps": 5192,
+          "same_clock_bootstraps": 242,
+          "pending_state_count": 242,
+          "returns": 262,
+          "return_crossing_bootstraps": 252,
+          "prefix_duration_s": 420.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 6381554.0,
+            "onboard_person_s": 13547489.0,
+            "lf_waiting_person_s": 1127001.0520456508,
+            "lf_onboard_person_s": 2504005.9824364837,
+            "dispatch_backlog_trip_s": 32370.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 37746.0,
+            "onboard_person_s": 6928.0,
+            "lf_waiting_person_s": 12217.161375117023,
+            "lf_onboard_person_s": 3052.6420671147234,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -5523.43583333334,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 6381554.0,
+        "onboard_person_s": 13547489.0,
+        "backlog_trip_s": 32370.0,
+        "holding_person_s": 1006175.0,
+        "dispatch_gap_mean_s": 361.78846153846155,
+        "dispatch_gap_variance_s2": 5945.589866863905,
+        "dispatch_cv_squared": 0.04542401557415324,
+        "public_launch_delay_total_s": 32370.0,
+        "readiness_delay_total_s": 32370.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "4982c6a6a179059c",
+        "passengers_generated": 19261,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4354,
+        "forward_fallback": 846
+      },
+      "execution": {
+        "commanded_s": 41880.0,
+        "executed_s": 41880.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 0
+      },
+      "graph": null,
+      "callback_latency_s": {
+        "mean": 0.0023220184577915533,
+        "p95": 0.003243258083239198,
+        "max": 0.022317001596093178
+      },
+      "wall_s": 119.75365020800382
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076002,
+      "arm": "fixed360_bilateral025",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076002,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 25163918.0,
+        "journey_min": 19.336387,
+        "cv_squared": 0.05303417255659414,
+        "readiness_delay_s": 124.282443,
+        "holding_s_per_trip": 160.209924,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2332,
+          "5": 719,
+          "10": 684,
+          "15": 582,
+          "20": 506,
+          "30": 285,
+          "45": 92
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5194,
+          "cross_trip_bootstraps": 5194,
+          "same_clock_bootstraps": 241,
+          "pending_state_count": 241,
+          "returns": 262,
+          "return_crossing_bootstraps": 256,
+          "prefix_duration_s": 438.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 9860774.0,
+            "onboard_person_s": 15303144.0,
+            "lf_waiting_person_s": 1591215.3045185853,
+            "lf_onboard_person_s": 2917704.603309679,
+            "dispatch_backlog_trip_s": 32562.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 40349.0,
+            "onboard_person_s": 4960.0,
+            "lf_waiting_person_s": 13948.865895617968,
+            "lf_onboard_person_s": 2002.4623967463685,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -6977.391388888896,
+          "conservation_max_error": 4.656612873077393e-10,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 9860774.0,
+        "onboard_person_s": 15303144.0,
+        "backlog_trip_s": 32562.0,
+        "holding_person_s": 1179380.0,
+        "dispatch_gap_mean_s": 360.95,
+        "dispatch_gap_variance_s2": 3848.778269230769,
+        "dispatch_cv_squared": 0.02954124534291891,
+        "public_launch_delay_total_s": 32562.0,
+        "readiness_delay_total_s": 32562.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "00efcc0122f4668b",
+        "passengers_generated": 21699,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4373,
+        "forward_fallback": 827
+      },
+      "execution": {
+        "commanded_s": 41975.0,
+        "executed_s": 41975.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 0
+      },
+      "graph": null,
+      "callback_latency_s": {
+        "mean": 0.0029707362887879405,
+        "p95": 0.004429373517632485,
+        "max": 0.03518950752913952
+      },
+      "wall_s": 149.4332524454221
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076003,
+      "arm": "fixed360_bilateral025",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076003,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 22107544.0,
+        "journey_min": 17.714228,
+        "cv_squared": 0.055415864591716074,
+        "readiness_delay_s": 127.912214,
+        "holding_s_per_trip": 155.610687,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2410,
+          "5": 730,
+          "10": 653,
+          "15": 558,
+          "20": 469,
+          "30": 284,
+          "45": 96
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5194,
+          "cross_trip_bootstraps": 5194,
+          "same_clock_bootstraps": 242,
+          "pending_state_count": 242,
+          "returns": 262,
+          "return_crossing_bootstraps": 253,
+          "prefix_duration_s": 426.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 7297536.0,
+            "onboard_person_s": 14810008.0,
+            "lf_waiting_person_s": 1195574.0710567143,
+            "lf_onboard_person_s": 2767550.6164100743,
+            "dispatch_backlog_trip_s": 33513.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 39841.0,
+            "onboard_person_s": 5195.0,
+            "lf_waiting_person_s": 11009.748758414064,
+            "lf_onboard_person_s": 2275.5951487344005,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -6128.47444444446,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 7297536.0,
+        "onboard_person_s": 14810008.0,
+        "backlog_trip_s": 33513.0,
+        "holding_person_s": 1103425.0,
+        "dispatch_gap_mean_s": 361.5423076923077,
+        "dispatch_gap_variance_s2": 4897.348210059171,
+        "dispatch_cv_squared": 0.03746646619136368,
+        "public_launch_delay_total_s": 33513.0,
+        "readiness_delay_total_s": 33513.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "c3f19e74a71c0591",
+        "passengers_generated": 20810,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4360,
+        "forward_fallback": 840
+      },
+      "execution": {
+        "commanded_s": 40770.0,
+        "executed_s": 40770.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 0
+      },
+      "graph": null,
+      "callback_latency_s": {
+        "mean": 0.0023271124847591496,
+        "p95": 0.0032581150531768802,
+        "max": 0.02162907551974058
+      },
+      "wall_s": 123.52490282990038
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076004,
+      "arm": "fixed360_bilateral025",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076004,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 19169570.0,
+        "journey_min": 16.314821,
+        "cv_squared": 0.06386750852624158,
+        "readiness_delay_s": 105.374046,
+        "holding_s_per_trip": 156.717557,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2397,
+          "5": 697,
+          "10": 686,
+          "15": 571,
+          "20": 476,
+          "30": 277,
+          "45": 96
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5193,
+          "cross_trip_bootstraps": 5193,
+          "same_clock_bootstraps": 257,
+          "pending_state_count": 257,
+          "returns": 262,
+          "return_crossing_bootstraps": 256,
+          "prefix_duration_s": 434.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 5399345.0,
+            "onboard_person_s": 13770225.0,
+            "lf_waiting_person_s": 894657.4355371939,
+            "lf_onboard_person_s": 2522503.072971752,
+            "dispatch_backlog_trip_s": 27608.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 23964.0,
+            "onboard_person_s": 3589.0,
+            "lf_waiting_person_s": 7087.425967642267,
+            "lf_onboard_person_s": 1507.0315262977736,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -5317.226944444427,
+          "conservation_max_error": 4.656612873077393e-10,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 5399345.0,
+        "onboard_person_s": 13770225.0,
+        "backlog_trip_s": 27608.0,
+        "holding_person_s": 1002925.0,
+        "dispatch_gap_mean_s": 362.19615384615383,
+        "dispatch_gap_variance_s2": 5221.157677514793,
+        "dispatch_cv_squared": 0.03979963970140502,
+        "public_launch_delay_total_s": 27608.0,
+        "readiness_delay_total_s": 27608.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "7f3c46d2ff1580f7",
+        "passengers_generated": 19593,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4351,
+        "forward_fallback": 849
+      },
+      "execution": {
+        "commanded_s": 41060.0,
+        "executed_s": 41060.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 0
+      },
+      "graph": null,
+      "callback_latency_s": {
+        "mean": 0.0031858274209886216,
+        "p95": 0.004883419768884778,
+        "max": 0.030744781717658043
+      },
+      "wall_s": 148.95183742325753
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076001,
+      "arm": "frozen_v275_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076001,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 19912936.0,
+        "journey_min": 17.239106,
+        "cv_squared": 0.05922352993471025,
+        "readiness_delay_s": 124.645038,
+        "holding_s_per_trip": 165.305344,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2448,
+          "5": 621,
+          "10": 615,
+          "15": 565,
+          "20": 496,
+          "30": 321,
+          "45": 134
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5192,
+          "cross_trip_bootstraps": 5192,
+          "same_clock_bootstraps": 255,
+          "pending_state_count": 255,
+          "returns": 262,
+          "return_crossing_bootstraps": 256,
+          "prefix_duration_s": 420.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 6351884.0,
+            "onboard_person_s": 13561052.0,
+            "lf_waiting_person_s": 1121958.434051078,
+            "lf_onboard_person_s": 2510059.541992265,
+            "dispatch_backlog_trip_s": 32657.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 37746.0,
+            "onboard_person_s": 6928.0,
+            "lf_waiting_person_s": 12217.161375117023,
+            "lf_onboard_person_s": 3052.6420671147234,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -5518.96166666668,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 6351884.0,
+        "onboard_person_s": 13561052.0,
+        "backlog_trip_s": 32657.0,
+        "holding_person_s": 1032800.0,
+        "dispatch_gap_mean_s": 361.91153846153844,
+        "dispatch_gap_variance_s2": 5573.3806360946755,
+        "dispatch_cv_squared": 0.04255139919851753,
+        "public_launch_delay_total_s": 32657.0,
+        "readiness_delay_total_s": 32657.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "4982c6a6a179059c",
+        "passengers_generated": 19261,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4369,
+        "forward_fallback": 831
+      },
+      "execution": {
+        "commanded_s": 43310.0,
+        "executed_s": 43310.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 503
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 3499,
+        "supported_fraction": 0.6728846153846154,
+        "statuses": {
+          "unsupported_prefix": 1701,
+          "retain_native": 2996,
+          "model_improvement": 503
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 6,
+          "fewer than three completed visits at (True, 3)": 8,
+          "fewer than three completed visits at (True, 4)": 5,
+          "fewer than three completed visits at (True, 5)": 5,
+          "fewer than three completed visits at (True, 6)": 6,
+          "fewer than three completed visits at (True, 7)": 4,
+          "fewer than three completed visits at (True, 8)": 4,
+          "fewer than three completed visits at (True, 9)": 8,
+          "fewer than three completed visits at (True, 10)": 8,
+          "fewer than three completed visits at (True, 11)": 8,
+          "fewer than three completed visits at (True, 12)": 8,
+          "fewer than three completed visits at (True, 13)": 8,
+          "fewer than three completed visits at (True, 14)": 10,
+          "fewer than three completed visits at (True, 15)": 8,
+          "fewer than three completed visits at (True, 16)": 8,
+          "fewer than three completed visits at (True, 17)": 6,
+          "fewer than three completed visits at (True, 18)": 10,
+          "fewer than three completed visits at (True, 19)": 14,
+          "fewer than three completed visits at (True, 20)": 16,
+          "fewer than three completed visits at (True, 21)": 4,
+          "fewer than three closed clearance blocks at (False, 16)": 1256,
+          "fewer than three closed clearance blocks at (False, 11)": 122,
+          "fewer than three closed clearance blocks at (False, 10)": 145
+        },
+        "actual_overrides": 503,
+        "signed_same_state_h_delta_s": 670,
+        "future_proposals": 52,
+        "future_statuses": {
+          "reached": 52
+        },
+        "future_requests_matched": 10,
+        "future_requests_differed": 42,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 2.05415341641736,
+          "p95": 3.9728976117912684,
+          "max": 5.383053535595536
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false
+      },
+      "callback_latency_s": {
+        "mean": 2.0577510889630335,
+        "p95": 3.9782412495464086,
+        "max": 5.388327082619071
+      },
+      "wall_s": 10825.833510207944
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076002,
+      "arm": "frozen_v275_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076002,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 25163918.0,
+        "journey_min": 19.336387,
+        "cv_squared": 0.05303417255659414,
+        "readiness_delay_s": 124.282443,
+        "holding_s_per_trip": 160.209924,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2332,
+          "5": 719,
+          "10": 684,
+          "15": 582,
+          "20": 506,
+          "30": 285,
+          "45": 92
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5194,
+          "cross_trip_bootstraps": 5194,
+          "same_clock_bootstraps": 241,
+          "pending_state_count": 241,
+          "returns": 262,
+          "return_crossing_bootstraps": 256,
+          "prefix_duration_s": 438.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 9860774.0,
+            "onboard_person_s": 15303144.0,
+            "lf_waiting_person_s": 1591215.3045185853,
+            "lf_onboard_person_s": 2917704.603309679,
+            "dispatch_backlog_trip_s": 32562.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 40349.0,
+            "onboard_person_s": 4960.0,
+            "lf_waiting_person_s": 13948.865895617968,
+            "lf_onboard_person_s": 2002.4623967463685,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -6977.391388888896,
+          "conservation_max_error": 4.656612873077393e-10,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 9860774.0,
+        "onboard_person_s": 15303144.0,
+        "backlog_trip_s": 32562.0,
+        "holding_person_s": 1179380.0,
+        "dispatch_gap_mean_s": 360.95,
+        "dispatch_gap_variance_s2": 3848.778269230769,
+        "dispatch_cv_squared": 0.02954124534291891,
+        "public_launch_delay_total_s": 32562.0,
+        "readiness_delay_total_s": 32562.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "00efcc0122f4668b",
+        "passengers_generated": 21699,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4373,
+        "forward_fallback": 827
+      },
+      "execution": {
+        "commanded_s": 41975.0,
+        "executed_s": 41975.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 0
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 0,
+        "supported_fraction": 0.0,
+        "statuses": {
+          "unsupported_prefix": 5200
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 3,
+          "fewer than three completed visits at (True, 3)": 7,
+          "fewer than three completed visits at (True, 4)": 6,
+          "fewer than three completed visits at (True, 5)": 4,
+          "fewer than three completed visits at (True, 6)": 7,
+          "fewer than three completed visits at (True, 7)": 6,
+          "fewer than three completed visits at (True, 8)": 4,
+          "fewer than three completed visits at (True, 9)": 8,
+          "fewer than three completed visits at (True, 10)": 10,
+          "fewer than three completed visits at (True, 11)": 13,
+          "fewer than three completed visits at (True, 12)": 7,
+          "fewer than three completed visits at (True, 13)": 8,
+          "fewer than three completed visits at (True, 14)": 10,
+          "fewer than three completed visits at (True, 15)": 9,
+          "fewer than three completed visits at (True, 16)": 6,
+          "fewer than three completed visits at (True, 17)": 8,
+          "fewer than three completed visits at (True, 18)": 13,
+          "fewer than three completed visits at (True, 19)": 7,
+          "fewer than three completed visits at (True, 20)": 11,
+          "fewer than three completed visits at (True, 21)": 6,
+          "fewer than three closed clearance blocks at (False, 16)": 504,
+          "fewer than three closed clearance blocks at (False, 12)": 44,
+          "fewer than three closed clearance blocks at (False, 10)": 4475
+        },
+        "actual_overrides": 0,
+        "signed_same_state_h_delta_s": 0,
+        "future_proposals": 0,
+        "future_statuses": {},
+        "future_requests_matched": 0,
+        "future_requests_differed": 0,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 0.1424195610599306,
+          "p95": 0.29877679045312105,
+          "max": 1.5246988106518984
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false
+      },
+      "callback_latency_s": {
+        "mean": 0.14623787032404484,
+        "p95": 0.30305182994343355,
+        "max": 1.530104584991932
+      },
+      "wall_s": 921.2442224081606
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076003,
+      "arm": "frozen_v275_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076003,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 22135980.0,
+        "journey_min": 17.737003,
+        "cv_squared": 0.054279484695408435,
+        "readiness_delay_s": 130.660305,
+        "holding_s_per_trip": 160.916031,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2413,
+          "5": 696,
+          "10": 650,
+          "15": 541,
+          "20": 475,
+          "30": 304,
+          "45": 121
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5193,
+          "cross_trip_bootstraps": 5193,
+          "same_clock_bootstraps": 238,
+          "pending_state_count": 238,
+          "returns": 262,
+          "return_crossing_bootstraps": 255,
+          "prefix_duration_s": 426.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 7306559.0,
+            "onboard_person_s": 14829421.0,
+            "lf_waiting_person_s": 1196005.144138287,
+            "lf_onboard_person_s": 2770942.672929186,
+            "dispatch_backlog_trip_s": 34233.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 39841.0,
+            "onboard_person_s": 5195.0,
+            "lf_waiting_person_s": 11009.748758414064,
+            "lf_onboard_person_s": 2275.5951487344005,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -6136.373333333346,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 7306559.0,
+        "onboard_person_s": 14829421.0,
+        "backlog_trip_s": 34233.0,
+        "holding_person_s": 1127115.0,
+        "dispatch_gap_mean_s": 361.56538461538463,
+        "dispatch_gap_variance_s2": 5006.622647928994,
+        "dispatch_cv_squared": 0.038297565587042406,
+        "public_launch_delay_total_s": 34233.0,
+        "readiness_delay_total_s": 34233.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "c3f19e74a71c0591",
+        "passengers_generated": 20810,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4368,
+        "forward_fallback": 832
+      },
+      "execution": {
+        "commanded_s": 42160.0,
+        "executed_s": 42160.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 391
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 3322,
+        "supported_fraction": 0.6388461538461538,
+        "statuses": {
+          "unsupported_prefix": 1878,
+          "retain_native": 2931,
+          "model_improvement": 391
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 4,
+          "fewer than three completed visits at (True, 3)": 5,
+          "fewer than three completed visits at (True, 4)": 7,
+          "fewer than three completed visits at (True, 5)": 6,
+          "fewer than three completed visits at (True, 6)": 5,
+          "fewer than three completed visits at (True, 7)": 4,
+          "fewer than three completed visits at (True, 8)": 6,
+          "fewer than three completed visits at (True, 9)": 11,
+          "fewer than three completed visits at (True, 10)": 12,
+          "fewer than three completed visits at (True, 11)": 8,
+          "fewer than three closed clearance blocks at (True, 11)": 33,
+          "fewer than three completed visits at (True, 16)": 6,
+          "fewer than three completed visits at (True, 17)": 10,
+          "fewer than three completed visits at (True, 18)": 28,
+          "fewer than three completed visits at (True, 19)": 10,
+          "fewer than three completed visits at (True, 20)": 9,
+          "fewer than three completed visits at (True, 21)": 5,
+          "fewer than three closed clearance blocks at (False, 16)": 329,
+          "fewer than three closed clearance blocks at (False, 15)": 168,
+          "fewer than three closed clearance blocks at (False, 12)": 912,
+          "fewer than three closed clearance blocks at (False, 11)": 145,
+          "fewer than three closed clearance blocks at (False, 10)": 131
+        },
+        "actual_overrides": 391,
+        "signed_same_state_h_delta_s": 720,
+        "future_proposals": 49,
+        "future_statuses": {
+          "reached": 49
+        },
+        "future_requests_matched": 13,
+        "future_requests_differed": 36,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 1.9693846130874366,
+          "p95": 4.011729275761173,
+          "max": 5.2204043650999665
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false
+      },
+      "callback_latency_s": {
+        "mean": 1.97299939862345,
+        "p95": 4.016864359751343,
+        "max": 5.22545110154897
+      },
+      "wall_s": 10387.293061473407
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076004,
+      "arm": "frozen_v275_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076004,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 19153419.0,
+        "journey_min": 16.301083,
+        "cv_squared": 0.05754117760910678,
+        "readiness_delay_s": 108.603053,
+        "holding_s_per_trip": 164.427481,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2451,
+          "5": 640,
+          "10": 610,
+          "15": 538,
+          "20": 525,
+          "30": 294,
+          "45": 142
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5193,
+          "cross_trip_bootstraps": 5193,
+          "same_clock_bootstraps": 233,
+          "pending_state_count": 233,
+          "returns": 262,
+          "return_crossing_bootstraps": 254,
+          "prefix_duration_s": 434.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 5371259.0,
+            "onboard_person_s": 13782160.0,
+            "lf_waiting_person_s": 891127.9926224157,
+            "lf_onboard_person_s": 2526972.0006702915,
+            "dispatch_backlog_trip_s": 28454.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 23964.0,
+            "onboard_person_s": 3589.0,
+            "lf_waiting_person_s": 7087.425967642267,
+            "lf_onboard_person_s": 1507.0315262977736,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -5312.740555555565,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 5371259.0,
+        "onboard_person_s": 13782160.0,
+        "backlog_trip_s": 28454.0,
+        "holding_person_s": 1023070.0,
+        "dispatch_gap_mean_s": 362.12307692307695,
+        "dispatch_gap_variance_s2": 5077.60023668639,
+        "dispatch_cv_squared": 0.03872095872278264,
+        "public_launch_delay_total_s": 28454.0,
+        "readiness_delay_total_s": 28454.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "7f3c46d2ff1580f7",
+        "passengers_generated": 19593,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4371,
+        "forward_fallback": 829
+      },
+      "execution": {
+        "commanded_s": 43080.0,
+        "executed_s": 43080.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 627
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 4941,
+        "supported_fraction": 0.9501923076923077,
+        "statuses": {
+          "unsupported_prefix": 259,
+          "model_improvement": 627,
+          "retain_native": 4314
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 4,
+          "fewer than three completed visits at (True, 3)": 7,
+          "fewer than three completed visits at (True, 4)": 3,
+          "fewer than three completed visits at (True, 5)": 4,
+          "fewer than three completed visits at (True, 6)": 8,
+          "fewer than three completed visits at (True, 7)": 6,
+          "fewer than three completed visits at (True, 8)": 5,
+          "fewer than three completed visits at (True, 9)": 10,
+          "fewer than three completed visits at (True, 10)": 8,
+          "fewer than three completed visits at (True, 11)": 8,
+          "fewer than three completed visits at (True, 12)": 7,
+          "fewer than three completed visits at (True, 13)": 6,
+          "fewer than three completed visits at (True, 14)": 9,
+          "fewer than three completed visits at (True, 15)": 9,
+          "fewer than three completed visits at (True, 16)": 7,
+          "fewer than three completed visits at (True, 17)": 11,
+          "fewer than three completed visits at (True, 18)": 16,
+          "fewer than three completed visits at (True, 19)": 7,
+          "fewer than three completed visits at (True, 20)": 13,
+          "fewer than three completed visits at (True, 21)": 5,
+          "fewer than three closed clearance blocks at (False, 12)": 5,
+          "fewer than three closed clearance blocks at (False, 11)": 7,
+          "fewer than three closed clearance blocks at (False, 10)": 49,
+          "fewer than three closed clearance blocks at (False, 8)": 21
+        },
+        "actual_overrides": 627,
+        "signed_same_state_h_delta_s": 1420,
+        "future_proposals": 74,
+        "future_statuses": {
+          "reached": 74
+        },
+        "future_requests_matched": 22,
+        "future_requests_differed": 52,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 3.393882046352821,
+          "p95": 4.877319298684597,
+          "max": 6.422441892325878
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false
+      },
+      "callback_latency_s": {
+        "mean": 3.3990631287152735,
+        "p95": 4.884670856595039,
+        "max": 6.431483703665435
+      },
+      "wall_s": 17835.983000407927
+    },
+    {
+      "source": "4a216af00c",
+      "original_control_source": "7023e2e784",
+      "index": 8,
+      "day": 2076001,
+      "arm": "native_continuation_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076001,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 19900345.0,
+        "journey_min": 17.228211,
+        "cv_squared": 0.06218472835009857,
+        "readiness_delay_s": 120.122137,
+        "holding_s_per_trip": 159.083969,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2433,
+          "5": 699,
+          "10": 621,
+          "15": 542,
+          "20": 506,
+          "30": 282,
+          "45": 117
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5192,
+          "cross_trip_bootstraps": 5192,
+          "same_clock_bootstraps": 245,
+          "pending_state_count": 245,
+          "returns": 262,
+          "return_crossing_bootstraps": 255,
+          "prefix_duration_s": 420.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 6363258.0,
+            "onboard_person_s": 13537087.0,
+            "lf_waiting_person_s": 1123500.058373994,
+            "lf_onboard_person_s": 2503325.7843195056,
+            "dispatch_backlog_trip_s": 31472.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 37746.0,
+            "onboard_person_s": 6928.0,
+            "lf_waiting_person_s": 12217.161375117023,
+            "lf_onboard_person_s": 3052.6420671147234,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -5515.464166666682,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 6363258.0,
+        "onboard_person_s": 13537087.0,
+        "backlog_trip_s": 31472.0,
+        "holding_person_s": 995420.0,
+        "dispatch_gap_mean_s": 361.7692307692308,
+        "dispatch_gap_variance_s2": 5680.600591715977,
+        "dispatch_cv_squared": 0.04340412462871655,
+        "public_launch_delay_total_s": 31472.0,
+        "readiness_delay_total_s": 31472.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "4982c6a6a179059c",
+        "passengers_generated": 19261,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4355,
+        "forward_fallback": 845
+      },
+      "execution": {
+        "commanded_s": 41680.0,
+        "executed_s": 41680.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 465
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 3499,
+        "supported_fraction": 0.6728846153846154,
+        "statuses": {
+          "unsupported_prefix": 1701,
+          "retain_native": 3034,
+          "model_improvement": 465
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 6,
+          "fewer than three completed visits at (True, 3)": 8,
+          "fewer than three completed visits at (True, 4)": 5,
+          "fewer than three completed visits at (True, 5)": 5,
+          "fewer than three completed visits at (True, 6)": 6,
+          "fewer than three completed visits at (True, 7)": 4,
+          "fewer than three completed visits at (True, 8)": 4,
+          "fewer than three completed visits at (True, 9)": 8,
+          "fewer than three completed visits at (True, 10)": 8,
+          "fewer than three completed visits at (True, 11)": 8,
+          "fewer than three completed visits at (True, 12)": 8,
+          "fewer than three completed visits at (True, 13)": 8,
+          "fewer than three completed visits at (True, 14)": 10,
+          "fewer than three completed visits at (True, 15)": 8,
+          "fewer than three completed visits at (True, 16)": 8,
+          "fewer than three completed visits at (True, 17)": 6,
+          "fewer than three completed visits at (True, 18)": 10,
+          "fewer than three completed visits at (True, 19)": 14,
+          "fewer than three completed visits at (True, 20)": 16,
+          "fewer than three completed visits at (True, 21)": 4,
+          "fewer than three closed clearance blocks at (False, 16)": 1256,
+          "fewer than three closed clearance blocks at (False, 11)": 122,
+          "fewer than three closed clearance blocks at (False, 10)": 145
+        },
+        "actual_overrides": 465,
+        "signed_same_state_h_delta_s": -705,
+        "future_proposals": 132,
+        "future_statuses": {
+          "reached": 132
+        },
+        "future_requests_matched": 24,
+        "future_requests_differed": 108,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 4.939573043091581,
+          "p95": 8.642098531220109,
+          "max": 62.80444343946874
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false,
+        "same_state_rule_checks": 5200,
+        "resource_prediction_queries": 465,
+        "continuation": "native_prepare_bilateral025",
+        "kernel_equivalence_audit": {
+          "verified": true,
+          "queries": 1,
+          "matching_model_calls": 128,
+          "extra_reference_wall_s": 53.72170415986329
+        }
+      },
+      "wall_s": 25751.375975127332,
+      "callback_latency_s": {
+        "mean": 4.941698978807813,
+        "p95": 8.646506083151326,
+        "max": 62.80899818148464
+      }
+    },
+    {
+      "source": "7023e2e784",
+      "day": 2076002,
+      "arm": "native_continuation_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076002,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 25163918.0,
+        "journey_min": 19.336387,
+        "cv_squared": 0.05303417255659414,
+        "readiness_delay_s": 124.282443,
+        "holding_s_per_trip": 160.209924,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2332,
+          "5": 719,
+          "10": 684,
+          "15": 582,
+          "20": 506,
+          "30": 285,
+          "45": 92
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5194,
+          "cross_trip_bootstraps": 5194,
+          "same_clock_bootstraps": 241,
+          "pending_state_count": 241,
+          "returns": 262,
+          "return_crossing_bootstraps": 256,
+          "prefix_duration_s": 438.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 9860774.0,
+            "onboard_person_s": 15303144.0,
+            "lf_waiting_person_s": 1591215.3045185853,
+            "lf_onboard_person_s": 2917704.603309679,
+            "dispatch_backlog_trip_s": 32562.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 40349.0,
+            "onboard_person_s": 4960.0,
+            "lf_waiting_person_s": 13948.865895617968,
+            "lf_onboard_person_s": 2002.4623967463685,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -6977.391388888896,
+          "conservation_max_error": 4.656612873077393e-10,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 9860774.0,
+        "onboard_person_s": 15303144.0,
+        "backlog_trip_s": 32562.0,
+        "holding_person_s": 1179380.0,
+        "dispatch_gap_mean_s": 360.95,
+        "dispatch_gap_variance_s2": 3848.778269230769,
+        "dispatch_cv_squared": 0.02954124534291891,
+        "public_launch_delay_total_s": 32562.0,
+        "readiness_delay_total_s": 32562.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "00efcc0122f4668b",
+        "passengers_generated": 21699,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4373,
+        "forward_fallback": 827
+      },
+      "execution": {
+        "commanded_s": 41975.0,
+        "executed_s": 41975.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 0
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 0,
+        "supported_fraction": 0.0,
+        "statuses": {
+          "unsupported_prefix": 5200
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 3,
+          "fewer than three completed visits at (True, 3)": 7,
+          "fewer than three completed visits at (True, 4)": 6,
+          "fewer than three completed visits at (True, 5)": 4,
+          "fewer than three completed visits at (True, 6)": 7,
+          "fewer than three completed visits at (True, 7)": 6,
+          "fewer than three completed visits at (True, 8)": 4,
+          "fewer than three completed visits at (True, 9)": 8,
+          "fewer than three completed visits at (True, 10)": 10,
+          "fewer than three completed visits at (True, 11)": 13,
+          "fewer than three completed visits at (True, 12)": 7,
+          "fewer than three completed visits at (True, 13)": 8,
+          "fewer than three completed visits at (True, 14)": 10,
+          "fewer than three completed visits at (True, 15)": 9,
+          "fewer than three completed visits at (True, 16)": 6,
+          "fewer than three completed visits at (True, 17)": 8,
+          "fewer than three completed visits at (True, 18)": 13,
+          "fewer than three completed visits at (True, 19)": 7,
+          "fewer than three completed visits at (True, 20)": 11,
+          "fewer than three completed visits at (True, 21)": 6,
+          "fewer than three closed clearance blocks at (False, 16)": 504,
+          "fewer than three closed clearance blocks at (False, 12)": 44,
+          "fewer than three closed clearance blocks at (False, 10)": 4475
+        },
+        "actual_overrides": 0,
+        "signed_same_state_h_delta_s": 0,
+        "future_proposals": 0,
+        "future_statuses": {},
+        "future_requests_matched": 0,
+        "future_requests_differed": 0,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 0.1348930202284828,
+          "p95": 0.25760253858752546,
+          "max": 1.6476465864107013
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false,
+        "same_state_rule_checks": 5200,
+        "resource_prediction_queries": 0,
+        "continuation": "native_prepare_bilateral025"
+      },
+      "callback_latency_s": {
+        "mean": 0.1394633746569833,
+        "p95": 0.26264254739508036,
+        "max": 1.6524333087727427
+      },
+      "wall_s": 881.7966790357605
+    },
+    {
+      "source": "4a216af00c",
+      "original_control_source": "7023e2e784",
+      "index": 10,
+      "day": 2076003,
+      "arm": "native_continuation_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076003,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 21946736.0,
+        "journey_min": 17.585438,
+        "cv_squared": 0.05004324470272611,
+        "readiness_delay_s": 118.061069,
+        "holding_s_per_trip": 149.389313,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2516,
+          "5": 696,
+          "10": 632,
+          "15": 545,
+          "20": 453,
+          "30": 267,
+          "45": 91
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5194,
+          "cross_trip_bootstraps": 5194,
+          "same_clock_bootstraps": 262,
+          "pending_state_count": 262,
+          "returns": 262,
+          "return_crossing_bootstraps": 253,
+          "prefix_duration_s": 426.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 7184177.0,
+            "onboard_person_s": 14762559.0,
+            "lf_waiting_person_s": 1179733.0060455534,
+            "lf_onboard_person_s": 2761233.161108023,
+            "dispatch_backlog_trip_s": 30932.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 39841.0,
+            "onboard_person_s": 5195.0,
+            "lf_waiting_person_s": 11009.748758414064,
+            "lf_onboard_person_s": 2275.5951487344005,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -6083.805555555546,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 7184177.0,
+        "onboard_person_s": 14762559.0,
+        "backlog_trip_s": 30932.0,
+        "holding_person_s": 1040705.0,
+        "dispatch_gap_mean_s": 361.5192307692308,
+        "dispatch_gap_variance_s2": 4013.126553254438,
+        "dispatch_cv_squared": 0.03070577384107812,
+        "public_launch_delay_total_s": 30932.0,
+        "readiness_delay_total_s": 30932.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "c3f19e74a71c0591",
+        "passengers_generated": 20810,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4355,
+        "forward_fallback": 845
+      },
+      "execution": {
+        "commanded_s": 39140.0,
+        "executed_s": 39140.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 431
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 3322,
+        "supported_fraction": 0.6388461538461538,
+        "statuses": {
+          "unsupported_prefix": 1878,
+          "retain_native": 2891,
+          "model_improvement": 431
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 4,
+          "fewer than three completed visits at (True, 3)": 5,
+          "fewer than three completed visits at (True, 4)": 7,
+          "fewer than three completed visits at (True, 5)": 6,
+          "fewer than three completed visits at (True, 6)": 5,
+          "fewer than three completed visits at (True, 7)": 4,
+          "fewer than three completed visits at (True, 8)": 6,
+          "fewer than three completed visits at (True, 9)": 11,
+          "fewer than three completed visits at (True, 10)": 12,
+          "fewer than three completed visits at (True, 11)": 8,
+          "fewer than three closed clearance blocks at (True, 11)": 33,
+          "fewer than three completed visits at (True, 16)": 6,
+          "fewer than three completed visits at (True, 17)": 10,
+          "fewer than three completed visits at (True, 18)": 28,
+          "fewer than three completed visits at (True, 19)": 10,
+          "fewer than three completed visits at (True, 20)": 9,
+          "fewer than three completed visits at (True, 21)": 5,
+          "fewer than three closed clearance blocks at (False, 16)": 329,
+          "fewer than three closed clearance blocks at (False, 15)": 168,
+          "fewer than three closed clearance blocks at (False, 12)": 912,
+          "fewer than three closed clearance blocks at (False, 11)": 145,
+          "fewer than three closed clearance blocks at (False, 10)": 131
+        },
+        "actual_overrides": 431,
+        "signed_same_state_h_delta_s": -920,
+        "future_proposals": 129,
+        "future_statuses": {
+          "reached": 129
+        },
+        "future_requests_matched": 24,
+        "future_requests_differed": 105,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 4.624460416587357,
+          "p95": 8.563615003367886,
+          "max": 64.23962351679802
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false,
+        "same_state_rule_checks": 5200,
+        "resource_prediction_queries": 431,
+        "continuation": "native_prepare_bilateral025",
+        "kernel_equivalence_audit": {
+          "verified": true,
+          "queries": 1,
+          "matching_model_calls": 128,
+          "extra_reference_wall_s": 55.69777838047594
+        }
+      },
+      "wall_s": 24121.175171269104,
+      "callback_latency_s": {
+        "mean": 4.626448481532638,
+        "p95": 8.566311406577006,
+        "max": 64.24234592355788
+      }
+    },
+    {
+      "source": "4a216af00c",
+      "original_control_source": "7023e2e784",
+      "index": 11,
+      "day": 2076004,
+      "arm": "native_continuation_apc",
+      "results": {
+        "train_seed": 12011,
+        "scenario_seed": 2076004,
+        "mode": "stochastic",
+        "sampler_seed": 27011001,
+        "passenger_person_s": 19064050.0,
+        "journey_min": 16.225061,
+        "cv_squared": 0.06295830219972129,
+        "readiness_delay_s": 102.332061,
+        "holding_s_per_trip": 155.038168,
+        "trips_unlaunched": 0,
+        "trips_incomplete": 0,
+        "action_counts": {
+          "0": 2471,
+          "5": 719,
+          "10": 612,
+          "15": 523,
+          "20": 499,
+          "30": 256,
+          "45": 120
+        },
+        "stream_audit": {
+          "decisions": 5200,
+          "terminal_transitions": 1,
+          "cross_bus_bootstraps": 5194,
+          "cross_trip_bootstraps": 5194,
+          "same_clock_bootstraps": 261,
+          "pending_state_count": 261,
+          "returns": 262,
+          "return_crossing_bootstraps": 254,
+          "prefix_duration_s": 434.0,
+          "horizon_s": 61380.0,
+          "exposure": {
+            "waiting_person_s": 5330233.0,
+            "onboard_person_s": 13733817.0,
+            "lf_waiting_person_s": 885459.6727159346,
+            "lf_onboard_person_s": 2516725.6885926127,
+            "dispatch_backlog_trip_s": 26811.0
+          },
+          "prefix_exposure": {
+            "waiting_person_s": 23964.0,
+            "onboard_person_s": 3589.0,
+            "lf_waiting_person_s": 7087.425967642267,
+            "lf_onboard_person_s": 1507.0315262977736,
+            "dispatch_backlog_trip_s": 0.0
+          },
+          "reward_sum": -5287.915833333322,
+          "conservation_max_error": 0.0,
+          "finite_day_discount": 1.0
+        },
+        "theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_actors_unchanged": true,
+        "training_updates": 0,
+        "dual_updates": 0,
+        "main_policy_changed": false,
+        "waiting_person_s": 5330233.0,
+        "onboard_person_s": 13733817.0,
+        "backlog_trip_s": 26811.0,
+        "holding_person_s": 960085.0,
+        "dispatch_gap_mean_s": 361.9807692307692,
+        "dispatch_gap_variance_s2": 5408.703476331361,
+        "dispatch_cv_squared": 0.04127833538738561,
+        "public_launch_delay_total_s": 26811.0,
+        "readiness_delay_total_s": 26811.0
+      },
+      "contract": {
+        "protocol_version": "freqduet-eval-v6",
+        "clock": {
+          "service_start_hour": 6,
+          "service_end_hour": 19,
+          "demand_end_time_s": 46980,
+          "evaluation_end_time_s": 61380,
+          "allow_early_finish": true
+        },
+        "scenario_tape_id": "7f3c46d2ff1580f7",
+        "passengers_generated": 19593,
+        "fleet_target": 12,
+        "physical_vehicle_count": 12,
+        "fleet_inventory_mode": "fixed_pool",
+        "dt_s": 1.0
+      },
+      "coverage": {
+        "decisions": 5200,
+        "missing_forward": 0,
+        "bilateral": 4365,
+        "forward_fallback": 835
+      },
+      "execution": {
+        "commanded_s": 40620.0,
+        "executed_s": 40620.0,
+        "unexecuted_s": 0.0,
+        "done_reason": "service_cleared",
+        "decisions": 5200,
+        "physical_vehicles": 12
+      },
+      "action_chain": {
+        "verified_commands": 5200,
+        "changed_from_native": 621
+      },
+      "graph": {
+        "queries": 5200,
+        "supported_queries": 4941,
+        "supported_fraction": 0.9501923076923077,
+        "statuses": {
+          "unsupported_prefix": 259,
+          "retain_native": 4320,
+          "model_improvement": 621
+        },
+        "unsupported_reasons": {
+          "fewer than three completed visits at (True, 1)": 24,
+          "fewer than three completed visits at (True, 2)": 4,
+          "fewer than three completed visits at (True, 3)": 7,
+          "fewer than three completed visits at (True, 4)": 3,
+          "fewer than three completed visits at (True, 5)": 4,
+          "fewer than three completed visits at (True, 6)": 8,
+          "fewer than three completed visits at (True, 7)": 6,
+          "fewer than three completed visits at (True, 8)": 5,
+          "fewer than three completed visits at (True, 9)": 10,
+          "fewer than three completed visits at (True, 10)": 8,
+          "fewer than three completed visits at (True, 11)": 8,
+          "fewer than three completed visits at (True, 12)": 7,
+          "fewer than three completed visits at (True, 13)": 6,
+          "fewer than three completed visits at (True, 14)": 9,
+          "fewer than three completed visits at (True, 15)": 9,
+          "fewer than three completed visits at (True, 16)": 7,
+          "fewer than three completed visits at (True, 17)": 11,
+          "fewer than three completed visits at (True, 18)": 16,
+          "fewer than three completed visits at (True, 19)": 7,
+          "fewer than three completed visits at (True, 20)": 13,
+          "fewer than three completed visits at (True, 21)": 5,
+          "fewer than three closed clearance blocks at (False, 12)": 5,
+          "fewer than three closed clearance blocks at (False, 11)": 7,
+          "fewer than three closed clearance blocks at (False, 10)": 49,
+          "fewer than three closed clearance blocks at (False, 8)": 21
+        },
+        "actual_overrides": 621,
+        "signed_same_state_h_delta_s": -1765,
+        "future_proposals": 195,
+        "future_statuses": {
+          "reached": 195
+        },
+        "future_requests_matched": 38,
+        "future_requests_differed": 157,
+        "future_proposals_cancelled": 0,
+        "callback_latency_s": {
+          "mean": 7.32787056382065,
+          "p95": 8.879349499288947,
+          "max": 33.11241916101426
+        },
+        "forecast_is_extrapolation": true,
+        "future_rate_upper_bound_identified": false,
+        "same_state_rule_checks": 5200,
+        "resource_prediction_queries": 621,
+        "continuation": "native_prepare_bilateral025",
+        "kernel_equivalence_audit": {
+          "verified": true,
+          "queries": 1,
+          "matching_model_calls": 128,
+          "extra_reference_wall_s": 24.837903858162463
+        }
+      },
+      "wall_s": 38172.617849517614,
+      "callback_latency_s": {
+        "mean": 7.3301848125001055,
+        "p95": 8.882462164573372,
+        "max": 33.114694736897945
+      }
+    }
+  ],
+  "event_uniform_alignment": {
+    "2076001_frozen_v275_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 2785,
+      "time_shifted": 3124,
+      "action_differences": 1244,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076001_native_continuation_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 2632,
+      "time_shifted": 2988,
+      "action_differences": 1090,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076002_frozen_v275_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 0,
+      "time_shifted": 0,
+      "action_differences": 0,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076002_native_continuation_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 0,
+      "time_shifted": 0,
+      "action_differences": 0,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076003_frozen_v275_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 2442,
+      "time_shifted": 2882,
+      "action_differences": 1007,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076003_native_continuation_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 2680,
+      "time_shifted": 2903,
+      "action_differences": 1203,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076004_frozen_v275_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 3845,
+      "time_shifted": 4345,
+      "action_differences": 1613,
+      "native_only": 0,
+      "alternative_only": 0
+    },
+    "2076004_native_continuation_apc": {
+      "common_events": 5200,
+      "uniform_mismatches": 0,
+      "order_shifted": 3463,
+      "time_shifted": 4160,
+      "action_differences": 1437,
+      "native_only": 0,
+      "alternative_only": 0
+    }
+  },
+  "independent_demand_days": 4,
+  "independent_futures": 0,
+  "extra_start_allowance": 3,
+  "original_start_cap": 13,
+  "total_authorized_start_cap": 16,
+  "main_policy_changed": false,
+  "training_updates": 0,
+  "confirmation_started": false,
+  "decision": "close_candidate_no_expansion"
+}

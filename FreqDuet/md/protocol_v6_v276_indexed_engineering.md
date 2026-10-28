@@ -36,3 +36,12 @@ with zero related cancellations or kill failures. Replacements t211923--t211925
 run on node001/node004,aggregate t211926 waits for their receipts. Each of the
 three real first searches already passed 128 frozen/indexed kernel comparisons.
 Reuse original pairs0--7 and9; no training, gate change or main-policy promotion.
+
+Completion:all three replacements and aggregate t211926 finished without an
+extra retry. Actual full-day replacement wall times were7.153h(p8),6.700h(p10)
+and10.604h(p11);the reused unsupported p9 took0.245h. Corresponding indexed
+callback p95 values were8.647s,8.566s and8.882s. First-search maxima include
+the explicit frozen-kernel verification overhead. These are measured runtimes,
+not a same-completed-path full-day speedup ratio. The original frozen runs
+were stopped before completion. The original traffic gate remains unchanged;
+see the completed development readout in the native-continuation protocol.

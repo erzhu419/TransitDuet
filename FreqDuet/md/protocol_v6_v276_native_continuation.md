@@ -43,3 +43,41 @@ passed 5200 same-state rule checks and exact cached V275 p0 trace/endpoint parit
 High/manual t211829--t211836 launched on node001/node004 (max8 concurrent).
 t211837 waits for their eight small receipts. The launch snapshot has p0--p7
 started, no completed development paths and no failures. No control result yet.
+
+## Completed development readout (2026-10-28)
+
+All12 paths and aggregate t211926 completed. Reuse nine original results and
+three authorized indexed replacements; the full small summary is in
+`../freqduet/results_freqduet/protocol_v6_v276_indexed_replacements/summary/results.json`.
+All event-uniform comparisons have zero mismatches. Every path completed262
+trips, verified5200 commands and executed all commanded holding. No training,
+confirmation or main-policy change occurred.
+
+Paired four-day differences (candidate minus comparator;95% day-bootstrap CI):
+
+| Metric | fixed360+bilateral025 | Frozen V275 |
+| --- | --- | --- |
+| Journey, seconds/person | -3.651 [-6.557,-0.745] | -3.577 [-6.984,-0.327] |
+| Actual CV2 | -0.001897 [-0.004257,-0.000326] | +0.001036 [-0.002437,+0.004189] |
+| Readiness delay, seconds/trip | -4.080 [-8.149,-0.857] | -5.848 [-10.580,-1.568] |
+| Public launch delay, seconds/day | -1069.00 [-2135.00,-224.50] | -1532.25 [-2772.00,-410.75] |
+
+The strong-baseline joint gate passes. The V275-preservation gate fails solely
+on CV2 non-harm;the combined preregistered decision remains
+`close_candidate_no_expansion`. Retain the positive traffic evidence without
+changing the gate,expanding confirmation or switching main.
+
+Days2076001/3/4 improve all four strong-baseline metrics;day2076002 has zero
+supported queries and exactly reproduces bilateral. Across four days,V276
+supports11762/20800 queries and executes1517 same-state overrides. Relative to
+the strong baseline,holding falls2.166s/trip,waiting falls50191.75 person-s/day
+and onboard time falls23564.75 person-s/day. Relative to V275,holding falls
+6.784s/trip,but CV2 worsens on days2076001/4. This is a partial tradeoff repair,
+not preservation of every V275 benefit. Future proposal matches are not an
+execution-success rate or an identified causal explanation of the endpoints.
+
+Limitations:four development demand days,one actor anchor,no independent-future
+replication and no APC/homogeneous or frequency ablation. Baseline continuation
+alignment now has service evidence,but APC-specific and frequency-separation
+claims remain unestablished. Readiness and public delay represent the same
+operational loss at different scales,not independent benefits.
