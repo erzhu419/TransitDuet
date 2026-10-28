@@ -1,0 +1,85 @@
+{
+  "source": "v277-exact-candidate01",
+  "tests": 7,
+  "cases": {
+    "late_native": {
+      "frozen_s": 6.558985038660467,
+      "prior_optimized_s": 4.462864274159074,
+      "candidate_s": 1.8145194528624415,
+      "build_s": 0.0039164824411273,
+      "cpu_s": 1.8101442249999984,
+      "speedup_vs_frozen": 3.6147229109688155,
+      "speedup_vs_prior": 2.4595295835042243,
+      "complete_solver_output_exact": true,
+      "evaluations": 128,
+      "action_s": 30,
+      "native_rule_cache_hits": 33572,
+      "native_rule_unique_inputs": 3808
+    },
+    "late_arrival_cv": {
+      "frozen_s": 6.532537393271923,
+      "prior_optimized_s": 4.503296101465821,
+      "candidate_s": 1.9745224304497242,
+      "build_s": 0.0074308933690190315,
+      "cpu_s": 1.9697413399999988,
+      "speedup_vs_frozen": 3.3084138688584304,
+      "speedup_vs_prior": 2.2807014151974636,
+      "complete_solver_output_exact": true,
+      "evaluations": 128,
+      "action_s": 30,
+      "native_rule_cache_hits": 33572,
+      "native_rule_unique_inputs": 3808,
+      "current_only": {
+        "prior_s": 0.34110396541655064,
+        "candidate_s": 0.18452849052846432,
+        "evaluations": 7,
+        "complete_solver_output_exact": true
+      }
+    },
+    "midday_native": {
+      "frozen_s": 11.154760994948447,
+      "prior_optimized_s": 7.632745726965368,
+      "candidate_s": 3.4553021201863885,
+      "build_s": 0.002750230021774769,
+      "cpu_s": 3.4469542530000012,
+      "speedup_vs_frozen": 3.228302651099791,
+      "speedup_vs_prior": 2.2089951794298197,
+      "complete_solver_output_exact": true,
+      "evaluations": 128,
+      "action_s": 30,
+      "native_rule_cache_hits": 55489,
+      "native_rule_unique_inputs": 7511
+    },
+    "midday_arrival_cv": {
+      "frozen_s": 10.940621318295598,
+      "prior_optimized_s": 7.7397731533274055,
+      "candidate_s": 3.539928747341037,
+      "build_s": 0.0043558040633797646,
+      "cpu_s": 3.5313936210000065,
+      "speedup_vs_frozen": 3.0906332017313844,
+      "speedup_vs_prior": 2.186420604974328,
+      "complete_solver_output_exact": true,
+      "evaluations": 128,
+      "action_s": 30,
+      "native_rule_cache_hits": 55489,
+      "native_rule_unique_inputs": 7511,
+      "current_only": {
+        "prior_s": 0.6030380977317691,
+        "candidate_s": 0.36985902301967144,
+        "evaluations": 7,
+        "complete_solver_output_exact": true
+      }
+    }
+  },
+  "traffic_starts": 0,
+  "training_updates": 0,
+  "existing_files_changed": false,
+  "running_tasks_changed": false,
+  "main_policy_changed": false,
+  "synthetic_workloads": true,
+  "scheduler_task": "t212094",
+  "node": "node004",
+  "priority": "high",
+  "reference_kernel": "previously_optimized_4888d751ab",
+  "frozen_s_definition": "frozen search function with the previously optimized kernel; not the full frozen live runtime"
+}
