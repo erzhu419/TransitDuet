@@ -95,25 +95,32 @@ class FallbackGraph:
         self.key = own.bus, own.trip, self.snapshot.routes[own.direction][own.index].station
         self.reference, self.fallbacks, self.calls = None, {}, 0
         self.rejected = Counter()
+        self.simulations = {}
+
+    def simulate(self, commands=None):
+        key = tuple(sorted((commands or {}).items()))
+        if key not in self.simulations:
+            self.simulations[key] = self.base.evaluate(commands, self.homogeneous)
+        return self.simulations[key]
 
     def evaluate(self, commands=None, homogeneous=False):
         assert homogeneous == self.homogeneous
         commands = commands or {}
         if self.reference is None:
             assert not commands
-            self.reference = self.base.evaluate(homogeneous=homogeneous)
+            self.reference = self.simulate()
             self.calls += 1
             self.fallbacks[self.snapshot.native_action_s] = self.reference
             return self.reference
         if self.calls >= graph.MAX_EVALUATIONS:
             return dict(self.reference, failure='query_evaluation_budget')
-        full = self.base.evaluate(commands, homogeneous)
+        full = self.simulate(commands)
         self.calls += 1
         h = commands.get(self.key, self.snapshot.native_action_s)
         if h not in self.fallbacks:
             if self.calls >= graph.MAX_EVALUATIONS:
                 return dict(full, failure='query_evaluation_budget')
-            self.fallbacks[h] = self.base.evaluate({self.key: h}, homogeneous)
+            self.fallbacks[h] = self.simulate({self.key: h})
             self.calls += 1
         fallback = self.fallbacks[h]
         acceptable = (graph.feasible(fallback, self.reference)

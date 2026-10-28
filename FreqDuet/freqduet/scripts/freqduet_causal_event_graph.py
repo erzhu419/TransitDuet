@@ -191,7 +191,8 @@ def _simulate(graph, commands, homogeneous, continuation=None):
         phase=v.phase, load=v.load, cap=v.capacity, legal=v.legal, frontier=now) for v in s.vehicles}
     originals = {v.bus: v for v in s.vehicles}
     arrivals = {k: [r.arrival_s for r in rows[-2:]] for k, rows in graph.completed.items()}
-    departures = {k: sorted(r.completed_s for r in rows)[-2:] for k, rows in graph.completed.items()}
+    departures = ({k: sorted(r.completed_s for r in rows)[-2:] for k, rows in graph.completed.items()}
+                  if continuation is None else None)
     queues = {}
     for k, rows in graph.completed.items():
         if graph.initial_queues is not None:
@@ -328,23 +329,24 @@ def _simulate(graph, commands, homogeneous, continuation=None):
             if not stop.control:
                 h = 0
             else:
-                previous = departures[key][-1] if departures[key] else None
-                forward = now - previous if previous is not None else 360.
-                follower = []
-                for other in vehicles.values():
-                    if other['bus'] == bus or other['phase'] == 'terminal' or other['d'] != v['d'] or other['i'] > v['i']:
-                        continue
-                    eta = other['frontier']
-                    for j in range(other['i'] + 1, v['i'] + 1):
-                        f = forecast[v['d'], s.routes[v['d']][j].station]
-                        eta += f['run_s'] + 4
-                    if eta > now:
-                        follower.append(eta - now)
-                desired = .25 * ((min(follower) - forward) / 2 if follower else (360 - forward))
-                desired = min(45., max(0., desired))
-                native = min(choices, key=lambda a: (abs(a - desired), a))
                 if continuation is not None:
                     native = continuation.action(v, now, choices)
+                else:
+                    previous = departures[key][-1] if departures[key] else None
+                    forward = now - previous if previous is not None else 360.
+                    follower = []
+                    for other in vehicles.values():
+                        if other['bus'] == bus or other['phase'] == 'terminal' or other['d'] != v['d'] or other['i'] > v['i']:
+                            continue
+                        eta = other['frontier']
+                        for j in range(other['i'] + 1, v['i'] + 1):
+                            f = forecast[v['d'], s.routes[v['d']][j].station]
+                            eta += f['run_s'] + 4
+                        if eta > now:
+                            follower.append(eta - now)
+                    desired = .25 * ((min(follower) - forward) / 2 if follower else (360 - forward))
+                    desired = min(45., max(0., desired))
+                    native = min(choices, key=lambda a: (abs(a - desired), a))
                 if bus == s.current_bus and now == s.now_s:
                     if continuation is not None:
                         assert native == s.native_action_s, 'same-state native continuation mismatch'
@@ -361,7 +363,8 @@ def _simulate(graph, commands, homogeneous, continuation=None):
             # depart until _process_dwelling on the next physical tick.
             stage(v, now + max(1, h), 'departure')
         elif kind == 'departure':
-            departures[key].append(now)
+            if departures is not None:
+                departures[key].append(now)
             v['i'] += 1
             v['phase'] = 'travel'
             target = s.routes[v['d']][v['i']]

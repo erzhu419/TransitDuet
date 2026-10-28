@@ -1,5 +1,6 @@
 from dataclasses import replace
 import unittest
+from unittest.mock import patch
 
 import freqduet_causal_event_graph as graph
 import freqduet_flow_controller as flow
@@ -37,9 +38,17 @@ class IndexedContinuationTests(unittest.TestCase):
         from run_freqduet_v276_indexed_replacement import CheckedIndexedGraph
         reference,_=self.models()
         checked=CheckedIndexedGraph(reference)
-        actual=flow.choose(checked)
+        evaluate = checked.evaluate
+        calls = []
+        def tracked(commands=None, homogeneous=False):
+            calls.append((tuple(sorted((commands or {}).items())),homogeneous))
+            return evaluate(commands,homogeneous)
+        with patch.object(checked,'evaluate',side_effect=tracked):
+            actual=flow.choose(checked)
         self.assertEqual(actual,flow.choose(reference))
-        self.assertEqual(checked.matches,actual['evaluations'])
+        self.assertEqual(checked.matches,len(calls))
+        self.assertEqual(len(calls),len(set(calls)))
+        self.assertLessEqual(checked.matches,actual['evaluations'])
 
     def test_replacement_aggregation_retains_the_frozen_strict_and_nonharm_gates(self):
         from run_freqduet_v276_indexed_replacement import paired_effects, frozen

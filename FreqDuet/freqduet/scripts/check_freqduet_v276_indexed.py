@@ -22,9 +22,9 @@ def write(path,value):
         stream.write('\n')
 
 
-def stress_state(history_count=5200):
+def stress_state(history_count=5200, now_s=50000., plans_per_direction=6):
     """Synthetic full-size state, not a new demand day or a traffic rollout."""
-    now,prepare=50000.,49999.
+    now,prepare=float(now_s),float(now_s)-1.
     routes={d:tuple(graph.Stop(21*int(d)+i,control=i<20,terminal=i==20)
                     for i in range(21)) for d in (False,True)}
     positions=(10,8,6,4,2,0,10,8,6,4,2,0)
@@ -40,7 +40,8 @@ def stress_state(history_count=5200):
         telemetry[bus]=dict(progress=progress,launch=launch,speed=0. if own else 5.,
             service=40. if own else 0.,predecessor=90 if own else None,target=360.)
         avl.append(AVLVehicleSnapshot(bus,d,True,progress,launch,0. if own else 5.,8.))
-    plans=tuple(graph.Plan(100+2*i+int(d),d,now+360*i) for d in (False,True) for i in range(6))
+    plans=tuple(graph.Plan(100+2*i+int(d),d,now+360*i)
+                for d in (False,True) for i in range(plans_per_direction))
     plans=tuple(sorted(plans,key=lambda p:(p.release_s,p.trip)))
     station=routes[False][10].station
     packet=dict(bus=0,trip=0,station=station,direction=False,prepare_s=prepare,
