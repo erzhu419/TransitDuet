@@ -82,7 +82,7 @@
   "runtime_status": "candidate_interpreter_not_verified_on_execution_nodes",
   "python_executable": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python",
   "preregistration": "protocols/plan_validity_preregistration_2026-10-22.json",
-  "preflight_gate": "results/plan_validity_dev_20261028/preflight_gate.json",
+  "preflight_gate": "results/plan_validity_dev_20261028/gates/preflight/gate.json",
   "cells": [
     {
       "task": "pointmaze",
@@ -1567,7 +1567,7 @@
       "description": "Freq-HRL native cost_pilot pointmaze history root 1972110000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/history/1972110000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1598,11 +1598,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1612,7 +1611,7 @@
       "description": "Freq-HRL native cost_pilot pointmaze threshold root 1972110000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/threshold/1972110000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method threshold --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1643,11 +1642,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1657,7 +1655,7 @@
       "description": "Freq-HRL native cost_pilot pointmaze termination_history root 1972110000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/termination_history/1972110000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972110000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1688,11 +1686,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1702,7 +1699,7 @@
       "description": "Freq-HRL native cost_pilot pointmaze history root 1972120000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/history/1972120000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1733,11 +1730,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1747,7 +1743,7 @@
       "description": "Freq-HRL native cost_pilot pointmaze threshold root 1972120000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/threshold/1972120000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method threshold --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1778,11 +1774,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1792,7 +1787,7 @@
       "description": "Freq-HRL native cost_pilot pointmaze termination_history root 1972120000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/pointmaze/termination_history/1972120000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task pointmaze --optimizer-seed 1972120000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1823,11 +1818,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1837,7 +1831,7 @@
       "description": "Freq-HRL native cost_pilot reacher_tracking history root 1972210000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/history/1972210000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1868,11 +1862,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1882,7 +1875,7 @@
       "description": "Freq-HRL native cost_pilot reacher_tracking threshold root 1972210000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/threshold/1972210000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method threshold --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1913,11 +1906,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1927,7 +1919,7 @@
       "description": "Freq-HRL native cost_pilot reacher_tracking termination_history root 1972210000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/termination_history/1972210000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972210000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -1958,11 +1950,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -1972,7 +1963,7 @@
       "description": "Freq-HRL native cost_pilot reacher_tracking history root 1972220000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/history/1972220000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -2003,11 +1994,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -2017,7 +2007,7 @@
       "description": "Freq-HRL native cost_pilot reacher_tracking threshold root 1972220000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/threshold/1972220000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/threshold",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method threshold --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method threshold --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -2048,11 +2038,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false
@@ -2062,7 +2051,7 @@
       "description": "Freq-HRL native cost_pilot reacher_tracking termination_history root 1972220000",
       "signature": "Freq-HRL/plan_validity_native_development_v1/plan_validity_dev_20261028/cost_pilot/reacher_tracking/termination_history/1972220000",
       "resource_family": "Freq-HRL/plan_validity_native_development_v1/cost_pilot/termination_history",
-      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/preflight_gate.json",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_development_cell.py --preregistration protocols/plan_validity_preregistration_2026-10-22.json --run-name plan_validity_dev_20261028 --stage cost_pilot --task reacher_tracking --optimizer-seed 1972220000 --method termination_history --preflight-gate results/plan_validity_dev_20261028/gates/preflight/gate.json",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
       "cpu": 1,
       "vram": 0,
@@ -2093,11 +2082,10 @@
         "**/__pycache__"
       ],
       "stage_input_paths": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_preregistration_2026-10-22.json",
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight"
       ],
       "wait_for_files": [
-        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/preflight_gate.json"
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028/gates/preflight/gate.json"
       ],
       "skip_launch_staging": false,
       "allow_duplicate": false

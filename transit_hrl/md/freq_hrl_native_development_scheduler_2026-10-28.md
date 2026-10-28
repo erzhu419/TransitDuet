@@ -40,7 +40,7 @@ PYTHONPATH=. python3 scripts/submit_plan_validity_development_scheduleurm.py \
   --output "results/$RUN/inputs/preflight_submission.json"
 PYTHONPATH=. python3 scripts/submit_plan_validity_development_scheduleurm.py \
   --run-name "$RUN" --stage cost_pilot \
-  --preflight-gate "results/$RUN/preflight_gate.json" \
+  --preflight-gate "results/$RUN/gates/preflight/gate.json" \
   --output "results/$RUN/inputs/pilot_submission.json"
 ```
 
@@ -52,7 +52,7 @@ After its6 public result files arrive, run:
 
 ```bash
 PYTHONPATH=. python3 scripts/analyze_plan_validity_development.py \
-  --run-name "$RUN" --stage preflight --output "results/$RUN/preflight_gate.json"
+  --run-name "$RUN" --stage preflight --output "results/$RUN/gates/preflight/gate.json"
 ```
 
 Only then repeat the pilot command with `--submit`. The submitter and worker
@@ -71,6 +71,8 @@ Fitted rule weights stay in the private report; the public result carries only
 the rule summary and a server-side source pointer.
 The existing result/data staging exclusions remain active. Pilot inputs stage
 only the registration and compact preflight gate, not private checkpoints.
+The registration travels with the source cwd. Scheduler extra inputs are
+directories, so only the dedicated `gates/preflight` directory is declared.
 
 The outer worker CPU ledger includes its pipeline, fitting-bank readout and
 native replay audits exactly once. The inner pipeline breakdown is retained

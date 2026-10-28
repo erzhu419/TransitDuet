@@ -55,7 +55,7 @@ class DevelopmentSchedulerTest(unittest.TestCase):
 
     def test_scheduler_specs_are_unpinned_one_core_and_only_sync_public_results(self):
         args = SimpleNamespace(preregistration=submitter.ROOT / "protocols/plan_validity_preregistration_2026-10-22.json",
-            stage="cost_pilot", run_name="unit_dev", preflight_gate=submitter.ROOT / "results/unit_dev/preflight_gate.json",
+            stage="cost_pilot", run_name="unit_dev", preflight_gate=submitter.ROOT / "results/unit_dev/gates/preflight/gate.json",
             python_executable="/worker/python", ram_mb=2048)
         bundle = submitter.build_bundle(args, draft_plan())
         self.assertEqual(len(bundle["jobs"]), 12)
@@ -66,7 +66,8 @@ class DevelopmentSchedulerTest(unittest.TestCase):
             self.assertIsNone(job["preferred_node"])
             self.assertEqual((job["cpu"], job["vram"], job["ram_mb"]), (1, 0, 2048))
             self.assertIn("OMP_NUM_THREADS=1", job["cmd"])
-            self.assertIn("--preflight-gate results/unit_dev/preflight_gate.json", job["cmd"])
+            self.assertIn("--preflight-gate results/unit_dev/gates/preflight/gate.json", job["cmd"])
+            self.assertEqual(job["stage_input_paths"], [str(args.preflight_gate.parent)])
             self.assertTrue(job["result_dir"].endswith("/public"))
             self.assertTrue(job["no_auto_requeue"])
             self.assertNotIn("pip install", job["cmd"])
@@ -107,15 +108,19 @@ class DevelopmentSchedulerTest(unittest.TestCase):
                 output = Path(folder) / f"{phase}.json"
                 command = ["--run-name", "unit_dev", "--stage", phase, "--output", str(output)]
                 if phase == "cost_pilot":
-                    command += ["--preflight-gate", str(submitter.ROOT / "results/unit_dev/preflight_gate.json")]
+                    command += ["--preflight-gate", str(submitter.ROOT / "results/unit_dev/gates/preflight/gate.json")]
                 with patch.object(submitter, "execute_bulk", side_effect=AssertionError("no submission")):
                     submitter.main(command)
-                self.assertEqual(json.loads(output.read_text())["submission_status"], "prepared_not_submitted")
+                data = json.loads(output.read_text())
+                self.assertEqual(data["submission_status"], "prepared_not_submitted")
+                if phase == "preflight":
+                    self.assertTrue(all(not job["stage_input_paths"] for job in data["jobs"]))
 
     def test_explicit_pilot_submit_requires_content_gate_and_records_attempt_once(self):
         plan = draft_plan()
         with tempfile.TemporaryDirectory(dir=submitter.ROOT / "protocols") as folder:
-            gate, output = Path(folder) / "gate.json", Path(folder) / "pilot.json"
+            gate, output = Path(folder) / "gates/preflight/gate.json", Path(folder) / "pilot.json"
+            gate.parent.mkdir(parents=True)
             gate.write_text(json.dumps(dev.summarize_phase(plan, "unit_dev", "preflight", [])))
             command = ["--run-name", "unit_dev", "--stage", "cost_pilot", "--preflight-gate", str(gate),
                        "--output", str(output), "--submit"]

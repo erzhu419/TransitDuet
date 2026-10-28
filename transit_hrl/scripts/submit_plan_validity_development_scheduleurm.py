@@ -25,6 +25,8 @@ def build_bundle(args, plan):
     gate = args.preflight_gate.resolve().relative_to(ROOT) if args.preflight_gate else None
     if args.stage == "cost_pilot" and gate is None:
         raise ValueError("declare the future qualified --preflight-gate even when preparing pilot specs")
+    if gate is not None and gate.parent.parts[-2:] != ("gates", "preflight"):
+        raise ValueError("place the gate in a dedicated gates/preflight directory for directory-only input staging")
     if args.ram_mb < 1:
         raise ValueError("declare a positive per-cell RAM request")
     jobs, resolved_cells = [], []
@@ -53,7 +55,7 @@ def build_bundle(args, plan):
             "no_auto_requeue": True, "reroute_on_node_down": False, "skip_resume_scan": True,
             "result_dir": str(directory / "public"), "local_result_dir": str(directory / "public"),
             "stage_excludes": list(STAGE_EXCLUDES),
-            "stage_input_paths": [str(args.preregistration.resolve()), *([str(args.preflight_gate.resolve())] if gate else [])],
+            "stage_input_paths": [str(args.preflight_gate.resolve().parent)] if gate else [],
             "wait_for_files": [str(args.preflight_gate.resolve())] if gate else [],
             "skip_launch_staging": False, "allow_duplicate": False})
     return {"protocol": {"protocol_version": PROTOCOL, "expected_runs": expected_runs(plan, args.run_name, args.stage)},
