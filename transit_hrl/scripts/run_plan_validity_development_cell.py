@@ -77,6 +77,7 @@ def main(argv=None):
                     audit = native_preflight(record)
     except Exception as exc:
         record.update(status="failed", error_type=type(exc).__name__, error=str(exc))
+        print(f"{options.stage} {options.task} {options.method}: {type(exc).__name__}: {exc}", flush=True)
     total = ledger.summary()
     # Outer CPU already includes the nested pipeline; only its work counters were relayed.
     record["offline_cost"] = total

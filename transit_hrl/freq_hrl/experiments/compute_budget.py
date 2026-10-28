@@ -105,7 +105,7 @@ def single_thread_runtime():
                    "torch": str(torch.__version__), "torch_threads": torch.get_num_threads(),
                    "gymnasium": version("gymnasium"), "mujoco": version("mujoco"),
                    "threadpoolctl": version("threadpoolctl"),
-                   "blas": sorted((p["internal_api"], p["version"], p["num_threads"])
+                   "blas": sorted([p["internal_api"], p["version"], p["num_threads"]]
                                   for p in threadpool_info())}
     finally:
         torch.set_num_threads(old_threads)

@@ -141,6 +141,7 @@ class BudgetTest(unittest.TestCase):
             self.assertEqual(torch.get_num_threads(), 1)
             self.assertTrue(all(row[2] == 1 for row in profile["blas"]))
             self.assertTrue(profile["cpu_model"])
+            self.assertEqual(profile, json.loads(json.dumps(profile)))
         self.assertEqual(torch.get_num_threads(), old)
 
     def test_single_predictor_fit_is_identical_but_does_not_fit_unused_comparator(self):
