@@ -1,6 +1,6 @@
 # Unified Prospective Validation Protocol
 
-Prepared: 2026-10-22. Status: **draft, not recipe-locked; development pilot incomplete**.
+Prepared: 2026-10-22. Status: **draft, not recipe-locked; pilot complete, recipe on hold**.
 This document integrates the four preparations and takes precedence over their
 earlier seed-count/statistical suggestions. The machine-readable reservation is
 [`protocols/plan_validity_preregistration_2026-10-22.json`](../protocols/plan_validity_preregistration_2026-10-22.json).
@@ -13,6 +13,11 @@ Execution update2026-10-28: the
 were subsequently authorized and run. Preflight passed; the
 [pilot readout](freq_hrl_native_development_pilot_2026-10-28.md) has9 completed
 measurements and3 interrupted cells. No confirmation training/evaluation was run.
+Update2026-10-29: the3 recovery attempts completed, yielding12 logical pilot
+measurements. The [complete readout](freq_hrl_native_development_complete_2026-10-29.md)
+retains PointMaze positives but finds no stable Reacher advantage; one Reacher
+stopping head fails its registered best-clock competence test. Interrupted costs
+remain unknown. Recipe lock and confirmation remain blocked.
 
 ## Questions And Claims
 
@@ -205,9 +210,9 @@ After evaluation, `--summaries FILES...` checks the four task/comparator summari
 against the registered alpha, margins, root/episode counts and retained profiles,
 and reports C1/C2 separately. Incomplete/unlocked evidence has no claim verdict.
 
-Current state is `draft_not_locked`: some pilot costs and competent stopping
-baselines are measured, but complete pilot accounting, numeric caps, distance
-cutoffs, the full baseline cohort, historical exposure audit and48 artifact
+Current state is `draft_not_locked`: all12 pilot measurements are available,
+but full lifecycle accounting, numeric caps, distance cutoffs, competent stopping
+baselines on every Reacher root, historical exposure audit and48 artifact
 bindings remain pending. Root intervals with8 roots are approximate. Conditional-future
 MSE is not observable-state Bayes error; the local identity is not an episode
 regret theorem. Own-schedule full-algorithm ranking, named timing reproductions

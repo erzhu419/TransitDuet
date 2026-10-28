@@ -1,0 +1,190 @@
+{
+  "run_name": "plan_validity_dev_20261028_r2",
+  "date": "2026-10-29",
+  "decision": "PILOT_RECIPE_HOLD",
+  "measurement_status": "complete",
+  "confirmation_released": false,
+  "scope": "exposed_timing_selection_paths_not_fresh_performance_confirmation",
+  "paired_cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "run_ids": {
+        "history": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972110000:pointmaze:history:1972110000",
+        "threshold": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972110000:pointmaze:threshold:1972110000",
+        "termination_history": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972110000:pointmaze:termination_history:1972110000"
+      },
+      "ise": {
+        "history": 0.991994033472304,
+        "threshold": 1.104563183541886,
+        "termination_history": 1.1653314118301203
+      },
+      "history_relative_percent": {
+        "threshold": -10.191282105621024,
+        "termination_history": -14.874513515910026
+      },
+      "same_controller_selection_ise_curve_and_iteration": true,
+      "termination_readiness": {
+        "behaviorally_noncollapsed": true,
+        "state_conditional_at_same_bin_and_offset": true,
+        "selection_ise_gain_over_best_clock": 0.43975711200414347,
+        "eligible_for_fresh_confirmation": true,
+        "performance_claim_supported": false
+      },
+      "best_clock_ise_derived_from_readiness": 1.6050885238342638
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "run_ids": {
+        "history": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972120000:pointmaze:history:1972120000",
+        "threshold": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972120000:pointmaze:threshold:1972120000",
+        "termination_history": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972120000:pointmaze:termination_history:1972120000"
+      },
+      "ise": {
+        "history": 1.3150617993730433,
+        "threshold": 1.2725571964792106,
+        "termination_history": 1.6208091188580913
+      },
+      "history_relative_percent": {
+        "threshold": 3.340093711420633,
+        "termination_history": -18.863869651748754
+      },
+      "same_controller_selection_ise_curve_and_iteration": true,
+      "termination_readiness": {
+        "behaviorally_noncollapsed": true,
+        "state_conditional_at_same_bin_and_offset": true,
+        "selection_ise_gain_over_best_clock": 0.21166729886388655,
+        "eligible_for_fresh_confirmation": true,
+        "performance_claim_supported": false
+      },
+      "best_clock_ise_derived_from_readiness": 1.832476417721978
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "run_ids": {
+        "history": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972210000:reacher_tracking:history:1972210000",
+        "threshold": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972210000_attempt_preempt1:reacher_tracking:threshold:1972210000",
+        "termination_history": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972210000:reacher_tracking:termination_history:1972210000"
+      },
+      "ise": {
+        "history": 4.404081600337276,
+        "threshold": 4.237017425712491,
+        "termination_history": 4.118874105366482
+      },
+      "history_relative_percent": {
+        "threshold": 3.9429664275381526,
+        "termination_history": 6.92440428318013
+      },
+      "same_controller_selection_ise_curve_and_iteration": true,
+      "termination_readiness": {
+        "behaviorally_noncollapsed": true,
+        "state_conditional_at_same_bin_and_offset": true,
+        "selection_ise_gain_over_best_clock": 0.2170793168995968,
+        "eligible_for_fresh_confirmation": true,
+        "performance_claim_supported": false
+      },
+      "best_clock_ise_derived_from_readiness": 4.335953422266078
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "run_ids": {
+        "history": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972220000_attempt_preempt1:reacher_tracking:history:1972220000",
+        "threshold": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972220000:reacher_tracking:threshold:1972220000",
+        "termination_history": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972220000_attempt_preempt1:reacher_tracking:termination_history:1972220000"
+      },
+      "ise": {
+        "history": 4.894345576746082,
+        "threshold": 4.806159043760147,
+        "termination_history": 4.896112826024259
+      },
+      "history_relative_percent": {
+        "threshold": 1.8348650592499238,
+        "termination_history": -0.03609494594943863
+      },
+      "same_controller_selection_ise_curve_and_iteration": true,
+      "termination_readiness": {
+        "behaviorally_noncollapsed": true,
+        "state_conditional_at_same_bin_and_offset": true,
+        "selection_ise_gain_over_best_clock": -0.1468265345812252,
+        "eligible_for_fresh_confirmation": false,
+        "performance_claim_supported": false
+      },
+      "best_clock_ise_derived_from_readiness": 4.749286291443034
+    }
+  ],
+  "task_means": [
+    {
+      "task": "pointmaze",
+      "roots": 2,
+      "selection_paths_per_root": 8,
+      "mean_ise": {
+        "history": 1.1535279164226737,
+        "threshold": 1.1885601900105485,
+        "termination_history": 1.3930702653441058
+      },
+      "history_relative_percent": {
+        "threshold": -2.947454734081567,
+        "termination_history": -17.195281162810705
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "roots": 2,
+      "selection_paths_per_root": 8,
+      "mean_ise": {
+        "history": 4.649213588541679,
+        "threshold": 4.521588234736319,
+        "termination_history": 4.5074934656953705
+      },
+      "history_relative_percent": {
+        "threshold": 2.8225779787929506,
+        "termination_history": 3.1441004612625667
+      }
+    }
+  ],
+  "known_pilot_cpu_seconds": 72297.630353598,
+  "known_prior_overhead": {
+    "initial_preflight_cpu_seconds": 116.698783967,
+    "qualified_r2_preflight_cpu_seconds": 124.54846589000002,
+    "initial_runtime_gate_failures_cpu_seconds": 6.6479207140000005
+  },
+  "known_campaign_cpu_seconds": 72545.525524169,
+  "known_pilot_environment_steps": 55147390,
+  "max_cell_control_p99_ms": 2.79025650583208,
+  "control_deadline_misses": 21,
+  "control_decisions": 115200,
+  "lifecycle_costs_complete": false,
+  "interrupted_measurements": {
+    "t212050": {
+      "cpu_seconds": null,
+      "environment_steps": null
+    },
+    "t212052": {
+      "cpu_seconds": null,
+      "environment_steps": null
+    },
+    "t212054": {
+      "cpu_seconds": null,
+      "environment_steps": null
+    }
+  },
+  "source_summary": "results/plan_validity_dev_20261028_r2/analysis/recovery_preempt1_result_20261029.json",
+  "source_files": [
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/threshold/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/termination_history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/threshold/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/termination_history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/threshold/attempts/preempt1/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/termination_history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/history/attempts/preempt1/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/threshold/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/termination_history/attempts/preempt1/public/result.json"
+  ],
+  "cached_fit_readout": "results/plan_validity_dev_20261028_r2/analysis/cached_fit_readout_20261029.json"
+}

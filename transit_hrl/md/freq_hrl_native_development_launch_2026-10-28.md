@@ -46,7 +46,8 @@ These counters exclude scheduler transport and environment-probe overhead.
 
 ## Next Gate
 
-The pilot has9 completed measurements and3 interrupted cells, not12 successful
-results. See the [pilot readout](freq_hrl_native_development_pilot_2026-10-28.md).
-The qualification gate remains closed; no replacement or confirmation task was
-submitted during this analysis.
+Recovery t212077-t212079 completed on2026-10-29, giving12 logical measurements
+with the9 retained originals. See the
+[complete readout](freq_hrl_native_development_complete_2026-10-29.md).
+Reacher stopping competence and interrupted lifecycle costs still block recipe
+admission. No confirmation task was submitted.

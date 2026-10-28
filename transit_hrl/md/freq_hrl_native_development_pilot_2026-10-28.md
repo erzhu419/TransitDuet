@@ -1,5 +1,9 @@
 # Native Pilot Readout
 
+Update2026-10-29: recovery completed. The
+[complete readout](freq_hrl_native_development_complete_2026-10-29.md) supersedes
+the incomplete cohort below; the historical9-cell results remain unchanged.
+
 Campaign: `plan_validity_dev_20261028_r2`. Scheduler t212043-t212054 has9 done
 and3 failed tasks. Retrieved9 public JSONs,737,891 bytes total, without models
 or fitting caches. The existing analyzer correctly returns `incomplete_or_failed`

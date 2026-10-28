@@ -1,0 +1,176 @@
+{
+  "protocol_version": "plan_validity_native_development_v1",
+  "stage": "cost_pilot",
+  "run_name": "plan_validity_dev_20261028_r2",
+  "plan_contract": {
+    "horizon": 1200,
+    "dt_seconds": 0.01,
+    "period_steps": 50,
+    "check_stride_steps": 5,
+    "deadline_steps": 25,
+    "upper_calls": 24,
+    "branch_window_steps": 50,
+    "threshold_quantile": 0.75,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "controller_hidden_dim": 128,
+    "termination_hidden_dim": 64,
+    "learning_rate": 0.0003,
+    "checkpoint_evaluation_interval": 8,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "ppo_epochs": 4,
+    "ppo_minibatch_size": 1024,
+    "termination_rounds": 2,
+    "termination_epochs": 200,
+    "effective_df": 8,
+    "primary_iterations": 384,
+    "primary_events_per_class": 4,
+    "primary_pairs_per_path": 12,
+    "controller_schedule": "balanced_jitter",
+    "candidate": "history",
+    "renewal_target": "keep_minus_renew_50_steps_no_later_upper_calls"
+  },
+  "expected_run_ids": [
+    "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972110000:pointmaze:history:1972110000",
+    "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972120000:pointmaze:history:1972120000",
+    "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972110000:pointmaze:termination_history:1972110000",
+    "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972120000:pointmaze:termination_history:1972120000",
+    "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972110000:pointmaze:threshold:1972110000",
+    "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972120000:pointmaze:threshold:1972120000",
+    "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972210000:reacher_tracking:history:1972210000",
+    "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972220000:reacher_tracking:history:1972220000",
+    "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972210000:reacher_tracking:termination_history:1972210000",
+    "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972220000:reacher_tracking:termination_history:1972220000",
+    "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972210000:reacher_tracking:threshold:1972210000",
+    "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972220000:reacher_tracking:threshold:1972220000"
+  ],
+  "task_driver_options": {
+    "regime_dwell_seconds": [
+      0.8,
+      1.6
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "pointmaze_env_id": "PointMaze_UMaze-v3",
+  "seed_recipe": {
+    "base": 1970000000,
+    "phase_codes": {
+      "preflight": 1,
+      "cost_pilot": 2,
+      "confirmation": 3
+    },
+    "task_codes": {
+      "pointmaze": 1,
+      "reacher_tracking": 2
+    },
+    "role_offsets": {
+      "train_seeds": 1000,
+      "selection_seeds": 2000,
+      "branch_fit_seeds": 3000,
+      "timing_selection_seeds": 4000,
+      "trigger_eval_seeds": 5000
+    },
+    "phase_roots": {
+      "preflight": 1,
+      "cost_pilot": 2,
+      "confirmation": 8
+    }
+  },
+  "status": "complete",
+  "missing": [],
+  "failed": [],
+  "hardware_profiles_matched": true,
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "preflight_passed": false,
+  "termination_development_eligible": {
+    "pointmaze": true,
+    "reacher_tracking": false
+  },
+  "known_measured_cpu_seconds": 72297.630353598,
+  "performance_claim_supported": false,
+  "source_files": [
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/threshold/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/termination_history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/threshold/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/termination_history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/threshold/attempts/preempt1/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/termination_history/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/history/attempts/preempt1/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/threshold/public/result.json",
+    "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/termination_history/attempts/preempt1/public/result.json"
+  ],
+  "recovery_bundle": "results/plan_validity_dev_20261028_r2/inputs/recovery_preempt1.json",
+  "interrupted_measurements": {
+    "t212050": {
+      "cpu_seconds": null,
+      "environment_steps": null
+    },
+    "t212052": {
+      "cpu_seconds": null,
+      "environment_steps": null
+    },
+    "t212054": {
+      "cpu_seconds": null,
+      "environment_steps": null
+    }
+  },
+  "lifecycle_costs_complete": false
+}
