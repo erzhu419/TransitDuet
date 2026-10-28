@@ -150,6 +150,9 @@ class FlowController(NativeNoop):
     def record_prediction(self, result, value):
         pass
 
+    def select_plan(self, model):
+        return choose(model, self.homogeneous, self.proposals)
+
     def observe(self, bus, legal, native_action):
         start = time.perf_counter()
         key = int(bus.bus_id), int(bus.trip_id), int(bus.last_station.station_id)
@@ -161,7 +164,7 @@ class FlowController(NativeNoop):
         detail = {}
         try:
             model, detail = self.build_model(value, visits)
-            result = choose(model, self.homogeneous, self.proposals)
+            result = self.select_plan(model)
         except graph.Unsupported as error:
             result = dict(action_s=int(native_action), commands={}, evaluations=0,
                           status='unsupported_prefix', reason=str(error))
