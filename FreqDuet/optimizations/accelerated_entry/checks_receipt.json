@@ -1,0 +1,65 @@
+{
+  "status": "ready_for_new_frozen_evaluations",
+  "tests": 16,
+  "controllers": [
+    "native_beam",
+    "arrival_beam",
+    "arrival_current"
+  ],
+  "runtime_probes": [
+    {
+      "actor": 12011,
+      "day": 2099001,
+      "sampler": 333,
+      "controller": "native_beam",
+      "checkpoint_files": [
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/runner_ep199.pt",
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/lower_ep199.pt",
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/upper_ep199.pt"
+      ],
+      "checkpoint_ep": 199,
+      "reference_trajectory_required": false,
+      "training_updates": 0,
+      "traffic_starts": 0
+    },
+    {
+      "actor": 12011,
+      "day": 2099001,
+      "sampler": 333,
+      "controller": "arrival_beam",
+      "checkpoint_files": [
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/runner_ep199.pt",
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/lower_ep199.pt",
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/upper_ep199.pt"
+      ],
+      "checkpoint_ep": 199,
+      "reference_trajectory_required": false,
+      "training_updates": 0,
+      "traffic_starts": 0
+    },
+    {
+      "actor": 12011,
+      "day": 2099001,
+      "sampler": 333,
+      "controller": "arrival_current",
+      "checkpoint_files": [
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/runner_ep199.pt",
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/lower_ep199.pt",
+        "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v34_checkpoint_trajectory/logs/F_freqduet_protocol_v6_confirmed_main_hiro_seed12011/checkpoints/upper_ep199.pt"
+      ],
+      "checkpoint_ep": 199,
+      "reference_trajectory_required": false,
+      "training_updates": 0,
+      "traffic_starts": 0
+    }
+  ],
+  "archived_reference_required": false,
+  "real_traffic_starts": 0,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "old_code_changed": false,
+  "running_matrix_changed": false,
+  "scheduler_task": "t212130",
+  "node": "node004",
+  "priority": "high"
+}
