@@ -49,6 +49,12 @@ def child_args(a,command):
         '--results-root',str(a.results_root),'--env-file',str(a.env_file),'--source',a.source]
 
 
+def rollout_root(a):
+    # The frozen evaluator locates its shared runtime proof in root.parent.
+    # Matrix records stay nested; runtime logs/ready markers use the outer root.
+    return a.root.parent
+
+
 def controller(arm):
     # Python inserts the entry script directory before PYTHONPATH. Remove that
     # insertion for historical arms so their frozen module resolution is real.
@@ -102,12 +108,18 @@ def prepare(a):
     subprocess.run([sys.executable,'-u',str(Path(__file__).with_name('check_freqduet_v277_arrival_metric.py')),
         '--out',str(a.root/'preflight/synthetic.json'),'--source',a.source],check=True)
     metadata = inventory(a)
+    failed = a.root.parent/'matrix'
+    assert sorted(p.name for p in (failed/'failures').glob('*.json')) == [f'p{i}.json' for i in range(8)]
+    assert not list((failed/'pairs').glob('*.json'))
+    for i in range(8):
+        assert 'runtime_optimization_20261014/benchmark_summary.json' in read(failed/'failures'/f'p{i}.json')['error']
     modules = {}
     for arm in ARMS:
         subprocess.run(child_args(a,'probe')+['--arm',arm],env=arm_env(a,arm),check=True)
         modules[arm] = read(a.root/'preflight/probes'/(arm+'.json'))
     write(a.root/'protocol.json',dict(source=a.source,days=DAYS,arms=ARMS,items=ITEMS,
-        physical_start_cap=20,authorization='user_approved_20_after_checks_and_sealing',
+        physical_start_cap=28,unique_development_paths=20,failed_prior_starts=8,
+        authorization='user_approved_20_then_8_identical_startup_replacements',
         max_concurrent_paths=8,actor=12011,sampler=27011001,automatic_retry=False,
         independent_days=4,independent_futures=0,training_updates=0,main_policy_changed=False,
         bootstrap_draws=10000,bootstrap_seed=2770201,
@@ -143,7 +155,7 @@ def path(a):
                 self.bridge.attach(Bus)
     audit = Audit()
     begin = time.perf_counter()
-    row,uniforms,_,holds = fixed.pilot.rollout(a.root,12011,day,'stochastic',27011001,
+    row,uniforms,_,holds = fixed.pilot.rollout(rollout_root(a),12011,day,'stochastic',27011001,
         [0.]*4,'v277_p'+str(a.index),probability_rule=audit,trace_observer=audit,credit_observer=credit)
     row.update(waiting_person_s=float(credit.stream.total[0]),onboard_person_s=float(credit.stream.total[1]),
         backlog_trip_s=float(credit.stream.total[4]),holding_person_s=audit.holding_person_s,
@@ -247,6 +259,7 @@ def aggregate(a):
         effects=effects,eligible=eligible,current_vs_beam=comparison,by_day=rows,
         event_uniform_alignment=alignment,independent_demand_days=4,independent_futures=0,
         main_policy_changed=False,training_updates=0,confirmation_started=False,
+        failed_prior_starts=8,total_authorized_start_cap=28,
         decision='review_eligible_candidate_before_confirmation' if any(eligible.values()) else 'close_no_expansion'))
     print('V277_AGGREGATE_COMPLETE',eligible,flush=True)
 
@@ -264,6 +277,10 @@ def main():
     a = parser.parse_args()
     if a.command == 'probe':
         _,modules = controller(a.arm)
+        import run_freqduet_v267_bilateral_factorial as fixed
+        _,runner,_,_ = fixed.pilot.joint.optimized_runtime(rollout_root(a))
+        modules['runtime_runner'] = sys.modules[runner.__module__].__file__
+        modules['runtime_proof'] = str(rollout_root(a).parent/'runtime_optimization_20261014')
         write(a.root/'preflight/probes'/(a.arm+'.json'),modules)
         return
     try:

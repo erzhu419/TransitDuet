@@ -60,3 +60,18 @@ forecasts were nearly identical here;later replanning remains part of the
 executed labels. These residuals motivate retaining the diagnostic fields,
 not simultaneously changing the frozen predictor. Small readout:
 `../freqduet/results_freqduet/protocol_v6_v277_metric_alignment/readout/results.json`.
+
+Admission:source60e0b7e682/t211990 passed27 synthetic/regression checks and7602
+metadata files with zero day collisions. Separate-interpreter probes confirmed
+V275 uses894ad14707,V276 uses indexed4a216af00c with frozen7023e2e784 flow,
+and corrected arms use the new source. The earlier same-state synthetic timing
+was6.268s/128 calls versus0.333s/7 calls,both retaining native with identical
+objective;this is not a traffic-effect or full-day speedup result.
+
+Startup correction:the first8 slots stopped before simulator initialization
+because the nested matrix root mislocated the frozen runtime proof. They remain
+failed/charged in `matrix/`;the user approved only8 identical replacements,
+raising the total start cap to28 for the same20 unique paths. Use a separate
+`matrix_repaired/` attempt and the outer experiment root for the legacy runtime
+loader. Before further traffic,all five arm probes must call that actual loader,
+not just import modules. Keep days,controllers and gates unchanged;no auto retry.

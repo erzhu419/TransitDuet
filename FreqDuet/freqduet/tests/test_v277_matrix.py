@@ -8,6 +8,12 @@ import run_freqduet_v277_arrival_metric as trial
 
 
 class MatrixTests(unittest.TestCase):
+    def test_nested_matrix_uses_outer_root_for_frozen_runtime_proof(self):
+        args = SimpleNamespace(root=Path('/results/V277/matrix_repaired'))
+        self.assertEqual(trial.rollout_root(args),Path('/results/V277'))
+        self.assertEqual(trial.rollout_root(args).parent/'runtime_optimization_20261014',
+                         Path('/results/runtime_optimization_20261014'))
+
     def test_twenty_paths_eight_shards_without_duplicate_futures(self):
         indices = [i for shard in range(8) for i in range(shard,20,8)]
         self.assertEqual(sorted(indices),list(range(20)))

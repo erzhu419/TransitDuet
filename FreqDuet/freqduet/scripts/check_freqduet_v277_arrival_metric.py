@@ -18,7 +18,7 @@ def run(a):
         top_level_dir=str(tests)) for name in
         ('test_v277_arrival_metric.py','test_v277_matrix.py','test_v276_indexed_continuation.py'))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    assert result.wasSuccessful() and result.testsRun >= 27
+    assert result.wasSuccessful() and result.testsRun >= 28
     reference = stress_state()
     model = ArrivalMetricGraph(reference,reference.observed)
     baseline = model.evaluate()
