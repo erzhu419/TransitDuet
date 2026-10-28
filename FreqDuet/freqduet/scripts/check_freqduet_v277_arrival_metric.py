@@ -16,9 +16,9 @@ def run(a):
     tests = Path(__file__).resolve().parents[1]/'tests'
     suite = unittest.TestSuite(unittest.defaultTestLoader.discover(str(tests),pattern=name,
         top_level_dir=str(tests)) for name in
-        ('test_v277_arrival_metric.py','test_v276_indexed_continuation.py'))
+        ('test_v277_arrival_metric.py','test_v277_matrix.py','test_v276_indexed_continuation.py'))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    assert result.wasSuccessful() and result.testsRun >= 24
+    assert result.wasSuccessful() and result.testsRun >= 27
     reference = stress_state()
     model = ArrivalMetricGraph(reference,reference.observed)
     baseline = model.evaluate()
