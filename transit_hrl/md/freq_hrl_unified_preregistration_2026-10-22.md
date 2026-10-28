@@ -1,15 +1,18 @@
 # Unified Prospective Validation Protocol
 
-Date: 2026-10-22. Status: **draft, not locked and not submitted for execution**.
+Prepared: 2026-10-22. Status: **draft, not recipe-locked; development pilot incomplete**.
 This document integrates the four preparations and takes precedence over their
 earlier seed-count/statistical suggestions. The machine-readable reservation is
 [`protocols/plan_validity_preregistration_2026-10-22.json`](../protocols/plan_validity_preregistration_2026-10-22.json).
 Unknown costs and operational distance thresholds remain explicit pending fields.
-Verification:78 focused tests passed, including development/test separation,
+Preparation verification:78 focused tests passed, including development/test separation,
 shared-cost allocation, seed reservation, global alpha and separate C1/C2 logic.
-No task was submitted and no new performance evidence was generated.
-The [native preflight/pilot scheduler scripts](freq_hrl_native_development_scheduler_2026-10-28.md)
-now implement the first two execution stages, without submitting them.
+No task was submitted and no performance evidence was generated at preparation time.
+Execution update2026-10-28: the
+[native preflight/pilot scheduler scripts](freq_hrl_native_development_scheduler_2026-10-28.md)
+were subsequently authorized and run. Preflight passed; the
+[pilot readout](freq_hrl_native_development_pilot_2026-10-28.md) has9 completed
+measurements and3 interrupted cells. No confirmation training/evaluation was run.
 
 ## Questions And Claims
 
@@ -202,9 +205,10 @@ After evaluation, `--summaries FILES...` checks the four task/comparator summari
 against the registered alpha, margins, root/episode counts and retained profiles,
 and reports C1/C2 separately. Incomplete/unlocked evidence has no claim verdict.
 
-Current state is `draft_not_locked`: actual pilot costs, distance cutoffs,
-competent baseline evidence, historical exposure audit and48 artifact bindings
-do not exist yet. Root intervals with8 roots are approximate. Conditional-future
+Current state is `draft_not_locked`: some pilot costs and competent stopping
+baselines are measured, but complete pilot accounting, numeric caps, distance
+cutoffs, the full baseline cohort, historical exposure audit and48 artifact
+bindings remain pending. Root intervals with8 roots are approximate. Conditional-future
 MSE is not observable-state Bayes error; the local identity is not an episode
 regret theorem. Own-schedule full-algorithm ranking, named timing reproductions
 and universal/real-world deployment claims remain outside this registration.

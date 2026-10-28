@@ -46,6 +46,7 @@ These counters exclude scheduler transport and environment-probe overhead.
 
 ## Next Gate
 
-After the12 pilot cells finish, retrieve their public JSONs and review learning,
-nondegenerate termination and measured budgets before freezing any confirmation
-recipe. Preflight success alone is not performance evidence.
+The pilot has9 completed measurements and3 interrupted cells, not12 successful
+results. See the [pilot readout](freq_hrl_native_development_pilot_2026-10-28.md).
+The qualification gate remains closed; no replacement or confirmation task was
+submitted during this analysis.

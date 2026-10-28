@@ -26,9 +26,12 @@ criteria. A completed pilot can still have an ineligible stopping baseline.
 Every worker requests1 CPU,2048 MiB RAM and0 VRAM, with native threadpools limited
 to1. The whitelist is node001-node006; there is no hard/preferred node. Each
 stage is deliberately bounded to6/12 simultaneous cells, not a1152-worker run.
-Automatic requeue/resume is disabled: interrupted attempts and their costs must
-be reconciled before another registration. The scripts use the existing
-scheduleurm bulk API, not Slurm.
+Crash auto-requeue and node-down rerouting are disabled. The scheduler's separate
+priority-preemption path can nevertheless kill and requeue these workers;
+`no_auto_requeue` does not prevent it. Interrupted outputs are preserved and
+their costs must be reconciled before a separate attempt. See the
+[pilot readout](freq_hrl_native_development_pilot_2026-10-28.md).
+The scripts use the existing scheduleurm bulk API, not Slurm.
 
 ## Resume Commands
 
