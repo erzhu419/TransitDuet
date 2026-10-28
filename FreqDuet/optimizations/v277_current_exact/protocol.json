@@ -1,0 +1,20 @@
+{
+  "purpose": "exact_engineering_validation_not_strategy_selection",
+  "reference": "protocol_v6_v277_metric_alignment/matrix_repaired/pairs/p17.json",
+  "reference_trace": "protocol_v6_v277_metric_alignment/matrix_repaired/traces/p17.pkl.gz",
+  "selection": "only_completed_current_action_reference_at_registration",
+  "reference_source": "b9909ddc03",
+  "candidate_kernel_source": "cbf336f036",
+  "day": 2077002,
+  "actor": 12011,
+  "sampler": 27011001,
+  "physical_start_cap": 1,
+  "automatic_retry": false,
+  "current_actions": "same_legal_current_actions_and_native_continuation",
+  "gates": "seven_regression_tests_then_first_supported_complete_solver_then_each_query_then_all_saved_traces_and_endpoints_exact",
+  "ignored_fields": ["graph_query.total_s", "graph_summary.callback_latency_s"],
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "existing_code_changed": false,
+  "running_matrix_changed": false
+}

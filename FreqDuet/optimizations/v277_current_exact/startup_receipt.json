@@ -1,0 +1,33 @@
+{
+  "task": "t212120",
+  "node": "node004",
+  "priority": "high",
+  "preflight_tests": 7,
+  "reference_day": 2077002,
+  "reference": "V277_p17_current_action",
+  "start_record": {
+    "day": 2077002,
+    "actor": 12011,
+    "sampler": 27011001,
+    "physical_start": 1,
+    "cap": 1,
+    "automatic_retry": false
+  },
+  "first_real_state_solver": {
+    "passed": true,
+    "evaluations": 7,
+    "extra_reference_wall_s": 0.4882253771647811
+  },
+  "last_progress": {
+    "phase": "current_exact_complete_day",
+    "current": 2600,
+    "total": 5200,
+    "unit": "matched_queries",
+    "sim_s": 24759.0,
+    "elapsed_s": 236.45210914779454
+  },
+  "final_summary_available": false,
+  "failure_available": false,
+  "main_policy_changed": false,
+  "running_matrix_changed": false
+}
