@@ -37,3 +37,16 @@ x fixed+bilateral / frozen V275 / frozen V276 / corrected-CV beam / corrected-CV
 current enumeration. Seal actual day IDs,budget and paired gates before launch;
 this document does not launch or authorize those20 physical starts. No threshold,
 support or search-budget tuning on V276;no APC or frequency superiority claim.
+
+Existing-archive readout t211986 reproduced all12 endpoints and all1517
+intervention-query keys. Relative to V275,the two CV2 losses were+0.0029612 and
++0.0054171;their raw-variance terms were+0.0029099 and+0.0053556,with normalization
+terms only+0.0000513 and+0.0000615. The leading hour buckets were[12h,13h) on
+day2076001 and[3h,4h) on day2076004;these are additive temporal accounting,
+not identified station-level treatment effects. Current-bus full-plan holding
+bias was-43.55/-42.27/-42.51s on the three active days,return bias
+-20.57/-26.06/-47.26s and return MAE93.18/79.59/101.29s. Full and fallback
+forecasts were nearly identical here;later replanning remains part of the
+executed labels. These residuals motivate retaining the diagnostic fields,
+not simultaneously changing the frozen predictor. Small readout:
+`../freqduet/results_freqduet/protocol_v6_v277_metric_alignment/readout/results.json`.

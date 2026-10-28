@@ -111,7 +111,8 @@ class ArrivalMetricTests(unittest.TestCase):
         old,_ = self.model()
         old.snapshot = replace(old.snapshot,vehicles=tuple(replace(v,phase='hold',remaining_s=12.,
             arrival_s=1990.,boarded=0.) if v.bus==2 else v for v in old.snapshot.vehicles))
-        old.observed = dict(old.observed,arrivals=old.observed['arrivals']+[(False,0,2,1990.,2)])
+        arrivals = sorted(old.observed['arrivals']+[(False,0,2,1990.,2)],key=lambda r:(r[3],r[4]))
+        old.observed = dict(old.observed,arrivals=arrivals)
         new = ArrivalMetricGraph(old,old.observed)
         for homogeneous in (False,True):
             a,b = old.evaluate(homogeneous=homogeneous),new.evaluate(homogeneous=homogeneous)
