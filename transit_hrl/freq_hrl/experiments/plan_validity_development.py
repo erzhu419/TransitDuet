@@ -33,12 +33,23 @@ def cell_directory(run_name, cell):
     return Path("results") / run_name / cell["phase"] / cell["task"] / str(cell["optimizer_seed"]) / cell["method"]
 
 
-def measurement_path(run_name, cell):
+def attempt_directory(run_name, cell, attempt=""):
+    directory = cell_directory(run_name, cell)
+    if attempt:
+        if Path(attempt).name != attempt or attempt in (".", ".."):
+            raise ValueError("use a single attempt directory name")
+        directory = directory / "attempts" / attempt
+    return directory
+
+
+def measurement_path(run_name, cell, attempt=""):
     name = f"{run_name}_{cell['phase']}_{cell['task']}_{cell['method']}_{cell['optimizer_seed']}"
-    return cell_directory(run_name, cell) / "private" / f"{name}.json"
+    if attempt:
+        name += f"_attempt_{attempt}"
+    return attempt_directory(run_name, cell, attempt) / "private" / f"{name}.json"
 
 
-def cell_arguments(plan, run_name, cell, *, root):
+def cell_arguments(plan, run_name, cell, *, root, attempt=""):
     from scripts.run_plan_validity_compute_budget import build_compute_parser, prepare
 
     preflight = cell["phase"] == "preflight"
@@ -61,7 +72,7 @@ def cell_arguments(plan, run_name, cell, *, root):
         "max_offset_steps": contract["deadline_steps"], "check_stride_steps": contract["check_stride_steps"],
         "ridge_alpha_grid": contract["ridge_alpha_grid"], **plan["task_driver_options"], **cell["seed_roles"]}
     command = ["--tasks", cell["task"], "--method", cell["method"], "--execute",
-               "--output", str(Path(root) / measurement_path(run_name, cell))]
+               "--output", str(Path(root) / measurement_path(run_name, cell, attempt))]
     for name, value in values.items():
         command.extend(["--" + name.replace("_", "-"), *map(str, value if isinstance(value, (list, tuple)) else [value])])
     args = build_compute_parser().parse_args(command)
@@ -69,8 +80,8 @@ def cell_arguments(plan, run_name, cell, *, root):
     return args
 
 
-def expected_runs(plan, run_name, phase):
-    return [{"run_id": f"{measurement_path(run_name, cell).stem}:{cell['task']}:{cell['method']}:{cell['optimizer_seed']}",
+def expected_runs(plan, run_name, phase, attempt=""):
+    return [{"run_id": f"{measurement_path(run_name, cell, attempt).stem}:{cell['task']}:{cell['method']}:{cell['optimizer_seed']}",
              "task": cell["task"], "method": cell["method"], "optimizer_seed": cell["optimizer_seed"]}
             for cell in development_cells(plan, phase)]
 
@@ -136,10 +147,14 @@ def summarize_phase(plan, run_name, phase, reports):
         if report["stage"] != phase or report["run_name"] != run_name or len(report["records"]) != 1:
             raise ValueError("development report belongs to another campaign/phase")
         record = report["records"][0]
-        run_id = record["run_id"]
+        run_id = record.get("logical_run_id", record["run_id"])
         if run_id in seen or run_id not in expected:
             raise ValueError("duplicate or unregistered development record")
         seen.add(run_id)
+        cell = expected[run_id]
+        actual = f"{measurement_path(run_name, cell, report.get('attempt', '')).stem}:{cell['task']}:{cell['method']}:{cell['optimizer_seed']}"
+        if record["run_id"] != actual:
+            raise ValueError("measurement attempt does not match its logical cell")
         args = cell_arguments(plan, run_name, expected[run_id], root=Path("."))
         configuration = _json_ready({key: value for key, value in vars(args).items() if key not in ("output", "dry_run")})
         if record["configuration"] != configuration:

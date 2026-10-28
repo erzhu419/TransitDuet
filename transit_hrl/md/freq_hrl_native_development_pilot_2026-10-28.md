@@ -59,3 +59,21 @@ superiority are not established. Sources: the campaign's
 [`analysis/cost_pilot_gate.json`](../results/plan_validity_dev_20261028_r2/analysis/cost_pilot_gate.json),
 [`cost_pilot/`](../results/plan_validity_dev_20261028_r2/cost_pilot/) public records,
 and [`analysis/scheduler_completion.json`](../results/plan_validity_dev_20261028_r2/analysis/scheduler_completion.json).
+
+## Recovery
+
+`preempt1` remeasures only t212050/t212052/t212054's logical cells, with identical
+training/selection/fitting seeds and parameters. New attempt directories and
+cost IDs retain the interrupted originals; the other9 cells are not resubmitted.
+These3 finite, non-resumable measurements use high priority and loss protection,
+without hard/preferred nodes: they are excluded from normal-priority victims
+and cannot themselves trigger pinned-node priority preemption. Resource eviction
+or process failure remains possible. The scheduler's existing missing-prerequisite
+preemption fix passed9 tests; its working tree was not changed. Project tests:28 passed.
+
+Input: [`inputs/recovery_preempt1.json`](../results/plan_validity_dev_20261028_r2/inputs/recovery_preempt1.json).
+After completion, run the existing analyzer with `--recovery-bundle` pointing at
+that input to combine the frozen9 originals and the3 declared attempts. It keeps
+interrupted costs unknown and `lifecycle_costs_complete=false`, even if all12
+logical measurements complete. Numeric budget admission remains blocked.
+No confirmation task is authorized by this recovery.

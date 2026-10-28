@@ -17,6 +17,7 @@ from freq_hrl.experiments.pointmaze_goal_validation import _json_ready
 from freq_hrl.experiments.pointmaze_timing_baselines import TimingRule
 from scripts import run_plan_validity_development_cell as worker
 from scripts import submit_plan_validity_development_scheduleurm as submitter
+from scripts import analyze_plan_validity_development as analyzer
 from test_plan_validity_second_task import Controller, DenseTask
 
 
@@ -56,7 +57,7 @@ class DevelopmentSchedulerTest(unittest.TestCase):
     def test_scheduler_specs_are_unpinned_one_core_and_only_sync_public_results(self):
         args = SimpleNamespace(preregistration=submitter.ROOT / "protocols/plan_validity_preregistration_2026-10-22.json",
             stage="cost_pilot", run_name="unit_dev", preflight_gate=submitter.ROOT / "results/unit_dev/gates/preflight/gate.json",
-            python_executable="/worker/python", ram_mb=2048)
+            python_executable="/worker/python", ram_mb=2048, attempt="", recovery_receipt=None)
         bundle = submitter.build_bundle(args, draft_plan())
         self.assertEqual(len(bundle["jobs"]), 12)
         self.assertTrue(all(row["configuration"]["iterations"] == 384 for row in bundle["cells"]))
@@ -72,6 +73,123 @@ class DevelopmentSchedulerTest(unittest.TestCase):
             self.assertTrue(job["no_auto_requeue"])
             self.assertNotIn("pip install", job["cmd"])
             self.assertNotIn("sbatch", job["cmd"])
+
+    def test_recovery_only_remeasures_failed_cells_with_unchanged_configuration(self):
+        plan = draft_plan()
+        args = SimpleNamespace(preregistration=submitter.ROOT / "protocols/plan_validity_preregistration_2026-10-22.json",
+            stage="cost_pilot", run_name="unit_recovery", preflight_gate=submitter.ROOT / "results/unit_recovery/gates/preflight/gate.json",
+            python_executable="/worker/python", ram_mb=2048, attempt="", recovery_receipt=None)
+        original = submitter.build_bundle(args, plan)
+        interrupted = [7, 9, 11]
+        with tempfile.TemporaryDirectory() as folder:
+            receipt = Path(folder) / "receipt.json"
+            receipt.write_text(json.dumps({"run_name": args.run_name,
+                "tasks": [{"id": str(i), "result_dir": job["result_dir"],
+                           "status": "failed" if i in interrupted else "done"}
+                          for i, job in enumerate(original["jobs"])],
+                "interrupted_measurements": {str(i): {"cpu_seconds": None} for i in interrupted}}))
+            args.attempt, args.recovery_receipt = "preempt1", receipt
+            recovered = submitter.build_bundle(args, plan)
+            self.assertEqual(recovered["cells"], [original["cells"][i] for i in interrupted])
+            self.assertEqual(len(recovered["jobs"]), 3)
+            for job in recovered["jobs"]:
+                self.assertEqual(job["priority"], "high")
+                self.assertIsNone(job["require_node"])
+                self.assertIsNone(job["preferred_node"])
+                self.assertTrue(job["protect_from_auto_eviction"])
+                self.assertIn("/attempts/preempt1/public", job["result_dir"])
+                self.assertIn("--attempt preempt1", job["cmd"])
+            old_ids = {r["run_id"] for r in original["protocol"]["expected_runs"]}
+            self.assertTrue(all(r["run_id"] not in old_ids for r in recovered["protocol"]["expected_runs"]))
+            with patch.object(Path, "exists", return_value=True):
+                with self.assertRaisesRegex(ValueError, "existing measurement"):
+                    submitter.build_bundle(args, plan)
+
+    def test_attempts_merge_as_logical_cells_without_hiding_duplicate_measurements(self):
+        plan, run_name = draft_plan(), "unit_dev"
+        reports = reports_for(plan, "cost_pilot", run_name)
+        original = deepcopy(reports[-1])
+        row = reports[-1]["records"][0]
+        row["logical_run_id"] = row["run_id"]
+        reports[-1]["attempt"] = "preempt1"
+        row["run_id"] = dev.expected_runs(plan, run_name, "cost_pilot", "preempt1")[-1]["run_id"]
+        self.assertEqual(dev.summarize_phase(plan, run_name, "cost_pilot", reports)["status"], "complete")
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            dev.summarize_phase(plan, run_name, "cost_pilot", [*reports, original])
+        row["run_id"] = original["records"][0]["run_id"]
+        with self.assertRaisesRegex(ValueError, "attempt"):
+            dev.summarize_phase(plan, run_name, "cost_pilot", reports)
+
+    def test_recovered_readout_keeps_interrupted_costs_unknown(self):
+        plan, run_name = draft_plan(), "unit_dev"
+        reports = reports_for(plan, "cost_pilot", run_name)
+        cells = dev.development_cells(plan, "cost_pilot")
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / "plan.json"
+            source.write_text(json.dumps({"plan": plan}))
+            attempt = "preempt1"
+            for i, (cell, report) in enumerate(zip(cells, reports)):
+                tag = attempt if i == 11 else ""
+                if tag:
+                    report["attempt"] = tag
+                    row = report["records"][0]
+                    row["logical_run_id"] = row["run_id"]
+                    row["run_id"] = dev.expected_runs(plan, run_name, "cost_pilot", tag)[i]["run_id"]
+                path = root / dev.attempt_directory(run_name, cell, tag) / "public/result.json"
+                path.parent.mkdir(parents=True)
+                path.write_text(json.dumps(report))
+            recovery = root / "recovery.json"
+            recovery.write_text(json.dumps({"run_name": run_name, "stage": "cost_pilot", "attempt": attempt,
+                "cells": [cells[-1]], "interrupted_measurements": {"old": {"cpu_seconds": None, "environment_steps": None}}}))
+            output = root / "readout.json"
+            with patch.object(analyzer, "ROOT", root):
+                self.assertEqual(analyzer.main(["--preregistration", str(source), "--run-name", run_name,
+                    "--stage", "cost_pilot", "--recovery-bundle", str(recovery), "--output", str(output)]), 0)
+            result = json.loads(output.read_text())
+            self.assertFalse(result["lifecycle_costs_complete"])
+            self.assertIsNone(result["interrupted_measurements"]["old"]["cpu_seconds"])
+            self.assertEqual(len(result["source_files"]), 12)
+            self.assertFalse(result["performance_claim_supported"])
+
+    def test_worker_recovery_preserves_interrupted_output_and_uses_a_distinct_cost_id(self):
+        plan, run_name = draft_plan(), "unit_dev"
+        cell = dev.development_cells(plan, "cost_pilot")[7]
+        profile = {"cpu": "fixture", "threads": 1}
+
+        @contextmanager
+        def runtime():
+            yield profile
+
+        def pipeline(args, task):
+            return {**worker.prepare(args)["expected_runs"][0], "status": "validation_complete",
+                "accounting_complete": True, "configuration": _json_ready({k: v for k, v in vars(args).items()
+                    if k not in ("output", "dry_run")}), "hardware_profile": profile,
+                "offline_cost": {"cpu_seconds": 100, "counts": {"environment_steps": 5}}}
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source, gate = root / "plan.json", root / "gate.json"
+            source.write_text(json.dumps({"plan": plan}))
+            gate.write_text(json.dumps(dev.summarize_phase(plan, run_name, "preflight", reports_for(plan))))
+            interrupted = root / dev.measurement_path(run_name, cell)
+            interrupted.parent.mkdir(parents=True)
+            interrupted.write_text('{"status":"running"}')
+            command = ["--preregistration", str(source), "--run-name", run_name, "--stage", "cost_pilot",
+                "--task", cell["task"], "--method", cell["method"], "--optimizer-seed", str(cell["optimizer_seed"]),
+                "--preflight-gate", str(gate), "--attempt", "preempt1"]
+            with patch.object(worker, "ROOT", root), patch.object(worker, "single_thread_runtime", runtime), \
+                 patch.object(worker, "run_trial", side_effect=pipeline):
+                self.assertEqual(worker.main(command), 0)
+            public = root / dev.attempt_directory(run_name, cell, "preempt1") / "public/result.json"
+            report = json.loads(public.read_text())
+            record = report["records"][0]
+            self.assertEqual(json.loads(interrupted.read_text()), {"status": "running"})
+            self.assertNotEqual(record["run_id"], record["logical_run_id"])
+            self.assertEqual(record["offline_cost"]["counts"]["environment_steps"], 5)
+            reports = reports_for(plan, "cost_pilot")
+            reports[7] = report
+            self.assertEqual(dev.summarize_phase(plan, run_name, "cost_pilot", reports)["status"], "complete")
 
     def test_missing_failed_or_other_seed_preflight_never_releases_pilot(self):
         plan = draft_plan()

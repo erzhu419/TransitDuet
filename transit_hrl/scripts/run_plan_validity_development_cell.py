@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from freq_hrl.experiments.compute_budget import ComputeLedger, measured_phase, single_thread_runtime
 from freq_hrl.experiments.plan_validity_development import (
-    METHODS, PHASES, cell_arguments, cell_directory, development_cells, load_plan,
+    METHODS, PHASES, attempt_directory, cell_arguments, development_cells, expected_runs, load_plan,
     native_preflight, require_preflight_gate,
 )
 from freq_hrl.experiments.plan_validity_preregistration import TASKS
@@ -32,18 +32,19 @@ def main(argv=None):
     parser.add_argument("--optimizer-seed", type=int, required=True)
     parser.add_argument("--method", choices=METHODS, required=True)
     parser.add_argument("--preflight-gate", type=Path)
+    parser.add_argument("--attempt", default="")
     options = parser.parse_args(argv)
     plan = load_plan(options.preregistration)
     cell, = [cell for cell in development_cells(plan, options.stage) if cell["task"] == options.task
              and cell["optimizer_seed"] == options.optimizer_seed and cell["method"] == options.method]
-    args = cell_arguments(plan, options.run_name, cell, root=ROOT)
+    args = cell_arguments(plan, options.run_name, cell, root=ROOT, attempt=options.attempt)
     gate = None
     if options.stage == "cost_pilot":
         if options.preflight_gate is None:
             parser.error("cost_pilot requires a qualified native preflight gate")
         gate = json.loads(options.preflight_gate.read_text())
         require_preflight_gate(plan, options.run_name, gate)
-    public = ROOT / cell_directory(options.run_name, cell) / "public" / "result.json"
+    public = ROOT / attempt_directory(options.run_name, cell, options.attempt) / "public" / "result.json"
     if args.output.exists() or public.exists():
         raise FileExistsError("preserve this measured/interrupted cell; register a separate attempt")
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -81,7 +82,10 @@ def main(argv=None):
     total = ledger.summary()
     # Outer CPU already includes the nested pipeline; only its work counters were relayed.
     record["offline_cost"] = total
+    record["logical_run_id"] = next(row["run_id"] for row in expected_runs(plan, options.run_name, options.stage)
+        if row["task"] == options.task and row["method"] == options.method and row["optimizer_seed"] == options.optimizer_seed)
     result = {"protocol": protocol, "stage": options.stage, "run_name": options.run_name,
+        "attempt": options.attempt,
         "status": "complete" if record["status"] == "validation_complete" else "failed",
         "records": [record], "native_preflight": audit,
         "peak_process_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024,

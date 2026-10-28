@@ -11,7 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from freq_hrl.experiments.plan_validity_development import (
-    PHASES, PROTOCOL, cell_arguments, cell_directory, development_cells, expected_runs,
+    PHASES, PROTOCOL, attempt_directory, cell_arguments, cell_directory, development_cells, expected_runs,
     load_plan, require_preflight_gate,
 )
 from freq_hrl.experiments.pointmaze_goal_validation import _json_ready
@@ -21,6 +21,13 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (
 
 
 def build_bundle(args, plan):
+    attempt = args.attempt
+    recovery = json.loads(args.recovery_receipt.read_text()) if args.recovery_receipt else None
+    if bool(attempt) != bool(recovery) or (recovery and args.stage != "cost_pilot"):
+        raise ValueError("pilot recovery requires both --attempt and --recovery-receipt")
+    if recovery and recovery["run_name"] != args.run_name:
+        raise ValueError("recovery receipt belongs to another campaign")
+    failed = {row["result_dir"]: row["id"] for row in recovery["tasks"] if row["status"] == "failed"} if recovery else {}
     preregistration = args.preregistration.resolve().relative_to(ROOT)
     gate = args.preflight_gate.resolve().relative_to(ROOT) if args.preflight_gate else None
     if args.stage == "cost_pilot" and gate is None:
@@ -31,24 +38,32 @@ def build_bundle(args, plan):
         raise ValueError("declare a positive per-cell RAM request")
     jobs, resolved_cells = [], []
     for cell in development_cells(plan, args.stage):
-        resolved = cell_arguments(plan, args.run_name, cell, root=ROOT)
+        original_public = ROOT / cell_directory(args.run_name, cell) / "public"
+        if recovery and str(original_public) not in failed:
+            continue
+        if recovery and (original_public / "result.json").exists():
+            raise ValueError("do not replace an existing measurement with a recovery attempt")
+        resolved = cell_arguments(plan, args.run_name, cell, root=ROOT, attempt=attempt)
         resolved_cells.append({"task": cell["task"], "method": cell["method"], "optimizer_seed": cell["optimizer_seed"],
             "configuration": _json_ready({k: v for k, v in vars(resolved).items() if k not in ("output", "dry_run")})})
-        directory = ROOT / cell_directory(args.run_name, cell)
+        directory = ROOT / attempt_directory(args.run_name, cell, attempt)
         command = [args.python_executable, "-u", "scripts/run_plan_validity_development_cell.py",
             "--preregistration", str(preregistration), "--run-name", args.run_name,
             "--stage", args.stage, "--task", cell["task"], "--optimizer-seed", str(cell["optimizer_seed"]),
             "--method", cell["method"]]
         if gate is not None:
             command.extend(["--preflight-gate", str(gate)])
+        if attempt:
+            command.extend(["--attempt", attempt])
         env = ["PYTHONPATH=.", "PYTHONDONTWRITEBYTECODE=1", "OMP_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
                "MKL_NUM_THREADS=1", "NUMEXPR_NUM_THREADS=1", "TORCH_NUM_THREADS=1", "CUDA_VISIBLE_DEVICES=", "MUJOCO_GL=egl"]
         jobs.append({"project": "Freq-HRL-PlanValidity-Development",
             "description": f"Freq-HRL native {args.stage} {cell['task']} {cell['method']} root {cell['optimizer_seed']}",
-            "signature": f"Freq-HRL/{PROTOCOL}/{args.run_name}/{args.stage}/{cell['task']}/{cell['method']}/{cell['optimizer_seed']}",
+            "signature": f"Freq-HRL/{PROTOCOL}/{args.run_name}/{args.stage}/{cell['task']}/{cell['method']}/{cell['optimizer_seed']}" + (f"/attempt/{attempt}" if attempt else ""),
             "resource_family": f"Freq-HRL/{PROTOCOL}/{args.stage}/{cell['method']}",
             "cmd": " ".join(env) + " " + shlex.join(command), "cwd": str(ROOT),
-            "cpu": 1, "vram": 0, "ram_mb": args.ram_mb, "priority": "normal",
+            "cpu": 1, "vram": 0, "ram_mb": args.ram_mb, "priority": "high" if recovery else "normal",
+            "protect_from_auto_eviction": bool(recovery),
             "allowed_nodes": list(LINUX_CPU_NODES), "require_node": None, "preferred_node": None,
             "allow_cpu_training": True,
             "cpu_training_justification": "Registered single-thread headless PPO development cell; no GPU use.",
@@ -58,8 +73,15 @@ def build_bundle(args, plan):
             "stage_input_paths": [str(args.preflight_gate.resolve().parent)] if gate else [],
             "wait_for_files": [str(args.preflight_gate.resolve())] if gate else [],
             "skip_launch_staging": False, "allow_duplicate": False})
-    return {"protocol": {"protocol_version": PROTOCOL, "expected_runs": expected_runs(plan, args.run_name, args.stage)},
+    if recovery and (not failed or len(jobs) != len(failed)):
+        raise ValueError("recovery receipt does not identify failed cells from this registered phase")
+    selected = {(row["task"], row["method"], row["optimizer_seed"]) for row in resolved_cells}
+    roster = [row for row in expected_runs(plan, args.run_name, args.stage, attempt)
+              if (row["task"], row["method"], row["optimizer_seed"]) in selected]
+    return {"protocol": {"protocol_version": PROTOCOL, "expected_runs": roster},
         "stage": args.stage, "run_name": args.run_name, "submission_status": "prepared_not_submitted",
+        "attempt": attempt, "recovered_task_ids": sorted(failed.values()),
+        "interrupted_measurements": recovery["interrupted_measurements"] if recovery else {},
         "runtime_status": "candidate_interpreter_not_verified_on_execution_nodes",
         "python_executable": args.python_executable, "preregistration": str(preregistration),
         "preflight_gate": str(gate) if gate else None, "cells": resolved_cells, "jobs": jobs}
@@ -71,6 +93,8 @@ def main(argv=None):
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--stage", choices=PHASES, required=True)
     parser.add_argument("--preflight-gate", type=Path)
+    parser.add_argument("--attempt", default="")
+    parser.add_argument("--recovery-receipt", type=Path)
     parser.add_argument("--python-executable", default=DEFAULT_LINUX_PYTHON)
     parser.add_argument("--ram-mb", type=int, default=2048)
     parser.add_argument("--submit", action="store_true")
