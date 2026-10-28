@@ -1,7 +1,8 @@
 # Native Preflight And Development Pilot
 
-Prepared on2026-10-28; no scheduler task submitted, remote installation or
-performance run. Parameters and seed roles come from the
+Initially prepared without execution on2026-10-28. Compute was subsequently
+authorized; see the [launch record](freq_hrl_native_development_launch_2026-10-28.md).
+Parameters and seed roles come from the
 [unified registration](freq_hrl_unified_preregistration_2026-10-22.md).
 Local verification:87 focused tests passed; scheduler submission was mocked.
 
@@ -82,12 +83,11 @@ so all preflight/pilot public records can later be charged as shared development
 costs over the declared8-root confirmation cohort. Missing/failed cells remain
 visible and cannot become zero-cost successful runs.
 
-## Pending Execution Checks
+## Environment Qualification
 
-The existing configured Linux interpreter is a candidate, not remotely verified.
-Override `--python-executable` if required; any dependency installation must run
-on node001-node006 through the scheduler, not on a login node. No installer is
-embedded. The2 GiB request is provisional; preflight publishes peak process RSS
-for sizing, not summed node memory or a PSS measurement. Runtime failures block
-pilot, while positive native preflight establishes software qualification only.
-Actual cost caps, risk distances and scientific evidence remain pending.
+The configured Linux interpreter and dependencies were verified on all six
+compute nodes; no installation was needed. Initial native preflight peak process
+RSS was447-505 MiB, so the2 GiB request is retained. This is process RSS, not PSS
+or summed node memory. Runtime failures block pilot, while positive native
+preflight establishes software qualification only. Actual cost caps, risk
+distances and scientific evidence remain pending.
