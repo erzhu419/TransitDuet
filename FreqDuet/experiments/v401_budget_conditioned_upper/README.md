@@ -22,6 +22,11 @@ S/E payloads and V75 native-run copies caused NFS waits; their receipts remain.
 Producer metadata stays in scope. These metadata attempts consumed no traffic
 path or optimizer update. The two engineering jobs are `t213966`/`t213967`, with
 gate `t213968`; only that gate can admit the 64 training and 24 development paths.
+Both engineering starts failed before native Runner construction because the
+new output root lacked the inherited runtime-optimization proof files. Both are
+charged and preserved. Zero-traffic task `t214071` subsequently copied the two
+existing proofs and passed native configuration/data-path imports. No engineering
+retry, training or development is released without approval of two extra starts.
 Two old-policy engineering paths must pass before 64 matched training paths and
 24 development paths. The two learners each receive 32 training days and 1,536
 updates; neither receives extra training or warm-starts from V400. Detailed

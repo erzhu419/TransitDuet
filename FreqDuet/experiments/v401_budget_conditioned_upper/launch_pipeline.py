@@ -23,7 +23,7 @@ def main():
     root=Path('/home/zhengliang01/scheduleurm_work/FreqDuet-v401-budget-conditioned-upper')
     source=root/'source02';run=root/'run01';assets=Path(d['assets'])
     files=('conditioned_law.py','conditioned_integration.py','recipe.py','worker.py',
-           'entry_check.py','engineering_gate.py','development.py','protocol.json','authorization.json','PROTOCOL.md')
+           'entry_check.py','runtime_ready.py','engineering_gate.py','development.py','protocol.json','authorization.json','PROTOCOL.md')
     buffer=io.BytesIO()
     with tarfile.open(fileobj=buffer,mode='w:gz') as archive:
         for name in files:
@@ -50,7 +50,9 @@ def main():
     common=['--root',run,'--assets',assets]
     add('entry01','entry_check.py',['--assets',assets,'--out',root/'entry01/summary'],
         root/'entry01/summary',[])
-    engineering_wait=[local/'entry01/ready.json',local/'metadata03/ready.json']
+    add('runtime_assets','runtime_ready.py',[*common,'--out',root/'runtime_assets/summary'],
+        root/'runtime_assets/summary',[])
+    engineering_wait=[local/'entry01/ready.json',local/'metadata03/ready.json',local/'runtime_assets/ready.json']
     for rho in plan['retentions']:
         name=f'engineering/r{round(rho*100):03d}'
         add(name,'worker.py',['path',*common,'--arm','implicit','--split','engineering',
@@ -83,7 +85,7 @@ def main():
             run/f'development_shard_{i}/summary',terminal)
     add('aggregate','development.py',['aggregate',*common],run/'summary',
         [local/f'development_shard_{i}/finished.json' for i in range(8)])
-    assert len(specs)==95
+    assert len(specs)==96
     existing={t.get('signature') for t in scheduler.load_state()['tasks']}
     assert not any(s['signature'] in existing for s in specs)
     proc=subprocess.run([sys.executable,str(Path(scheduler.__file__)),'submit-jsonl',

@@ -1,0 +1,15 @@
+{
+  "protocol_id": "v401_budget_conditioned_upper",
+  "arm": "implicit",
+  "day": 2400001,
+  "split": "engineering",
+  "rho": 0.5,
+  "batch": null,
+  "learner_seed": 314011,
+  "checkpoint": null,
+  "physical_starts": 1,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "automatic_retry": false,
+  "error": "Traceback (most recent call last):\n  File \"/home/zhengliang01/scheduleurm_work/FreqDuet-v401-budget-conditioned-upper/source02/worker.py\", line 175, in collect\n    row,uniforms,_,holds=frozen.base.fixed.pilot.rollout(runtime,12011,args.day,'stochastic',27011001,\n  File \"/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v107_rule_confirmation/source/e994b9693a/scripts/run_freqduet_v78_system_policy_step.py\", line 57, in rollout\n    _, Runner, load_config, runtime_torch = joint.optimized_runtime(root)\n  File \"/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v107_rule_confirmation/source/e994b9693a/scripts/complete_freqduet_v34_optimized_evaluation.py\", line 22, in optimized_runtime\n    benchmark = json.loads((proof_root / \"benchmark_summary.json\").read_text())\n  File \"/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/lib/python3.10/pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/lib/python3.10/pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: '/home/zhengliang01/scheduleurm_work/FreqDuet-v401-budget-conditioned-upper/run01/runtime/runtime_optimization_20261014/benchmark_summary.json'\n"
+}
