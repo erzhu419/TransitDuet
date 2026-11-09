@@ -44,3 +44,9 @@ Any later multi-seed or harmonic confirmation requires a separate frozen budget.
 All checks and experiments use scheduler high, manual dispatch, node001--006.
 Failures stay recorded and are not automatically retried. Old source/results,
 V400's failed harmonic gate and the current main policy remain untouched.
+
+The user subsequently approved the proposed 90-path ceiling and 3,072 candidate
+updates; see authorization.json. Release remains conditional on the new-day
+metadata, collection-entry and two engineering checks. Both arms' batch-b
+checkpoints must be ready before either arm collects batch b, keeping physical
+concurrency at eight and stopping subsequent batches if either arm fails.

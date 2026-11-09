@@ -1,0 +1,13 @@
+{
+  "protocol_id": "v401_budget_conditioned_upper",
+  "approved_physical_start_cap": 90,
+  "engineering_paths": 2,
+  "training_paths": 64,
+  "development_paths": 24,
+  "candidate_training_update_cap": 3072,
+  "max_concurrent_paths": 8,
+  "release_condition": "Fresh development days and both old-policy engineering reproductions must pass before training and development.",
+  "automatic_retry": false,
+  "main_policy_changed": false,
+  "user_answer": "批准90条上限，工程通过后启动"
+}
