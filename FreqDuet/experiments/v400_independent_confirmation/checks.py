@@ -66,6 +66,10 @@ def runtime_check(args):
 def engineering_check(args):
     metadata = read(args.root.parent/'preflight01/summary/results.json')
     assert metadata['completed'] and metadata['freshness_verified_across_both_servers']
+    compare_engineering(args, metadata)
+
+
+def compare_engineering(args, metadata):
     gate = helper(args.assets,'gate_default')
     checks, tolerances = {}, []
     for arm in ('K4_r050','manual_r050'):
@@ -102,6 +106,7 @@ def engineering_check(args):
         checks[arm] = {'passed':not differences,'differences':differences}
     passed = all(c['passed'] for c in checks.values())
     result = dict(completed=True,passed=passed,checks=checks,
+        freshness_verified_across_both_servers=metadata['freshness_verified_across_both_servers'],
         allowed_diagnostic_roundoff=len(tolerances),roundoff_examples=tolerances[:2],
         physical_starts=0,charged_engineering_paths=2,training_updates=0,main_policy_changed=False)
     write(args.root/'engineering_gate/summary/results.json',result)
