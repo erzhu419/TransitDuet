@@ -50,3 +50,11 @@ updates; see authorization.json. Release remains conditional on the new-day
 metadata, collection-entry and two engineering checks. Both arms' batch-b
 checkpoints must be ready before either arm collects batch b, keeping physical
 concurrency at eight and stopping subsequent batches if either arm fails.
+
+The two original engineering starts failed before Runner construction because
+the new output root lacked the existing runtime proof files. They remain charged
+and preserved. The user approved exactly two replacement starts on the same old
+day and retentions, bringing the ceiling to 92; see
+engineering_restart_authorization.json. Replacements have distinct output paths.
+Both must pass the unchanged equivalence gate before the original 64 training
+and 24 development paths can proceed. No algorithm, update or scenario changes.

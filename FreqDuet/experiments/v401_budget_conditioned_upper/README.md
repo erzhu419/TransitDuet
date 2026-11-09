@@ -26,7 +26,13 @@ Both engineering starts failed before native Runner construction because the
 new output root lacked the inherited runtime-optimization proof files. Both are
 charged and preserved. Zero-traffic task `t214071` subsequently copied the two
 existing proofs and passed native configuration/data-path imports. No engineering
-retry, training or development is released without approval of two extra starts.
+retry was released until the user approved exactly two extra starts (92 total).
+Restart check `t214075` passed with zero traffic, Runner constructions or updates.
+It precedes replacement paths `t214076`/`t214077`; gate
+`t214078` checks both against the same V400 references and alone admits the
+original pending training workflow. Original failures and their gate receipt
+remain unchanged. Only the final ledger in the still-queued development
+aggregator includes the amendment; training/control code stays frozen.
 Two old-policy engineering paths must pass before 64 matched training paths and
 24 development paths. The two learners each receive 32 training days and 1,536
 updates; neither receives extra training or warm-starts from V400. Detailed

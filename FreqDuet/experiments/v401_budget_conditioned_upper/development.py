@@ -77,12 +77,15 @@ def aggregate(args,plan):
         assert checkpoint['completed_batches']==8 and checkpoint['successful_updates']==1536
         counts[arm]=checkpoint['successful_updates']
     starts=sum(1 for _ in args.root.glob('engineering/*/started.json'))
+    starts+=sum(1 for _ in args.root.glob('engineering_retry01/*/started.json'))
     starts+=sum(1 for _ in args.root.glob('train/*/*/*/started.json'))
     starts+=sum(1 for _ in args.root.glob('development/*/*/*/started.json'))
-    assert starts==90
+    amendment=read(HERE/'engineering_restart_authorization.json')
+    assert starts==amendment['effective_physical_start_cap']==92
     write(args.root/'summary/results.json',dict(completed=True,status='development_screen_complete',
         effects=results,screen_passed=all(passed),candidate_training_updates=counts,
-        physical_starts_charged=starts,statistical_unit='four development demand days',
+        physical_starts_charged=starts,original_failed_engineering_starts=2,
+        statistical_unit='four development demand days',
         independent_confirmation=False,main_policy_changed=False,automatic_retry=False))
 
 

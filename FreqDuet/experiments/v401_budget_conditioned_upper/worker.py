@@ -50,6 +50,13 @@ def configuration(args):
     assert read(args.root.parent/'metadata03/summary/ready.json')['passed']
     assert read(args.root.parent/'checks01/summary/results.json')['passed']
     assert read(args.root.parent/'entry01/summary/ready.json')['passed']
+    if args.engineering_attempt==2:
+        assert args.command=='path' and args.split=='engineering'
+        amendment=read(HERE/'engineering_restart_authorization.json')
+        assert amendment['additional_engineering_starts']==2
+        assert amendment['effective_physical_start_cap']==92
+        assert args.day==amendment['replacement_day'] and args.rho in amendment['replacement_retentions']
+        assert read(args.root.parent/'runtime_assets/summary/ready.json')['passed']
     if args.command!='path' or args.split!='engineering':
         assert read(args.root/'engineering_gate/summary/admitted.json')['passed']
     return plan,base
@@ -118,7 +125,9 @@ def bind(args):
 
 
 def case_location(args):
-    if args.split=='engineering':return args.root/'engineering'/f'r{round(args.rho*100):03d}'
+    if args.split=='engineering':
+        folder='engineering_retry01' if args.engineering_attempt==2 else 'engineering'
+        return args.root/folder/f'r{round(args.rho*100):03d}'
     if args.split=='train':return args.root/'train'/args.arm/f'b{args.batch}'/f'd{args.day}'
     return args.root/'development'/args.arm/f'r{round(args.rho*100):03d}'/f'd{args.day}'
 
@@ -139,6 +148,7 @@ def collect(args,plan,base):
     identity=dict(protocol_id=plan['protocol_id'],arm=args.arm,day=args.day,split=args.split,
         rho=args.rho,batch=args.batch,learner_seed=314011,checkpoint=str(args.checkpoint) if args.checkpoint else None,
         physical_starts=1,training_updates=0,main_policy_changed=False,automatic_retry=False)
+    if args.split=='engineering':identity['engineering_attempt']=args.engineering_attempt
     write(out/'started.json',identity)
     begin=time.perf_counter()
     try:
@@ -171,6 +181,7 @@ def collect(args,plan,base):
             label=(f'train_s314011_b{args.batch}_d{args.day}' if args.split=='train' else
                    f'engineering_k4_development_s314011_bNone_d{args.day}')
         runtime=args.root/'runtime'/f'{args.split}_{args.arm}_r{round(args.rho*100):03d}_d{args.day}'
+        if args.engineering_attempt==2:runtime=runtime.with_name(runtime.name+'_retry01')
         runtime.mkdir(parents=True,exist_ok=False)
         row,uniforms,_,holds=frozen.base.fixed.pilot.rollout(runtime,12011,args.day,'stochastic',27011001,
             [0.]*4,label,probability_rule=audit,trace_observer=audit,credit_observer=credit)
@@ -276,6 +287,7 @@ if __name__=='__main__':
     parser.add_argument('--split',choices=('engineering','train','development'))
     parser.add_argument('--day',type=int)
     parser.add_argument('--rho',type=float)
+    parser.add_argument('--engineering-attempt',type=int,choices=(1,2),default=1)
     parser.add_argument('--batch',type=int)
     parser.add_argument('--checkpoint',type=Path)
     parser.add_argument('--out',type=Path)
