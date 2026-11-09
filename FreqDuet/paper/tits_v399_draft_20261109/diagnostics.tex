@@ -1,0 +1,75 @@
+\section{Closed-Loop Diagnostics}
+\label{sec:diagnostics}
+
+Matched continuations distinguish state prediction from prediction of a
+control intervention. From one recorded state, 20 versus 30 s of holding
+reduces waiting plus onboard exposure by 125 person-s under native
+continuation and by 70 person-s under rolling control over the same 582-s
+window. Actual cumulative CV$^2$ also decreases in both cases. Total holding
+is unchanged within each pair: its location and passenger exposure change.
+Reoptimization therefore attenuates this local benefit without reversing it.
+
+Two diagnostics explain why point-forecast improvements need not improve
+control. First, a predicted downstream arrival lay beyond the physical
+comparison window; removing that event changed the predicted CV$^2$ difference
+from approximately $+0.936\times10^{-6}$ to $-0.201\times10^{-6}$. A
+cross-window sign disagreement could not establish a wrong action ranking.
+Second, improved motion predictions reduced six continuous holding-target
+errors below 0.562 s, yet some predictions remained across discrete-action
+boundaries. For example, a predicted target of 7.9019 s and actual value of
+7.3404 s straddle the 7.5-s boundary. Relevant validation must include the
+projected response to an intervention and its actual continuation, not only
+absolute timing error.
+
+\section{Discussion and Evidence Boundaries}
+\label{sec:discussion}
+
+\subsection{Observation and Configuration Semantics}
+
+A selected queue forecast of 7.0694 passengers versus a retrospective count
+of one motivated an audit rather than a fitted correction. Across 441 queries
+from 73 other APC intervals, interval-weighted mean error was $-0.326$
+passengers and became $-1.570$ for gaps of at least 360 s. No additional eligible
+target-stop observation supplied the missing arrivals, so a uniform downward
+correction was unsupported. The point-correction branch was stopped.
+
+The budget experiment gives operational meaning to configuration. The
+retention floor $\rho_B$ limits the use of vehicle time while preserving
+explicit timetable obligations. Its monotonic effect on a same-state
+allowance does not ensure a monotonic full-day outcome. The prespecified
+settings demonstrate actual service and circulation consequences, including
+the regularity cost of tighter retention. They provide a concrete interface
+for examining dispatch preferences. Human usability has not been measured.
+
+\subsection{Limitations and Scope of the Claim}
+\label{sec:limitations}
+
+The learned controller's advantage over strong manual joint remains unresolved
+at both matched retention settings. At retention 0.25, waiting and journey
+improve only on the fourth day; intervals spanning zero establish neither
+equivalence nor noninferiority. The older cross-budget contrast combines
+configuration and upper-policy changes. The matched harmonic ablation supports
+a modest journey increment at default retention while changing estimator
+capacity and both actor and plan-law inputs. A direct high-frequency fast-control
+pathway and complete LF/HF specialization remain unestablished. The fixed-fleet
+implementation does not allocate vehicles or drivers by frequency band.
+
+All full-day findings concern reused development days; independent confirmation
+remains necessary. The additional manual-budget comparison uses one frozen
+learning seed, whereas the default harmonic comparison reports three seeds;
+the two studies do not constitute a crossed three-seed budget experiment.
+The local continuation observes only seven of 24 resource endpoints and cannot
+establish an all-day guarantee.
+
+An enabled observation-vector field described as a queue estimate reads the
+simulator's waiting population. It is ineligible as an additional APC
+observation. The examined fast native rule does not consume that component;
+future learned fast policies require an explicit observation-use audit.
+
+A complete layer comparison should separate fixed versus dynamic timetable
+control from reference versus adaptive holding under matched budgets and
+observation access. A separately configured and trained TransitDuet reference
+is also needed; no manual mode here is relabeled as TransitDuet. Representation-
+capacity controls and independent demand days would strengthen attribution
+and generalization. The current evidence supports executable coordination,
+a modest harmonic increment, and measurable budget-setting tradeoffs.

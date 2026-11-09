@@ -1,0 +1,45 @@
+\documentclass[letterpaper,journal]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{array,booktabs,tabularx}
+\usepackage{graphicx,xcolor}
+\usepackage{algorithm,algorithmic}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{cite,url}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={FreqDuet: Frequency-Informed Coordination of Dynamic Bus Timetables and Holding Budgets},pdfauthor={Anonymous Authors}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\pos}[1]{[#1]_+}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\hyphenation{time-table time-tables co-or-di-na-tion}
+\begin{document}
+\title{FreqDuet: Frequency-Informed Coordination of Dynamic Bus Timetables and Holding Budgets}
+\author{Anonymous Authors}
+\markboth{DEVELOPMENT STUDY --- MANUSCRIPT DRAFT, NOVEMBER 2026}{Frequency-Informed Timetabling and Holding}
+\maketitle
+\begin{abstract}
+Dynamic terminal timetables and en-route holding share finite vehicle supply but operate on different decision clocks. FreqDuet coordinates them through causal demand summaries, a learned slow timetable-permission policy, and a fast passenger-cost controller with persistent trip-level holding budgets. Prediction and execution share timetable obligations and remaining allowances. We separate coordination, budget configuration, and harmonic representation in paired full-day experiments. On four reused development days, learned and strong manual joint control at the same budget retention of 0.25 differ in journey time by $-0.094$ s/passenger, with descriptive 95\% interval $[-1.234,0.703]$ s. Thus a learning advantage over strong manual coordination is unresolved. Tightening the learned controller's retention from the default 0.5 to 0.25 reduces journey time by 1.589 s/passenger and readiness delay by 2.546 s/trip, but increases actual headway CV$^2$ by 0.004177; all four days follow these directions. At default retention, a matched retraining ablation favors retaining harmonics by 1.061 s/passenger, with interval $[0.233,1.889]$ s and the same mean direction across three training seeds. A same-state comparison demonstrates that timetable revisions alter the holding feasible set. These results support executable timetable--holding coordination, configurable vehicle-time allowances, and a modest harmonic contribution. Independent demand-day confirmation, complete low-/high-frequency specialization, and expert-use evaluation remain open.
+\end{abstract}
+\begin{IEEEkeywords}
+Public transport control, dynamic timetabling, bus holding, frequency-informed control, reinforcement learning, vehicle circulation.
+\end{IEEEkeywords}
+
+\input{introduction}
+\input{method}
+\input{properties}
+\input{results}
+\input{diagnostics}
+
+\section{Conclusion}
+This study develops and evaluates a coordination interface between a slow, frequency-informed timetable policy and fast holding control. Its distinguishing operational element is a persistent trip budget that is shared by prediction, action selection, and physical execution. The controller revises executable terminal releases and preserves the resulting obligations during downstream holding decisions. A matched input comparison directly demonstrates this plan-to-action coupling.
+
+The main comparison matches both controllers' budget retention. At retention 0.25, the learned policy differs from strong manual joint control by only $-0.094$ s/passenger in mean journey time, with an interval spanning zero. The previously larger cross-budget difference largely reflects budget configuration along the stated comparison sequence. Matched retraining answers a different question: retaining harmonic terms reduces the preselected candidate's journey time by 1.061 s/passenger, with the same mean direction across all three seeds. Most of that increment is onboard time.
+
+The resulting interface connects planning and control timescales through explicit timetable commitments and persistent command-time allowances. Tighter retention improves journey time and circulation while reducing regularity; looser retention increases passenger and vehicle delay on the evaluated panel. This is an operationally interpretable configuration effect, not a uniformly superior setting. The default candidate remains unchanged. The present evidence supports executable coordination, a modest harmonic increment, and configurable time-budget effects. It does not establish a stable learning advantage over strong manual joint control. A complete two-layer comparison, independent demand days, and expert-use evaluation remain future work.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

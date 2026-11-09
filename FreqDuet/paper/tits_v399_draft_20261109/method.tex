@@ -1,0 +1,115 @@
+\section{Problem and Information Structure}
+\label{sec:problem}
+Consider a bidirectional bus service with a fixed fleet and a fixed set of trips $\mathcal T$. Trip $j$ has a public reference departure $p_j$, an operationally published release $\tau_j$, and an actual departure $d_j$. Public references remain unchanged when the controller revises a release. Each controllable stop visit $e$ receives a holding command $h_e$ from a finite legal set $\mathcal H_e$. Vehicle returns determine the supply available to later trips, so the feasible schedules and holding sequences are coupled.
+
+Let $W$ and $R$ denote total passenger waiting and on-board time, respectively, in person-seconds. The accounting includes the prescribed tail of service and uses the same generated passenger population for paired policies. Let $D_{\mathrm{pub}}$ be total positive departure delay measured against the immutable public references. The implemented upper objective is
+\begin{equation}
+ J_0=\frac{W+R}{3{,}600{,}000}+\frac{D_{\mathrm{pub}}}{94{,}320}.
+ \label{eq:objective}
+\end{equation}
+The fixed divisors define the relative scale of passenger and operational costs. This is a composite passenger-time objective rather than pure waiting-time minimization. Waiting, on-board time, journey time, readiness delay, and public delay are therefore reported separately.
+
+An earlier objective included $\mathrm{CV}^2/0.05$, where $\mathrm{CV}^2$ is the squared coefficient of variation of actual arrival headways. We use that comparison to examine objective choice. A timetable revision can legitimately change target headways, so actual headway variation alone does not identify a failure to follow the revised plan. Nevertheless, a real worsening of measured regularity remains a transport outcome and is reported rather than removed from the record.
+
+At decision time $t$, the controller uses a history $\mathcal I_t$ consisting of available APC events, automatic vehicle location (AVL) telemetry, completed-trip summaries, and published plans. APC fields include time, station, direction, boarding and alighting counts, and entering load. Completion of a service event can occur after its arrival observation. Historical statistics requiring completed service are formed only after completion; currently available events can already inform queue reconciliation. Simulator passenger records are used to score physical outcomes, not to fill an unobserved current queue in the predictive graph.
+
+The distinction between boarding and arrival rates is operationally consequential. A vehicle with spare capacity that serves the waiting passengers provides a clearance observation. A full vehicle gives a censored observation of demand: the number boarded does not determine the number remaining. Between clearance events, a model may propagate a queue using an estimated arrival rate, but that propagation remains a forecast. The controller cannot infer that no passenger arrived merely because no bus boarded passengers during the interval.
+
+\section{Frequency-Informed Resource Coordination}
+\label{sec:method}
+\input{architecture}
+\subsection{Causal Frequency Summaries}
+The frequency tracker forms closed-bin APC signals and maintains a causal harmonic state. For a nonnegative observed rate $x_n$, let $z_n=\log(1+x_n)$ and let $\phi_n$ contain an intercept, a temporal trend, and harmonic basis terms. A recursive least-squares update has the form
+\begin{align}
+ k_n&=\frac{P_{n-1}\phi_n}{\rho+\phi_n^\top P_{n-1}\phi_n},\\
+ \theta_n&=\theta_{n-1}+k_n(z_n-\phi_n^\top\theta_{n-1}),\\
+ P_n&=\rho^{-1}(P_{n-1}-k_n\phi_n^\top P_{n-1}).
+\end{align}
+The transformed fitted value supplies a nonnegative low-frequency summary $L_n$. A residual is formed against the \emph{pre-update} prediction, and its smoothed value and energy are retained. Thus the fitted low component and smoothed residual are not an exact additive reconstruction of the raw count. A future low-frequency summary is obtained by evaluating the fitted state at the future harmonic phase, without incorporating future observations.
+
+The implemented slow state includes global low demand, its slope, a low-frequency forecast, and high-frequency energy. The timetable rule uses the global low level and forecast. Station-specific short-window arrival-rate estimates in the fast graph are obtained separately from APC clearance intervals. They have units of passengers per second and are not interchangeable with boarding-bin residuals. This separation avoids adding quantities with different sampling and exposure meanings.
+
+\subsection{Bounded Dynamic Timetable Revision}
+The slow manager begins at 7200 s and considers publication every 900 s. For each direction, a revision concerns the next mutable departure and preserves the following departure as an anchor. Write $p_1$ for the next public release, $p_2$ for the following public release, and $d_-$ for the preceding actual departure. Let $L_t$ and $F_t$ be the currently supported low-frequency level and forecast. Define
+\begin{align}
+ \omega_t&=\clip((p_2-t)/1800,0,1),\\
+ \ell_t&=\pos{L_t},\qquad r_t=\pos{(1-\omega_t)L_t+\omega_t F_t},\\
+ \tau^*&=\frac{\ell_t d_-+r_t p_2}{\ell_t+r_t}.
+ \label{eq:timetable}
+\end{align}
+If the frequency estimate is unsupported, equal weights replace $\ell_t$ and $r_t$. The proposed release is restricted to a $\pm30$ s shift around $p_1$, then constrained by the current time, a 180 s minimum separation from the preceding published release, and a 180 s separation from the anchor. The executable value is rounded upward to the simulator's integer-second clock. Both the revised trip's target headway and the anchor's following target headway are updated.
+
+A revision requires two mutable future departures within the publication window, sufficient completed-trip history, and a compatible vehicle-supply estimate. A trip that has already become operationally committed is not rewritten. The rule evaluates supply from available vehicles and forecast returning vehicles; it does not create an additional vehicle or reserve an unobserved return. Consequently, a proposed plan can be rejected even when its demand-weighted release is attractive. The learned policy controls permission to invoke this law, rather than directly optimizing all timetable entries.
+
+\subsection{Persistent Holding Budgets}
+For each active vehicle--trip pair $i$, the manager estimates the normal remaining command exposure $C_i$ from the number of remaining controls and the median command seconds per control in at least three completed eligible trips of the same direction. A return estimate separates the remaining non-holding running and service component, irrevocable commands, and the physical overhead of control events. It is matched to an upcoming trip within a 2700 s supply look-ahead.
+
+Let $\widehat r_i^{\mathrm{ord}}$ be the estimated ordinary return time, and $p_{j(i)}$ the public departure of the matched trip. The estimated supply pressure and proposed remaining allowance are
+\begin{align}
+ P_i&=\pos{\widehat r_i^{\mathrm{ord}}+1-p_{j(i)}},\\
+ \widetilde B_i&=\left\lceil\max(\rho_B C_i,C_i-P_i)\right\rceil.
+ \label{eq:budget}
+\end{align}
+The main experiment uses $\rho_B=0.5$; the prespecified configuration study also evaluates 0.25 and 0.75 without retraining. This retention floor preserves a fraction of the estimated ordinary command exposure; a larger value permits more holding time at the same supply pressure. It is a time allowance, not a vehicle or driver fraction. Only active trips with positive pressure, positive normal exposure, and remaining control opportunities receive a new allowance. If an allowance already exists, publication takes $\min(B_i,\widetilde B_i)$ rather than replenishing it. At final submission of a command,
+\begin{equation}
+ B_i\leftarrow B_i-h_e,\qquad h_e\leq B_i^{\mathrm{before}}.
+ \label{eq:debit}
+\end{equation}
+The allowance is closed when that trip returns. It persists across changes in the upper mode and across all remaining control points.
+
+Budget accounting uses command seconds. In the simulator, a zero command still occupies one physical tick at a control point. Thus physical residence is $\max(1,h_e)$ for a submitted command, with corresponding automatic zero ticks at unrequested controls. Treating residence as identical to the budget debit would change the executed model. The return predictor estimates this overhead separately; it does not claim that subtracting one budget second always advances a return by one second.
+
+\subsection{Fast Holding with a Common Continuation}
+At a controllable event, the fast layer constructs a graph from the same current observations, published plans, and budget ledger. Its reference is the native bilateral rule projected onto the remaining allowance. If the native command is $h_e^{\mathrm{nat}}$, the projection is
+\begin{equation}
+ \bar h_e=\max\{h\in\mathcal H_e:h\leq h_e^{\mathrm{nat}},\ h\leq B_i\},
+ \label{eq:projection}
+\end{equation}
+where the budget restriction is omitted for an unbudgeted trip. The rule's original legal mask is preserved. The current controller enumerates the legal members of $\{0,5,10,15,20,30,45\}$ s, using the same future native continuation and a separate copy of the ledger for each evaluation. The selected action minimizes predicted $W+R$ over candidates that satisfy the frozen relative feasibility conditions: predicted CV$^2$, relevant vehicle return times, subsequent departure times, and trip departure delays must not exceed their reference values. Coverage must be complete for the required events. The first executable command is applied; future actions remain predictions.
+
+Published releases affect terminal events and downstream supply matching in the graph. Budget depletion changes later available commands. These dependencies mean that the two layers interact through a shared feasible set, even if the immediate passenger-cost ordering of the current holding candidates does not change. Every trial starts from the same remaining allowance, so searching more candidates does not spend physical budget. Only the executed command debits the live ledger.
+
+If the predictive reference lacks the required support, the controller uses the budget-feasible native command. This fallback is an operational part of the method. An enumeration can be exact over the current finite library and still fail to identify the best real-world action, because the future continuation and demand estimates are approximate. We therefore distinguish search completeness from prediction accuracy and from actual transport benefit.
+
+\subsection{Learning the Slow Publication Mode}
+The upper action set is $\mathcal A=\{\mathrm{budget},\mathrm{joint}\}$. Both modes permit persistent budgets; only the joint mode permits a new timetable revision. The 180-dimensional state contains the time, fleet load, frequency summaries, accumulated arrival-headway moments, public-delay debt, the previous mode, directional supply and plan summaries, completed-trip history, and telemetry and remaining allowances for the 12 vehicles. Fixed divisors normalize these fields. The same canonical action labels are used in the actor, critic, replay, previous-action encoding, and execution.
+
+The reward is the negative increment of~\eqref{eq:objective} over a slow interval. With $\gamma=1$ and a finite daily episode, interval increments retain their daily accounting interpretation. The final interval is closed after the service tail. A discrete maximum-entropy actor--critic uses twin critics and the target
+\begin{align}
+ V(s')&=\sum_{a'}\pi(a'|s')\left[\min_m\bar Q_m(s',a')-\alpha\log\pi(a'|s')\right],\\
+ y&=r+(1-d)V(s').
+\end{align}
+where $d$ denotes termination. The actor minimizes
+\begin{equation}
+ L_\pi=\E_s\sum_a\pi(a|s)\left[\alpha\log\pi(a|s)-\min_m Q_m(s,a)\right].
+\end{equation}
+The entropy temperature is fixed at $10^{-5}$, the hidden width is 64, the learning rate is $3\times10^{-4}$, and the target update coefficient is 0.005. Replay capacity is 8192. Training behavior mixes the policy with a 0.1 uniform exploration component; evaluation uses the deterministic policy. These settings are held fixed for the action-semantics comparison.
+
+\begin{algorithm}[t]
+\caption{One interaction cycle of FreqDuet}
+\label{alg:control}
+\begin{algorithmic}[1]
+\STATE Update histories from newly available APC/AVL events.
+\IF{a new slow publication time has been reached}
+\STATE Close the preceding reward interval; encode current state.
+\STATE Select budget or joint using the upper policy.
+\STATE Issue or tighten trip budgets using~\eqref{eq:budget}.
+\IF{joint is selected and a plan revision is supported}
+\STATE Publish the bounded release and its two target headways.
+\ENDIF
+\ENDIF
+\IF{a vehicle requests a holding action}
+\STATE Build the observed graph with current plans and budgets.
+\STATE Project the native reference using~\eqref{eq:projection}.
+\STATE Enumerate current legal candidates with separate ledgers.
+\STATE Select the lowest-cost feasible action or reference fallback.
+\STATE Submit one command and debit its live trip allowance once.
+\ENDIF
+\STATE Close the allowance when its physical trip returns.
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{What the Architecture Identifies}
+The architecture makes two interactions explicit: slow releases alter fast resource feasibility, and fast holding consumes vehicle time that constrains later releases. It also exposes a useful distinction between \emph{permission} and \emph{dose}. Selecting joint does not guarantee that a plan will be revised; the law may reject a publication, produce the same integer-second release, or be unable to influence an already committed trip. An upper action count is therefore insufficient evidence of timetable control. We record published revisions, binding to actual departures, and changes relative to matched control paths.
+
+Similarly, an enabled frequency feature is not evidence of beneficial frequency specialization. The verified pathway is frequency summary to slow state or plan law, then published plans and budgets to fast control. A direct high-frequency residual correction to station demand or holding is outside the evaluated main implementation. The architecture figure depicts only these implemented paths. This scope permits a reproducible method description while keeping a stronger LF/HF division-of-labor hypothesis testable.

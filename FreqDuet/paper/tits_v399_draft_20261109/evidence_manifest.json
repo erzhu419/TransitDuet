@@ -1,0 +1,50 @@
+{
+  "manuscript": "FreqDuet V399 development-study draft, 2026-11-09",
+  "default_candidate": {
+    "family": "K4/V326",
+    "seed": 314011,
+    "checkpoint": "b8",
+    "retention_floor": 0.5,
+    "policy_changed": false
+  },
+  "demand_days": [2077001, 2077002, 2077003, 2077004],
+  "statistical_scope": "Four reused development days; existing equally weighted paired descriptive 95% intervals from 256 resamples. No new statistical fit or confirmation.",
+  "main_equal_retention_table": {
+    "tex": "equal_budget_table.tex",
+    "summary": "evidence/v399_equal_budget.json",
+    "original": "../../experiments/v399_equal_budget_manual/review01/compare.json",
+    "absolute_rows": "Transcribed rounded means from ../../experiments/v399_equal_budget_manual/RESULTS.md; exact day values are result.by_day in the summary.",
+    "paired_rows": [
+      "result.comparisons.K4_minus_manual_r050",
+      "result.comparisons.K4_minus_manual_r025"
+    ],
+    "execution": "result.execution_K4_minus_manual_r025"
+  },
+  "budget_configuration": {
+    "tex_label": "tab:budget_settings",
+    "summary": "evidence/v352_budget_settings.json",
+    "original": "../../experiments/v352_budget_interface/review01/aggregate.json",
+    "comparison": "Frozen K4 at retention 0.25/0.75 versus default 0.5. Cross-budget manual contrast is not a learned-upper increment."
+  },
+  "harmonic_ablation": {
+    "tex_label": "tab:harmonic",
+    "summary": "evidence/v350_matched_harmonics.json",
+    "original": "../../experiments/v350_live_basis_wiring/matched_launch01/review01/matched_aggregate.json",
+    "comparison": "K4 minus matched-retrained K0 at default retention; invert the archived K0-minus-K4 mean and reverse/invert interval endpoints.",
+    "seeds": [314011, 314037, 314049],
+    "interpretation": "Harmonic-basis and capacity/input intervention, not a complete LF/HF specialization test."
+  },
+  "historical_default_contrasts": {
+    "section": "Historical Objective and Authorization Comparisons",
+    "summary": "evidence/v326_default.json",
+    "original": "../../experiments/v326_two_action_upper/review01/aggregate.json",
+    "historical_decision_preserved": "close_two_action_upper_candidate_no_confirmation"
+  },
+  "changes_this_revision": {
+    "new_simulations": 0,
+    "training_updates": 0,
+    "confirmation_started": false,
+    "original_code_or_results_edited": false,
+    "bibliography": "Inherited unchanged from the V352 draft; no new literature audit in this revision."
+  }
+}

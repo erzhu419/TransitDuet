@@ -1,0 +1,381 @@
+% Sources: experiments/v326_two_action_upper/{RESULTS.md,PROTOCOL.md,config.json,review01/aggregate.json}
+% Sources: experiments/v325_budget_permission/{RESULTS.md,review01/aggregate.json}
+% Sources: experiments/v316_upper_no_cv/learning01/{RESULTS.md,config.json}
+% Sources: experiments/v331_candidate_capture/RESULTS.md
+% Source: experiments/v350_live_basis_wiring/matched_launch01/review01/matched_aggregate.json
+% Source: experiments/v352_budget_interface/review01/aggregate.json
+% Source: experiments/v399_equal_budget_manual/review01/compare.json
+% All estimates below are transcribed from existing server aggregates, not recomputed.
+
+\section{Experimental Evaluation}
+\label{sec:experiments}
+
+The evaluation separates three questions: how learned and strong manual joint
+control compare at matched budget retention, how retention changes service and
+regularity, and what harmonic terms contribute under matched retraining.
+Historical objective and authorization comparisons provide additional context.
+The preselected default candidate and its retention of 0.5 remain unchanged.
+
+\subsection{Experimental Design and Comparators}
+
+The simulated corridor has 22 physical stops, including two terminals, with
+21 segments of 500 m in each direction (10.5 km one way). Each bus has capacity
+50. The public timetable specifies 131 trips per direction at 360-s intervals;
+the two initial departures are offset by 180 s. Time zero corresponds to
+06:00. The simulation advances in 1-s steps, updates road conditions every
+300 s, and generates passengers in 20-s windows from the configured hourly
+origin--destination table. Counts are Poisson, with arrival times sampled
+uniformly within each window and revealed only when they occur. The scenario
+generator perturbs hourly demand and shifts the hourly template. Link speeds
+are sampled around hourly means, clipped to the supported range, and used in
+the physical vehicle update. This is a stochastic simulation study; the
+development demand seeds are not independent observations from an operational
+deployment.
+
+The nominal demand cutoff is the last public departure at 46,980 s. A
+14,400-s service tail gives a maximum accounting horizon of 61,380 s; physical
+driving can end earlier when service has finished. Passenger metrics are
+restricted accumulated times over this evaluation horizon. They include
+waiting for generated passengers who remain unserved, rather than conditioning
+on completed journeys. Accordingly, ``journey'' below means the sum of
+accounted waiting and onboard exposure per generated passenger, not an assertion
+that every generated passenger has reached a destination.
+
+All reported full-day comparisons retain the same 12-vehicle fleet, 262 scheduled
+trips, demand realization within each paired day, and fast holding controller.
+Passenger accounting includes the prescribed waiting and onboard tail. Waiting
+and onboard time are divided by the number of passengers generated on the same
+day; journey time is their sum. Vehicle-readiness delay is normalized by 262
+trips, while public departure delay is reported as a daily total relative to the
+unchanged public timetable. Consequently, revising an internal operating plan
+cannot erase a public delay by redefining its reference. Actual headway
+\(CV^2\) is reported separately from these service measures.
+
+The four-mode learner and FreqDuet each use three initialization seeds, 314011,
+314037, and 314049. Each seed receives 32 distinct training demand days, identifiers
+1780001--1780032, in eight batches of four days. A batch uses its preceding
+checkpoint and is followed by 192 updates, giving 1,536 updates per seed and
+4,608 in total. The final checkpoint is evaluated deterministically without
+updates on demand days 2077001--2077004. Seed 314011 and its eighth-batch
+checkpoint were designated before evaluation as the primary candidate; the
+other seeds assess sensitivity rather than provide alternative candidates for
+selection. The four evaluation days had already been used during development.
+
+The comparators isolate different parts of the coordination mechanism.
+\emph{Fixed plan} retains the original upper timetable with the same fast
+controller. The \emph{four-mode learner} chooses among fixed, plan, budget, and
+joint permissions using the passenger-and-delay objective. The
+\emph{permission-mapped learner} freezes that actor and maps fixed to budget and
+plan to joint, retaining its weights, prediction inputs, and fast controller.
+This intervention provides budget authorization at every upper decision but
+does not retrain the critic under the changed action semantics.
+\emph{Manual joint} always authorizes the same low-frequency plan rule and
+holding-budget mechanism. It is therefore a strong coordinated comparator,
+not an uncontrolled schedule. FreqDuet instead learns directly between the two
+executable budget and joint actions, with actor, critic, replay labels, previous
+action encoding, and execution sharing the same semantics (archived as V326,
+V316, and V325 for FreqDuet, the four-mode learner, and the permission-mapped
+learner, respectively). For seed-sensitivity comparisons, the four-mode and
+permission-mapped references both use their frozen seed-314011 policies; manual
+joint is also shared across the three FreqDuet seeds.
+
+The optimization objective is given in~\eqref{eq:objective}.
+
+For the main comparison, both learned and manual joint control use retention
+$\rho_B=0.5$ and $0.25$. The latter manual arm is evaluated on the same four
+days with no learning; the learned arms and the default manual arm are reused
+from the existing evaluations. Equal retention means the same lower bound in
+the allowance formula, not equal realized allowance, holding, or state
+trajectory. The additional manual paths each complete all 262 trips, preserve
+the 12-vehicle pool, and match 5,200 common random events per day. The original
+default manual path is reproduced before applying the tighter setting.
+
+Differences are always method minus the named comparator, so negative values
+denote reductions. The archived summaries use equal day weights and all $4^4=256$ paired
+resamples with replacement from the four days. We retain their descriptive 95\% intervals
+and report each learning seed separately. Twelve evaluation runs represent
+three policies on four demand days, not twelve independent demand days.
+
+\subsection{Main Comparison at Matched Budget Retention}
+\label{sec:equal_budget}
+
+Table~\ref{tab:equal_budget} reports the four controller--retention combinations.
+At retention 0.25, the learned policy reduces mean journey time by only
+0.094~s/passenger relative to strong manual joint control. The corresponding
+waiting, journey, readiness, and actual $CV^2$ intervals all span zero.
+Journey differences by day are $+0.883$, $+0.163$, $+0.336$, and $-1.758$
+s/passenger; waiting also improves only on the fourth day. At default retention
+0.5, the mean journey difference is larger at $-1.925$~s/passenger, but its
+interval also spans zero. The main outcome is therefore a matched description
+of operational performance, not an established learning advantage.
+
+\input{equal_budget_table}
+
+These small aggregate differences do not arise from identical execution. At
+retention 0.25, the controllers differ in 43 trips' published release times,
+245 trips' actual departures, and 3,989 matched holding commands across the
+four days. These are records from different closed-loop trajectories; they
+cannot identify the passenger effect of any individual command.
+
+The matched comparison also clarifies the earlier cross-budget contrast.
+Learned control at 0.25 versus manual joint at 0.5 reduces journey time by
+3.514~s/passenger. Along the comparison sequence that first tightens the
+manual budget and then changes upper policy at retention 0.25, this difference
+is $-3.420-0.094=-3.514$~s/passenger. The waiting contrast similarly decomposes
+as $-1.403-0.072=-1.475$~s/passenger. These are accounting identities along a
+stated sequence, not a unique allocation of interacting causal effects.
+The journey difference-in-differences is $+1.831$~s/passenger
+$[-2.039,6.681]$; there is no resolved advantage in how the learned policy
+responds to budget tightening. Section~\ref{sec:budget_settings} reports the
+within-policy configuration effects.
+
+\subsection{Historical Objective and Authorization Comparisons}
+
+The historical comparisons evaluate the default preselected candidate
+against earlier learners and manual joint, all at retention 0.5.
+Relative to the four-mode learner, journey
+time decreases by 7.448~s/passenger, vehicle-readiness delay by
+12.221~s/trip, and public departure delay by 3,162.5~s/day. All four days improve
+on these three measures, and their descriptive intervals remain below zero.
+The largest passenger component is onboard time, reduced by
+5.873~s/passenger. Holding decreases by 14.704~s/trip. The waiting reduction is
+smaller and varies across days, indicating that the clearest recovered benefit
+is reduced onboard burden and improved vehicle circulation.
+
+The comparison with manual joint is materially closer. FreqDuet reduces mean
+waiting by 1.023~s/passenger and journey time by 1.925~s/passenger, with lower
+mean readiness and public delay. However, the corresponding intervals cross
+zero. Waiting increases by 0.315 and 1.022~s/passenger on the third and fourth
+days; journey time increases by 1.308~s/passenger on the fourth day. The
+aggregate result therefore identifies a competitive candidate with favorable
+means on this panel, rather than a demonstrated uniform improvement over
+manual coordination. The comparator is retained in the main table because the
+larger improvement over the four-mode learner alone would overstate the
+remaining benefit attributable to learning.
+
+Against the permission-mapped learner, retraining adds only
+0.365~s/passenger of mean journey reduction and 0.271~s/passenger of waiting
+reduction. Readiness and public delay increase slightly. This small difference
+shows that most of the full-day recovery was already present after enabling
+budget authorization. Correcting the action representation makes learning
+consistent with execution, but does not itself establish an additional traffic
+benefit.
+
+\subsection{Objective and Authorization Ablations}
+
+The objective ablation retains the four-mode architecture and training budget
+while removing the upper regularity term from
+\(J_1=J_0+CV^2/0.05\). For the preselected seed, the resulting four-mode learner
+reduces journey time by 7.258~s/passenger relative to its regularity-penalized
+counterpart. Relative to fixed plan, its journey reduction is
+7.047~s/passenger [\(-11.169,-2.360\)], readiness decreases by
+23.120~s/trip, and public delay decreases by 6,007~s/day. The two other seeds
+also reduce journey time against fixed plan, by 12.296 and 9.987~s/passenger.
+The action records show that budget and joint permissions become active after
+the objective change; the regularity-penalized learners had selected neither
+mode in their final evaluations.
+
+This recovery includes a real regularity tradeoff. For the preselected seed,
+actual \(CV^2\) increases by 0.01894 [0.01334,0.02454] against fixed plan.
+Although \(J_0\) decreases by 0.10374, evaluating the same trajectories with
+\(J_1\) increases cost by 0.27498. Thus the objective change exposes a useful
+passenger--circulation tradeoff; it does not make the old composite criterion
+pass. The four-mode learner also remains 5.523~s/passenger worse than manual
+joint in journey time, on average, with all four days worse.
+
+The authorization ablation then freezes this actor and changes only its
+permission mapping. Relative to the unmapped four-mode learner, it reduces
+journey time by 7.083~s/passenger [\(-15.617,-1.896\)], readiness by
+12.658~s/trip [\(-22.407,-4.824\)], and public delay by
+3,324.5~s/day [\(-5883.8,-1275.5\)]. Its onboard reduction is
+5.779~s/passenger, while the waiting reduction of 1.304~s/passenger has an
+interval spanning zero. Persistent-budget accounting confirms that existing
+allowances are consumed rather than replenished at repeated decision times.
+These results support authorization as an important source of the recovered
+benefit. They do not isolate every indirect effect, because changed holding
+also changes subsequent vehicle supply and plan opportunities.
+
+\subsection{Learning Sensitivity and Executed Plan Authority}
+
+Table~\ref{tab:seed_results} reports all final learning seeds. Each has lower
+mean waiting and journey time than manual joint, but only the preselected seed
+improves mean waiting against the permission-mapped learner. The other seeds
+increase waiting by 0.341 and 0.270~s/passenger against that comparator. The
+budget/joint action counts also differ substantially, despite identical action
+semantics and training budgets. This variation limits the interpretation of the
+small incremental gain from retraining.
+
+\begin{table}[t]
+\centering
+\caption{Seed sensitivity. Passenger differences are in s/passenger. MJ denotes
+manual joint; PM denotes the permission-mapped learner.}
+\label{tab:seed_results}
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{tabular}{lrrrr}
+\toprule
+Seed & $\Delta W$/MJ & $\Delta(W+R)$/MJ & $\Delta W$/PM & Budget/joint \\
+\midrule
+314011 & $-1.023$ & $-1.925$ & $-0.271$ & 70/118 \\
+314037 & $-0.411$ & $-0.942$ & $0.341$ & 174/14 \\
+314049 & $-0.482$ & $-0.822$ & $0.270$ & 106/82 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The upper controller is operationally active. Under the archived criterion
+requiring a matched publication, bound dispatch, and at least a 5-s actual
+departure difference, the three seeds have material plan effects on four, two,
+and four demand days. The preselected candidate affects seven, five, six, and
+one trips across the four days. Its actor disagrees with its online twin-min
+critic ranking on 51 of 188 decisions; the individual critics disagree on
+38. These diagnostics distinguish valid execution from unresolved value and
+policy disagreement. A critic preference is not a measured counterfactual
+traffic outcome, so these counts cannot be converted into lost passenger
+seconds or used to justify replacing the evaluated actor.
+
+\subsection{Matched Harmonic-Basis Ablation}
+\label{sec:harmonic_ablation}
+
+We retain the evaluated $K=4$ harmonic representation and retrain a $K=0$
+comparison from initialization with identical seeds, training days, update
+counts, reward, fast controller, and action semantics. Both the actor input and
+timetable law consume the same causal summary object. A frozen complete day verifies $K=4$ operational reproduction before this
+ablation. The $K=0$ arm retains the intercept, trend, online adaptation, and
+innovation statistics; removing four sine--cosine pairs reduces estimator
+capacity from ten to two coefficients. Thus this is a matched harmonic-basis
+ablation, not removal of every temporal summary.
+
+\begin{table}[t]
+\centering
+\caption{Matched retraining ablation: $K4-K0$ for the preselected candidate.
+Negative differences favor retaining harmonics.}
+\label{tab:harmonic}
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{lr}
+\toprule
+Metric & Mean [descriptive 95\% interval] \\
+\midrule
+Waiting (s/passenger) & $-0.404\;[-1.352,0.316]$ \\
+Onboard (s/passenger) & $-0.657\;[-0.951,-0.387]$ \\
+Journey (s/passenger) & $-1.061\;[-1.889,-0.233]$ \\
+Readiness (s/trip) & $-0.441\;[-0.955,0.049]$ \\
+Public delay (s/day) & $-93.75\;[-228.50,21.00]$ \\
+$J_0$ & $-0.00713\;[-0.01249,-0.00178]$ \\
+Actual $CV^2$ & $-0.000824\;[-0.002377,0.000730]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The preselected $K4$ candidate reduces journey time on all four days
+(Table~\ref{tab:harmonic}). Mean journey differences for seeds 314011, 314037,
+and 314049 are $-1.061$, $-0.286$, and $-1.174$ s/passenger, respectively;
+9 of 12 seed--day comparisons favor $K4$. Onboard time improves in 10 of 12
+comparisons, whereas waiting improves in only six. The result supports a
+modest journey benefit from retaining harmonic structure under this training
+recipe. It does not establish a stable waiting benefit. Because the
+intervention changes both representation capacity and the summary supplied to
+the actor and plan law, their individual contributions remain coupled.
+The main candidate and historical comparison rules are unchanged.
+
+\subsection{Prespecified Budget Configuration}
+\label{sec:budget_settings}
+
+We evaluate $\rho_B\in\{0.25,0.5,0.75\}$ in~\eqref{eq:budget} using the
+frozen preselected $K4$ policy. The default remains 0.5. Before evaluating the
+two other settings on the same four days, one default full day reproduces all
+compared actions, event times, policy states, rewards, probabilities, and
+service outcomes exactly. All nine paths finish without retraining or retries;
+physical, budget, action, reward, and paired random-event accounting pass.
+The settings were declared in advance, and no setting replaces the main policy.
+
+\begin{table}[t]
+\centering
+\caption{Prespecified budget settings relative to default $\rho_B=0.5$.
+Four-day means; negative costs improve. The default contrast is zero.}
+\label{tab:budget_settings}
+\setlength{\tabcolsep}{6pt}
+\footnotesize
+\begin{tabular}{lrr}
+\toprule
+Metric & $\rho_B=0.25$ & $\rho_B=0.75$ \\
+\midrule
+Waiting (s/passenger) & $-0.452$ & $+2.015$ \\
+Onboard (s/passenger) & $-1.137$ & $+2.916$ \\
+Journey (s/passenger) & $-1.589$ & $+4.931$ \\
+Readiness (s/trip) & $-2.546$ & $+4.401$ \\
+Public delay (s/day) & $-644.75$ & $+1153.25$ \\
+Holding (s/trip) & $-0.969$ & $+5.940$ \\
+Actual $CV^2$ & $+0.004177$ & $+0.000196$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At 0.25, journey and readiness improve on all four days, with descriptive
+95\% intervals $[-2.641,-0.541]$ s/passenger and $[-2.985,-2.168]$ s/trip.
+Waiting improves on only two days; its interval is $[-1.197,0.293]$
+s/passenger. Actual $CV^2$ increases on every day, with interval
+$[0.000919,0.008926]$. At 0.75, journey and readiness worsen on every day,
+and the waiting, journey, readiness, and public-delay intervals are above zero.
+Table~\ref{tab:budget_settings} thus identifies a service--regularity tradeoff,
+not a uniformly superior setting.
+
+The tighter setting changes 4,662 matched holding actions, 30 published
+releases, and 345 actual departures across the panel. Joint permissions
+increase from 118 to 122 despite frozen weights: changed budgets alter later
+states and hence policy decisions. Executed holding falls by 253.75 s/day;
+reductions within budgeted periods are partly offset elsewhere on the changed
+trajectories. These records establish a physical effect beyond changing a
+logged allowance.
+
+Against manual joint at its original retention 0.5, retention 0.25 reduces
+waiting by 1.475 s/passenger $[-3.419,-0.206]$, journey by 3.514 s/passenger
+$[-7.095,-0.760]$, and readiness by 3.271 s/trip $[-5.898,-1.635]$.
+Waiting improves on three days and increases by 0.013 s/passenger on the fourth;
+journey and readiness improve on all four. This comparison changes both
+budget configuration and upper control, so it does not isolate a learning
+increment at matched retention. Conversely, retention 0.75 improves $CV^2$
+against manual joint on every day while worsening journey and readiness.
+
+\subsection{Direct Coupling Between Timetable and Holding}
+
+A paired replay provides a concrete mechanism example beyond aggregate plan
+activity. At one recorded query, the effective vehicle, queue, forecast,
+history, and holding-budget inputs are identical across two branches. Only the
+published plan differs: one trip's release and target move by $+1$~s, and
+another target moves by $-1$~s. The native reference action is 30~s, the remaining
+budget is 66~s, and the same seven action bins are available.
+
+\begin{table}[t]
+\centering
+\caption{Same-state timetable-to-holding interaction. Costs are predicted
+passenger-seconds; a positive difference favors 20~s over 15~s.}
+\label{tab:coupling}
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabularx}{\columnwidth}{lrrX}
+\toprule
+Plan branch & $C(15)-C(20)$ & Selected & Rejected alternative \\
+\midrule
+Budget & $142.345$ & 20~s & 15~s: 2-s plan-relative delay violation \\
+Joint & $204.892$ & 15~s & 20~s: up to 1-s plan-relative delay violation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Both branches rank 20~s ahead of 15~s by passenger cost, but their plan-relative
+feasible sets differ (Table~\ref{tab:coupling}). The selected action changes
+from 20 to 15~s because the published plan changes which downstream departure
+constraints bind. This establishes an implemented information path from the
+slow plan to fast holding, rather than two disconnected controllers. It is a
+local mechanism result, not a full-day synergy estimate. At another captured
+query, vehicle and demand inputs have already diverged, so its changed action
+cannot be attributed to the plan alone.
+
+The same replay also illustrates the objective's meaning. The selected joint
+action, relative to its 30-s reference, predicts 3,623.636 additional
+person-seconds of waiting and 3,660.720 fewer onboard person-seconds, a net
+37.083-person-second reduction. Minimizing their sum can therefore select an
+action that increases waiting. Separating these components is essential when
+interpreting a journey-time improvement.

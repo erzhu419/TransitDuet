@@ -1,0 +1,24 @@
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[font=\small,>=Latex,
+ box/.style={draw=blue!55!black,rounded corners=2pt,fill=blue!4,align=center,minimum height=1.0cm,text width=3.0cm},
+ arr/.style={->,thick,blue!55!black}]
+\node[box] (data) at (0,0) {Available APC / AVL\\Closed history};
+\node[box] (freq) at (4.1,0) {Causal harmonic state\\LF level / forecast\\Residual energy};
+\node[box] (slow) at (8.2,0) {Slow policy: 900 s\\Budget or joint\\LF timetable law};
+\node[box] (ledger) at (12.3,0) {Published releases\\Persistent trip budgets};
+\node[box] (graph) at (4.1,-2.1) {Observed event graph\\APC service forecast\\Plan-aware continuation};
+\node[box] (fast) at (8.2,-2.1) {Fast event controller\\Legal-bin enumeration\\Predicted $W+R$};
+\node[box] (physical) at (12.3,-2.1) {One executed holding\\One budget debit\\Actual returns / departures};
+\draw[arr] (data)--(freq);
+\draw[arr] (freq)--(slow);
+\draw[arr] (slow)--(ledger);
+\draw[arr] (data.south) |- (graph.west);
+\draw[arr] (ledger.south) -- ++(0,-.32) -| ([xshift=-.35cm]graph.north);
+\draw[arr] (graph)--(fast);
+\draw[arr] (fast)--(physical);
+\draw[arr] (physical.south) -- ++(0,-.5) -| (data.south);
+\end{tikzpicture}
+\caption{Implemented information and resource pathways. Frequency summaries inform the slow policy and timetable law. The fast layer uses APC/AVL, published plans, and remaining budgets; no direct high-frequency demand-residual branch is assumed. Physical events update the observations and resource ledger.}
+\label{fig:architecture}
+\end{figure*}

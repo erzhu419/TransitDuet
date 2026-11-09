@@ -1,0 +1,33 @@
+\begin{table*}[t]
+\centering
+\caption{Matched-retention main comparison on four reused development days.
+The learned policy is the preselected K4 candidate; manual joint is a strong
+coordinated controller. Retention is an allowance floor, not realized holding.
+Intervals in panel (b) are descriptive paired 95\% intervals.}
+\label{tab:equal_budget}
+\small
+\textbf{(a) Absolute means}\par\smallskip
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Upper policy & $\rho_B$ & Waiting (s/passenger) & Journey (s/passenger) & Readiness (s/trip) & Actual $CV^2$ \\
+\midrule
+Manual joint & 0.50 & 308.775 & 998.705 & 65.450 & 0.08083 \\
+Learned K4 (default) & 0.50 & 307.752 & 996.780 & 64.725 & 0.07802 \\
+Manual joint & 0.25 & 307.372 & 995.285 & 62.732 & 0.08273 \\
+Learned K4 & 0.25 & 307.300 & 995.191 & 62.179 & 0.08220 \\
+\bottomrule
+\end{tabular}
+\par\medskip
+\textbf{(b) Learned K4 minus manual joint at the same retention}\par\smallskip
+\begin{tabular}{lrr}
+\toprule
+Metric & $\rho_B=0.50$ & $\rho_B=0.25$ \\
+\midrule
+Waiting (s/passenger) & $-1.023\;[-3.396,0.668]$ & $-0.072\;[-1.307,0.955]$ \\
+Journey (s/passenger) & $-1.925\;[-5.935,0.762]$ & $-0.094\;[-1.234,0.703]$ \\
+Readiness (s/trip) & $-0.725\;[-3.295,0.885]$ & $-0.552\;[-1.552,0.447]$ \\
+Actual $CV^2$ & $-0.002816\;[-0.007316,0.000185]$ & $-0.000532\;[-0.001479,0.000620]$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
