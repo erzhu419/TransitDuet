@@ -1,0 +1,41 @@
+{
+  "protocol_id": "v400_independent_confirmation",
+  "phase": "sealed_protocol_zero_traffic_preflight",
+  "candidate_seed": 314011,
+  "checkpoint_batch": 8,
+  "default_rho": 0.5,
+  "fast_actor": 12011,
+  "fast_sampler": 27011001,
+  "days": [2400001, 2400002, 2400003, 2400004, 2400005, 2400006, 2400007, 2400008, 2400009, 2400010, 2400011, 2400012, 2400013, 2400014, 2400015, 2400016],
+  "arms": [
+    {"id": "K4_r050", "upper": "learned", "K": 4, "rho": 0.5},
+    {"id": "manual_r050", "upper": "manual_joint", "K": 4, "rho": 0.5},
+    {"id": "K4_r025", "upper": "learned", "K": 4, "rho": 0.25},
+    {"id": "manual_r025", "upper": "manual_joint", "K": 4, "rho": 0.25},
+    {"id": "K0_r050", "upper": "learned", "K": 0, "rho": 0.5}
+  ],
+  "planned_confirmation_paths": 80,
+  "proposed_old_day_reproductions": {"day": 2077002, "arms": ["K4_r050", "manual_r050"], "paths": 2},
+  "authorized_traffic_starts_this_phase": 0,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "bootstrap": {"unit": "demand_day", "draws": 10000, "seed": 4000201, "two_sided_interval": 0.95},
+  "allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"],
+  "priority": "high",
+  "max_concurrent_paths": 8,
+  "automatic_retry": false,
+  "server_assets": {
+    "hpc_python": "/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python",
+    "hpc_K4_checkpoint": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet/protocol_v6_v326_two_action_upper/attempt01/checkpoints/s314011/b8/training.pt",
+    "hpc_basis_source": "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/experiments/v350_live_basis_wiring/matched_launch01/source07",
+    "gpu_basis_source": "/home/erzhu419/scheduleurm_work/FreqDuet-v350-live-basis/source07",
+    "gpu_K4_checkpoint": "/home/erzhu419/scheduleurm_work/FreqDuet-v350-live-basis/inputs/actor/checkpoint",
+    "gpu_K0_checkpoint": "/home/erzhu419/scheduleurm_work/FreqDuet-v350-live-basis/matched01/checkpoints/s314011/b8/training.pt"
+  },
+  "metadata_roots": [
+    "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/freqduet/results_freqduet",
+    "/home/zhengliang01/scheduleurm_work/FreqDuet-v4-worktree/FreqDuet/experiments"
+  ],
+  "gpu_metadata_root": "/home/erzhu419/scheduleurm_work",
+  "gpu_inventory_status": "not_yet_audited_by_scheduled_preflight"
+}
