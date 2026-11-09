@@ -14,8 +14,6 @@ from evaluation import read, write, helper, bind, policy, validate_case, load_mo
 
 def runtime_check(args):
     load_modules()
-    metadata = read(args.root.parent/'preflight01/summary/results.json')
-    assert metadata['completed'] and metadata['freshness_verified_across_both_servers']
     plan = read(HERE/'manifest.json')
     traffic = bind(args.assets)
     assert Path(frozen.__file__).parent == args.assets/'basis'
@@ -66,6 +64,8 @@ def runtime_check(args):
 
 
 def engineering_check(args):
+    metadata = read(args.root.parent/'preflight01/summary/results.json')
+    assert metadata['completed'] and metadata['freshness_verified_across_both_servers']
     gate = helper(args.assets,'gate_default')
     checks, tolerances = {}, []
     for arm in ('K4_r050','manual_r050'):

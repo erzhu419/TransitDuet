@@ -30,13 +30,14 @@ def main():
             wait_for_files=list(map(str,waits))))
 
     common=['--root',root,'--assets',assets]
-    add('runtime_check','checks.py',['runtime',*common],[HERE/'review01/results.json'])
+    add('runtime_check','checks.py',['runtime',*common],[])
     ready=HERE/'review01/runtime_check/ready.json'
     for arm in ('K4_r050','manual_r050'):
         label=f'engineering/{arm}_d2077002'
         add(label,'evaluation.py',[*common,'--engineering','--arm',arm,'--day',2077002],[ready])
     add('engineering_gate','checks.py',['engineering',*common],
-        [HERE/f'review01/engineering/{a}_d2077002/finished.json' for a in ('K4_r050','manual_r050')])
+        [HERE/'review01/results.json',
+         *[HERE/f'review01/engineering/{a}_d2077002/finished.json' for a in ('K4_r050','manual_r050')]])
     admitted=HERE/'review01/engineering_gate/admitted.json'
     for i in range(8):
         add(f'shard_{i}','shard.py',[*common,'--shard',i],[admitted])
