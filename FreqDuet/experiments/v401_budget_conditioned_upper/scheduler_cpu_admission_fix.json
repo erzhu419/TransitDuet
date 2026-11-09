@@ -1,0 +1,26 @@
+{
+  "reason": "Missing explicit CPU-training admission on an intentionally CPU-only workflow.",
+  "changed_existing_tasks": 80,
+  "collection_paths": 64,
+  "update_tasks": 16,
+  "ready_task_ids": [
+    "t213971",
+    "t213972",
+    "t213973",
+    "t213974",
+    "t213976",
+    "t213977",
+    "t213978",
+    "t213979"
+  ],
+  "physical_starts_added": 0,
+  "new_tasks_submitted": 0,
+  "original_task_ids_preserved": true,
+  "engineering_gate_passed": true,
+  "effective_physical_start_cap": 92,
+  "candidate_training_update_cap": 3072,
+  "priority": "high",
+  "node": "node004",
+  "automatic_retry": false,
+  "main_policy_changed": false
+}

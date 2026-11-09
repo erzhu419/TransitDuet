@@ -41,3 +41,10 @@ assignments and stop conditions are frozen in [PROTOCOL.md](PROTOCOL.md) and
 
 Synthetic success does not establish runtime equivalence or a service benefit.
 V400, its negative harmonic-journey gate and the main policy remain unchanged.
+
+Both replacement engineering paths passed exact equivalence (zero diagnostic
+roundoff), and both fresh initial checkpoints completed. The first training
+batch then remained queued because the scheduler required explicit CPU-training
+admission. The repair changes only admission metadata on the existing 64
+collection and 16 update tasks; commands, dependencies, budgets and IDs stay
+unchanged. See scheduler_cpu_admission_fix.json. No additional paths are created.

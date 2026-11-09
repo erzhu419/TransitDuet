@@ -43,6 +43,8 @@ def main():
         specs.append(dict(description='FreqDuet V401 '+label,project='FreqDuet',
             signature='FreqDuet/v401/source02/'+label,priority='high',require_node='node004',
             cpu=1,ram_mb=4096,vram=0,no_auto_requeue=True,skip_launch_staging=True,
+            allow_cpu_training=True,
+            cpu_training_justification='Approved CPU-only transit rollouts and small 181-input learner updates on node001--006; dedicated CPU environment, unchanged training budget.',
             cwd=str(source),env=env,
             cmd=shlex.join([d['python'],'-u',str(source/script),*map(str,args)]),
             result_dir=str(result),local_result_dir=str(local/label),wait_for_files=list(map(str,waits))))
