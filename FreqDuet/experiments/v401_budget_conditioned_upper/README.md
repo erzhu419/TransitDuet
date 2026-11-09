@@ -15,10 +15,13 @@ The user approved the separate 90-path ceiling in `authorization.json`.
 Collection, checkpoint updates and the file-gated scheduler workflow are now
 implemented. Entry task `t213965` passed fresh checkpoint round-trips, replay
 budget checks and 47 exact old-actor reference calls, with zero optimizer steps.
-The corrected metadata03 task verifies/reserves the four development days.
+The corrected metadata03 task `t214064` passed and reserved all four development
+days: 9,075 HPC JSONs, 610 GPU JSONs, no conflicts or unresolved read errors.
 The first two metadata tasks were stopped after unnecessary traversal of raw
 S/E payloads and V75 native-run copies caused NFS waits; their receipts remain.
-Producer metadata stays in scope. No traffic path or update was consumed.
+Producer metadata stays in scope. These metadata attempts consumed no traffic
+path or optimizer update. The two engineering jobs are `t213966`/`t213967`, with
+gate `t213968`; only that gate can admit the 64 training and 24 development paths.
 Two old-policy engineering paths must pass before 64 matched training paths and
 24 development paths. The two learners each receive 32 training days and 1,536
 updates; neither receives extra training or warm-starts from V400. Detailed
