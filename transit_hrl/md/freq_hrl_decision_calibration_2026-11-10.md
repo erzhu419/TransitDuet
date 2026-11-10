@@ -29,3 +29,9 @@ development. These are known training prefixes, not independent-prefix policy
 validation. OOF is for head scores; the pooled calibrated cut sees every A prefix,
 so this is not nested prefix-OOF policy validation or full-pipeline OOF. Existing
 HOLD and lifecycle/termination gaps remain; no automatic new-prefix or closed-loop run.
+
+All four jobs t214445-t214448 completed with exit 0. The
+[result](freq_hrl_decision_calibration_result_2026-11-10.md) records no stable
+full-score W/G gain across B halves, independent-future failure already on OOF
+scores, and failure of relative constraints to transfer to full scores. The eight
+full heads remain unchanged; recovered OOF scores are retained on the server.

@@ -280,3 +280,12 @@ finds fresh-prefix W error worse on three roots and no stable W/G gain. PointMaz
 actions scarcely change; Reacher changes actions without reliable transfer.
 Continuation-only relabeling is not sufficient. No closed-loop follow-up was
 submitted and the original confirmation HOLD remains.
+
+The [A-only decision calibration](freq_hrl_decision_calibration_2026-11-10.md)
+subsequently completed four cache-only jobs, reconstructing 256 OOF ridge folds
+without changing full heads or taking native steps. The
+[readout](freq_hrl_decision_calibration_result_2026-11-10.md) finds no stable joint
+W/G gain across B halves. Selected A gains can fail on independent B futures even
+with OOF scores; relative constraints also fail to transfer to full-model scores.
+Recovered scores are saved for a bounded score-source diagnostic, not B-based
+retuning. No further native evaluation or confirmation is released; HOLD remains.
