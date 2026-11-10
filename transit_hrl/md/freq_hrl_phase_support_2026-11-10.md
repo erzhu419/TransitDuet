@@ -35,3 +35,10 @@ clock augmentation is additive; sampling and clock tests do not settle whether
 phase-dependent interactions or continuation-policy updates are needed. Effective
 DF and fitting-label counts match, not coefficient counts or total CPU. Two roots
 per task provide development evidence; no confirmation roots are accessed.
+
+Native prechecks t214238-t214241 all passed on node004/node005. All roots exposed
+all five optional phases; the later probe was at offset5 and the new phase head
+retained 24 upper calls/episode. Cost: 88.125 CPU seconds, 91,200 simulator steps,
+264 ridge calls; only 14,287 public bytes retrieved. Main task IDs: t214242-t214245.
+All four main tasks started on node004 with unpinned placement across the six-node
+pool; no automatic promotion or confirmation was released.

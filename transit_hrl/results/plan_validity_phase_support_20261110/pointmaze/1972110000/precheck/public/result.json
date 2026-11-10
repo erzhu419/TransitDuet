@@ -1,0 +1,154 @@
+{
+  "run_name": "plan_validity_phase_support_20261110",
+  "task": "pointmaze",
+  "optimizer_seed": 1972110000,
+  "phase": "precheck",
+  "status": "complete",
+  "fit_prefix_seeds": [
+    1972113000,
+    1972113001,
+    1972113002,
+    1972113003,
+    1972113004,
+    1972113005,
+    1972113006,
+    1972113007,
+    1972118000,
+    1972118001,
+    1972118002,
+    1972118003,
+    1972118004,
+    1972118005,
+    1972118006,
+    1972118007,
+    1972118008,
+    1972118009,
+    1972118010,
+    1972118011,
+    1972118012,
+    1972118013,
+    1972118014,
+    1972118015,
+    1972118016,
+    1972118017,
+    1972118018,
+    1972118019,
+    1972118020,
+    1972118021,
+    1972118022,
+    1972118023
+  ],
+  "held_prefix_seeds": [
+    1972119000,
+    1972119001,
+    1972119002,
+    1972119003,
+    1972119004,
+    1972119005,
+    1972119006,
+    1972119007
+  ],
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false,
+  "performance_claim_supported": false,
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "stage": "precheck_passed",
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 22.703239436,
+    "wall_seconds": 22.70573593210429,
+    "counts": {
+      "ridge_fit_calls": 66,
+      "environment_opens": 19,
+      "environment_resets": 19,
+      "planner_calls": 456,
+      "lower_calls": 22800,
+      "environment_step_attempts": 22800,
+      "environment_steps": 22800,
+      "history_updates": 22800,
+      "feature_vector_builds": 1825,
+      "trigger_score_checks": 1737
+    },
+    "phases": {
+      "phase_support_precheck": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.36371633300000283,
+        "wall_seconds": 0.0688092764467001,
+        "counts": {}
+      },
+      "phase_support_precheck/load_frozen_artifacts": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1.293773045,
+        "wall_seconds": 1.4684597169980407,
+        "counts": {}
+      },
+      "phase_support_precheck/start_fits_and_reproduction": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.07383546200000035,
+        "wall_seconds": 0.07402004301548004,
+        "counts": {
+          "ridge_fit_calls": 66
+        }
+      },
+      "phase_support_precheck/native_phase_precheck": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 20.971914595999998,
+        "wall_seconds": 21.09444689564407,
+        "counts": {
+          "environment_opens": 19,
+          "environment_resets": 19,
+          "planner_calls": 456,
+          "lower_calls": 22800,
+          "environment_step_attempts": 22800,
+          "environment_steps": 22800,
+          "history_updates": 22800,
+          "feature_vector_builds": 1825,
+          "trigger_score_checks": 1737
+        }
+      }
+    }
+  },
+  "start_plain_reproduced": true,
+  "nonzero_phase_probe": 5,
+  "phase_rule_upper_calls": 24,
+  "available_reference_phase_counts": {
+    "0": 80,
+    "5": 59,
+    "10": 55,
+    "15": 53,
+    "20": 49
+  },
+  "peak_process_rss_mb": 479.81640625
+}

@@ -240,3 +240,8 @@ prediction and Reacher ISE point estimates, but no arm beats pooled history or
 threshold. The [result](freq_hrl_window_coverage_result_2026-11-10.md) identifies
 bin-start-only supervision versus later deployed checks as the next support gap;
 it does not relax confirmation gates or alter the frozen models.
+The next [phase-support factorial](freq_hrl_phase_support_2026-11-10.md) separates
+bin-start/reachable-check supervision from explicit clock information at DF8 and
+96 fitting futures/arm, using another held cohort. Four native prechecks passed,
+including real nonzero phases and unchanged 24-call budgets. It remains a
+development repair and does not release confirmation.
