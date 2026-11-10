@@ -27,7 +27,14 @@ def aggregate_paths(paths):
                 values = [p["blocks"][block]["contrasts"][name][key] for p in paths]
                 contrasts[name][key] = {"path_interval": paired_mean_interval([v["mean"] for v in values]),
                     "conditional_MC_standard_error": float(np.sqrt(sum(v["conditional_MC_standard_error"] ** 2 for v in values)) / len(values))}
-        output[block] = {"contexts": contexts, "contrasts": contrasts}
+        context_intervals = {c: {k: paired_mean_interval([p["blocks"][block]["contexts"][c][k] for p in paths])
+            for k in ("candidate_action_gain_W", "candidate_action_gain_G")} for c in CONTEXTS}
+        error_contrasts = {name: {key: paired_mean_interval([
+            sum(sign * p["blocks"][block]["contexts"][c][key] for sign, c in terms) for p in paths])
+            for key in ("candidate_W_mse", "candidate_W_noise_corrected_mse")}
+            for name, terms in CONTRASTS.items()}
+        output[block] = {"contexts": contexts, "contrasts": contrasts,
+            "context_action_path_intervals": context_intervals, "error_path_contrasts": error_contrasts}
     return output
 
 

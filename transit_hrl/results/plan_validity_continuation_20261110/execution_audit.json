@@ -1,0 +1,249 @@
+{
+  "run_name": "plan_validity_continuation_20261110",
+  "status": "complete",
+  "scheduler_done_exit0_ids": [
+    "t214267",
+    "t214268",
+    "t214269",
+    "t214270",
+    "t214271",
+    "t214272",
+    "t214273",
+    "t214274"
+  ],
+  "shards": [
+    {
+      "task": "pointmaze",
+      "root": 1972110000,
+      "shard": 0,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "pointmaze",
+      "root": 1972110000,
+      "shard": 1,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "pointmaze",
+      "root": 1972120000,
+      "shard": 0,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "pointmaze",
+      "root": 1972120000,
+      "shard": 1,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972210000,
+      "shard": 0,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972210000,
+      "shard": 1,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972220000,
+      "shard": 0,
+      "status": "complete",
+      "steps": 1046400
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972220000,
+      "shard": 1,
+      "status": "complete",
+      "steps": 1046400
+    }
+  ],
+  "new_paths": 32,
+  "matched_probes": 96,
+  "conditional_replicates": 8,
+  "native_episode_rollouts": 6976,
+  "environment_steps": 8371200,
+  "environment_step_attempts": 8371200,
+  "main_cpu_seconds": 7950.417258883,
+  "new_fit_counts": {
+    "controller_optimizer_updates": 0,
+    "termination_optimizer_updates": 0,
+    "ridge_fit_calls": 0
+  },
+  "root_diagnostics": [
+    {
+      "task": "pointmaze",
+      "root": 1972110000,
+      "reference_ISE": 0.9163556121480205,
+      "candidate_ISE": 1.0125985859903914,
+      "delta_ISE": 0.0962429738423709,
+      "relative_delta_percent": 10.502797447463518,
+      "common_clock_union_fraction": 0.8110918544194108,
+      "support_counts": {
+        "common": 468,
+        "reference_only": 32,
+        "candidate_only": 77
+      },
+      "occupancy_standardized_RMS": 1.100341406260765,
+      "noise_corrected_W_mse": {
+        "reference/reference": 0.00013276779382607762,
+        "reference/candidate": 0.00018254951116995034,
+        "candidate/reference": 0.0001173371232883413,
+        "candidate/candidate": 0.0003090460820105202
+      }
+    },
+    {
+      "task": "pointmaze",
+      "root": 1972120000,
+      "reference_ISE": 1.108752044381643,
+      "candidate_ISE": 1.0450639474703207,
+      "delta_ISE": -0.06368809691132227,
+      "relative_delta_percent": -5.744124417542018,
+      "common_clock_union_fraction": 0.7,
+      "support_counts": {
+        "common": 455,
+        "reference_only": 28,
+        "candidate_only": 167
+      },
+      "occupancy_standardized_RMS": 1.2841780862990237,
+      "noise_corrected_W_mse": {
+        "reference/reference": 0.00016510900822129635,
+        "reference/candidate": 0.0004506159748495469,
+        "candidate/reference": 0.00016335840680408258,
+        "candidate/candidate": 0.0004266100460104943
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972210000,
+      "reference_ISE": 4.041667723270437,
+      "candidate_ISE": 4.010475768817895,
+      "delta_ISE": -0.031191954452541637,
+      "relative_delta_percent": -0.7717594960355068,
+      "common_clock_union_fraction": 0.5964125560538116,
+      "support_counts": {
+        "common": 399,
+        "reference_only": 215,
+        "candidate_only": 55
+      },
+      "occupancy_standardized_RMS": 0.5571511799359703,
+      "noise_corrected_W_mse": {
+        "reference/reference": 0.0007590641047858027,
+        "reference/candidate": 9.08749206610865e-05,
+        "candidate/reference": 0.00019760049036485406,
+        "candidate/candidate": 0.00010110347452650057
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972220000,
+      "reference_ISE": 4.609726031840296,
+      "candidate_ISE": 4.661238855228863,
+      "delta_ISE": 0.051512823388566886,
+      "relative_delta_percent": 1.117481234953166,
+      "common_clock_union_fraction": 0.47604790419161674,
+      "support_counts": {
+        "common": 318,
+        "reference_only": 139,
+        "candidate_only": 211
+      },
+      "occupancy_standardized_RMS": 0.7816743627436605,
+      "noise_corrected_W_mse": {
+        "reference/reference": 0.0003726678127008837,
+        "reference/candidate": 0.00045509376066213175,
+        "candidate/reference": 0.004188612765782169,
+        "candidate/candidate": 0.004693253293037426
+      },
+      "all_path_prefix_mse_contributions": [
+        {
+          "seed": 1972240000,
+          "prefix_mse_change_under_reference": 0.004070273709642954,
+          "prefix_mse_change_under_candidate": 0.004467317773851008,
+          "episode_delta_ISE": 1.0608970195250924
+        },
+        {
+          "seed": 1972240001,
+          "prefix_mse_change_under_reference": 0.026216164757396437,
+          "prefix_mse_change_under_candidate": 0.028687573193482738,
+          "episode_delta_ISE": -0.8422785530084083
+        },
+        {
+          "seed": 1972240002,
+          "prefix_mse_change_under_reference": -0.00010611711690909371,
+          "prefix_mse_change_under_candidate": -0.0005165942478035351,
+          "episode_delta_ISE": 1.4930614448559698
+        },
+        {
+          "seed": 1972240003,
+          "prefix_mse_change_under_reference": -9.676518860268446e-06,
+          "prefix_mse_change_under_candidate": -5.655811354129682e-05,
+          "episode_delta_ISE": -0.40166776784377056
+        },
+        {
+          "seed": 1972240004,
+          "prefix_mse_change_under_reference": -0.0001392489811958873,
+          "prefix_mse_change_under_candidate": -3.361401854331758e-05,
+          "episode_delta_ISE": -0.09187235920827774
+        },
+        {
+          "seed": 1972240005,
+          "prefix_mse_change_under_reference": -0.00036143133506922064,
+          "prefix_mse_change_under_candidate": -0.00018310042514151933,
+          "episode_delta_ISE": -0.5945768976529076
+        },
+        {
+          "seed": 1972240006,
+          "prefix_mse_change_under_reference": 0.0005760289646512837,
+          "prefix_mse_change_under_candidate": 0.001533947423429019,
+          "episode_delta_ISE": 0.09142094726356476
+        },
+        {
+          "seed": 1972240007,
+          "prefix_mse_change_under_reference": 0.0002815661449940759,
+          "prefix_mse_change_under_candidate": 6.304673269261993e-06,
+          "episode_delta_ISE": -0.3028812468227189
+        }
+      ],
+      "largest_path_mse_increase_share": {
+        "prefix_mse_change_under_reference": 0.8587704054872274,
+        "prefix_mse_change_under_candidate": 0.8461094071122855
+      }
+    }
+  ],
+  "task_episode_means": {
+    "pointmaze": {
+      "frozen_trained_roots": 2,
+      "new_paths": 16,
+      "reference_ISE": 1.0125538282648319,
+      "candidate_ISE": 1.028831266730356,
+      "relative_delta_percent": 1.6075627794937208
+    },
+    "reacher_tracking": {
+      "frozen_trained_roots": 2,
+      "new_paths": 16,
+      "reference_ISE": 4.325696877555366,
+      "candidate_ISE": 4.3358573120233785,
+      "relative_delta_percent": 0.23488549372776557
+    }
+  },
+  "remote_cache_analysis_cpu_seconds": [
+    0.2569277249999997,
+    0.33588802100000015
+  ],
+  "result_file_download_bytes": 951482,
+  "final_result_file_bytes": 712923,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false
+}

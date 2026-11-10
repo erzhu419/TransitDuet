@@ -1,5 +1,7 @@
 # Frozen Prefix And Continuation Diagnostic
 
+Completed: all eight shards exited 0; [result](freq_hrl_continuation_result_2026-11-10.md).
+
 Fix original history (R) and the complete checks/clock repair (C), on the same
 saved upper/lower controller. Keep both tasks and all four trained roots; C is
 chosen uniformly as the mechanism under diagnosis, not as a per-task winner.
@@ -44,6 +46,5 @@ continuation preserved the causal prefix at phase 5. The prechecks used 201,600
 environment steps with no fits or optimizer updates; only 12,427 public bytes
 were retrieved. Formal shards t214267-t214274 use the unchanged frozen manifest.
 The [launch receipt](../results/plan_validity_continuation_20261110/launch_receipt.json)
-records actual placement and initial progress. All eight shards are running on
-node004 by dynamic scheduler placement, and each has saved its first paid probe.
-Results remain pending.
+records placement on node004 and the initial saved probes. All eight shards
+subsequently completed; the frozen manifest and candidate policies are unchanged.

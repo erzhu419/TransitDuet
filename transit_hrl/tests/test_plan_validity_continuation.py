@@ -13,6 +13,7 @@ from freq_hrl.experiments.compute_budget import count_work
 from freq_hrl.experiments.plan_validity_preregistration import draft_plan
 from freq_hrl.experiments.pointmaze_plan_validity_branching import _task_options
 from scripts import analyze_plan_validity_continuation as analyzer
+from scripts import read_plan_validity_continuation_cache as cache_reader
 from scripts import run_plan_validity_continuation as worker
 from scripts import submit_plan_validity_continuation_scheduleurm as submitter
 from test_plan_validity_phase_support import clock_rule
@@ -98,6 +99,42 @@ class ContinuationTest(unittest.TestCase):
         interval = result["all"]["contrasts"]["continuation_at_reference"]["G"]["path_interval"]
         self.assertEqual(interval["n"], 8)
         self.assertEqual(interval["interval"], [1, 1])
+        self.assertEqual(result["all"]["context_action_path_intervals"]["candidate/candidate"]["candidate_action_gain_G"]["n"], 8)
+        self.assertEqual(result["all"]["error_path_contrasts"]["continuation_at_reference"]["candidate_W_noise_corrected_mse"]["interval"], [0, 0])
+
+    def test_cross_future_selection_uses_only_the_opposite_half(self):
+        probe = toy_probe()
+        for context in diagnostic.CONTEXTS:
+            probe["effects"][context] = [{"W": w, "tail": g - w, "G": g}
+                for w, g in zip((-2, -2, 1, 1), (1, 1, -3, -3))]
+        result = diagnostic.cross_future_decisions([probe] * 3)
+        context = "reference/reference"
+        self.assertEqual(result["A_to_B"][context]["choices"]["W_sign"]["gain_G"], 0)
+        self.assertEqual(result["A_to_B"][context]["choices"]["G_sign"]["gain_G"], -3)
+        self.assertEqual(result["B_to_A"][context]["choices"]["W_sign"]["gain_G"], 1)
+        self.assertEqual(result["all"][context]["choices"]["W_sign"]["gain_G"], 0.5)
+        self.assertEqual(result["all"][context]["choices"]["G_sign"]["gain_G"], -1.5)
+        self.assertEqual(result["all"][context]["W_G_choice_disagreement"], 1)
+        frozen = diagnostic.probe_summary([probe] * 3)["all"]["contexts"][context]["candidate_action_gain_G"]
+        self.assertEqual(result["all"][context]["choices"]["candidate"]["gain_G"], frozen)
+        self.assertEqual(result["all"][context]["choices"]["score_zero"]["gain_G"], frozen)
+        aggregate = cache_reader.aggregate_choices([{"blocks": result}] * 8)
+        interval = aggregate["all"][context]["choices"]["W_sign"]["gain_G"]
+        self.assertEqual(interval["n"], 8)
+        self.assertEqual(interval["interval"], [0.5, 0.5])
+        contrast = aggregate["all"][context]["paired_choice_contrasts"]["W_sign_minus_candidate"]["gain_G"]
+        self.assertEqual(contrast["interval"], [1.5, 1.5])
+        probe["candidate_scores"] = {p: -1 for p in diagnostic.POLICIES}
+        result = diagnostic.cross_future_decisions([probe])
+        self.assertEqual(result["all"][context]["choices"]["score_zero"]["gain_G"], 0)
+        self.assertEqual(result["all"][context]["choices"]["candidate"]["gain_G"], frozen)
+
+    def test_cross_future_selection_rejects_precheck_two_future_probes(self):
+        probe = toy_probe()
+        for context in diagnostic.CONTEXTS:
+            probe["effects"][context] = probe["effects"][context][:2]
+        with self.assertRaisesRegex(ValueError, "two halves"):
+            diagnostic.cross_future_decisions([probe])
 
     def test_seed_and_shard_reservations_preserve_four_roots_and_public_only_sync(self):
         source = json.loads((submitter.ROOT / "protocols/plan_validity_phase_support_2026-11-10.json").read_text())

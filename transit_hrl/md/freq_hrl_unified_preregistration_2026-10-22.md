@@ -258,3 +258,9 @@ futures at common optional clocks. Prefix effects, continuation effects and
 their interaction are read separately; exclusive clocks and fixed-grid occupancy
 remain visible. Conditional-path uncertainty does not add trained roots or
 release the original confirmation gates.
+All eight crossed-continuation shards completed. The
+[readout](freq_hrl_continuation_result_2026-11-10.md) finds no complete-episode
+advantage over history. Prefix-sensitive error, continuation-dependent labels,
+and local/long-horizon credit differ by root; cache-only future-half and zero-cut
+controls do not identify a universal repair. They do not select a new candidate,
+add trained roots, authorize new jobs or release HOLD.

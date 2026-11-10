@@ -11,6 +11,7 @@ from .plan_validity_transfer import run_episode, time_contract
 
 POLICIES = ("reference", "candidate")
 CONTEXTS = ("reference/reference", "reference/candidate", "candidate/reference", "candidate/candidate")
+DECISION_CHOICES = ("candidate", "score_zero", "W_sign", "G_sign")
 CONTRASTS = {
     "continuation_at_reference": [(-1, "reference/reference"), (1, "reference/candidate")],
     "continuation_at_candidate": [(-1, "candidate/reference"), (1, "candidate/candidate")],
@@ -135,3 +136,39 @@ def occupancy(fit_rows, factual_by_seed, *, horizon):
     return state_distribution(fit_rows,
         [r for f in factual_by_seed for r in f["reference"]["feature_rows"]],
         [r for f in factual_by_seed for r in f["candidate"]["feature_rows"]], horizon=horizon)
+
+
+def cross_future_decisions(probes):
+    """Choose with one cached future half, evaluate with the other; no policy fit."""
+    output = {}
+    for direction in ("A_to_B", "B_to_A"):
+        contexts = {}
+        for context in CONTEXTS:
+            values = {name: [] for name in DECISION_CHOICES}
+            disagreement = []
+            prefix = context.split("/")[0]
+            for probe in probes:
+                rows = probe["effects"][context]
+                if len(rows) < 4 or len(rows) % 2:
+                    raise ValueError("cross-future choices need two halves of at least two futures")
+                matrix = np.asarray([[r[k] for k in ("W", "tail", "G")] for r in rows])
+                a, b = np.array_split(matrix, 2)
+                train, evaluation = (a, b) if direction == "A_to_B" else (b, a)
+                estimated, target = train.mean(axis=0), evaluation.mean(axis=0)
+                reference = int(probe["actions"][prefix]["reference"])
+                choices = {"candidate": int(probe["actions"][prefix]["candidate"]),
+                    "score_zero": int(probe["candidate_scores"][prefix] >= 0),
+                    "W_sign": int(estimated[0] >= 0), "G_sign": int(estimated[2] >= 0)}
+                disagreement.append(choices["W_sign"] != choices["G_sign"])
+                for name, action in choices.items():
+                    values[name].append([*((action - reference) * target), action != reference, action])
+            contexts[context] = {"W_G_choice_disagreement": float(np.mean(disagreement)),
+                "choices": {name: dict(zip(("gain_W", "gain_tail", "gain_G", "changed_from_reference", "choose_now"),
+                    np.asarray(rows).mean(axis=0).tolist())) for name, rows in values.items()}}
+        output[direction] = contexts
+    output["all"] = {c: {"W_G_choice_disagreement": float(np.mean([
+        output[d][c]["W_G_choice_disagreement"] for d in ("A_to_B", "B_to_A")])),
+        "choices": {name: {key: float(np.mean([output[d][c]["choices"][name][key]
+            for d in ("A_to_B", "B_to_A")])) for key in output["A_to_B"][c]["choices"][name]}
+            for name in output["A_to_B"][c]["choices"]}} for c in CONTEXTS}
+    return output
