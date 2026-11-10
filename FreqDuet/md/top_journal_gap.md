@@ -1,5 +1,14 @@
 # FreqDuet Top-Journal Gap Backlog
 
+> **2026-11-11 current entry:** the dated items below are historical. Current
+> evidence and manuscript are indexed in `../paper/CURRENT.md`, with the V404
+> closure in `../experiments/v404_publication_closure/RESULTS.md`. The new 144-path
+> factorial/condition supplement, service tails, physical vehicle chains, empirical
+> figures, closest literature and standalone source are complete. Service and
+> circulation gains coexist with CV2 cost; consistent extra timetable, learning,
+> full-frequency and preserved-quality allocator advantages remain unestablished.
+> Author/public-release decisions and exact special-issue eligibility remain open.
+
 > **2026-10-14 V34 duration diagnostic:** the original smoke failed on an
 > expected configuration/log-timing difference. Recovery task `t152020` passed
 > eight tests, operational checkpoint equality, and both frozen evaluations.

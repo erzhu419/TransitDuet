@@ -1,5 +1,23 @@
 # FreqDuet
 
+## Current Research Entry
+
+The evidence-aligned manuscript and study map are indexed in
+[`paper/CURRENT.md`](paper/CURRENT.md). The current traffic-control study uses
+bounded timetable revisions, persistent trip budgets and seven-bin model-based
+holding. Learned publication permission and harmonic inputs have separate
+experimental evidence; the historical HRL description below is not a statement
+that the current controller jointly learns both layers.
+
+The standalone frozen source is in [`runtime_release/v404/`](runtime_release/v404/README.md),
+with full input/model artifacts retained on the research server. The bounded
+factorial and demand-condition supplement is in
+[`experiments/v404_publication_closure/`](experiments/v404_publication_closure/PROTOCOL.md).
+Traffic runs, analysis and plotting belong on scheduler-managed CPU servers.
+Old controls, negative outcomes and earlier manuscripts remain historical records.
+
+## Historical Module Overview
+
 `freqduet/` is an isolated copy of the active `transit_duet` code. It excludes
 logs, caches, and archives. All experimental changes for frequency-separated
 hierarchical RL should happen here, not in the original `transit_duet/` folder.
@@ -39,14 +57,14 @@ Implementation slice:
 - EMA baseline entry point: `freqduet/configs_freqduet/F_freqduet_ema_hiro.yaml`
 - ablation configs live under `freqduet/configs_freqduet/F_*.yaml`
 
-Smoke run:
+Historical smoke command (server only):
 
 ```bash
 cd FreqDuet/freqduet
 python3 runner_v3.py --config configs_freqduet/F_freqduet_timetable_hiro.yaml --episodes 1 --seed 42
 ```
 
-Module effectiveness test:
+Historical module test (server only):
 
 ```bash
 cd FreqDuet/freqduet

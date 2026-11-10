@@ -1,0 +1,19 @@
+\section{Optional Supervisor Optimization}
+The learned publication-permission comparator uses a discrete maximum-entropy
+actor--critic with target
+\begin{align}
+V(s')&=\sum_{a'}\pi(a'|s')\left[\min_m\overline Q_m(s',a')-\alpha\log\pi(a'|s')\right],\\
+y&=r+(1-d)V(s').
+\end{align}
+Here $d$ denotes episode termination. The actor minimizes
+\begin{equation}
+L_\pi=\mathbb E_s\sum_a\pi(a|s)\left[\alpha\log\pi(a|s)-\min_m Q_m(s,a)\right].
+\end{equation}
+The entropy temperature is $10^{-5}$, hidden width 64, learning rate
+$3\times10^{-4}$, target coefficient .005 and replay capacity 8192. Training
+mixes the policy with .1 uniform exploration; evaluation is deterministic.
+The daily objective is the negative increment of normalized waiting plus
+onboard exposure and immutable-public dispatch delay, with $\gamma=1$.
+Both modes can publish trip credit; only joint permits the same bounded
+timetable law. All original update budgets and failed learning gates remain
+unchanged.

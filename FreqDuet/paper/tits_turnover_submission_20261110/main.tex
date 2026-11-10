@@ -1,0 +1,38 @@
+\documentclass[letterpaper,journal]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts,array,booktabs,tabularx}
+\usepackage{graphicx,xcolor,algorithm,algorithmic,tikz,cite,url}
+\usepackage{microtype}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={FreqDuet: Cumulative Holding Budgets for Fixed-Fleet Timetable Coordination},pdfauthor={Anonymous Authors}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\pos}[1]{[#1]_+}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\input{numeric_values}
+\hyphenation{time-table time-tables co-or-di-na-tion}
+\begin{document}
+\title{FreqDuet: Cumulative Holding Budgets for Fixed-Fleet Timetable Coordination}
+\author{Anonymous Authors}
+\markboth{RESEARCH DRAFT, NOVEMBER 2026}{Cumulative Holding Budgets and Vehicle Circulation}
+\maketitle
+\begin{abstract}
+Terminal timetable revisions and en-route holding compete for the same vehicle time. We study their coordination through persistent trip-level holding budgets shared by forecasting, legal-action enumeration, and physical execution. The system combines causal demand summaries, a bounded timetable law, and a model-based fast controller; a learned publication-permission policy is evaluated separately. On 16 independent simulation demand days, reducing the manual joint controller's budget retention from 0.50 to 0.25 reduced restricted journey exposure by \ManualBudgetGain\ s/passenger and readiness delay by \ManualReadinessGain\ s/trip, while increasing actual headway CV$^2$ by \ManualBudgetCV. On another 16 new days, pressure-driven credit reduced public dispatch delay relative to development-exposure-matched static-credit and stop-cap mixtures, but both comparisons failed prespecified regularity protection. A further 144-path factorial supplement covered nominal, light, heavy and shifted-peak demand, with four new paired days per condition. Joint control reduced journey exposure by 6.84--27.56 s/passenger and readiness delay by 27.52--60.26 s/trip relative to fixed360 bilateral holding, again at increased actual CV$^2$. Conditional contrasts identified budgets as the main source of circulation savings; adding the timetable law did not consistently improve service. Matched-budget learning and the primary harmonic-journey comparison did not establish additional passenger gains. The evidence supports an executable vehicle-time interface and condition-dependent operational tradeoffs, not a general improvement over simple limits at preserved regularity.
+\end{abstract}
+\begin{IEEEkeywords}
+Bus holding, timetable coordination, vehicle circulation, cumulative time budgets, model-based control, paired simulation.
+\end{IEEEkeywords}
+\input{introduction}
+\input{method}
+\input{accounting}
+\input{experiments}
+\input{results}
+\input{discussion}
+\section{Conclusion}
+FreqDuet implements a shared interface between published terminal plans and cumulative holding allowances under a fixed fleet. Independent demand panels reproduced budget-driven passenger and circulation effects while exposing their regularity cost. A four-condition factorial further separated the large budget contribution from the weak, inconsistent increment of the current timetable law. Complete vehicle chains and passenger-cohort readouts showed how aggregate service gains can coexist with local losses and early departures. These results locate the contribution in executable accounting, component attribution and measured operating tradeoffs. A controller that improves on simple limits at preserved service regularity, or establishes additional learning and frequency-specialization benefits, remains an open result.
+\section*{Code and Data Availability}
+The prepared source package contains the manuscript, editable vector figures and source data, server analysis entrypoints, compact summaries, and offline table generators with a field-level evidence manifest. A source-only runtime snapshot is provided separately. The sealed server runtime additionally includes frozen simulator inputs and model artifacts; all 144 supplemental paths used its standalone source, and relocation was checked without historical source imports. Redistribution of inherited inputs and model files and a permanent public archive remain author decisions. Public transit-data caches used in separate realism audits are not outcomes of the simulation studies. No API credential is required for offline reproduction.
+\IEEEtriggeratref{7}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

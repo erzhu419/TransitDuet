@@ -1,0 +1,73 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\title{Supporting Information: Cumulative Holding Budgets for Fixed-Fleet Timetable Coordination}
+\author{Anonymous Authors}
+\date{November 2026}
+\begin{document}
+\maketitle
+\section{Finite Development Grid and Independent Operating Points}
+The original four calibration days evaluated all 16 simple-limit settings.
+The lines in Fig.~\ref{fig:calibration} connect settings in parameter order;
+they are not an independently validated optimal frontier. The daily-mixture
+probabilities were frozen before the original 16-day confirmation. Neither
+the new figures nor the robustness supplement reweight those mixtures.
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/calibration_tradeoff.pdf}
+\caption{Development grid: mean public dispatch delay, restricted journey exposure and actual holding versus nonterminal arrival CV$^2$ on four paired calibration days. Each point is a complete-day policy. The starred pressure point uses the same four days.}
+\label{fig:calibration}
+\end{figure}
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/reference_tradeoff.pdf}
+\caption{Pressure credit on 16 independent days and common-reference credit on four different development days, each minus its frozen simple-limit mixtures. These are separate studies, not a paired comparison between the two methods. Error bars reproduce their archived 95\% day-bootstrap intervals; four-day intervals are descriptive.}
+\end{figure}
+\section{Factorial and Operating-Condition Supplement}
+The four model-controller corners isolate timetable revision, pressure credit,
+and their interaction. The unchanged fixed360 bilateral rule is a separate
+transport baseline. Nominal, light (.8 demand scale), heavy (1.2), and rushshift
+(fixed +1-hour lookup) retain the same 12 vehicles, 262 trips and seven holding bins.
+Each condition uses four distinct new demand realizations. No actor or critic is
+retrained; within-day causal estimator updates retain their frozen rule.
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/factorial_coordination.pdf}
+\caption{Complete-day means for the four model-based corners in each operating condition. Lines connect categorical conditions for readability, not an interpolation or a robustness guarantee outside them. Fixed denotes no timetable revision and no cumulative credit, with the same fast model.}
+\end{figure}
+\input{tables/factorial_all}
+\section{All Frozen Simple-Limit Components}
+These are secondary component comparisons, not new policy selections. The
+original daily-mixture probabilities and failed joint gates are unchanged.
+All four components are retained with all seven endpoints in the source JSON;
+the tables below show journey, public delay, regularity and actual holding.
+Four-day supplemental intervals are descriptive. No mixture is selected from
+these new-day results, and separate pointwise intervals do not define a
+simultaneous dominance claim.
+\input{tables/components_all}
+\section{Vehicle-Time Mechanism and Service Distribution}
+The mechanism illustration uses the first preregistered nominal day and its
+first issued pressure-credit cycle. It is not selected for a favorable outcome.
+Same-vehicle identities, physical returns and following departures are used
+only as evaluation labels. A recorded publication is distinguished from a
+binding release and from a paired change to actual departure.
+The corresponding vehicle-time plot is Fig.~5 of the main manuscript.
+\input{service_readout}
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/cohort_exposure.pdf}
+\caption{Distribution of timestamp-based journey changes on the four nominal days, by passenger generation hour and recorded origin station. Cohort means weight passengers within each cohort across days; the primary whole-day contrasts instead weight demand days equally. All three comparisons use the original fixed simple-mixture probabilities. These outcomes identify affected passenger cohorts, not the location or causal value of an individual holding action.}
+\end{figure}
+\section{Execution and Reproduction}
+All simulations and resampling run on scheduler-managed Linux CPU nodes.
+The manuscript source package includes editable vector figures, their source
+data and the server plotting entrypoints, and rebuilds tables from archived JSON.
+A separate relocatable
+traffic-runtime bundle includes frozen source, inputs and checkpoints on the
+research server. The independent entrypoint uses no historical PYTHONPATH.
+The release note identifies data-permission decisions separately from technical
+reproduction; no API credential is required for the offline runs.
+\input{learner_support}
+\input{properties_support}
+\input{appendix}
+\end{document}

@@ -1,0 +1,70 @@
+\section{Experimental Design}
+\label{sec:experiments}
+\subsection{Physical Contract and Endpoints}
+All studies retained 12 physical vehicles and 262 scheduled trips, with 131 departures per direction at a public 360-s interval. The two directional schedules began 180 s apart. The simulator advanced in 1-s steps; the original seven holding bins were retained throughout. Demand was generated from the frozen hourly origin--destination template with stochastic demand perturbations. A demand-day identifier denotes a simulated realization, not an observed calendar service day.
+
+Demand generation ended at 46,980 s. The evaluation contract allowed a 14,400-s service tail and a maximum horizon of 61,380 s, with earlier physical termination when service cleared. For $N$ passengers generated on the common demand realization, waiting and onboard exposure were $W/N$ and $R/N$, using the frozen one-second occupancy integrals. We call their sum \emph{restricted journey exposure}. It includes accounted waiting by generated passengers who remain unserved, rather than conditioning on completed journeys. Individual timestamp-derived durations used for tail percentiles are kept separate from these grid-integrated means; neither definition is silently substituted for the other.
+
+For public release $p_j$, actual departure $d_j$, and the observed time $e_j$ when the trip first became dispatch-eligible under its operational plan, the reported operational measures were
+\begin{align}
+ D_{\rm pub}&=\sum_{j\in\mathcal T}\max(0,d_j-p_j),\\
+ \overline D_{\rm ready}&=\frac{1}{262}\sum_{j\in\mathcal T}(d_j-e_j).
+\end{align}
+Public delay is a daily total; readiness delay is seconds per scheduled trip. The public references were immutable, so changing an operational release could not redefine away measured lateness. Positive public delay does not penalize an early departure symmetrically. Actual nonterminal arrival CV$^2$ used~\eqref{eq:cv_moments}. Commanded and executed holding, trip completion, and physical returns were also checked.
+
+\subsection{Separate Studies and Statistical Units}
+\begin{table}[t]
+\centering\footnotesize
+\caption{Evaluation panels. Calibration, engineering paths and learning collections are accounted for separately.}
+\label{tab:panels}
+\begin{tabularx}{\columnwidth}{@{}lYrr@{}}
+\toprule
+Study & Question & Days & Paths\\
+\midrule
+A & Independent budget and representation tests & 16 & 80\\
+B & Explicit-retention learner development & 4 & 24\\
+C & Independent simple-limit comparison & 16 & 80\\
+D & Joint-credit admission development & 4 & 24\\
+E & Factorial and demand-condition supplement & 16 & 144\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Study~A evaluated the preselected K4 supervisor and the same-seed matched K0 supervisor at their final training checkpoints. Each original learner had 32 training demand days in eight four-day batches with 192 updates per batch. The selected seed was 314011; no new seed or checkpoint was selected on the 16 test days. The five arms were K4 and manual joint at each of $\rho_B=.50$ and $.25$, and K0 at $.50$. K0 retained trend, online adaptation and innovation statistics. Removing harmonics also reduced estimator capacity, so this was a defined representation ablation rather than removal of every temporal feature.
+
+Study~B trained two new learners with identical 181-channel architectures, initialization, day/retention assignments and update budgets. Each used 32 original training days and 1,536 updates. The final channel was the day's retention for the explicit learner and zero for the implicit learner; both still observed physical remaining credit. Each learner was evaluated at both retentions on four new development days, with manual joint as a control. This tested an explicit budget-context change without changing the two publication modes.
+
+Study~C froze manual joint and the fast model, then compared pressure credit at $.50$ with static remaining-trip credit and a per-stop cap. A static setting issued $\lceil c n_i\rceil$ seconds once, where $n_i$ was the number of uncommitted controls at first supported publication. A stop cap limited each subsequent legal command on an admitted cycle. Both restrictions also entered plan-supply forecasts and model continuation. All policies used the same publication start and completed-history requirements; their allocation rules could admit different cycles.
+
+Only four previously consumed development days calibrated the simple controls. Static settings were $c\in\{0,2.5,5,7.5,10,15,20,30,45\}$ s per remaining control, and caps were $\{0,5,10,15,20,30,45\}$ s. All 64 calibration paths were retained. For each family, the closest realized-holding brackets around the pressure mean were chosen; an ex-ante daily mixture matched that development mean. The frozen static mixture used 7.5 and 10 with probabilities .466709 and .533291, and the cap mixture used 10 and 15 with probabilities .210341 and .789659. The expected daily endpoint was obtained by evaluating both whole-day components and applying these fixed probabilities. It was not formed by mixing actions along one trajectory. No test-day reweighting occurred.
+
+Study~D froze the joint-admission candidate and reused those original mixture probabilities. Four further development days evaluated six physical arms: the candidate, pressure credit, both static settings, and both caps. Engineering first checked exact pressure reproduction and the new selector's no-proposal behavior, then verified a real candidate path and its chronological credit ledger. Performance on that old engineering day did not tune the candidate or gate its development screen.
+
+Study~E adds a frozen factorial and operating-condition supplement without selecting another controller. Four conditions retain nominal demand, multiply demand by .8 or 1.2, or shift the hourly demand lookup by one hour. Each uses four distinct, previously unconsumed demand days. The nine physical arms are the four model-controller corners (fixed timetable/no credit, timetable only, credit only, and joint), the four already frozen simple-limit components, and fixed360 with the native bilateral holding rule. The four corners share the same fast model, costs, seven legal actions and retention .50. The bilateral arm executes its original rule with no model overrides. Comparing joint against credit-only isolates timetable revision given credit; joint against timetable-only isolates credit given revision; the difference-in-differences measures their interaction. These conditional effects are not claims about a learned supervisor.
+
+Study~E uses the original mixture probabilities without new intensity matching.
+All four simple components are reported, rather than selecting a favorable one
+after evaluation. Paired intervals use 10,000 day-bootstrap draws with seed
+4041110 and are descriptive within each four-day condition. The native
+generator uses demand-noise parameter .15 and samples from the peak-offset list
+$(-1,0,0,0,+1)$ h. Nominal, light and heavy retain this offset draw; rushshift
+fixes it to $+1$ h. The latter reweights an existing pattern rather than
+introducing an unseen peak shape. Route speeds use native noise parameter 1.5
+and a day-seeded scenario tape at fixed exogenous update times, shared within
+each day's policy comparison. The perturbation law is unchanged: running-noise
+intensity, route geometry and fleet size are not additional factors.
+
+The 144 distinct formal paths in Study~E include one native baseline used for the runtime engineering check; two further old-day starts are charged separately, including one failed observation capture. The total allowance is 146 traffic starts, with no automatic retry. Frozen pressure control exactly reproduced its old archived path before the independent runtime was released.
+
+\subsection{Pairing, Hypotheses and Accounting}
+The timetable component changes the mutable release and its two adjacent target headways. Its factorial effect therefore includes both terminal timing and the subsequent response to those targets. It is not an isolated mediation estimate for a changed actual departure.
+
+Policies within a day shared the demand realization, public clocks and 5,200 common sampler events. Actual action submission, execution, returns and the fixed trip roster were checked before statistical aggregation. The independent studies sampled demand days, not independent continuation futures or fresh learning seeds. Day means received equal weight.
+
+Study~A retained its two prespecified primary propositions. The budget-service proposition required the learned $.25-.50$ journey upper bound to be below zero and its readiness upper bound to be non-positive; actual CV$^2$ was reported as the operating tradeoff. The harmonic proposition required the K4$-$K0 journey upper bound to be below zero. Archived intervals used 10,000 paired day-bootstrap draws and seed 4000201. Their 95\% two-sided upper endpoints supplied the frozen 97.5\% one-sided bounds. Supervisor and additional endpoint comparisons were reported separately.
+
+Study~C asked a stricter question: pressure credit had to reduce public dispatch delay while preserving actual CV$^2$ against each simple family. Its zero-margin protections and 97.5\% one-sided bounds were frozen before testing, with multiplicity handled across the two families. It used 10,000 paired demand-day bootstrap draws and seed 40211010. Passing required both joint comparisons, rather than selecting the more favorable one.
+
+Study~D was a development screen, not a repeat confirmation. Its fixed criterion required lower mean public delay and non-higher mean CV$^2$ against both simple mixtures. Four-day bootstrap intervals were descriptive, with 10,000 archived draws and seed 40311010. The candidate's comparison with old pressure and its passenger costs were retained without requiring dominance of every operating point. A failed screen did not authorize a new retention, forecast repair or confirmation expansion.
+
+All tables below format server-computed archived estimates directly. They do not pool days across studies or replace an original gate with a supplemental interval. Study~E's four conditions are reported separately, not counted as 16 replications of one nominal setting.

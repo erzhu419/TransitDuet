@@ -1,0 +1,30 @@
+\section{Accounting and Comparison Semantics}
+\label{sec:properties}
+If a trip receives allowance $B_0$, legal command debits $h_e$ and later
+nonnegative tightenings $u_v$ satisfy
+\begin{equation}
+ B_{\rm rem}=B_0-\sum_eh_e-\sum_vu_v\geq0.
+ \label{eq:budget_identity}
+\end{equation}
+This is an accounting invariant, not a vehicle return-time or passenger-cost
+guarantee. The same ordered debit rule operates in each trial continuation and
+in physical execution. An anchored timetable revision redistributes two
+adjacent targets without adding a trip or vehicle. Full derivations are in the
+Supporting Information.
+
+For the actual nonterminal arrival-headway prefix, let $n$, $S$ and $Q$ denote
+the count, sum and squared sum. The shared population-moment statistic is
+\begin{equation}
+ \mathrm{CV}^2=\frac{nQ}{S^2}-1,\qquad n>0,\ S>0.
+ \label{eq:cv_moments}
+\end{equation}
+The fast model adds a predicted suffix without counting an observed arrival
+twice; terminal returns affect supply but not this statistic.
+
+A relative feasibility guard protects its reference, not the decision that
+created that reference. In the original method the reference already includes
+published credit. The common-reference candidate asks the different question
+of whether issuing new credit and taking its current action improve upon a
+no-new-tightening continuation. Neither local comparison guarantees complete-day
+non-harm under later closed-loop decisions. These distinct questions motivate
+the separate allocation and admission experiments.

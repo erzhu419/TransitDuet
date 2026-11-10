@@ -1,0 +1,2684 @@
+{
+  "sources": {
+    "v400": "experiments/v400_independent_confirmation/review01/aggregate/results.json",
+    "v401": "experiments/v401_budget_conditioned_upper/review02/aggregate/results.json",
+    "v401_readout": "experiments/v401_budget_conditioned_upper/review02/readout01/results.json",
+    "v402": "experiments/v402_budget_mechanism/review/aggregate/results.json",
+    "v402_selection": "experiments/v402_budget_mechanism/review/selection/results.json",
+    "v403": "experiments/v403_joint_credit/review/aggregate/results.json"
+  },
+  "cells": [
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/journey_s_per_passenger",
+      "estimate": -1.6450386100717367,
+      "interval_key": "ci95",
+      "interval": [
+        -3.0739443618909292,
+        -0.06958316049321196
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/readiness_s_per_trip",
+      "estimate": -3.8043893129770994,
+      "interval_key": "ci95",
+      "interval": [
+        -4.78104126908397,
+        -2.9147841125954215
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/public_delay_s_per_day",
+      "estimate": -1001.625,
+      "interval_key": "ci95",
+      "interval": [
+        -1255.0625,
+        -771.75
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/cv_squared",
+      "estimate": 0.0056461797450002155,
+      "interval_key": "ci95",
+      "interval": [
+        0.003260998002406303,
+        0.009175637646973779
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/journey_s_per_passenger",
+      "estimate": -2.395566586112821,
+      "interval_key": "ci95",
+      "interval": [
+        -3.770727943453998,
+        -0.9758806631944495
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/readiness_s_per_trip",
+      "estimate": -4.539599236641223,
+      "interval_key": "ci95",
+      "interval": [
+        -5.5789957061068725,
+        -3.59517533396947
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/public_delay_s_per_day",
+      "estimate": -1185.4375,
+      "interval_key": "ci95",
+      "interval": [
+        -1457.6328125,
+        -939.621875
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/cv_squared",
+      "estimate": 0.0030254307143205094,
+      "interval_key": "ci95",
+      "interval": [
+        0.0014096019672288783,
+        0.004740783243862388
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r050/journey_s_per_passenger",
+      "estimate": 0.022450912496694286,
+      "interval_key": "ci95",
+      "interval": [
+        -0.6080310183442016,
+        0.5844523646298775
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r050/readiness_s_per_trip",
+      "estimate": -0.6898854961832068,
+      "interval_key": "ci95",
+      "interval": [
+        -1.4003160782442738,
+        -0.04818105916030428
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r050/cv_squared",
+      "estimate": -0.000866895625338612,
+      "interval_key": "ci95",
+      "interval": [
+        -0.002201736389667728,
+        0.0003533544164179289
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r025/journey_s_per_passenger",
+      "estimate": 0.7729788885377786,
+      "interval_key": "ci95",
+      "interval": [
+        0.0753639355905552,
+        1.4580957742475809
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r025/readiness_s_per_trip",
+      "estimate": 0.04532442748091725,
+      "interval_key": "ci95",
+      "interval": [
+        -0.6197697996183197,
+        0.5701335877862608
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r025/cv_squared",
+      "estimate": 0.0017538534053410937,
+      "interval_key": "ci95",
+      "interval": [
+        -0.000713476191806792,
+        0.005082861402635602
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_K0_r050/journey_s_per_passenger",
+      "estimate": -0.561958030250409,
+      "interval_key": "ci95",
+      "interval": [
+        -1.5671172691518145,
+        0.3521237776436609
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_K0_r050/readiness_s_per_trip",
+      "estimate": -0.10376908396946538,
+      "interval_key": "ci95",
+      "interval": [
+        -0.5973699904580145,
+        0.4363191793893137
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_K0_r050/cv_squared",
+      "estimate": -0.0009371454207868775,
+      "interval_key": "ci95",
+      "interval": [
+        -0.0016682596272999846,
+        -0.0001749050879410468
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/public_delay_s_per_day",
+      "estimate": -3744.1451727964486,
+      "interval_key": "ci95",
+      "interval": [
+        -4401.405352330374,
+        -3025.059381935637
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/cv_squared",
+      "estimate": 0.006573421878283976,
+      "interval_key": "ci95",
+      "interval": [
+        0.0041679767489690225,
+        0.00897885566279481
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/journey_s_per_passenger",
+      "estimate": -4.760827936049665,
+      "interval_key": "ci95",
+      "interval": [
+        -6.669646245094311,
+        -2.883690481626161
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/readiness_s_per_trip",
+      "estimate": -14.354210181424776,
+      "interval_key": "ci95",
+      "interval": [
+        -16.857613680918938,
+        -11.610423960304859
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/public_delay_s_per_day",
+      "estimate": -3123.8047150411276,
+      "interval_key": "ci95",
+      "interval": [
+        -3791.9595255581667,
+        -2377.1109081227964
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/cv_squared",
+      "estimate": 0.006882583388550053,
+      "interval_key": "ci95",
+      "interval": [
+        0.004661272140518843,
+        0.009121403627276503
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/journey_s_per_passenger",
+      "estimate": -0.05621329575821932,
+      "interval_key": "ci95",
+      "interval": [
+        -1.8345813445350676,
+        1.8487149912538654
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/readiness_s_per_trip",
+      "estimate": -11.975246903059713,
+      "interval_key": "ci95",
+      "interval": [
+        -14.5106145189539,
+        -9.144681128398561
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/public_delay_s_per_day",
+      "estimate": 5917.102726696259,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        3715.7947051363362,
+        8773.659004438807
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/cv_squared",
+      "estimate": -0.01368976010083763,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        -0.01618754748439337,
+        -0.009969083697096159
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/journey_s_per_passenger",
+      "estimate": 6.803207726827537,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        0.889201110718659,
+        15.612568247563672
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/holding_s_per_trip",
+      "estimate": 22.33272785799688,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        18.603058275690145,
+        26.062397440303613
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/public_delay_s_per_day",
+      "estimate": 6165.447121034078,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        4157.08607520564,
+        8765.841069330201
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/cv_squared",
+      "estimate": -0.012680234792442775,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        -0.01663972852939201,
+        -0.008720741055493541
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/journey_s_per_passenger",
+      "estimate": 10.74371618891746,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        4.138312552187358,
+        20.72931004736381
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/holding_s_per_trip",
+      "estimate": 24.453505530090336,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        21.333455925224925,
+        27.573555134955747
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/public_delay_s_per_day",
+      "estimate": 9918.5,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        6623.0,
+        13315.0
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/cv_squared",
+      "estimate": -0.020795390779679,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        -0.0328455666611288,
+        -0.012464500682697957
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/journey_s_per_passenger",
+      "estimate": 12.768158079306346,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        1.377390184287293,
+        25.860873284896286
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/holding_s_per_trip",
+      "estimate": 26.250000000000004,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        19.58492366412213,
+        32.35209923664124
+      ]
+    }
+  ],
+  "protocol_sources": {
+    "v400": "experiments/v400_independent_confirmation/PROTOCOL.md",
+    "v401": "experiments/v401_budget_conditioned_upper/PROTOCOL.md",
+    "v402": "experiments/v402_budget_mechanism/PROTOCOL.md",
+    "v403": "experiments/v403_joint_credit/PROTOCOL.md"
+  },
+  "entrypoints": {
+    "v400": "experiments/v400_independent_confirmation/evaluation.py",
+    "v401": "experiments/v401_budget_conditioned_upper/worker.py",
+    "v402": "experiments/v402_budget_mechanism/worker.py",
+    "v403": "experiments/v403_joint_credit/worker.py"
+  },
+  "runtime_assets": "experiments/v400_independent_confirmation/deployment.json",
+  "original_supervisor": "K4/V326, seed314011, batch8; K0 from matched V350",
+  "units": {
+    "journey_s_per_passenger": "restricted seconds per generated passenger",
+    "readiness_s_per_trip": "seconds per scheduled trip",
+    "public_delay_s_per_day": "positive lateness seconds per day",
+    "cv_squared": "dimensionless actual nonterminal arrival CV squared"
+  },
+  "study_units": {
+    "v400": "16 independent demand days, one frozen learner seed",
+    "v401": "4 development days, two matched learners",
+    "v402": "16 independent demand days, fixed daily-mixture expectations",
+    "v403": "4 development days, fixed daily-mixture expectations"
+  },
+  "original_copies_equal_when_available": {
+    "v400": true,
+    "v401": true,
+    "v401_readout": true,
+    "v402": true,
+    "v402_selection": true,
+    "v403": true
+  },
+  "formatting_only": true,
+  "new_statistical_resamples": 0,
+  "new_traffic_paths": 0,
+  "supplemental_sources": {
+    "v404": "experiments/v404_publication_closure/review/aggregate/results.json",
+    "service": "experiments/v404_publication_closure/review/extra/results.json",
+    "figures": "experiments/v404_publication_closure/archive_figures.py"
+  },
+  "supplemental_cells": [
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_fixed_model/journey_s_per_passenger",
+      "estimate": -7.7961798209915685,
+      "interval": [
+        -11.909746282643113,
+        -0.8612579922323107
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_fixed_model/public_delay_s_per_day",
+      "estimate": -8516.75,
+      "interval": [
+        -9075.5,
+        -7718.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_fixed_model/readiness_s_per_trip",
+      "estimate": -32.959923664122144,
+      "interval": [
+        -35.22709923664122,
+        -29.879770992366414
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_fixed_model/cv_squared",
+      "estimate": 0.03210630422936505,
+      "interval": [
+        0.027157361699971447,
+        0.03838358795583196
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_at_budget/journey_s_per_passenger",
+      "estimate": 2.013023329868247,
+      "interval": [
+        0.8864433928832227,
+        3.846853636328291
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_at_budget/public_delay_s_per_day",
+      "estimate": 204.5,
+      "interval": [
+        31.5,
+        377.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_at_budget/readiness_s_per_trip",
+      "estimate": 0.3272900763358777,
+      "interval": [
+        -0.4675572519083957,
+        1.122137404580151
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_at_budget/cv_squared",
+      "estimate": 0.0019511299473034295,
+      "interval": [
+        0.0004004603061501244,
+        0.0035017995884567346
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_without_budget/journey_s_per_passenger",
+      "estimate": -0.9093060565114115,
+      "interval": [
+        -1.8887635519545825,
+        0.07015143893175946
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_without_budget/public_delay_s_per_day",
+      "estimate": 38.25,
+      "interval": [
+        -433.25,
+        344.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_without_budget/readiness_s_per_trip",
+      "estimate": -0.2700381679389352,
+      "interval": [
+        -2.0000000000000036,
+        0.8683206106870216
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/plan_without_budget/cv_squared",
+      "estimate": -0.0001697752743039134,
+      "interval": [
+        -0.0019068170990467342,
+        0.0015672665504389074
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_at_plan/journey_s_per_passenger",
+      "estimate": -6.886873764480157,
+      "interval": [
+        -10.586865654130008,
+        -0.8166678040720399
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_at_plan/public_delay_s_per_day",
+      "estimate": -8555.0,
+      "interval": [
+        -9420.0,
+        -7690.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_at_plan/readiness_s_per_trip",
+      "estimate": -32.68988549618321,
+      "interval": [
+        -36.095419847328245,
+        -29.284351145038165
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_at_plan/cv_squared",
+      "estimate": 0.03227607950366897,
+      "interval": [
+        0.026438153408902605,
+        0.03788800206536261
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_without_plan/journey_s_per_passenger",
+      "estimate": -9.809203150859815,
+      "interval": [
+        -14.726513938533344,
+        -2.3872558752334214
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_without_plan/public_delay_s_per_day",
+      "estimate": -8721.25,
+      "interval": [
+        -9189.5,
+        -8056.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_without_plan/readiness_s_per_trip",
+      "estimate": -33.287213740458014,
+      "interval": [
+        -35.07442748091603,
+        -30.749045801526723
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/budget_without_plan/cv_squared",
+      "estimate": 0.030155174282061617,
+      "interval": [
+        0.02656785865284643,
+        0.035511056233023815
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/interaction/journey_s_per_passenger",
+      "estimate": 2.9223293863796584,
+      "interval": [
+        0.8162919539514633,
+        5.320392624923585
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/interaction/public_delay_s_per_day",
+      "estimate": 166.25,
+      "interval": [
+        -313.0,
+        659.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/interaction/readiness_s_per_trip",
+      "estimate": 0.5973282442748129,
+      "interval": [
+        -1.3358778625954173,
+        2.554389312977097
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/interaction/cv_squared",
+      "estimate": 0.002120905221607343,
+      "interval": [
+        -0.0010839547479649485,
+        0.005199407774644057
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_bilateral/journey_s_per_passenger",
+      "estimate": -12.204263622673807,
+      "interval": [
+        -16.606100350044073,
+        -4.170640878600921
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_bilateral/public_delay_s_per_day",
+      "estimate": -9725.25,
+      "interval": [
+        -10020.0,
+        -9430.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_bilateral/readiness_s_per_trip",
+      "estimate": -37.57251908396947,
+      "interval": [
+        -38.832061068702295,
+        -36.31297709923664
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/joint_vs_bilateral/cv_squared",
+      "estimate": 0.03135336657583575,
+      "interval": [
+        0.02577288603019713,
+        0.03757071855827243
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_static/journey_s_per_passenger",
+      "estimate": -2.706535440479513,
+      "interval": [
+        -5.695905785648364,
+        0.2828349046893379
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_static/public_delay_s_per_day",
+      "estimate": -3456.775523145213,
+      "interval": [
+        -4084.216550412176,
+        -2829.33449587825
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_static/readiness_s_per_trip",
+      "estimate": -13.24602830768635,
+      "interval": [
+        -15.68505157633346,
+        -10.80700503903924
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_static/cv_squared",
+      "estimate": 0.014158586957682014,
+      "interval": [
+        0.009574593589300476,
+        0.019909332014443393
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_cap/journey_s_per_passenger",
+      "estimate": 1.7019390498695373,
+      "interval": [
+        -0.9095113565303166,
+        3.4139150049465457
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_cap/public_delay_s_per_day",
+      "estimate": -3049.4650411280836,
+      "interval": [
+        -3493.75910693302,
+        -2605.170975323147
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_cap/readiness_s_per_trip",
+      "estimate": -11.771767162117312,
+      "interval": [
+        -13.353732923099006,
+        -10.189801401135618
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/nominal/pressure_vs_cap/cv_squared",
+      "estimate": 0.014040695034396799,
+      "interval": [
+        0.011608242299010026,
+        0.01647314776978357
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_fixed_model/journey_s_per_passenger",
+      "estimate": -3.975765220444231,
+      "interval": [
+        -5.789864041120012,
+        -1.397803695891696
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_fixed_model/public_delay_s_per_day",
+      "estimate": -6431.5,
+      "interval": [
+        -9153.25,
+        -4027.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_fixed_model/readiness_s_per_trip",
+      "estimate": -25.14885496183206,
+      "interval": [
+        -35.35019083969466,
+        -16.01145038167939
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_fixed_model/cv_squared",
+      "estimate": 0.027355327372023737,
+      "interval": [
+        0.01164370352929264,
+        0.05212039515802892
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_at_budget/journey_s_per_passenger",
+      "estimate": 0.9511893901244832,
+      "interval": [
+        -0.2568093284547217,
+        2.4075684304691265
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_at_budget/public_delay_s_per_day",
+      "estimate": 582.0,
+      "interval": [
+        340.75,
+        877.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_at_budget/readiness_s_per_trip",
+      "estimate": 1.6202290076335846,
+      "interval": [
+        0.6555343511450342,
+        2.8311068702290036
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_at_budget/cv_squared",
+      "estimate": 0.0020474465272289945,
+      "interval": [
+        -0.0007201218337032893,
+        0.0059988687489495995
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_without_budget/journey_s_per_passenger",
+      "estimate": 0.029334449758209757,
+      "interval": [
+        -0.40508783699391415,
+        0.46375673651033367
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_without_budget/public_delay_s_per_day",
+      "estimate": 507.0,
+      "interval": [
+        254.75,
+        695.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_without_budget/readiness_s_per_trip",
+      "estimate": 1.4160305343511492,
+      "interval": [
+        0.338740458015268,
+        2.1116412213740503
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/plan_without_budget/cv_squared",
+      "estimate": 0.001194070434253543,
+      "interval": [
+        0.0005691557776186656,
+        0.0017918632492018045
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_at_plan/journey_s_per_passenger",
+      "estimate": -4.005099670202441,
+      "interval": [
+        -5.7548142948164696,
+        -1.8526193676642322
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_at_plan/public_delay_s_per_day",
+      "estimate": -6938.5,
+      "interval": [
+        -9724.5,
+        -4430.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_at_plan/readiness_s_per_trip",
+      "estimate": -26.56488549618321,
+      "interval": [
+        -37.15839694656489,
+        -17.045801526717558
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_at_plan/cv_squared",
+      "estimate": 0.026161256937770192,
+      "interval": [
+        0.011042394399300583,
+        0.05049957937150083
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_without_plan/journey_s_per_passenger",
+      "estimate": -4.926954610568714,
+      "interval": [
+        -6.382897421457528,
+        -3.4710117996799
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_without_plan/public_delay_s_per_day",
+      "estimate": -7013.5,
+      "interval": [
+        -10030.5,
+        -4555.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_without_plan/readiness_s_per_trip",
+      "estimate": -26.769083969465647,
+      "interval": [
+        -38.28435114503816,
+        -17.385496183206104
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/budget_without_plan/cv_squared",
+      "estimate": 0.02530788084479474,
+      "interval": [
+        0.01207536430550939,
+        0.046124958522703735
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/interaction/journey_s_per_passenger",
+      "estimate": 0.9218549403662735,
+      "interval": [
+        0.10548718339288143,
+        2.0319945110648803
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/interaction/public_delay_s_per_day",
+      "estimate": 75.0,
+      "interval": [
+        -292.5,
+        442.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/interaction/readiness_s_per_trip",
+      "estimate": 0.20419847328243534,
+      "interval": [
+        -1.1374045801526798,
+        1.5458015267175504
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/interaction/cv_squared",
+      "estimate": 0.0008533760929754514,
+      "interval": [
+        -0.0016720612582901539,
+        0.004247694221368552
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_bilateral/journey_s_per_passenger",
+      "estimate": -6.841243406679297,
+      "interval": [
+        -8.783408416634671,
+        -3.97452730180089
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_bilateral/public_delay_s_per_day",
+      "estimate": -7054.0,
+      "interval": [
+        -10283.0,
+        -4378.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_bilateral/readiness_s_per_trip",
+      "estimate": -27.524809160305345,
+      "interval": [
+        -39.66221374045803,
+        -17.35114503816794
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/joint_vs_bilateral/cv_squared",
+      "estimate": 0.023640962416273177,
+      "interval": [
+        0.007485464418628355,
+        0.048629747886741403
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_static/journey_s_per_passenger",
+      "estimate": 0.47784151549304,
+      "interval": [
+        -1.114436928807308,
+        1.8178215918125886
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_static/public_delay_s_per_day",
+      "estimate": -1856.4407102092578,
+      "interval": [
+        -2355.5703868103983,
+        -1177.6417247939128
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_static/readiness_s_per_trip",
+      "estimate": -7.100983483955916,
+      "interval": [
+        -9.048747622067218,
+        -4.395769094860766
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_static/cv_squared",
+      "estimate": 0.005328827415108041,
+      "interval": [
+        -0.0019144174262208744,
+        0.015934395099850417
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_cap/journey_s_per_passenger",
+      "estimate": 3.422828716650514,
+      "interval": [
+        1.9933713646726403,
+        4.474721046618981
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_cap/public_delay_s_per_day",
+      "estimate": -1688.926263219741,
+      "interval": [
+        -2116.1580493537012,
+        -1261.6944770857808
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_cap/readiness_s_per_trip",
+      "estimate": -6.446033404795438,
+      "interval": [
+        -8.098924928911657,
+        -4.793141880679219
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/light/pressure_vs_cap/cv_squared",
+      "estimate": 0.006352397511112539,
+      "interval": [
+        -0.0013372155470972036,
+        0.01766425014099396
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_fixed_model/journey_s_per_passenger",
+      "estimate": -27.557175788816835,
+      "interval": [
+        -38.3369709832798,
+        -18.996959541718525
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_fixed_model/public_delay_s_per_day",
+      "estimate": -15686.0,
+      "interval": [
+        -17911.5,
+        -13399.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_fixed_model/readiness_s_per_trip",
+      "estimate": -60.2557251908397,
+      "interval": [
+        -68.68320610687022,
+        -51.49522900763358
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_fixed_model/cv_squared",
+      "estimate": 0.02375807918142125,
+      "interval": [
+        0.019035110383034376,
+        0.0286769595585753
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_at_budget/journey_s_per_passenger",
+      "estimate": -0.3691509071231849,
+      "interval": [
+        -0.7255127799169259,
+        -0.06890833663851481
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_at_budget/public_delay_s_per_day",
+      "estimate": 74.0,
+      "interval": [
+        43.75,
+        116.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_at_budget/readiness_s_per_trip",
+      "estimate": -0.10305343511450182,
+      "interval": [
+        -0.2538167938931277,
+        0.0706106870228993
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_at_budget/cv_squared",
+      "estimate": 0.0006285834448631795,
+      "interval": [
+        -0.0001906592743022642,
+        0.0018429738540667769
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_without_budget/journey_s_per_passenger",
+      "estimate": 2.141425045121764,
+      "interval": [
+        0.8740550623322179,
+        3.781019788214053
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_without_budget/public_delay_s_per_day",
+      "estimate": 837.75,
+      "interval": [
+        365.0,
+        1460.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_without_budget/readiness_s_per_trip",
+      "estimate": 2.966603053435122,
+      "interval": [
+        1.1393129770992374,
+        5.432251908396964
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/plan_without_budget/cv_squared",
+      "estimate": 0.0005854955116091146,
+      "interval": [
+        -2.3550297887975358e-05,
+        0.0013533329674596424
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_at_plan/journey_s_per_passenger",
+      "estimate": -29.6986008339386,
+      "interval": [
+        -42.13703607688433,
+        -20.531173279258155
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_at_plan/public_delay_s_per_day",
+      "estimate": -16523.75,
+      "interval": [
+        -19127.5,
+        -13879.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_at_plan/readiness_s_per_trip",
+      "estimate": -63.22232824427482,
+      "interval": [
+        -73.1851145038168,
+        -53.07156488549619
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_at_plan/cv_squared",
+      "estimate": 0.023172583669812136,
+      "interval": [
+        0.018793278706214882,
+        0.028463456466944644
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_without_plan/journey_s_per_passenger",
+      "estimate": -27.18802488169365,
+      "interval": [
+        -38.046786163055685,
+        -18.831445592628143
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_without_plan/public_delay_s_per_day",
+      "estimate": -15760.0,
+      "interval": [
+        -17962.0,
+        -13510.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_without_plan/readiness_s_per_trip",
+      "estimate": -60.152671755725194,
+      "interval": [
+        -68.55725190839695,
+        -51.56583969465649
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/budget_without_plan/cv_squared",
+      "estimate": 0.02312949573655807,
+      "interval": [
+        0.017595345862647098,
+        0.028663645610469045
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/interaction/journey_s_per_passenger",
+      "estimate": -2.510575952244949,
+      "interval": [
+        -4.153536343446945,
+        -1.4925364966682082
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/interaction/public_delay_s_per_day",
+      "estimate": -763.75,
+      "interval": [
+        -1418.25,
+        -247.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/interaction/readiness_s_per_trip",
+      "estimate": -3.0696564885496223,
+      "interval": [
+        -5.651717557251928,
+        -1.0381679389312986
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/interaction/cv_squared",
+      "estimate": 4.3087933254064986e-05,
+      "interval": [
+        -0.0011676935361029823,
+        0.0012560496195364937
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_bilateral/journey_s_per_passenger",
+      "estimate": -27.557175788816835,
+      "interval": [
+        -38.3369709832798,
+        -18.996959541718525
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_bilateral/public_delay_s_per_day",
+      "estimate": -15686.0,
+      "interval": [
+        -17911.5,
+        -13399.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_bilateral/readiness_s_per_trip",
+      "estimate": -60.2557251908397,
+      "interval": [
+        -68.68320610687022,
+        -51.49522900763358
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/joint_vs_bilateral/cv_squared",
+      "estimate": 0.02375807918142125,
+      "interval": [
+        0.019035110383034376,
+        0.0286769595585753
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_static/journey_s_per_passenger",
+      "estimate": -14.934355869279301,
+      "interval": [
+        -20.203119077323663,
+        -9.129310362612472
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_static/public_delay_s_per_day",
+      "estimate": -7040.0353519340515,
+      "interval": [
+        -7988.603202282815,
+        -5688.495244134432
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_static/readiness_s_per_trip",
+      "estimate": -26.891991025572757,
+      "interval": [
+        -30.663306500409032,
+        -21.59635649871482
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_static/cv_squared",
+      "estimate": 0.007738110621536101,
+      "interval": [
+        0.003923412690562098,
+        0.011513490240189665
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_cap/journey_s_per_passenger",
+      "estimate": -10.129743468534059,
+      "interval": [
+        -17.192700637906626,
+        -1.9576252522111872
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_cap/public_delay_s_per_day",
+      "estimate": -5958.2244418331375,
+      "interval": [
+        -6835.875146886016,
+        -4538.96034077556
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_cap/readiness_s_per_trip",
+      "estimate": -22.76504740718149,
+      "interval": [
+        -26.21114136041119,
+        -17.305013858863838
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/heavy/pressure_vs_cap/cv_squared",
+      "estimate": 0.00999759099836015,
+      "interval": [
+        0.007462542289524128,
+        0.013206635370390754
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_fixed_model/journey_s_per_passenger",
+      "estimate": -17.90451920556086,
+      "interval": [
+        -29.13140500680052,
+        -8.799239962519579
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_fixed_model/public_delay_s_per_day",
+      "estimate": -9949.5,
+      "interval": [
+        -13923.5,
+        -7784.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_fixed_model/readiness_s_per_trip",
+      "estimate": -38.41793893129771,
+      "interval": [
+        -53.73759541984733,
+        -30.046755725190838
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_fixed_model/cv_squared",
+      "estimate": 0.02221171821557241,
+      "interval": [
+        0.017785262093724864,
+        0.02541430561435786
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_at_budget/journey_s_per_passenger",
+      "estimate": 1.2173928126089208,
+      "interval": [
+        0.03694700990376987,
+        2.523285282281506
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_at_budget/public_delay_s_per_day",
+      "estimate": 314.75,
+      "interval": [
+        46.75,
+        617.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_at_budget/readiness_s_per_trip",
+      "estimate": 0.7585877862595432,
+      "interval": [
+        -0.2261450381679353,
+        1.9522900763358741
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_at_budget/cv_squared",
+      "estimate": -7.560185846520323e-05,
+      "interval": [
+        -0.0007254928829902446,
+        0.0005742891660598382
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_without_budget/journey_s_per_passenger",
+      "estimate": 2.28167640098647,
+      "interval": [
+        0.7196416126570284,
+        3.803793874978311
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_without_budget/public_delay_s_per_day",
+      "estimate": 580.0,
+      "interval": [
+        132.0,
+        1028.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_without_budget/readiness_s_per_trip",
+      "estimate": 1.860687022900759,
+      "interval": [
+        0.1192748091603093,
+        3.589694656488547
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/plan_without_budget/cv_squared",
+      "estimate": 0.0005562610132177955,
+      "interval": [
+        0.0003036587872609804,
+        0.0009600989565150975
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_at_plan/journey_s_per_passenger",
+      "estimate": -20.18619560654733,
+      "interval": [
+        -31.214109880467646,
+        -12.14867941716119
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_at_plan/public_delay_s_per_day",
+      "estimate": -10529.5,
+      "interval": [
+        -14389.25,
+        -8308.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_at_plan/readiness_s_per_trip",
+      "estimate": -40.27862595419847,
+      "interval": [
+        -55.172709923664115,
+        -31.697519083969464
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_at_plan/cv_squared",
+      "estimate": 0.02165545720235461,
+      "interval": [
+        0.016825163137209765,
+        0.025009280318480553
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_without_plan/journey_s_per_passenger",
+      "estimate": -19.12191201816978,
+      "interval": [
+        -30.567263996651803,
+        -9.672719930918703
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_without_plan/public_delay_s_per_day",
+      "estimate": -10264.25,
+      "interval": [
+        -14281.75,
+        -7897.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_without_plan/readiness_s_per_trip",
+      "estimate": -39.17652671755725,
+      "interval": [
+        -54.51049618320611,
+        -30.141221374045802
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/budget_without_plan/cv_squared",
+      "estimate": 0.022287320074037612,
+      "interval": [
+        0.01716163207682051,
+        0.025721218645848885
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/interaction/journey_s_per_passenger",
+      "estimate": -1.064283588377549,
+      "interval": [
+        -2.4759594862424876,
+        -0.0371972746995084
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/interaction/public_delay_s_per_day",
+      "estimate": -265.25,
+      "interval": [
+        -863.5,
+        191.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/interaction/readiness_s_per_trip",
+      "estimate": -1.102099236641216,
+      "interval": [
+        -3.3568702290076224,
+        0.7452290076335863
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/interaction/cv_squared",
+      "estimate": -0.0006318628716829987,
+      "interval": [
+        -0.0010650758598133928,
+        -0.00018173872444453808
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_bilateral/journey_s_per_passenger",
+      "estimate": -22.339684937694983,
+      "interval": [
+        -30.268636541635516,
+        -16.460521937708478
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_bilateral/public_delay_s_per_day",
+      "estimate": -11303.25,
+      "interval": [
+        -14359.0,
+        -9510.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_bilateral/readiness_s_per_trip",
+      "estimate": -43.584923664122144,
+      "interval": [
+        -55.377862595419856,
+        -36.7013358778626
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/joint_vs_bilateral/cv_squared",
+      "estimate": 0.020364826249935318,
+      "interval": [
+        0.01558717953616031,
+        0.024904673136835722
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_static/journey_s_per_passenger",
+      "estimate": -7.617524290828982,
+      "interval": [
+        -11.572080170290818,
+        -3.996931018807402
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_static/public_delay_s_per_day",
+      "estimate": -4321.354470513633,
+      "interval": [
+        -6441.485732403296,
+        -3066.5561192136965
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_static/readiness_s_per_trip",
+      "estimate": -16.57017806057496,
+      "interval": [
+        -24.81730396878796,
+        -11.671200269136001
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_static/cv_squared",
+      "estimate": 0.01001305843930734,
+      "interval": [
+        0.006428426317920687,
+        0.013751960080930012
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_cap/journey_s_per_passenger",
+      "estimate": -3.354365754632113,
+      "interval": [
+        -6.566781062332495,
+        -0.06038531507277867
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_cap/public_delay_s_per_day",
+      "estimate": -3828.0146886016446,
+      "interval": [
+        -5622.398648648647,
+        -2579.952996474736
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_cap/readiness_s_per_trip",
+      "estimate": -14.703951794476188,
+      "interval": [
+        -21.682019806065608,
+        -9.904611548156186
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/v404.json",
+      "pointer": "/effects/rushshift/pressure_vs_cap/cv_squared",
+      "estimate": 0.00891261378822586,
+      "interval": [
+        0.005252595785068665,
+        0.012770383300392396
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_7p5/journey_s_per_passenger",
+      "estimate": -1.8857250193026545,
+      "interval": [
+        -3.53832385845997,
+        -0.20425507051261124
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_7p5/public_delay_s_per_day",
+      "estimate": -2369.1875,
+      "interval": [
+        -2968.5171875,
+        -1765.7062500000006
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_7p5/cv_squared",
+      "estimate": 0.0016592648307685006,
+      "interval": [
+        -0.0008340864315272804,
+        0.00427108423429418
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_7p5/holding_s_per_trip",
+      "estimate": 5.153864503816792,
+      "interval": [
+        2.9329675572519083,
+        7.428435114503811
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_10/journey_s_per_passenger",
+      "estimate": -7.27697032216836,
+      "interval": [
+        -9.618964732686356,
+        -5.044680949660228
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_10/public_delay_s_per_day",
+      "estimate": -4947.4375,
+      "interval": [
+        -5720.76875,
+        -4091.7609375000006
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_10/cv_squared",
+      "estimate": 0.010874039698701802,
+      "interval": [
+        0.008408680945923109,
+        0.01330825584675665
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/static_10/holding_s_per_trip",
+      "estimate": -10.621421755725194,
+      "interval": [
+        -12.952081345419847,
+        -8.318165553435119
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_10/journey_s_per_passenger",
+      "estimate": 5.899991997024685,
+      "interval": [
+        4.398829452086515,
+        7.3926503119293585
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_10/public_delay_s_per_day",
+      "estimate": -608.9375,
+      "interval": [
+        -1123.378125,
+        -90.5906250000005
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_10/cv_squared",
+      "estimate": -0.003635568048004213,
+      "interval": [
+        -0.006130672565575451,
+        -0.0010655181651124715
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_10/holding_s_per_trip",
+      "estimate": 14.210400763358777,
+      "interval": [
+        12.299588501908394,
+        16.21072876908397
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_15/journey_s_per_passenger",
+      "estimate": -1.642762027020332,
+      "interval": [
+        -3.6264075620398537,
+        0.43256556947943653
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_15/public_delay_s_per_day",
+      "estimate": -3793.6875,
+      "interval": [
+        -4526.0625,
+        -3012.434375
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_15/cv_squared",
+      "estimate": 0.009684293369417934,
+      "interval": [
+        0.007404270259241909,
+        0.011976544348422852
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_historical.json",
+      "pointer": "/effects/cap_15/holding_s_per_trip",
+      "estimate": -6.060353053435116,
+      "interval": [
+        -7.981870229007634,
+        -4.2712309160305395
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_7p5/journey_s_per_passenger",
+      "estimate": -0.9214808222918407,
+      "interval": [
+        -3.489563465811159,
+        1.6466018212274776
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_7p5/public_delay_s_per_day",
+      "estimate": -2307.0,
+      "interval": [
+        -2656.5,
+        -1912.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_7p5/cv_squared",
+      "estimate": 0.006416067401990048,
+      "interval": [
+        -0.002326942084205842,
+        0.015159076888185938
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_7p5/holding_s_per_trip",
+      "estimate": 4.918893129770996,
+      "interval": [
+        3.9408396946564963,
+        5.96851145038168
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_10/journey_s_per_passenger",
+      "estimate": -4.268723548667509,
+      "interval": [
+        -7.626783249857851,
+        -0.9106638474771671
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_10/public_delay_s_per_day",
+      "estimate": -4463.0,
+      "interval": [
+        -5373.5,
+        -3552.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_10/cv_squared",
+      "estimate": 0.020934442359571773,
+      "interval": [
+        0.017312920522099203,
+        0.024555964197044342
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/static_10/holding_s_per_trip",
+      "estimate": -9.780534351145036,
+      "interval": [
+        -11.66984732824428,
+        -7.8912213740457915
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_10/journey_s_per_passenger",
+      "estimate": 7.435749751477573,
+      "interval": [
+        3.491041220737202,
+        12.74416661755501
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_10/public_delay_s_per_day",
+      "estimate": -286.25,
+      "interval": [
+        -1047.0,
+        853.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_10/cv_squared",
+      "estimate": 0.006183896197326268,
+      "interval": [
+        0.0015350545704305024,
+        0.014597153064573515
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_10/holding_s_per_trip",
+      "estimate": 15.267175572519086,
+      "interval": [
+        13.75,
+        17.013358778625953
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_15/journey_s_per_passenger",
+      "estimate": 0.17462935405436042,
+      "interval": [
+        -2.394837939681395,
+        2.2754256541450957
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_15/public_delay_s_per_day",
+      "estimate": -3785.5,
+      "interval": [
+        -4145.5,
+        -3425.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_15/cv_squared",
+      "estimate": 0.01613350305796172,
+      "interval": [
+        0.013992041842456313,
+        0.019165487383353826
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/nominal/effects/cap_15/holding_s_per_trip",
+      "estimate": -6.731870229007633,
+      "interval": [
+        -7.528625954198464,
+        -5.28148854961832
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_7p5/journey_s_per_passenger",
+      "estimate": 2.8407843517025526,
+      "interval": [
+        1.5095151465242225,
+        4.541563871267272
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_7p5/public_delay_s_per_day",
+      "estimate": -898.25,
+      "interval": [
+        -1328.5,
+        -468.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_7p5/cv_squared",
+      "estimate": 0.0015810930083456388,
+      "interval": [
+        -0.00578956568549081,
+        0.011878911707451784
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_7p5/holding_s_per_trip",
+      "estimate": 16.397900763358773,
+      "interval": [
+        13.492366412213741,
+        19.303435114503806
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_10/journey_s_per_passenger",
+      "estimate": -1.5900846764810694,
+      "interval": [
+        -3.5867446090583996,
+        -0.457551043063944
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_10/public_delay_s_per_day",
+      "estimate": -2695.0,
+      "interval": [
+        -3486.5,
+        -1809.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_10/cv_squared",
+      "estimate": 0.008608652056460157,
+      "interval": [
+        0.0014769132739249936,
+        0.019483545845160044
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/static_10/holding_s_per_trip",
+      "estimate": -0.1240458015267194,
+      "interval": [
+        -3.716603053435108,
+        3.1440839694656404
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_10/journey_s_per_passenger",
+      "estimate": 6.089182369061092,
+      "interval": [
+        5.324988512818322,
+        6.7630770503348
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_10/public_delay_s_per_day",
+      "estimate": -266.75,
+      "interval": [
+        -338.5,
+        -153.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_10/cv_squared",
+      "estimate": -0.008194897207097271,
+      "interval": [
+        -0.012810277686939698,
+        -0.0038654108421148966
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_10/holding_s_per_trip",
+      "estimate": 22.733778625954194,
+      "interval": [
+        20.772900763358784,
+        24.694656488549604
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_15/journey_s_per_passenger",
+      "estimate": 2.7125946336423112,
+      "interval": [
+        1.1455258968368867,
+        4.017700519925711
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_15/public_delay_s_per_day",
+      "estimate": -2067.75,
+      "interval": [
+        -2623.5,
+        -1512.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_15/cv_squared",
+      "estimate": 0.010227346550635686,
+      "interval": [
+        0.0018006940578377244,
+        0.023317244463154703
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/light/effects/cap_15/holding_s_per_trip",
+      "estimate": 1.9370229007633561,
+      "interval": [
+        -0.37690839694655764,
+        4.890267175572504
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_7p5/journey_s_per_passenger",
+      "estimate": -11.356698827876642,
+      "interval": [
+        -16.443336747187914,
+        -6.27006090856537
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_7p5/public_delay_s_per_day",
+      "estimate": -4963.0,
+      "interval": [
+        -5856.25,
+        -3596.25
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_7p5/cv_squared",
+      "estimate": 0.0019349391195447666,
+      "interval": [
+        -0.0011693671415766577,
+        0.005039245380666191
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_7p5/holding_s_per_trip",
+      "estimate": -1.207061068702295,
+      "interval": [
+        -4.546755725190849,
+        1.917938931297705
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_10/journey_s_per_passenger",
+      "estimate": -18.06533753690394,
+      "interval": [
+        -23.493487442341348,
+        -11.364575919986123
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_10/public_delay_s_per_day",
+      "estimate": -8857.75,
+      "interval": [
+        -9793.25,
+        -7581.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_10/cv_squared",
+      "estimate": 0.012816748226132565,
+      "interval": [
+        0.00764480580997012,
+        0.017179416775991427
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/static_10/holding_s_per_trip",
+      "estimate": -18.373091603053435,
+      "interval": [
+        -21.61259541984733,
+        -15.267175572519086
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_10/journey_s_per_passenger",
+      "estimate": -2.2547051985017674,
+      "interval": [
+        -7.934353422317599,
+        4.508250135177093
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_10/public_delay_s_per_day",
+      "estimate": -2203.0,
+      "interval": [
+        -3111.25,
+        -1011.75
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_10/cv_squared",
+      "estimate": 0.0011316422841052137,
+      "interval": [
+        -0.0022706712666198496,
+        0.004635670269177463
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_10/holding_s_per_trip",
+      "estimate": 6.860687022900759,
+      "interval": [
+        4.098282442748083,
+        8.936068702290072
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_15/journey_s_per_passenger",
+      "estimate": -12.227409912486223,
+      "interval": [
+        -19.658837768249896,
+        -3.679934321173164
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_15/public_delay_s_per_day",
+      "estimate": -6958.5,
+      "interval": [
+        -7828.0,
+        -5478.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_15/cv_squared",
+      "estimate": 0.012359205313615557,
+      "interval": [
+        0.00989377997770784,
+        0.015898131563146796
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/heavy/effects/cap_15/holding_s_per_trip",
+      "estimate": -14.742366412213745,
+      "interval": [
+        -17.657442748091608,
+        -11.889312977099245
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_7p5/journey_s_per_passenger",
+      "estimate": -4.325298376175226,
+      "interval": [
+        -5.818420477485574,
+        -2.832176274864878
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_7p5/public_delay_s_per_day",
+      "estimate": -2695.75,
+      "interval": [
+        -4052.75,
+        -1672.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_7p5/cv_squared",
+      "estimate": 0.005321598015637551,
+      "interval": [
+        -0.00019086094679076487,
+        0.01115549358462551
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_7p5/holding_s_per_trip",
+      "estimate": 6.688931297709917,
+      "interval": [
+        3.8358778625954137,
+        9.293893129770986
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_10/journey_s_per_passenger",
+      "estimate": -10.498711298183565,
+      "interval": [
+        -17.25197209853161,
+        -5.016264540260124
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_10/public_delay_s_per_day",
+      "estimate": -5744.0,
+      "interval": [
+        -8560.5,
+        -4064.5
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_10/cv_squared",
+      "estimate": 0.014118783613886373,
+      "interval": [
+        0.011270656981680841,
+        0.016966910246091906
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/static_10/holding_s_per_trip",
+      "estimate": -10.854007633587795,
+      "interval": [
+        -15.94465648854963,
+        -7.690839694656496
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_10/journey_s_per_passenger",
+      "estimate": 3.3543436667764013,
+      "interval": [
+        1.6009410578695906,
+        4.653876625518876
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_10/public_delay_s_per_day",
+      "estimate": -1301.5,
+      "interval": [
+        -2357.75,
+        -316.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_10/cv_squared",
+      "estimate": -0.002260274579042834,
+      "interval": [
+        -0.004896399743806006,
+        0.0003758505857203373
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_10/holding_s_per_trip",
+      "estimate": 13.215648854961831,
+      "interval": [
+        10.157442748091597,
+        16.130725190839694
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_15/journey_s_per_passenger",
+      "estimate": -5.141358293965681,
+      "interval": [
+        -9.230595205042164,
+        -1.1381868873827727
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_15/public_delay_s_per_day",
+      "estimate": -4501.0,
+      "interval": [
+        -6492.0,
+        -3183.0
+      ],
+      "displayed_divisor": 60
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_15/cv_squared",
+      "estimate": 0.011888725421769159,
+      "interval": [
+        0.007955974058384985,
+        0.016123805582756258
+      ],
+      "displayed_divisor": 1
+    },
+    {
+      "source": "evidence/components_fresh.json",
+      "pointer": "/panels/rushshift/effects/cap_15/holding_s_per_trip",
+      "estimate": -6.93225190839695,
+      "interval": [
+        -11.250000000000004,
+        -3.6641221374045827
+      ],
+      "displayed_divisor": 1
+    }
+  ],
+  "figure_source_data": {
+    "archive": "figures/source_data.json",
+    "retention": "figures/retention_source_data.json",
+    "components": "figures/component_source_data.json",
+    "cohorts": "figures/cohort_source_data.json",
+    "mechanism": "figures/vehicle_source_data.json",
+    "operating_conditions": "evidence/v404.json"
+  },
+  "runtime": {
+    "source_inventory": "evidence/runtime_source_manifest.json",
+    "server_bundle": "evidence/runtime_packaging.json",
+    "environment": "evidence/runtime_environment.json",
+    "sealed_release": "evidence/runtime_release.json",
+    "installable_version_pins": "requirements-runtime.txt",
+    "source_snapshot": "FreqDuet/runtime_release/v404",
+    "clean_reinstall_tested": false
+  },
+  "aggregation_acceptance": "evidence/v404_aggregation_acceptance.json"
+}

@@ -1,0 +1,18 @@
+\begin{center}\small
+\begin{tabular}{lrrr}\toprule
+Condition & Journey P95 difference (s) & Early trips/day & Unserved/day \\ \midrule
+nominal & $-42.45\;[-56.94,-21.50]$ & 7.00 & 0.50 \\
+light & $-17.92\;[-20.50,-15.22]$ & 3.25 & 1.00 \\
+heavy & $-112.34\;[-153.83,-70.84]$ & 9.75 & 744.75 \\
+rushshift & $-84.84\;[-149.47,-46.46]$ & 5.00 & 47.00 \\
+\bottomrule\end{tabular}\end{center}
+P95 is calculated within each complete demand day before taking paired day differences. It is not a percentile pooled over policies or days. Intervals are descriptive paired day-bootstrap intervals. Early departures are counted against immutable public releases; they are not offset against positive lateness. Unserved passengers retain fixed-horizon waiting exposure. The full source JSON includes the native baseline and all model arms.
+\begin{center}\small
+\begin{tabular}{lrr}\toprule
+Condition & Journey P95 vs static (s) & Journey P95 vs cap (s) \\ \midrule
+nominal & $-15.37\;[-19.79,-9.45]$ & $-2.10\;[-7.95,+5.91]$ \\
+light & $-0.01\;[-4.30,+3.95]$ & $+7.10\;[+2.91,+11.28]$ \\
+heavy & $-70.94\;[-150.08,-11.13]$ & $-60.89\;[-154.78,+14.83]$ \\
+rushshift & $-32.10\;[-51.27,-14.69]$ & $-18.01\;[-36.50,-3.57]$ \\
+\bottomrule\end{tabular}\end{center}
+Simple-control P95 values are expectations of each component policy's daily percentile under the original whole-day randomization, not percentiles of pooled passengers.
