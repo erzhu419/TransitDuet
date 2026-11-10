@@ -1,0 +1,17 @@
+{
+  "protocol_id": "v403_joint_credit",
+  "engineering_day": 2410001,
+  "engineering_arms": ["pressure", "candidate_noop", "candidate"],
+  "development_days": [2430001, 2430002, 2430003, 2430004],
+  "arms": ["candidate", "pressure", "static_7p5", "static_10", "cap_10", "cap_15"],
+  "static_high_probability": 0.533291058972733,
+  "cap_high_probability": 0.7896592244418331,
+  "retention": 0.5,
+  "physical_start_cap": 27,
+  "parallel_paths": 32,
+  "bootstrap_draws": 10000,
+  "bootstrap_seed": 40311010,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "automatic_retry": false
+}
