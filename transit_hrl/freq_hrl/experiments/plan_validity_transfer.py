@@ -65,7 +65,7 @@ def jitter_schedule(args, seed):
 def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=None,
                 rule=None, sample=False, branch_step=None, renew=False,
                 intervention_step=None, arm=None, feature_steps=(), latency_recorder=None,
-                risk_spec=None, continuation_seed=None):
+                risk_spec=None, continuation_seed=None, continuation_rule=None):
     """One execution loop: scheduled training, adaptive timing, or paired keep/renew."""
     period = time_scale.upper_period_steps
     mode_name = rule.name if rule is not None else "scheduled"
@@ -93,6 +93,9 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         raise ValueError("timing intervention must be a nondeadline check")
     if continuation_seed is not None and (branch_step is None) == (intervention_step is None):
         raise ValueError("a conditional future requires exactly one causal branch point")
+    if continuation_rule is not None and (intervention_step is None or branch_step is not None
+        or schedule is not None or sample or continuation_rule.kind == "jitter"):
+        raise ValueError("a continuation policy requires an adaptive timing intervention")
     task = task_spec.open(seed=seed, horizon=args.horizon)
     ledger = active_ledger()
     try:
@@ -120,6 +123,8 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         planner_seconds = lower_seconds = score_seconds = 0.0
         end_step = args.horizon if branch_step is None else branch_step + 50
         for step in range(end_step):
+            if continuation_rule is not None and step == intervention_step + 1:
+                rule = continuation_rule
             if continuation_seed is not None and step in (branch_step, intervention_step):
                 task.driver = task.driver.conditional_future(step=step, seed=continuation_seed)
                 if not np.array_equal(np.concatenate(task.driver.sample(step)), observation.task_measurement):
@@ -245,6 +250,8 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
             row["tail_ise"] = float(sum(errors[intervention_step + period:]))
             row["first_200_step_ise"] = float(sum(errors[intervention_step:intervention_step + 200]))
             row["first_200_step_length"] = min(200, len(errors) - intervention_step)
+        if continuation_rule is not None:
+            row["continuation_policy"] = continuation_rule.name
         if risk_spec is not None:
             from .plan_validity_reliability import episode_risk
 
