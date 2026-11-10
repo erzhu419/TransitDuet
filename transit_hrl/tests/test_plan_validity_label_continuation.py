@@ -121,6 +121,21 @@ class LabelContinuationTest(unittest.TestCase):
             self.assertEqual(len(incomplete["missing"]), 24)
             self.assertEqual(incomplete["trained_roots_per_task"]["pointmaze"], 2)
 
+    def test_live_sampler_is_pending_not_failed_and_keeps_its_cost(self):
+        source = json.loads((submitter.ROOT / "protocols/plan_validity_continuation_2026-11-10.json").read_text())
+        manifest = submitter.prepare(source, draft_plan(), "fixture", Path("protocols/fixture.json"))
+        cell = manifest["cells"][0]
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            path = root / cell["output_directory"] / "sample/shard0/public/result.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({"run_name": "fixture", "task": cell["task"], "optimizer_seed": cell["optimizer_seed"],
+                "phase": "sample", "shard_index": 0, "status": "running", "measured_cost": {"cpu_seconds": 2}}))
+            result = analyzer.summarize(manifest, root=root)
+            self.assertEqual(len(result["pending"]), 1)
+            self.assertEqual(result["failed"], [])
+            self.assertEqual(result["known_cpu_seconds"], 2)
+
     def test_sampler_failure_keeps_ledger_and_never_overwrites_attempt(self):
         @contextmanager
         def runtime():

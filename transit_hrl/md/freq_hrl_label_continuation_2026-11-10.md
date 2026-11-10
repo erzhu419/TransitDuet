@@ -18,7 +18,8 @@ Only prechecks and training sampling are submitted now. All four roots must have
 frozen heads before any new probe prefix is accessed. Use one CPU/2GiB per job,
 dynamic unpinned placement on node001-node006; only public aggregates sync locally.
 Training uses 11,212,800 native steps; later probes 4,185,600; prechecks at most 76,800.
-Models and paid per-probe banks remain on the shared server and are not overwritten.
+Models and paid per-probe rows are retained on the shared server; previous
+attempts are not overwritten.
 
 Reserve eight new paths/root at root+50000..+50007, excluding registered,
 effective-training and revealed seeds. In particular, root+20000 diagnostic
@@ -34,3 +35,16 @@ and W gains without losing G across roots/halves, not just own-label fit.
 Complete-episode follow-up requires a separate readout decision; it is not queued.
 No threshold/encoder search, held-set selection or automatic candidate promotion.
 Original HOLD, termination-competence failures and unknown old lifecycle costs remain.
+Prefix OOF holds out only the new heads' labels, conditional on frozen C0;
+fresh-prefix evaluation is the primary transfer test, not full-pipeline OOF.
+
+## Execution
+
+73 related tests passed. Native prechecks t214317-t214320 passed on node004/node006:
+phase 5 causal pairing, factual replay, feature scoring and 24-call budgets held.
+They used 62,400 native steps, 63.480 CPU seconds and no fits. Training shards
+t214322-t214329 are running on node004/node005/node006, each with paid probes
+saved. Fit and probe jobs remain unsubmitted. The
+[launch receipt](../results/plan_validity_label_continuation_20261110/launch_receipt.json)
+retains actual placement and costs. The readout also distinguishes live phases
+from failed attempts; its targeted tests passed after this status-only correction.

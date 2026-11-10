@@ -38,7 +38,7 @@ def aggregate_paths(paths):
 
 
 def summarize(manifest, *, root=ROOT):
-    roots, missing, failed, costs = [], [], [], []
+    roots, missing, pending, failed, costs = [], [], [], [], []
     for cell in manifest["cells"]:
         records = {}
         for phase, shards in (("precheck", [-1]), ("sample", [0, 1]), ("fit", [-1]), ("probe", [0, 1])):
@@ -57,7 +57,7 @@ def summarize(manifest, *, root=ROOT):
                     raise ValueError("result differs from its frozen paired-label phase")
                 costs.append(row["measured_cost"])
                 if row["status"] != "complete":
-                    failed.append(key)
+                    (failed if row["status"] == "failed" else pending).append(key)
                     continue
                 if phase in ("sample", "probe"):
                     roster, count = (cell["fit_prefix_seeds"], 16) if phase == "sample" else (cell["evaluation_seeds"], 4)
@@ -75,8 +75,8 @@ def summarize(manifest, *, root=ROOT):
             paths = [p for i in (0, 1) for p in records[("probe", i)]["paths"]]
             result.update(path_count=len(paths), blocks=aggregate_paths(paths))
         roots.append(result)
-    return {"run_name": manifest["run_name"], "status": "complete" if not missing and not failed else "incomplete_or_failed",
-        "missing": missing, "failed": failed, "root_readouts": roots,
+    return {"run_name": manifest["run_name"], "status": "complete" if not missing and not pending and not failed else "incomplete_or_failed",
+        "missing": missing, "pending": pending, "failed": failed, "root_readouts": roots,
         "trained_roots_per_task": {task: sum(c["task"] == task for c in manifest["cells"]) for task in sorted(set(c["task"] for c in manifest["cells"]))},
         "known_cpu_seconds": sum(c["cpu_seconds"] for c in costs),
         "statistical_scope": "eight_path_CIs_conditional_on_frozen_root_not_new_trained_roots",
@@ -93,7 +93,7 @@ def main(argv=None):
     result = summarize(json.loads(args.manifest.read_text()))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
-    print(json.dumps({k: result[k] for k in ("status", "missing", "failed", "candidate_recipe_decision")}))
+    print(json.dumps({k: result[k] for k in ("status", "missing", "pending", "failed", "candidate_recipe_decision")}))
     return 0
 
 

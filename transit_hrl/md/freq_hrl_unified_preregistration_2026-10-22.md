@@ -264,3 +264,10 @@ advantage over history. Prefix-sensitive error, continuation-dependent labels,
 and local/long-horizon credit differ by root; cache-only future-half and zero-cut
 controls do not identify a universal repair. They do not select a new candidate,
 add trained roots, authorize new jobs or release HOLD.
+
+The next [paired-label experiment](freq_hrl_label_continuation_2026-11-10.md)
+fixes C0-visited training states and changes only label continuation. It retains
+DF8, training-A OOF calibration and equal fitting information, and reserves new
+prefixes for a fixed-continuation one-step readout. Native prechecks precede
+sampling; all roots' fits precede new-prefix access. No new-head episode loop
+or confirmation is automatically scheduled.
