@@ -32,4 +32,9 @@ At most 150 charged starts: 3 engineering, 64 calibration, 80 confirmation,
 3 reserved technical replacements with distinct receipts, no automatic retry.
 Engineering compares pressure to V401 and cap45 to a native unrestricted plan
 reference. Synthetic checks and metadata admission precede traffic. All work is
-scheduler high/manual, node001--006, at most eight traffic paths. No promotion.
+scheduler high/manual, node001--006, originally at most eight traffic paths. No promotion.
+
+The user subsequently approved 32-way confirmation only. Calibration remains
+eight-way; the source01 physics worker, scenarios, parameters, gate and 150-start
+ceiling are unchanged. See concurrency_amendment.json. A zero-traffic partition
+check must establish exact coverage before any confirmation shard is admitted.

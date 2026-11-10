@@ -8,8 +8,10 @@ calibration grids, independent days, primary delay endpoint and CV2 protection.
 `launch.py` stages and submits zero-traffic admission. `complete.py` orchestrates
 engineering, calibration, sealed selection and independent confirmation, using
 existing scheduler APIs and only small local summaries. All physical paths and
-statistical calculations execute on node001--006, high/manual, at most eight
-concurrent paths; failed starts are charged, not automatically retried.
+statistical calculations execute on node001--006, high/manual, with eight
+calibration paths and an approved maximum of 32 confirmation paths in parallel.
+Failed starts are charged, not automatically retried. The concurrency amendment
+uses the original source01 physics worker and changes no cases or statistical gate.
 
 Synthetic task t214090 passed six contracts with zero native Runner constructions.
 Freshness task t214091 passed; engineering gate t214103 found zero differences

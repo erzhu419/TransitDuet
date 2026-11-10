@@ -26,6 +26,8 @@ def wait(tasks,label):
 
 def register(stage,specs):
     path=HERE/f'submission_{stage}.json'
+    if stage=='confirmation' and (HERE/'submission_confirmation32.json').exists():
+        path=HERE/'submission_confirmation32.json'
     if path.exists():
         wait(json.loads(path.read_text())['tasks'],stage);return
     existing={t.get('signature'):t for t in scheduler.load_state()['tasks']}
