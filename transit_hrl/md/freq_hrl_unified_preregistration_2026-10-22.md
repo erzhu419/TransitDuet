@@ -311,5 +311,10 @@ decision. This is development work, not release of the original confirmation coh
 All four native prechecks subsequently passed on node004/node006, using 33,600
 steps with no fitting or controller updates. The
 [execution receipt](../results/plan_validity_independent_calibration_20261111/precheck_summary.json)
-retains the zero formal-task count. New calibration/readout cohorts remain unused;
-the next bounded release is calibration sampling only, not confirmation or episodes.
+retains the zero formal-task count at precheck completion, when both formal cohorts
+were unused. The next bounded release is calibration sampling only, not confirmation or episodes.
+The subsequent user-authorized release submits eight calibration shards only
+(t214476-t214483; 4,224,000-step budget), preserving all frozen cohorts and rules.
+The [sampling receipt](../results/plan_validity_independent_calibration_20261111/sampling_release.json)
+keeps this stage distinct from later cut freezing and fresh-prefix readout; neither
+later phase nor the original confirmation cohort is released.

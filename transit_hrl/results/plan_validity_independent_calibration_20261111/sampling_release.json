@@ -1,0 +1,110 @@
+{
+  "run_name": "plan_validity_independent_calibration_20261111",
+  "stage": "calibration_sampling_only",
+  "authorized_local_date": "2026-11-11",
+  "snapshot_at_utc": "2026-11-10T16:28:02.737021+00:00",
+  "source_manifest": "protocols/plan_validity_independent_calibration_2026-11-11.json",
+  "frozen_implementation_commit": "e2f6ef9c93",
+  "launch_worktree_commit": "e2a032c2a0",
+  "released_environment_steps": 4224000,
+  "per_job_environment_steps": 528000,
+  "prefixes_total": 64,
+  "states_total": 192,
+  "A_futures_per_state": 4,
+  "B_futures_per_state": 4,
+  "permitted_model_fits": 0,
+  "permitted_controller_updates": 0,
+  "permitted_cut_selection_jobs": 0,
+  "submitted_phase_counts": {
+    "precheck": 4,
+    "sample": 8,
+    "select": 0,
+    "readout": 0
+  },
+  "scheduler_snapshot": [
+    {
+      "id": "t214476",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/pointmaze/1972110000/shard0",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214476.log"
+    },
+    {
+      "id": "t214477",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/pointmaze/1972110000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214477.log"
+    },
+    {
+      "id": "t214478",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/pointmaze/1972120000/shard0",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214478.log"
+    },
+    {
+      "id": "t214479",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/pointmaze/1972120000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214479.log"
+    },
+    {
+      "id": "t214480",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/reacher_tracking/1972210000/shard0",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214480.log"
+    },
+    {
+      "id": "t214481",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/reacher_tracking/1972210000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214481.log"
+    },
+    {
+      "id": "t214482",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/reacher_tracking/1972220000/shard0",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214482.log"
+    },
+    {
+      "id": "t214483",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/sample/reacher_tracking/1972220000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214483.log"
+    }
+  ],
+  "local_raw_bank_or_model_downloads": 0,
+  "initial_native_progress_observed": {
+    "shards_with_at_least_one_complete_prefix": 8,
+    "reported_errors": 0,
+    "source": "compact_server_public_progress_only"
+  },
+  "performance_readout": "not_started_sampling_in_progress",
+  "next_step": "after_all_sampling_complete_A4_only_cut_freeze_on_four_roots_before_any_new_prefix_readout",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}

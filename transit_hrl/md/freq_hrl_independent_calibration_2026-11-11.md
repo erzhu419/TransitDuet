@@ -18,8 +18,8 @@ and both heads separate. Positive point behavior requires both W/G in both halve
 and both roots/task; intervals and C0 comparisons must also be shown. A gain against
 quantile is not automatically a gain against C0 or an episode-performance claim.
 
-Four native prechecks first, at most 48,000 environment steps total. Formal work,
-prepared but not released: eight calibration shards (4,224,000 steps), four zero-
+Four native prechecks first, at most 48,000 environment steps total. Formal work
+is released by stage: eight calibration shards (4,224,000 steps), four zero-
 simulation cut freezes, four readouts (2,112,000 steps). Total cap 6,384,000 steps;
 zero full-model/ridge fits. Jobs are unpinned 1CPU/2GiB on node001-node006. Retain
 paid banks server-side and retrieve only public aggregates. No automatic follow-up.
@@ -39,5 +39,18 @@ conditional pairing and both heads' native/full-score equality passed; no model
 fits or updates. Measured phase CPU: 34.354 seconds. Retrieved 10,585 public bytes,
 no raw banks/models. Forty related tests passed. See the
 [receipt](../results/plan_validity_independent_calibration_20261111/precheck_summary.json).
-Formal sampling remains unsubmitted. Next release only the eight frozen calibration
-shards (4,224,000 steps), then freeze cuts before any fresh-prefix readout.
+At precheck completion, formal sampling was unsubmitted. The next release is only
+the eight frozen calibration shards, then cut freezing before fresh-prefix readout.
+
+## Calibration Sampling Release
+
+The subsequent authorized step submits only the eight frozen calibration shards,
+t214476-t214483, with 528,000 steps/shard (4,224,000 total). Each shard contains
+eight new prefixes, three states/prefix and A4+B4 futures/state. No parameters,
+cohort rosters, models or selection rules change. Cut-freeze and fresh-prefix
+readout jobs remain unsubmitted. The dated
+[release receipt](../results/plan_validity_independent_calibration_20261111/sampling_release.json)
+records placement/status without changing the original frozen manifest.
+All eight jobs started on node004/node005 (four each). Initial public progress
+confirms at least one completed prefix/shard without errors; sampling is ongoing,
+not a completed performance readout. No raw banks or models were retrieved.
