@@ -1,0 +1,90 @@
+{
+  "run_name": "plan_validity_independent_calibration_20261111",
+  "status": "four_native_prechecks_passed",
+  "completed_at_utc": "2026-11-10T16:21:10.232843+00:00",
+  "frozen_code_commit": "e2f6ef9c93",
+  "source_manifest": "protocols/plan_validity_independent_calibration_2026-11-11.json",
+  "scheduler_snapshot": [
+    {
+      "id": "t214471",
+      "status": "done",
+      "exit_code": 0,
+      "node": "node006",
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214472",
+      "status": "done",
+      "exit_code": 0,
+      "node": "node006",
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214473",
+      "status": "done",
+      "exit_code": 0,
+      "node": "node004",
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214474",
+      "status": "done",
+      "exit_code": 0,
+      "node": "node006",
+      "protect_from_auto_eviction": true
+    }
+  ],
+  "roots": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "sampled_seeds": [
+        1972171000
+      ],
+      "nonzero_phase": 5,
+      "upper_calls": 24,
+      "new_environment_steps": 8400
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "sampled_seeds": [
+        1972181000
+      ],
+      "nonzero_phase": 5,
+      "upper_calls": 24,
+      "new_environment_steps": 8400
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "sampled_seeds": [
+        1972271000
+      ],
+      "nonzero_phase": 5,
+      "upper_calls": 24,
+      "new_environment_steps": 8400
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "sampled_seeds": [
+        1972281000
+      ],
+      "nonzero_phase": 5,
+      "upper_calls": 24,
+      "new_environment_steps": 8400
+    }
+  ],
+  "new_environment_steps": 33600,
+  "environment_step_upper_bound": 48000,
+  "measured_phase_cpu_seconds": 34.353692511000006,
+  "public_result_download_bytes": 10585,
+  "new_model_fits": 0,
+  "formal_sampling_tasks_submitted": 0,
+  "next_step": "eight_frozen_calibration_shards_then_four_A_only_cut_freezes_before_any_new_prefix_readout",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}

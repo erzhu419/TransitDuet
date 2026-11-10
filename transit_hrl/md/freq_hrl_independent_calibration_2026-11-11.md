@@ -30,3 +30,14 @@ New cohorts are a development diagnostic on the same four trained roots, not the
 original reserved confirmation cohort. These are single interventions on C0 states,
 not learned-head closed-loop execution. Prefix intervals condition on trained roots;
 unknown earlier lifecycle costs and original termination/confirmation HOLD remain.
+
+## Precheck Execution
+
+All four prechecks t214471-t214474 passed on node004/node006: 8,400 native steps
+each (33,600 total), phase5 checks and 24 factual upper calls. Factual replay,
+conditional pairing and both heads' native/full-score equality passed; no model
+fits or updates. Measured phase CPU: 34.354 seconds. Retrieved 10,585 public bytes,
+no raw banks/models. Forty related tests passed. See the
+[receipt](../results/plan_validity_independent_calibration_20261111/precheck_summary.json).
+Formal sampling remains unsubmitted. Next release only the eight frozen calibration
+shards (4,224,000 steps), then freeze cuts before any fresh-prefix readout.

@@ -308,3 +308,8 @@ All eight heads stay fixed, A4 alone selects cuts, and all four roots must freez
 before new readout access. Only four native prechecks are released (48,000-step
 cap); 6,336,000 formal sampling/readout steps remain unsubmitted pending a separate
 decision. This is development work, not release of the original confirmation cohort.
+All four native prechecks subsequently passed on node004/node006, using 33,600
+steps with no fitting or controller updates. The
+[execution receipt](../results/plan_validity_independent_calibration_20261111/precheck_summary.json)
+retains the zero formal-task count. New calibration/readout cohorts remain unused;
+the next bounded release is calibration sampling only, not confirmation or episodes.
