@@ -44,7 +44,7 @@ def inventory(plan):
 def deployment():return json.loads((HERE.parent/'v400_independent_confirmation/deployment.json').read_text())
 
 
-def submit(label,script,args,result,waits=()):
+def make_spec(label,script,args,result,waits=()):
     d=deployment();source=ROOT.parent/'source01'
     env=dict(d['env']);env['PYTHONPATH']=str(source)+':'+env['PYTHONPATH']
     spec=dict(description='FreqDuet V402 '+label,project='FreqDuet',signature='FreqDuet/v402/'+label,
@@ -54,9 +54,15 @@ def submit(label,script,args,result,waits=()):
         no_auto_requeue=True,skip_launch_staging=True,cwd=str(source),env=env,
         cmd=shlex.join([d['python'],'-u',str(source/script),*map(str,args)]),
         result_dir=str(result),local_result_dir=str(HERE/'review'/label),wait_for_files=list(map(str,waits)))
+    return spec
+
+
+def submit_many(requests):
+    specs=[make_spec(*request) for request in requests]
     proc=subprocess.run([sys.executable,scheduler.__file__,'submit-jsonl','--stdin','--trusted','--json',
-                         '--lock-timeout','120'],input=json.dumps([spec]),text=True,capture_output=True,check=True)
-    return json.loads(proc.stdout)['submitted'][0]
+                         '--lock-timeout','600'],input=json.dumps(specs),text=True,capture_output=True)
+    if proc.returncode:raise RuntimeError(proc.stdout[-2000:]+'\n'+proc.stderr[-4000:])
+    return json.loads(proc.stdout)['submitted']
 
 
 def dispatch(tasks):
@@ -81,8 +87,8 @@ def preflight():
     code+=f'tarfile.open(fileobj=io.BytesIO(base64.b64decode({base64.b64encode(buffer.getvalue()).decode()!r}))).extractall(p)\n'
     d=deployment();rc,out,err=scheduler.run_on('node003',shlex.join([d['python'],'-c',code]),timeout=60,check=False)
     assert rc==0,(out,err[-2000:])
-    tasks=[submit('checks','checks.py',['--root',ROOT,'--assets',d['assets']],ROOT/'checks/summary'),
-           submit('freshness','freshness.py',['--root',ROOT],ROOT/'freshness/summary')]
+    tasks=submit_many([('checks','checks.py',['--root',ROOT,'--assets',d['assets']],ROOT/'checks/summary'),
+           ('freshness','freshness.py',['--root',ROOT],ROOT/'freshness/summary')])
     with (HERE/'submission_preflight.json').open('x') as stream:
         json.dump(dict(tasks=[dict(id=t['id'],signature=t['signature']) for t in tasks],physical_starts=0,
                        source=str(ROOT.parent/'source01'),root=str(ROOT)),stream,indent=2)

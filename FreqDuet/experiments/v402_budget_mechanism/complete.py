@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import time
 
-from launch import HERE,ROOT,deployment,submit,dispatch,scheduler
+from launch import HERE,ROOT,deployment,submit_many,dispatch,scheduler
 
 
 def wait(tasks,label):
@@ -26,8 +26,13 @@ def wait(tasks,label):
 
 def register(stage,specs):
     path=HERE/f'submission_{stage}.json'
-    assert not path.exists()
-    tasks=[submit(*spec) for spec in specs]
+    if path.exists():
+        wait(json.loads(path.read_text())['tasks'],stage);return
+    existing={t.get('signature'):t for t in scheduler.load_state()['tasks']}
+    missing=[spec for spec in specs if 'FreqDuet/v402/'+spec[0] not in existing]
+    if missing:
+        existing.update({t['signature']:t for t in submit_many(missing)})
+    tasks=[existing['FreqDuet/v402/'+spec[0]] for spec in specs]
     with path.open('x') as stream:json.dump(dict(stage=stage,tasks=[dict(id=t['id'],signature=t['signature'])
                                                            for t in tasks]),stream,indent=2)
     print('V402_STAGE_REGISTERED',stage,[t['id'] for t in tasks],flush=True)

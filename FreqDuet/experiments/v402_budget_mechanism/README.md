@@ -12,6 +12,9 @@ statistical calculations execute on node001--006, high/manual, at most eight
 concurrent paths; failed starts are charged, not automatically retried.
 
 Synthetic task t214090 passed six contracts with zero native Runner constructions.
-Freshness task t214091 and the real engineering gate must pass before calibration.
+Freshness task t214091 passed; engineering gate t214103 found zero differences
+for both pressure reproduction and the stop-cap noop. Calibration uses eight
+existing queues t214104--t214111. Registration recovery reused the first four
+IDs without restarting any path; later stages are submitted in one batch.
 Sources and raw results remain under the dedicated V402 server root; historical
 TransitDuet/FreqDuet code and results are unchanged.
