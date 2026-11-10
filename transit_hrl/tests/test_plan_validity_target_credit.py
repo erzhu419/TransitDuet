@@ -1,6 +1,8 @@
 from copy import deepcopy
 import json
 from pathlib import Path
+import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -12,6 +14,8 @@ from freq_hrl.experiments.plan_validity_target_credit import (
 )
 from freq_hrl.experiments.pointmaze_timing_baselines import _CAUSAL_DYNAMIC_NAMES
 from scripts import submit_plan_validity_target_credit_scheduleurm as submitter
+from scripts import run_plan_validity_target_credit as worker
+from scripts import analyze_plan_validity_target_credit as analyzer
 
 
 def bank():
@@ -102,6 +106,55 @@ class TargetCreditTest(unittest.TestCase):
     def test_missing_training_paths_are_not_replaced_with_evaluation_data(self):
         with self.assertRaisesRegex(ValueError, "three fitting paths"):
             fit_targets(bank()[:6], effective_df=8, threshold_quantile=0.75)
+
+    def test_rules_are_frozen_before_independent_readout_and_new_prefixes(self):
+        source = json.loads((submitter.ROOT / "protocols/plan_validity_local_episode_diagnostic_2026-11-10.json").read_text())
+        manifest = submitter.prepare(source, draft_plan(), "fixture", Path("protocols/fixture.json"))
+        cell = manifest["cells"][0]
+        for row in cell["sources"].values():
+            row["validation_ise"] = 1
+        rules, _ = fit_targets(bank(), effective_df=8, threshold_quantile=0.75)
+        originals = {m: rules["L"] for m in cell["sources"]}
+        records = {"termination_history": {"termination_readiness": {"eligible_for_fresh_confirmation": False}}}
+        with tempfile.TemporaryDirectory() as folder:
+            directory = Path(folder) / "run"
+            (directory / "private").mkdir(parents=True)
+            gate_path = directory.parent / "precheck/public/result.json"
+            gate_path.parent.mkdir(parents=True)
+            gate = {"status": "complete", "stage": "precheck_passed", "run_name": "fixture",
+                    "optimizer_seed": cell["optimizer_seed"]}
+            gate_path.write_text(json.dumps(gate))
+            calls = []
+
+            def collect(*args, **kwargs):
+                calls.append(kwargs["seeds"])
+                if len(calls) == 2:
+                    self.assertTrue((directory / "private/frozen_rules.json").exists())
+                return bank()
+
+            with patch.object(worker, "load_sources", return_value=(records,
+                {m: object() for m in originals}, originals, SimpleNamespace(**cell["expected_configuration"]))), \
+                 patch.object(worker, "run_episode", return_value=(None, {"tracking_squared_error_integral": 1})), \
+                 patch.object(worker, "collect_bank", side_effect=collect):
+                result, raw = worker.run_cell(cell, manifest, "run", directory, lambda _: None)
+                self.assertEqual(calls, [cell["training_prefix_seeds"], cell["held_prefix_seeds"]])
+                self.assertEqual(result["stage"], "repair_readout_complete")
+                self.assertEqual(len(result["episodes"]), 8)
+                self.assertFalse(result["termination_development_eligible"])
+                gate_path.write_text(json.dumps({**gate, "status": "failed"}))
+                calls.clear()
+                with self.assertRaisesRegex(ValueError, "successful matching native precheck"):
+                    worker.run_cell(cell, manifest, "run", directory, lambda _: None)
+                self.assertFalse(calls)
+
+    def test_analysis_does_not_omit_missing_roots_or_clear_hold(self):
+        source = json.loads((submitter.ROOT / "protocols/plan_validity_local_episode_diagnostic_2026-11-10.json").read_text())
+        manifest = submitter.prepare(source, draft_plan(), "fixture", Path("protocols/fixture.json"))
+        with tempfile.TemporaryDirectory() as folder:
+            result = analyzer.summarize(manifest, root=Path(folder))
+        self.assertEqual(len(result["missing"]), 4)
+        self.assertEqual(result["task_means"], {"pointmaze": None, "reacher_tracking": None})
+        self.assertFalse(result["confirmation_released"])
 
 
 if __name__ == "__main__":

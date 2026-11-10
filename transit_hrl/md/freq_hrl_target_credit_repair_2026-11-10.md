@@ -45,6 +45,7 @@ a favorable future block. No winner is automatically promoted or refitted here.
 ## Execution
 
 Four one-CPU/2-GiB native prechecks must pass before four main jobs are submitted.
+Precheck task IDs: t214182-t214185, in the manifest's task/root order.
 Use dynamic scheduler placement on node001-node006. Main jobs also require their
 successful precheck artifact. Prechecks access only a training prefix; new held
 prefixes remain untouched. Full banks and fitted rules stay on the server; only
