@@ -289,3 +289,9 @@ W/G gain across B halves. Selected A gains can fail on independent B futures eve
 with OOF scores; relative constraints also fail to transfer to full-model scores.
 Recovered scores are saved for a bounded score-source diagnostic, not B-based
 retuning. No further native evaluation or confirmation is released; HOLD remains.
+
+The next [saved-score source control](freq_hrl_score_source_2026-11-10.md)
+freezes OOF-selected and full-score-selected A-only cuts, crosses both score views,
+and compares them directly on identical full-model scores. It reuses saved OOF
+predictions with zero new fits or native steps. Full-score A calibration is
+in-sample; previously revealed B is diagnostic only. Original gates stay held.

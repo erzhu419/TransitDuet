@@ -84,3 +84,26 @@ def decision_readout(rows, oof, rules, selected):
                 "choose_now": {"quantile": int(original.sum()), "utility": int(utility.sum()), "C0": int(factual.sum())},
                 "B_panels": panels}
     return result
+
+
+def score_source_readout(rows, oof, rules, selected):
+    """Compare both A-selected cuts on the same scoring view and paired futures."""
+    panels = {source: decision_readout(rows, oof, rules, cuts) for source, cuts in selected.items()}
+    groups = np.asarray([r["seed"] for r in rows])
+    b = {k: values(rows, k, "B") for k in ("W", "G")}
+    a = {k: values(rows, k, "A").mean(axis=1) for k in ("W", "G")}
+    contrast = {}
+    for head, rule in rules.items():
+        contrast[head] = {}
+        for view, scores in (("oof_scores", oof[head]), ("frozen_full_scores", predict(rule, rows))):
+            old = scores >= selected["oof_scores"][head]["cut"]
+            new = scores >= selected["frozen_full_scores"][head]["cut"]
+            change = new.astype(int) - old.astype(int)
+            contrast[head][view] = {
+                "changed_actions": int(np.count_nonzero(change)),
+                "changed_prefixes": len(set(groups[change != 0].tolist())),
+                "apparent_A_full_selected_minus_oof_selected": {k: float(np.mean(change * v)) for k, v in a.items()},
+                "B_full_selected_minus_oof_selected": {
+                    block: {k: _B_gain(change, v[:, subset], groups) for k, v in b.items()}
+                    for block, subset in (("B1", slice(0, 2)), ("B2", slice(2, 4)), ("B_all", slice(0, 4)))}}
+    return {"by_calibration_source": panels, "same_score_source_contrast": contrast}
