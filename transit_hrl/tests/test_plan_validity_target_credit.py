@@ -1,4 +1,5 @@
 from copy import deepcopy
+from contextlib import contextmanager
 import json
 from pathlib import Path
 import tempfile
@@ -9,6 +10,7 @@ from unittest.mock import patch
 import numpy as np
 
 from freq_hrl.experiments.plan_validity_preregistration import draft_plan, seed_cells
+from freq_hrl.experiments.compute_budget import count_work
 from freq_hrl.experiments.plan_validity_target_credit import (
     TARGETS, fit_targets, fitting_readout, held_readout, labels, prediction_error, predict,
 )
@@ -155,6 +157,31 @@ class TargetCreditTest(unittest.TestCase):
         self.assertEqual(len(result["missing"]), 4)
         self.assertEqual(result["task_means"], {"pointmaze": None, "reacher_tracking": None})
         self.assertFalse(result["confirmation_released"])
+
+    def test_private_and_public_costs_both_include_work_after_last_progress_update(self):
+        @contextmanager
+        def runtime():
+            yield {"cpu": "fixture"}
+
+        def measured_cell(cell, manifest, phase, directory, publish):
+            count_work("environment_steps", 7)
+            publish({"stage": "rules_frozen_before_holdout"})
+            count_work("environment_steps", 11)
+            return {"stage": "repair_readout_complete"}, None
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"run_name": "fixture", "source_hardware_profile": {"cpu": "fixture"},
+                "cells": [{"task": "pointmaze", "optimizer_seed": 1, "output_directory": "out",
+                    "training_prefix_seeds": [2, 3, 4], "held_prefix_seeds": [5, 6]}]}))
+            with patch.object(worker, "ROOT", root), patch.object(worker, "single_thread_runtime", runtime), \
+                 patch.object(worker, "run_cell", side_effect=measured_cell):
+                self.assertEqual(worker.main(["--manifest", str(manifest), "--cell-index", "0", "--phase", "run"]), 0)
+            private = json.loads((root / "out/run/private/result.json").read_text())
+            public = json.loads((root / "out/run/public/result.json").read_text())
+            self.assertEqual(private["measured_cost"], public["measured_cost"])
+            self.assertEqual(private["measured_cost"]["counts"]["environment_steps"], 18)
 
 
 if __name__ == "__main__":

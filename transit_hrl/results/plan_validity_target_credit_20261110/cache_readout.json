@@ -1,0 +1,541 @@
+{
+  "run_name": "plan_validity_target_credit_20261110",
+  "analysis_role": "posthoc_descriptive_frozen_cache_only",
+  "interpretation": "one_intervention_on_original_policy_states_not_repeated_policy_episode_effects",
+  "information_benchmarks": "finite_future_information_not_deployable_rules_or_upper_bounds",
+  "fit_calls": 0,
+  "new_simulator_steps": 0,
+  "confirmation_released": false,
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "panels": {
+        "training": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -0.5981806660452474,
+          "G_maximum_future": 0.14039627492838935,
+          "G_largest_state_fraction_of_future_squares": 0.3453225963024739,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.20833333333333334,
+                "same_cut_information_stop_fraction": 0.20833333333333334,
+                "frozen_gain_over_factual": 0.0027204097894822296,
+                "same_cut_information_gain_over_frozen": 0.0,
+                "target_zero_information_gain_over_frozen": 9.700520418213024e-05,
+                "full_information_gain_over_frozen": 0.010218662351680851,
+                "full_information_gain_over_selected_constant": 0.006845589093213902,
+                "score_zero_gain_over_frozen": -0.006226506995119646
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.4166666666666667,
+                "same_cut_information_stop_fraction": 0.5,
+                "frozen_gain_over_factual": 0.006954429867199166,
+                "same_cut_information_gain_over_frozen": 0.010025361237956621,
+                "target_zero_information_gain_over_frozen": 0.010025361237956621,
+                "full_information_gain_over_frozen": 0.005984642273963915,
+                "full_information_gain_over_selected_constant": 0.006845589093213902,
+                "score_zero_gain_over_frozen": -0.0026984409320360728
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.16666666666666666,
+                "same_cut_information_stop_fraction": 0.4583333333333333,
+                "frozen_gain_over_factual": 0.00853550359742264,
+                "same_cut_information_gain_over_frozen": 0.007374130151771745,
+                "target_zero_information_gain_over_frozen": 0.004403568543740441,
+                "full_information_gain_over_frozen": 0.004403568543740441,
+                "full_information_gain_over_selected_constant": 0.006845589093213902,
+                "score_zero_gain_over_frozen": 0.0001818604067957575
+              }
+            }
+          }
+        },
+        "held": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -0.4241124292965561,
+          "G_maximum_future": 0.14788174741880267,
+          "G_largest_state_fraction_of_future_squares": 0.2447993680777699,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.375,
+                "same_cut_information_stop_fraction": 0.3333333333333333,
+                "frozen_gain_over_factual": 0.00034042625087740236,
+                "same_cut_information_gain_over_frozen": -0.001335977302875272,
+                "target_zero_information_gain_over_frozen": -0.007426055316395334,
+                "full_information_gain_over_frozen": 1.5044411744337058e-05,
+                "full_information_gain_over_selected_constant": 0.007131028667415491,
+                "score_zero_gain_over_frozen": -0.0024830752734068266
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.375,
+                "same_cut_information_stop_fraction": 0.3333333333333333,
+                "frozen_gain_over_factual": -0.000612272381268464,
+                "same_cut_information_gain_over_frozen": -0.00017217750128180215,
+                "target_zero_information_gain_over_frozen": -0.010242680197701127,
+                "full_information_gain_over_frozen": -0.003390596036496053,
+                "full_information_gain_over_selected_constant": 0.00023097109627173823,
+                "score_zero_gain_over_frozen": -0.013796605334260763
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.5416666666666666,
+                "same_cut_information_stop_fraction": 0.5833333333333334,
+                "frozen_gain_over_factual": -0.0019198863369433033,
+                "same_cut_information_gain_over_frozen": -0.00097936489646843,
+                "target_zero_information_gain_over_frozen": -0.0013212157946919558,
+                "full_information_gain_over_frozen": 0.002275356999565043,
+                "full_information_gain_over_selected_constant": 0.007131028667415491,
+                "score_zero_gain_over_frozen": 0.0
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.5416666666666666,
+                "same_cut_information_stop_fraction": 0.5833333333333334,
+                "frozen_gain_over_factual": -0.010871349648516375,
+                "same_cut_information_gain_over_frozen": 0.00375704314827328,
+                "target_zero_information_gain_over_frozen": 0.001908984656991958,
+                "full_information_gain_over_frozen": 0.006868481230751858,
+                "full_information_gain_over_selected_constant": 0.00023097109627173823,
+                "score_zero_gain_over_frozen": 0.0
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.20833333333333334,
+                "same_cut_information_stop_fraction": 0.2916666666666667,
+                "frozen_gain_over_factual": -0.008963050990598615,
+                "same_cut_information_gain_over_frozen": 0.00717580996971999,
+                "target_zero_information_gain_over_frozen": 0.009318521653220356,
+                "full_information_gain_over_frozen": 0.009318521653220356,
+                "full_information_gain_over_selected_constant": 0.007131028667415491,
+                "score_zero_gain_over_frozen": -0.00020579573062504825
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.20833333333333334,
+                "same_cut_information_stop_fraction": 0.5,
+                "frozen_gain_over_factual": -0.007345284359613025,
+                "same_cut_information_gain_over_frozen": 0.003342415941848508,
+                "target_zero_information_gain_over_frozen": 0.003342415941848508,
+                "full_information_gain_over_frozen": 0.003342415941848508,
+                "full_information_gain_over_selected_constant": 0.00023097109627173823,
+                "score_zero_gain_over_frozen": -0.00161192956304466
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "panels": {
+        "training": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -0.28637089810246674,
+          "G_maximum_future": 0.45151534863136256,
+          "G_largest_state_fraction_of_future_squares": 0.15959341721906867,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.2916666666666667,
+                "same_cut_information_stop_fraction": 0.2916666666666667,
+                "frozen_gain_over_factual": -0.0009059850446523852,
+                "same_cut_information_gain_over_frozen": -5.4617106520749255e-05,
+                "target_zero_information_gain_over_frozen": 0.011927115149066391,
+                "full_information_gain_over_frozen": 0.011360267199381602,
+                "full_information_gain_over_selected_constant": 0.024554878481475365,
+                "score_zero_gain_over_frozen": -0.003835138827791247
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.25,
+                "same_cut_information_stop_fraction": 0.3333333333333333,
+                "frozen_gain_over_factual": -0.0023790548967997003,
+                "same_cut_information_gain_over_frozen": 0.002719744990536116,
+                "target_zero_information_gain_over_frozen": 0.013804316835068407,
+                "full_information_gain_over_frozen": 0.012833337051528915,
+                "full_information_gain_over_selected_constant": 0.024554878481475365,
+                "score_zero_gain_over_frozen": 0.0036042991826083447
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.16666666666666666,
+                "same_cut_information_stop_fraction": 0.20833333333333334,
+                "frozen_gain_over_factual": -0.005723733089011207,
+                "same_cut_information_gain_over_frozen": 0.005541068737306945,
+                "target_zero_information_gain_over_frozen": 0.016178015243740424,
+                "full_information_gain_over_frozen": 0.016178015243740424,
+                "full_information_gain_over_selected_constant": 0.024554878481475365,
+                "score_zero_gain_over_frozen": 0.020170024903748317
+              }
+            }
+          }
+        },
+        "held": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -0.4029529477258108,
+          "G_maximum_future": 1.0665026634906978,
+          "G_largest_state_fraction_of_future_squares": 0.3954943224913959,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.08333333333333333,
+                "same_cut_information_stop_fraction": 0.125,
+                "frozen_gain_over_factual": -0.010597676062022795,
+                "same_cut_information_gain_over_frozen": 0.008192447790226808,
+                "target_zero_information_gain_over_frozen": 0.0014361386887040359,
+                "full_information_gain_over_frozen": 0.022344591703604155,
+                "full_information_gain_over_selected_constant": 0.021229085482928494,
+                "score_zero_gain_over_frozen": 0.0037806919214443315
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.08333333333333333,
+                "same_cut_information_stop_fraction": 0.125,
+                "frozen_gain_over_factual": -0.013452474504250737,
+                "same_cut_information_gain_over_frozen": 0.014042320420762734,
+                "target_zero_information_gain_over_frozen": 0.0018408673174960186,
+                "full_information_gain_over_frozen": 0.017751557098172468,
+                "full_information_gain_over_selected_constant": 0.016712572041335246,
+                "score_zero_gain_over_frozen": -0.008761754248378788
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.08333333333333333,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": -0.003413568385483387,
+                "same_cut_information_gain_over_frozen": 0.003076257944464982,
+                "target_zero_information_gain_over_frozen": 0.007205459722031831,
+                "full_information_gain_over_frozen": 0.015160484027064748,
+                "full_information_gain_over_selected_constant": 0.021229085482928494,
+                "score_zero_gain_over_frozen": 0.010054905344257877
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.08333333333333333,
+                "same_cut_information_stop_fraction": 0.2916666666666667,
+                "frozen_gain_over_factual": 0.00014311124844561726,
+                "same_cut_information_gain_over_frozen": 0.004301184630957363,
+                "target_zero_information_gain_over_frozen": 0.0072508424313147855,
+                "full_information_gain_over_frozen": 0.004155971345476112,
+                "full_information_gain_over_selected_constant": 0.016712572041335246,
+                "score_zero_gain_over_frozen": 0.0014840603211227453
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.08333333333333333,
+                "same_cut_information_stop_fraction": 0.16666666666666666,
+                "frozen_gain_over_factual": -0.003413568385483387,
+                "same_cut_information_gain_over_frozen": 0.0017986497938617858,
+                "target_zero_information_gain_over_frozen": 0.015160484027064748,
+                "full_information_gain_over_frozen": 0.015160484027064748,
+                "full_information_gain_over_selected_constant": 0.021229085482928494,
+                "score_zero_gain_over_frozen": -0.003193361490217657
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.08333333333333333,
+                "same_cut_information_stop_fraction": 0.2916666666666667,
+                "frozen_gain_over_factual": 0.00014311124844561726,
+                "same_cut_information_gain_over_frozen": 0.003766871542350903,
+                "target_zero_information_gain_over_frozen": 0.004155971345476112,
+                "full_information_gain_over_frozen": 0.004155971345476112,
+                "full_information_gain_over_selected_constant": 0.016712572041335246,
+                "score_zero_gain_over_frozen": -0.0011062945591420517
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "panels": {
+        "training": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -1.353069383339145,
+          "G_maximum_future": 0.7431664419860367,
+          "G_largest_state_fraction_of_future_squares": 0.5357199554624511,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.16666666666666666,
+                "same_cut_information_stop_fraction": 0.16666666666666666,
+                "frozen_gain_over_factual": 0.0127329667716782,
+                "same_cut_information_gain_over_frozen": 0.0,
+                "target_zero_information_gain_over_frozen": 0.0023928035201631753,
+                "full_information_gain_over_frozen": 0.004699964945481226,
+                "full_information_gain_over_selected_constant": 0.004702378018285533,
+                "score_zero_gain_over_frozen": 0.003974095241235279
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.125,
+                "same_cut_information_stop_fraction": 0.20833333333333334,
+                "frozen_gain_over_factual": 0.01302650029531372,
+                "same_cut_information_gain_over_frozen": -0.021353900925612273,
+                "target_zero_information_gain_over_frozen": -0.02218408669853304,
+                "full_information_gain_over_frozen": 0.004406431421845709,
+                "full_information_gain_over_selected_constant": 0.004702378018285533,
+                "score_zero_gain_over_frozen": -0.025340504912704228
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.20833333333333334,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": 0.011356517601494753,
+                "same_cut_information_gain_over_frozen": 0.0027636161364838437,
+                "target_zero_information_gain_over_frozen": 0.0060764141156646745,
+                "full_information_gain_over_frozen": 0.0060764141156646745,
+                "full_information_gain_over_selected_constant": 0.004702378018285533,
+                "score_zero_gain_over_frozen": 0.002841409966166534
+              }
+            }
+          }
+        },
+        "held": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -1.8036020705186013,
+          "G_maximum_future": 0.3662843642971687,
+          "G_largest_state_fraction_of_future_squares": 0.8976027062695513,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.125,
+                "same_cut_information_stop_fraction": 0.041666666666666664,
+                "frozen_gain_over_factual": -0.002645044606771507,
+                "same_cut_information_gain_over_frozen": -6.311309271501049e-05,
+                "target_zero_information_gain_over_frozen": 0.01157253643940657,
+                "full_information_gain_over_frozen": 0.01528101696939195,
+                "full_information_gain_over_selected_constant": 0.012559234086983298,
+                "score_zero_gain_over_frozen": -0.04072794387019358
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.125,
+                "same_cut_information_stop_fraction": 0.041666666666666664,
+                "frozen_gain_over_factual": -0.002378894347226342,
+                "same_cut_information_gain_over_frozen": 0.00024920197358256163,
+                "target_zero_information_gain_over_frozen": 0.01037574872714068,
+                "full_information_gain_over_frozen": 0.012123314075007488,
+                "full_information_gain_over_selected_constant": 0.011470418236201494,
+                "score_zero_gain_over_frozen": -0.016207972525695533
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.3333333333333333,
+                "same_cut_information_stop_fraction": 0.3333333333333333,
+                "frozen_gain_over_factual": -0.039396835641138474,
+                "same_cut_information_gain_over_frozen": 0.049704190437777296,
+                "target_zero_information_gain_over_frozen": 0.05028226181612077,
+                "full_information_gain_over_frozen": 0.052032808003758924,
+                "full_information_gain_over_selected_constant": 0.012559234086983298,
+                "score_zero_gain_over_frozen": -0.003568131566660887
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.3333333333333333,
+                "same_cut_information_stop_fraction": 0.2916666666666667,
+                "frozen_gain_over_factual": -0.021177897633158544,
+                "same_cut_information_gain_over_frozen": 0.026370020423060036,
+                "target_zero_information_gain_over_frozen": 0.030239603881693094,
+                "full_information_gain_over_frozen": 0.03092231736093969,
+                "full_information_gain_over_selected_constant": 0.011470418236201494,
+                "score_zero_gain_over_frozen": 0.0028464618546867096
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.16666666666666666,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": 0.0024884692021823105,
+                "same_cut_information_gain_over_frozen": 0.0077754372050759845,
+                "target_zero_information_gain_over_frozen": 0.010147503160438132,
+                "full_information_gain_over_frozen": 0.010147503160438132,
+                "full_information_gain_over_selected_constant": 0.012559234086983298,
+                "score_zero_gain_over_frozen": -0.048124993353763405
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.16666666666666666,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": 0.0026629007346838283,
+                "same_cut_information_gain_over_frozen": 0.005230399947546103,
+                "target_zero_information_gain_over_frozen": 0.007081518993097317,
+                "full_information_gain_over_frozen": 0.007081518993097317,
+                "full_information_gain_over_selected_constant": 0.011470418236201494,
+                "score_zero_gain_over_frozen": -0.02336623060027676
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "panels": {
+        "training": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -1.0163493447998349,
+          "G_maximum_future": 2.1183007318646077,
+          "G_largest_state_fraction_of_future_squares": 0.2243966004850131,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.2916666666666667,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": 0.005217505719018291,
+                "same_cut_information_gain_over_frozen": 0.003441385021147413,
+                "target_zero_information_gain_over_frozen": 0.008683293160109748,
+                "full_information_gain_over_frozen": 0.007174598826898794,
+                "full_information_gain_over_selected_constant": 0.013145313453675594,
+                "score_zero_gain_over_frozen": -0.0002975751472362638
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.16666666666666666,
+                "same_cut_information_stop_fraction": 0.375,
+                "frozen_gain_over_factual": 0.01022162672485829,
+                "same_cut_information_gain_over_frozen": 0.024189611341924325,
+                "target_zero_information_gain_over_frozen": 0.022878544707758738,
+                "full_information_gain_over_frozen": 0.0021704778210587944,
+                "full_information_gain_over_selected_constant": 0.013145313453675594,
+                "score_zero_gain_over_frozen": -0.00131106663416559
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.2916666666666667,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": -0.0024149875411511867,
+                "same_cut_information_gain_over_frozen": 0.005366770586547716,
+                "target_zero_information_gain_over_frozen": 0.014807092087068272,
+                "full_information_gain_over_frozen": 0.014807092087068272,
+                "full_information_gain_over_selected_constant": 0.013145313453675594,
+                "score_zero_gain_over_frozen": -0.0054669352451318055
+              }
+            }
+          }
+        },
+        "held": {
+          "paths": 8,
+          "states": 24,
+          "G_minimum_future": -1.9640502280646208,
+          "G_maximum_future": 1.947779003540954,
+          "G_largest_state_fraction_of_future_squares": 0.33602393547805864,
+          "actions": {
+            "L": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.5833333333333334,
+                "same_cut_information_stop_fraction": 0.375,
+                "frozen_gain_over_factual": 0.0032696135109090557,
+                "same_cut_information_gain_over_frozen": 0.00271152386163206,
+                "target_zero_information_gain_over_frozen": -0.007467780842500896,
+                "full_information_gain_over_frozen": -0.008287474540888165,
+                "full_information_gain_over_selected_constant": -0.0208248726312579,
+                "score_zero_gain_over_frozen": 0.00012835998128620887
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.5833333333333334,
+                "same_cut_information_stop_fraction": 0.375,
+                "frozen_gain_over_factual": 0.02079387689391543,
+                "same_cut_information_gain_over_frozen": 0.003621244155072668,
+                "target_zero_information_gain_over_frozen": 0.005242918828654121,
+                "full_information_gain_over_frozen": -0.029428260523323906,
+                "full_information_gain_over_selected_constant": -0.007668329564492436,
+                "score_zero_gain_over_frozen": -0.022417567481511035
+              }
+            },
+            "W": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.4583333333333333,
+                "same_cut_information_stop_fraction": 0.5,
+                "frozen_gain_over_factual": -0.008647721197408956,
+                "same_cut_information_gain_over_frozen": 0.02973360594609115,
+                "target_zero_information_gain_over_frozen": 0.05264801151133747,
+                "full_information_gain_over_frozen": 0.0036298601674298464,
+                "full_information_gain_over_selected_constant": -0.0208248726312579,
+                "score_zero_gain_over_frozen": 0.0
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.4583333333333333,
+                "same_cut_information_stop_fraction": 0.5416666666666666,
+                "frozen_gain_over_factual": -0.0030949958999250174,
+                "same_cut_information_gain_over_frozen": 0.02430458187793139,
+                "target_zero_information_gain_over_frozen": 0.025421000165213148,
+                "full_information_gain_over_frozen": -0.005539387729483457,
+                "full_information_gain_over_selected_constant": -0.007668329564492436,
+                "score_zero_gain_over_frozen": 0.0
+              }
+            },
+            "G": {
+              "A_to_B": {
+                "frozen_stop_fraction": 0.25,
+                "same_cut_information_stop_fraction": 0.25,
+                "frozen_gain_over_factual": -0.008956398572035498,
+                "same_cut_information_gain_over_frozen": 0.00027945454865511976,
+                "target_zero_information_gain_over_frozen": 0.003938537542056387,
+                "full_information_gain_over_frozen": 0.003938537542056387,
+                "full_information_gain_over_selected_constant": -0.0208248726312579,
+                "score_zero_gain_over_frozen": 0.00036148207847612007
+              },
+              "B_to_A": {
+                "frozen_stop_fraction": 0.25,
+                "same_cut_information_stop_fraction": 0.2916666666666667,
+                "frozen_gain_over_factual": -0.0002915610487083757,
+                "same_cut_information_gain_over_frozen": 0.009893591966123652,
+                "target_zero_information_gain_over_frozen": -0.008342822580700099,
+                "full_information_gain_over_frozen": -0.008342822580700099,
+                "full_information_gain_over_selected_constant": -0.007668329564492436,
+                "score_zero_gain_over_frozen": 0.0003590459746755185
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "cost_snapshots": [
+    {
+      "task": "pointmaze",
+      "root": 1972110000,
+      "private_cpu": 730.341734815,
+      "public_cpu": 1472.888997384
+    },
+    {
+      "task": "pointmaze",
+      "root": 1972120000,
+      "private_cpu": 721.0159189510001,
+      "public_cpu": 1432.315853418
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972210000,
+      "private_cpu": 599.410955324,
+      "public_cpu": 1206.120792679
+    },
+    {
+      "task": "reacher_tracking",
+      "root": 1972220000,
+      "private_cpu": 584.0734118940001,
+      "public_cpu": 1190.056942131
+    }
+  ]
+}

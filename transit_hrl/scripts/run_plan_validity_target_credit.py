@@ -141,7 +141,8 @@ def main(argv=None):
         result.update(summary, status="complete")
     except Exception as exc:
         result.update(status="failed", stage="failed", error_type=type(exc).__name__, error=str(exc))
-    result["peak_process_rss_mb"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+    result.update(measured_cost=ledger.summary(),
+        peak_process_rss_mb=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024)
     (directory / "private/result.json").write_text(json.dumps(_json_ready({**result, "raw_banks": raw}), indent=2) + "\n")
     publish({})
     return int(result["status"] != "complete")

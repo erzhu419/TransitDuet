@@ -227,3 +227,7 @@ compares L/W/G on common training prefixes, capacity and conditional futures.
 Four native prechecks passed before main submission. New development prefixes
 are reserved separately from the revealed pilot evaluation paths; no confirmation
 roots are accessed. This repair does not change the original gates or clear HOLD.
+All four main cells subsequently completed: W improves matched L on average but
+not the frozen history reference; G is not a reliable repair. The
+[readout](freq_hrl_target_credit_result_2026-11-10.md) retains root/half differences
+and separates independent-future prediction from new-prefix transfer.

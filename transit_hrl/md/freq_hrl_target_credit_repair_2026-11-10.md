@@ -1,5 +1,7 @@
 # Matched Target Repair
 
+Completed: all four main cells succeeded; [result](freq_hrl_target_credit_result_2026-11-10.md).
+
 Parent decision remains **PILOT_RECIPE_HOLD**. This is a bounded development
 comparison, not a replacement confirmation protocol.
 
