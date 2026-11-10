@@ -10,7 +10,7 @@ import numpy as np
 from .pointmaze_budgeted_trigger import _predict_renewal_advantage
 from .pointmaze_compact_plan_validity import (
     _CAUSAL_DYNAMIC_NAMES, _CURRENT_COMPACT_NAMES, _base_matrix,
-    _quadratic_features, _select_named_features,
+    _causal_validity_interactions, _quadratic_features, _select_named_features,
 )
 from .pointmaze_plan_validity_branching import _ridge_fit_predict
 
@@ -56,6 +56,13 @@ class TimingRule:
                 feature_names=names, features=values, predictor=self.view,
                 fitted=self.model,
             )
+        if self.kind == "phase_ridge":
+            schema, raw = _base_matrix([{"feature_names": names, "causal_features": values}])
+            base, _ = _causal_validity_interactions(schema, raw)
+            x = np.r_[base[0], offset_fraction, remaining_fraction]
+            model = self.model["model"]
+            z = (x - model["feature_mean"]) / model["feature_scale"]
+            return float(model["weights"][0] + z @ np.asarray(model["weights"][1:]))
         row = {"feature_names": names, "causal_features": values,
                "offset_fraction": offset_fraction, "remaining_fraction": remaining_fraction}
         x, _ = feature_view([row], self.view, quadratic=self.kind == "ridge")
