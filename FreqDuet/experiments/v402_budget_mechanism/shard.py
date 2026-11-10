@@ -16,7 +16,13 @@ if __name__=='__main__':
     plan=read(HERE/'protocol.json')
     cases=grid(plan) if a.phase=='calibration' else selected_cases(a.root,plan)
     days=plan['calibration_days'] if a.phase=='calibration' else plan['confirmation_days']
-    cells=list(itertools.product(days,cases))[a.shard::8];completed=[];rc=0
+    if a.phase=='calibration':
+        ordered=sorted(cases,key=lambda c:(c['parameter'],c['kind']))
+        assert len(ordered)==16
+        pair=(ordered[a.shard],ordered[-1-a.shard])
+        cells=list(itertools.product(days,pair))
+    else:cells=list(itertools.product(days,cases))[a.shard::8]
+    completed=[];rc=0
     try:
         for day,case in cells:
             command=[sys.executable,'-u',str(HERE/'worker.py'),'--root',str(a.root),'--assets',str(a.assets),
