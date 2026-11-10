@@ -250,3 +250,11 @@ inputs are active, but the joint repair worsens PointMaze and gives only a fragi
 Reacher point gain, without surpassing the old controls. The
 [readout](freq_hrl_phase_support_result_2026-11-10.md) retains the whole cohort and
 prioritizes prefix/continuation consistency diagnostics; confirmation stays held.
+
+The [frozen prefix/continuation diagnostic](freq_hrl_continuation_diagnostic_2026-11-10.md)
+crosses original history and checks/clock without further fitting. Four native
+prechecks gate eight new paths per existing root, with matched conditional
+futures at common optional clocks. Prefix effects, continuation effects and
+their interaction are read separately; exclusive clocks and fixed-grid occupancy
+remain visible. Conditional-path uncertainty does not add trained roots or
+release the original confirmation gates.

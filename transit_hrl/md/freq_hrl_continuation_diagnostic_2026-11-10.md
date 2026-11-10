@@ -35,3 +35,15 @@ Each root uses at most 2,092,800 main simulator steps under this fixed design;
 eight shards total 8,371,200. Actual failed/replayed costs remain charged.
 Save paid probes incrementally on the server; retrieve only compact public JSON.
 Parent HOLD, failed termination competence and unknown old lifecycle costs remain.
+
+## Execution
+
+All 96 related tests passed. Native prechecks t214262-t214265 passed on all
+four roots: source ISE reproduced, factual same-policy replay held, and switching
+continuation preserved the causal prefix at phase 5. The prechecks used 201,600
+environment steps with no fits or optimizer updates; only 12,427 public bytes
+were retrieved. Formal shards t214267-t214274 use the unchanged frozen manifest.
+The [launch receipt](../results/plan_validity_continuation_20261110/launch_receipt.json)
+records actual placement and initial progress. All eight shards are running on
+node004 by dynamic scheduler placement, and each has saved its first paid probe.
+Results remain pending.

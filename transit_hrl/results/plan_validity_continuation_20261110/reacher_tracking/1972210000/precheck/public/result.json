@@ -1,0 +1,112 @@
+{
+  "run_name": "plan_validity_continuation_20261110",
+  "task": "reacher_tracking",
+  "optimizer_seed": 1972210000,
+  "phase": "precheck",
+  "shard_index": -1,
+  "status": "complete",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false,
+  "performance_claim_supported": false,
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "stage": "precheck_passed",
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 50.05340943,
+    "wall_seconds": 50.17508295085281,
+    "counts": {
+      "environment_opens": 42,
+      "environment_resets": 42,
+      "planner_calls": 1008,
+      "lower_calls": 50400,
+      "environment_step_attempts": 50400,
+      "environment_steps": 50400,
+      "history_updates": 50400,
+      "feature_vector_builds": 3509,
+      "trigger_score_checks": 3414
+    },
+    "phases": {
+      "continuation_precheck": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.19439838300000645,
+        "wall_seconds": 0.05854148790240288,
+        "counts": {}
+      },
+      "continuation_precheck/load_frozen_artifacts": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1.232312104,
+        "wall_seconds": 1.3105285000056028,
+        "counts": {}
+      },
+      "continuation_precheck/native_source_reproduction": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 15.264317148,
+        "wall_seconds": 15.357089454308152,
+        "counts": {
+          "environment_opens": 16,
+          "environment_resets": 16,
+          "planner_calls": 384,
+          "lower_calls": 19200,
+          "environment_step_attempts": 19200,
+          "environment_steps": 19200,
+          "history_updates": 19200,
+          "feature_vector_builds": 1512,
+          "trigger_score_checks": 1512
+        }
+      },
+      "continuation_precheck/native_continuation_precheck": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 33.362381795,
+        "wall_seconds": 33.44892350863665,
+        "counts": {
+          "environment_opens": 26,
+          "environment_resets": 26,
+          "planner_calls": 624,
+          "lower_calls": 31200,
+          "environment_step_attempts": 31200,
+          "environment_steps": 31200,
+          "history_updates": 31200,
+          "feature_vector_builds": 1997,
+          "trigger_score_checks": 1902
+        }
+      }
+    }
+  },
+  "source_episodes_reproduced": true,
+  "same_policy_factual_replay": true,
+  "cross_continuation_prefix_preserved": true,
+  "nonzero_phase": 5,
+  "peak_process_rss_mb": 442.39453125
+}
