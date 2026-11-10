@@ -210,6 +210,55 @@ def local_error_summary(rows, population):
             "sign_accuracy": float(np.mean((score > 0) == (target > 0)))}
 
 
+def cross_future_attribution(probes, *, threshold):
+    """Choose with one conditional-future block and score with the other."""
+    if not probes or any(len(p["conditional_replicas"]) < 2 or len(p["conditional_replicas"]) % 2 for p in probes):
+        raise ValueError("attribution needs probes with two equal nonempty future blocks")
+    local, full, reference = [], [], []
+    for probe in probes:
+        halves = np.array_split(probe["conditional_replicas"], 2)
+        local.append([np.mean([r["local_advantage"] for r in h]) for h in halves])
+        full.append([np.mean([r["full_advantage"] for r in h]) for h in halves])
+        reference.append([np.mean([r["reference_local_advantage"] for r in h]) for h in halves])
+    local, full, reference = map(np.asarray, (local, full, reference))
+    score = np.array([p["deployed_score"] for p in probes])
+    ref_score = np.array([p["reference_score"] for p in probes])
+    factual = np.array([p["factual_stop"] for p in probes], dtype=float)
+    directions = {}
+    for choose, evaluate, name in ((0, 1, "A_to_B"), (1, 0, "B_to_A")):
+        truth = full[:, evaluate]
+        actions = {"frozen": factual, "score_zero": score > 0,
+            "local_same_threshold": local[:, choose] > threshold,
+            "local_zero": local[:, choose] > 0, "full_zero": full[:, choose] > 0}
+        constant = float(full[:, choose].mean() > 0)
+        directions[name] = {
+            "gain_over_frozen": {k: float(np.mean((a - factual) * truth)) for k, a in actions.items()},
+            "full_signal_gain_over_block_selected_constant": float(np.mean((actions["full_zero"] - constant) * truth)),
+            "block_selected_constant_stop": bool(constant),
+            "local_to_full_sign_flip_fraction": float(np.mean(local[:, choose] * truth < 0))}
+    errors = {}
+    for name, scores, target in (("reference", ref_score, reference), ("deployed", score, local)):
+        errors[name] = {
+            "cross_block_conditional_mean_mse": float(np.mean((scores - target[:, 0]) * (scores - target[:, 1]))),
+            "cross_block_zero_predictor_mse": float(np.mean(target[:, 0] * target[:, 1])),
+            "mse_minus_zero_predictor": float(np.mean(scores ** 2 - scores * target.sum(axis=1)))}
+    mean_gain = {arm: float(np.mean([d["gain_over_frozen"][arm] for d in directions.values()]))
+                 for arm in directions["A_to_B"]["gain_over_frozen"]}
+    parts = {key: float(np.mean([r[key] for p in probes for r in p["conditional_replicas"]]))
+             for key in ("local_advantage", "opportunity_gap", "tail_advantage", "full_advantage")}
+    return {"probe_states": len(probes), "probe_paths": len({p["seed"] for p in probes}),
+        "threshold": float(threshold), "directions": directions, "mean_gain_over_frozen": mean_gain,
+        "full_signal_gain_over_block_selected_constant": float(np.mean([
+            d["full_signal_gain_over_block_selected_constant"] for d in directions.values()])),
+        "conditional_local_errors": errors, "mean_credit_parts": parts,
+        "full_conditional_mean_second_moment": float(np.mean(full[:, 0] * full[:, 1])),
+        "full_conditional_mean_variance_across_probes": float(np.mean(full[:, 0] * full[:, 1]) - full[:, 0].mean() * full[:, 1].mean()),
+        "full_future_half_difference_mse": float(np.mean((full[:, 0] - full[:, 1]) ** 2)),
+        "local_half_sign_agreement": float(np.mean((local[:, 0] > 0) == (local[:, 1] > 0))),
+        "full_half_sign_agreement": float(np.mean((full[:, 0] > 0) == (full[:, 1] > 0))),
+        "scope": "cross_future_information_benchmarks_not_deployable_policies_or_upper_bounds"}
+
+
 def aggregate_reliability(reports, *, expected_roots, tasks, profiles=PROFILES,
                           alpha=FAMILY_ALPHA, risk_rate_margin, tail_ise_margin):
     """Primary inference uses optimizer roots; probes never inflate the episode N."""
