@@ -1,0 +1,33 @@
+\section{Results}
+\subsection{Budget Retention Reproduced an Operating Tradeoff}
+\input{tables/budget}
+On the 16 independent days in Study~A, reducing retention from .50 to .25 lowered journey exposure and readiness delay under both learned and manual supervision (Table~\ref{tab:budget}). The learned controller's journey difference was $-1.645$ s/passenger, with interval $[-3.074,-0.070]$; the manual contrast was $-2.396$ s/passenger, with interval $[-3.771,-0.976]$. The corresponding actual CV$^2$ differences were positive for both controllers. The original budget-service proposition passed with its registered interpretation: improved passenger exposure and circulation accompanied by worse regularity.
+
+These within-controller contrasts establish a configuration effect, not a learned-policy increment. In particular, manual joint also benefited from tighter retention. The public-delay and readiness columns describe related parts of the same vehicle-supply chain and are not independent replications of an operating benefit.
+
+\subsection{Learning and Harmonic Inputs Had Different Evidence Boundaries}
+\input{tables/supervisor}
+At matched default retention, K4$-$manual journey exposure was $+0.022$ s/passenger with interval $[-0.608,0.584]$ (Table~\ref{tab:supervisor}). At $.25$, the difference was $+0.773$ s/passenger with interval $[0.075,1.458]$. Thus the independent panel did not establish a learned-supervisor journey advantage; the tighter setting favored the manual comparator on that endpoint. An interval spanning zero at the default setting did not establish equivalence.
+
+The independent K4$-$K0 journey estimate was $-0.562$ s/passenger with interval $[-1.567,0.352]$, so the primary harmonic-journey proposition failed. The secondary actual-CV$^2$ interval favored K4 (Table~\ref{tab:supervisor}). These endpoints retain their separate status: the secondary regularity result does not replace the failed journey criterion.
+
+Study~B produced the same executed policy as manual joint. Both newly trained learners selected joint at every one of their 47 publications in each of the 16 learned development paths. Their waiting, onboard, journey, readiness, public delay and CV$^2$ differences from manual joint were exactly zero at the matching retention on all four days. Each learner received 1,536 updates. The explicit-retention development screen therefore failed. Joint selection still invoked a demand- and vehicle-dependent timetable law; it did not imply a fixed timetable or an inactive controller.
+
+\subsection{Pressure Credit Improved Delay but Failed Regularity Protection}
+\input{tables/simple_limits}
+On Study~C's 16 new days, pressure credit reduced public delay relative to both simple mixtures (Table~\ref{tab:limits}). The differences were $-3744.15$ s/day against static credit and $-3123.80$ s/day against the stop cap. Both delay bounds were below zero, but both actual-CV$^2$ intervals were above zero. Each joint gate failed under its original criterion.
+
+The journey contrast against static credit was $-4.761$ s/passenger with interval $[-6.670,-2.884]$. Against the stop cap it was $-0.056$, with interval $[-1.835,1.849]$. Waiting intervals spanned zero for both families. Thus a passenger advantage was supported against one defined simple mixture, not uniformly against both.
+
+Development exposure matching did not ensure matched test exposure. Pressure credit used 3.259 fewer holding seconds per trip than the static mixture and 1.797 fewer than the cap mixture on the new days. It improved delay on 16/16 and 15/16 days, respectively, while worsening CV$^2$ on 14/16 and 15/16 days. The failed protection was therefore directional across the panel, rather than driven by one adverse day.
+
+\subsection{Joint Credit and Operating Cost}
+\input{tables/joint_credit}
+The Study~D candidate improved actual CV$^2$ against both simple mixtures on all four new development days (Table~\ref{tab:joint}). However, journey exposure and public delay were worse on every day against each mixture. The mean-delay conditions failed and both mean-CV$^2$ protections passed; the overall development screen failed.
+
+The execution record showed 985 evaluated credit requests: 34 were admitted, 919 offered no joint improvement under the common reference, and 32 had an unsupported reference. All admitted budgets passed chronological accounting. Actual holding averaged 146.594 s/trip, compared with 120.344 for old pressure. Relative to old pressure, the candidate's CV$^2$ decreased by 0.020795, while journey exposure increased by 12.768 s/passenger and public delay increased by 9918.50 s/day. The candidate was closed without changing its constraints or opening independent confirmation.
+
+\subsection{Engineering Validity and Computation}
+All 80 Study~C test paths and all 24 Study~D development paths completed with the fixed fleet, full trip roster and valid physical accounting. The Study~D implementation also exactly reproduced the archived pressure path and its no-proposal selector path, with zero diagnostic roundoff in the registered comparison. One zero-traffic test-fixture failure was repaired and retained; it did not consume a traffic path. These checks support execution validity, separately from the scientific outcomes.
+
+Archived full-day wall time in Study~C had median 21.26 min and maximum 29.35 min. In Study~D the corresponding values were 24.36 and 27.27 min, with 24 development paths running concurrently on Linux CPU nodes. These are batch experiment costs under the recorded server workloads, not per-query real-time latency guarantees.

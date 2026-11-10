@@ -1,0 +1,419 @@
+{
+  "sources": {
+    "v400": "experiments/v400_independent_confirmation/review01/aggregate/results.json",
+    "v401": "experiments/v401_budget_conditioned_upper/review02/aggregate/results.json",
+    "v401_readout": "experiments/v401_budget_conditioned_upper/review02/readout01/results.json",
+    "v402": "experiments/v402_budget_mechanism/review/aggregate/results.json",
+    "v402_selection": "experiments/v402_budget_mechanism/review/selection/results.json",
+    "v403": "experiments/v403_joint_credit/review/aggregate/results.json"
+  },
+  "cells": [
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/journey_s_per_passenger",
+      "estimate": -1.6450386100717367,
+      "interval_key": "ci95",
+      "interval": [
+        -3.0739443618909292,
+        -0.06958316049321196
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/readiness_s_per_trip",
+      "estimate": -3.8043893129770994,
+      "interval_key": "ci95",
+      "interval": [
+        -4.78104126908397,
+        -2.9147841125954215
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/public_delay_s_per_day",
+      "estimate": -1001.625,
+      "interval_key": "ci95",
+      "interval": [
+        -1255.0625,
+        -771.75
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_tight_minus_default/cv_squared",
+      "estimate": 0.0056461797450002155,
+      "interval_key": "ci95",
+      "interval": [
+        0.003260998002406303,
+        0.009175637646973779
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/journey_s_per_passenger",
+      "estimate": -2.395566586112821,
+      "interval_key": "ci95",
+      "interval": [
+        -3.770727943453998,
+        -0.9758806631944495
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/readiness_s_per_trip",
+      "estimate": -4.539599236641223,
+      "interval_key": "ci95",
+      "interval": [
+        -5.5789957061068725,
+        -3.59517533396947
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/public_delay_s_per_day",
+      "estimate": -1185.4375,
+      "interval_key": "ci95",
+      "interval": [
+        -1457.6328125,
+        -939.621875
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/manual_tight_minus_default/cv_squared",
+      "estimate": 0.0030254307143205094,
+      "interval_key": "ci95",
+      "interval": [
+        0.0014096019672288783,
+        0.004740783243862388
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r050/journey_s_per_passenger",
+      "estimate": 0.022450912496694286,
+      "interval_key": "ci95",
+      "interval": [
+        -0.6080310183442016,
+        0.5844523646298775
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r050/readiness_s_per_trip",
+      "estimate": -0.6898854961832068,
+      "interval_key": "ci95",
+      "interval": [
+        -1.4003160782442738,
+        -0.04818105916030428
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r050/cv_squared",
+      "estimate": -0.000866895625338612,
+      "interval_key": "ci95",
+      "interval": [
+        -0.002201736389667728,
+        0.0003533544164179289
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r025/journey_s_per_passenger",
+      "estimate": 0.7729788885377786,
+      "interval_key": "ci95",
+      "interval": [
+        0.0753639355905552,
+        1.4580957742475809
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r025/readiness_s_per_trip",
+      "estimate": 0.04532442748091725,
+      "interval_key": "ci95",
+      "interval": [
+        -0.6197697996183197,
+        0.5701335877862608
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_manual_r025/cv_squared",
+      "estimate": 0.0017538534053410937,
+      "interval_key": "ci95",
+      "interval": [
+        -0.000713476191806792,
+        0.005082861402635602
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_K0_r050/journey_s_per_passenger",
+      "estimate": -0.561958030250409,
+      "interval_key": "ci95",
+      "interval": [
+        -1.5671172691518145,
+        0.3521237776436609
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_K0_r050/readiness_s_per_trip",
+      "estimate": -0.10376908396946538,
+      "interval_key": "ci95",
+      "interval": [
+        -0.5973699904580145,
+        0.4363191793893137
+      ]
+    },
+    {
+      "study": "v400",
+      "pointer": "/effects/K4_minus_K0_r050/cv_squared",
+      "estimate": -0.0009371454207868775,
+      "interval_key": "ci95",
+      "interval": [
+        -0.0016682596272999846,
+        -0.0001749050879410468
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/public_delay_s_per_day",
+      "estimate": -3744.1451727964486,
+      "interval_key": "ci95",
+      "interval": [
+        -4401.405352330374,
+        -3025.059381935637
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/cv_squared",
+      "estimate": 0.006573421878283976,
+      "interval_key": "ci95",
+      "interval": [
+        0.0041679767489690225,
+        0.00897885566279481
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/journey_s_per_passenger",
+      "estimate": -4.760827936049665,
+      "interval_key": "ci95",
+      "interval": [
+        -6.669646245094311,
+        -2.883690481626161
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/static/readiness_s_per_trip",
+      "estimate": -14.354210181424776,
+      "interval_key": "ci95",
+      "interval": [
+        -16.857613680918938,
+        -11.610423960304859
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/public_delay_s_per_day",
+      "estimate": -3123.8047150411276,
+      "interval_key": "ci95",
+      "interval": [
+        -3791.9595255581667,
+        -2377.1109081227964
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/cv_squared",
+      "estimate": 0.006882583388550053,
+      "interval_key": "ci95",
+      "interval": [
+        0.004661272140518843,
+        0.009121403627276503
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/journey_s_per_passenger",
+      "estimate": -0.05621329575821932,
+      "interval_key": "ci95",
+      "interval": [
+        -1.8345813445350676,
+        1.8487149912538654
+      ]
+    },
+    {
+      "study": "v402",
+      "pointer": "/effects/cap/readiness_s_per_trip",
+      "estimate": -11.975246903059713,
+      "interval_key": "ci95",
+      "interval": [
+        -14.5106145189539,
+        -9.144681128398561
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/public_delay_s_per_day",
+      "estimate": 5917.102726696259,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        3715.7947051363362,
+        8773.659004438807
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/cv_squared",
+      "estimate": -0.01368976010083763,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        -0.01618754748439337,
+        -0.009969083697096159
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/journey_s_per_passenger",
+      "estimate": 6.803207726827537,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        0.889201110718659,
+        15.612568247563672
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/static/holding_s_per_trip",
+      "estimate": 22.33272785799688,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        18.603058275690145,
+        26.062397440303613
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/public_delay_s_per_day",
+      "estimate": 6165.447121034078,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        4157.08607520564,
+        8765.841069330201
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/cv_squared",
+      "estimate": -0.012680234792442775,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        -0.01663972852939201,
+        -0.008720741055493541
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/journey_s_per_passenger",
+      "estimate": 10.74371618891746,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        4.138312552187358,
+        20.72931004736381
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/cap/holding_s_per_trip",
+      "estimate": 24.453505530090336,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        21.333455925224925,
+        27.573555134955747
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/public_delay_s_per_day",
+      "estimate": 9918.5,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        6623.0,
+        13315.0
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/cv_squared",
+      "estimate": -0.020795390779679,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        -0.0328455666611288,
+        -0.012464500682697957
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/journey_s_per_passenger",
+      "estimate": 12.768158079306346,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        1.377390184287293,
+        25.860873284896286
+      ]
+    },
+    {
+      "study": "v403",
+      "pointer": "/effects/pressure/holding_s_per_trip",
+      "estimate": 26.250000000000004,
+      "interval_key": "descriptive_ci95",
+      "interval": [
+        19.58492366412213,
+        32.35209923664124
+      ]
+    }
+  ],
+  "protocol_sources": {
+    "v400": "experiments/v400_independent_confirmation/PROTOCOL.md",
+    "v401": "experiments/v401_budget_conditioned_upper/PROTOCOL.md",
+    "v402": "experiments/v402_budget_mechanism/PROTOCOL.md",
+    "v403": "experiments/v403_joint_credit/PROTOCOL.md"
+  },
+  "entrypoints": {
+    "v400": "experiments/v400_independent_confirmation/evaluation.py",
+    "v401": "experiments/v401_budget_conditioned_upper/worker.py",
+    "v402": "experiments/v402_budget_mechanism/worker.py",
+    "v403": "experiments/v403_joint_credit/worker.py"
+  },
+  "runtime_assets": "experiments/v400_independent_confirmation/deployment.json",
+  "original_supervisor": "K4/V326, seed314011, batch8; K0 from matched V350",
+  "units": {
+    "journey_s_per_passenger": "restricted seconds per generated passenger",
+    "readiness_s_per_trip": "seconds per scheduled trip",
+    "public_delay_s_per_day": "positive lateness seconds per day",
+    "cv_squared": "dimensionless actual nonterminal arrival CV squared"
+  },
+  "study_units": {
+    "v400": "16 independent demand days, one frozen learner seed",
+    "v401": "4 development days, two matched learners",
+    "v402": "16 independent demand days, fixed daily-mixture expectations",
+    "v403": "4 development days, fixed daily-mixture expectations"
+  },
+  "original_copies_equal_when_available": {
+    "v400": true,
+    "v401": true,
+    "v401_readout": true,
+    "v402": true,
+    "v402_selection": true,
+    "v403": true
+  },
+  "formatting_only": true,
+  "new_statistical_resamples": 0,
+  "new_traffic_paths": 0
+}

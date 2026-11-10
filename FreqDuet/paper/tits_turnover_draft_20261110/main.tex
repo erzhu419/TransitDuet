@@ -1,0 +1,40 @@
+\documentclass[letterpaper,journal]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts,array,booktabs,tabularx}
+\usepackage{graphicx,xcolor,algorithm,algorithmic,tikz,cite,url}
+\usepackage{microtype}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={FreqDuet: Cumulative Holding Budgets for Fixed-Fleet Timetable Coordination},pdfauthor={Anonymous Authors}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\pos}[1]{[#1]_+}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\input{numeric_values}
+\hyphenation{time-table time-tables co-or-di-na-tion}
+\begin{document}
+\title{FreqDuet: Cumulative Holding Budgets for Fixed-Fleet Timetable Coordination}
+\author{Anonymous Authors}
+\markboth{RESEARCH DRAFT, NOVEMBER 2026}{Cumulative Holding Budgets and Vehicle Circulation}
+\maketitle
+\begin{abstract}
+Terminal timetable revisions and en-route holding compete for the same vehicle time. We study their coordination through persistent trip-level holding budgets shared by forecasting, legal-action enumeration, and physical execution. The system combines causal demand summaries, a bounded timetable law, and a model-based fast controller; a learned publication-permission policy is evaluated separately. On 16 independent simulation demand days, reducing the manual joint controller's budget retention from 0.50 to 0.25 reduced restricted journey exposure by \ManualBudgetGain\ s/passenger and readiness delay by \ManualReadinessGain\ s/trip, while increasing actual headway CV$^2$ by \ManualBudgetCV. On another 16 new days, pressure-driven credit reduced daily public dispatch delay by \PressureStaticGain\ s relative to a static-credit mixture and by \PressureCapGain\ s relative to a stop-cap mixture calibrated on development holding exposure. Both comparisons worsened actual CV$^2$ and failed the prespecified joint criterion. A common-reference credit-admission redesign restored regularity on four further development days but increased journey exposure by \JointStaticLoss\ and \JointCapLoss\ s/passenger relative to the simple controls. Matched-budget comparisons did not establish a learned-supervisor journey advantage, and the independent harmonic-journey criterion also failed. The evidence supports an executable, configurable vehicle-time interface and reproducible operational tradeoffs, rather than a demonstrated improvement over simple limits at preserved regularity.
+\end{abstract}
+\begin{IEEEkeywords}
+Bus holding, timetable coordination, vehicle circulation, cumulative time budgets, model-based control, paired simulation.
+\end{IEEEkeywords}
+\input{introduction}
+\input{method}
+\input{properties}
+\input{experiments}
+\input{results}
+\input{discussion}
+\section{Conclusion}
+FreqDuet implements a shared interface between published terminal plans and cumulative holding allowances under a fixed fleet. Independent paired-demand studies reproduced the passenger and circulation effects of changing budget retention. They also showed why that configuration effect should be separated from the incremental value of learning, harmonic inputs, and pressure-driven allocation. Pressure credit improved dispatch delay relative to development-exposure-matched simple limits but worsened regularity. Evaluating credit admission against a common no-new-tightening reference reversed the regularity loss without retaining the operating savings. These complementary outcomes locate the current contribution in executable accounting and measured operating tradeoffs. A controller that improves on simple limits at preserved service regularity remains an open result.
+\section*{Code and Data Availability}
+The accompanying source package contains the manuscript, compact archived summaries, and an offline table generator with a field-level evidence manifest. The experiment entrypoints, frozen protocols, scenario identifiers, and runtime dependencies are mapped in that manifest. Full simulation traces and native runtime bundles are retained on the research servers; the paper package alone does not reproduce traffic trajectories. Public transit-data caches used in separate realism audits are not treated as observed outcomes of these simulation experiments.
+\clearpage
+\appendices
+\input{appendix}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

@@ -1,0 +1,43 @@
+\section{Properties of the Coordination Interface}
+\label{sec:properties}
+The interface admits several limited statements that help interpret the experiments. They concern the meaning of the executed commands and comparisons, rather than optimality of the learned policy.
+
+\subsection{Cumulative Feasibility of a Trip Budget}
+Suppose a trip first receives allowance $B_0\geq0$. Let $h_1,\ldots,h_m$ be its subsequently committed holding commands and let $u_1,\ldots,u_q\geq0$ be the reductions imposed by later budget publications. If each command is constrained by the currently remaining allowance and debited exactly once, then
+\begin{equation}
+ B_{\mathrm{rem}}=B_0-\sum_{e=1}^{m}h_e-\sum_{v=1}^{q}u_v\geq0.
+ \label{eq:budget_identity}
+\end{equation}
+This follows by induction over the ordered sequence of command submissions and publications. A legal submission subtracts at most the current remainder. A publication replaces the remainder by the minimum of itself and a nonnegative proposal, subtracting a nonnegative reduction. Neither event increases the allowance. Consequently, total committed holding after issuance cannot exceed $B_0$, regardless of how often the upper mode changes.
+
+The same identity holds inside an individual predictive continuation because its ledger uses the same events. It does not imply a realized return-time bound: uncertain running and service times, control-point residence, and later dispatch availability remain outside this scalar accounting identity. It also does not compare total holding with an unconstrained policy that would visit different future states. Its practical value is that prediction and execution refer to the same limited resource.
+
+\subsection{Timetable Revision Redistributes Adjacent Targets}
+Let $\tau_-$ be the preceding published release. Before a permitted revision, the two adjacent target headways are $p_1-\tau_-$ and $p_2-p_1$. After changing the next release to $\tau_1$, they become $\tau_1-\tau_-$ and $p_2-\tau_1$. Therefore,
+\begin{equation}
+ (\tau_1-\tau_-)+(p_2-\tau_1)=p_2-\tau_-.
+ \label{eq:anchor}
+\end{equation}
+The law redistributes service within a fixed anchored span. It neither inserts a trip nor increases the nominal fleet. The term ``frequency-informed'' refers to temporal components of the observed signal, rather than an increase in the total scheduled service frequency. As actual releases depend on vehicle availability,~\eqref{eq:anchor} describes published targets and does not force realized headways to attain those values.
+
+This limited intervention also explains why many budget and joint choices can be behaviorally identical. The same state may yield no mutable departure, an unsupported supply estimate, an unchanged rounded release, or a release whose effect is absorbed before dispatch. A critic trained on the mode label then learns across both effective and ineffective interventions. The relevant learning question is whether state information identifies the occasions on which a permitted revision changes passenger outcomes, not whether the actor selects joint often.
+
+\subsection{Identical Cost Rankings Can Produce Different Actions}
+Let $\widehat C(h)$ be the predicted passenger cost of a current action, and let $\mathcal F(\tau,B)$ be its feasible set under the published plan and remaining budget. The fast decision is
+\begin{equation}
+ h^*(\tau,B)\in\arg\min_{h\in\mathcal F(\tau,B)}\widehat C(h).
+\end{equation}
+Even if a plan change leaves $\widehat C(h_1)<\widehat C(h_2)$ intact, it can switch the selected action by removing $h_1$ from the feasible set. This is operational coupling, not by itself a passenger-cost improvement. The experiments therefore evaluate complete realized trajectories rather than interpreting changed plan or command counts as a benefit.
+
+\subsection{Consistent Windows for Regularity Comparisons}
+For $n$ included arrival headways with sum $S$ and squared sum $Q$, the population-moment convention gives
+\begin{equation}
+ \mathrm{CV}^2=\frac{nQ}{S^2}-1,\qquad n>0,\ S>0.
+ \label{eq:cv_moments}
+\end{equation}
+The fast model extends the actual nonterminal arrival prefix with a predicted suffix. Already observed arrivals are counted once, and terminal returns are excluded from the regularity statistic while remaining in the resource calculation. Complete-day evaluation uses the physical arrival recorder with the same population-moment convention.
+
+\subsection{A Relative Guard Does Not Protect Its Reference}
+In the original interface, the fast reference already includes published credit. An action satisfying a non-increasing predicted CV$^2$ condition relative to that reference does not establish that issuing the credit was itself harmless. The joint-admission candidate instead compares the credit restriction and current action against a common no-new-tightening continuation. These are different comparisons even with identical demand forecasts and clocks. Neither comparison is a mathematical guarantee of complete-day non-harm under later closed-loop decisions.
+
+Together, these properties locate the method's guarantees at the interface: cumulative command feasibility, anchored plan semantics, and well-defined comparisons. Realized waiting-time improvement, vehicle readiness, and generalization remain empirical questions.
