@@ -275,3 +275,8 @@ All eight training-sampling shards subsequently completed. The four cache-only
 fit jobs froze both DF8 heads/root without new simulation, then the eight
 reserved-prefix probe shards started. This preserves the frozen one-step scope;
 training-fit statistics do not establish fresh-prefix or closed-loop improvement.
+All eight probes completed. The [result](freq_hrl_label_continuation_result_2026-11-10.md)
+finds fresh-prefix W error worse on three roots and no stable W/G gain. PointMaze
+actions scarcely change; Reacher changes actions without reliable transfer.
+Continuation-only relabeling is not sufficient. No closed-loop follow-up was
+submitted and the original confirmation HOLD remains.

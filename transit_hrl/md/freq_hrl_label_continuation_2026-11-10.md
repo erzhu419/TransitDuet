@@ -1,5 +1,7 @@
 # Paired Label Continuation
 
+Completed: all eight probes exited 0; [readout](freq_hrl_label_continuation_result_2026-11-10.md).
+
 Freeze the original history controller and source checks/clock policy C0. At
 the same C0-visited TRAINING states, compare only R versus C0 label continuation.
 Features stay 41-dimensional, ridge slope DF8, cut quantile 0.75 from training-A
@@ -52,8 +54,8 @@ from failed attempts; its targeted tests passed after this status-only correctio
 Cache-only fits t214363-t214366 completed and froze both heads on every root:
 96 fitting pairs/head, DF8,264 ridge calls total,8.657 CPU seconds and ZERO new
 environment steps. No models or raw banks were downloaded. Only after all four
-roots passed this gate were probe shards t214367-t214374 submitted. They are
-running on node004/node005, each with paid probes saved. The
+roots passed this gate were probe shards t214367-t214374 submitted. They
+subsequently completed on node004/node005. The
 [fit/probe receipt](../results/plan_validity_label_continuation_20261110/fit_probe_launch_receipt.json)
-records the transition. Fresh-prefix performance remains pending; no new-head
-closed-loop episode jobs were submitted. Frozen policies, cuts and HOLD are unchanged.
+records the transition. The final readout does not support continuation-only
+repair; no new-head closed-loop jobs followed. Frozen policies, cuts and HOLD are unchanged.
