@@ -20,3 +20,10 @@ existing queues t214104--t214111. Registration recovery reused the first four
 IDs without restarting any path; later stages are submitted in one batch.
 Sources and raw results remain under the dedicated V402 server root; historical
 TransitDuet/FreqDuet code and results are unchanged.
+
+Completed: 3 engineering, 64 calibration and 80 independent test paths, with no
+failed traffic starts or replacements (147/150 charged starts). Selection t214113,
+aggregate t214122 and descriptive readout t214159 completed on the server. Both
+delay comparisons pass, but both CV2 protections fail. See RESULTS.md; the outcome
+is a turnover--regularity tradeoff, not superiority over simple holding limits.
+No training, main-policy promotion or further parameter search was performed.
