@@ -327,3 +327,8 @@ both-half G gains versus quantile occur at a root with zero immediate renewals
 on the sampled states. All eight cuts are now frozen. Recommend the already
 declared whole-cohort E8 prefix-transfer test before any further calibration
 changes; no readout jobs or original confirmation are released by this analysis.
+The subsequent user-authorized step releases the four frozen whole-cohort E8
+readouts (t214504-t214507; 2,112,000 steps), with all four roots and both heads.
+The [E8 release receipt](../results/plan_validity_independent_calibration_20261111/readout_release.json)
+keeps launch separate from outcome. No cut/model revision, extra roots, original
+confirmation or complete-episode follow-up is released.

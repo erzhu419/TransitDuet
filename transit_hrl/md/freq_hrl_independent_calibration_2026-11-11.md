@@ -61,5 +61,19 @@ All eight samples completed at exactly 4,224,000 steps. The subsequent four
 zero-simulation A4-only jobs t214490-t214493 froze both heads/root before B4.
 The [result and next decision](freq_hrl_independent_calibration_result_2026-11-11.md)
 retain conditional positives, G half-group instability and sampled decision
-collapse. All cuts stay frozen; the whole-cohort E8 readout is recommended but
-remains unsubmitted, and no original confirmation or episode follow-up is released.
+collapse. At that analysis, all cuts were frozen and the recommended E8 readout
+was unsubmitted; no original confirmation or episode follow-up was released.
+
+## Frozen E8 Release
+
+The subsequent user-authorized step releases all four declared readout jobs,
+t214504-t214507: 528,000 steps/root, 2,112,000 total. The 32 disjoint new prefixes
+provide 96 states and 768 paired conditional futures. Both heads, all eight cuts,
+models, comparators and E4/E4 split remain fixed; no further calibration is scheduled.
+The [release receipt](../results/plan_validity_independent_calibration_20261111/readout_release.json)
+records launch status separately from completed evaluation. This is the planned
+single-intervention prefix-transfer diagnostic, not original-cohort confirmation
+or a learned-head complete-episode experiment.
+All four jobs started: three on node004 and one on node005. Initial public
+progress confirms at least two complete prefixes/root without errors. Evaluation
+is still in progress; only progress metadata returned locally, no raw banks/models.

@@ -1,0 +1,159 @@
+{
+  "run_name": "plan_validity_independent_calibration_20261111",
+  "stage": "frozen_whole_cohort_E8_readout",
+  "authorized_local_date": "2026-11-11",
+  "snapshot_at_utc": "2026-11-10T17:24:30.514244+00:00",
+  "source_manifest": "protocols/plan_validity_independent_calibration_2026-11-11.json",
+  "frozen_implementation_commit": "e2f6ef9c93",
+  "launch_worktree_commit": "889d38b09209d15c04110b61f52c0e881d8ae95e",
+  "released_environment_steps": 2112000,
+  "per_job_environment_steps": 528000,
+  "roots": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "readout_prefix_seeds": [
+        1972173000,
+        1972173001,
+        1972173002,
+        1972173003,
+        1972173004,
+        1972173005,
+        1972173006,
+        1972173007
+      ],
+      "cut_source": "results/plan_validity_independent_calibration_20261111/pointmaze/1972110000/select/private/frozen_cuts.json",
+      "selected_cuts": {
+        "label_reference": -0.006885875199079631,
+        "label_candidate": -0.0018820072139993406
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "readout_prefix_seeds": [
+        1972183000,
+        1972183001,
+        1972183002,
+        1972183003,
+        1972183004,
+        1972183005,
+        1972183006,
+        1972183007
+      ],
+      "cut_source": "results/plan_validity_independent_calibration_20261111/pointmaze/1972120000/select/private/frozen_cuts.json",
+      "selected_cuts": {
+        "label_reference": 0.00018976617822433033,
+        "label_candidate": 0.00023331560517539103
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "readout_prefix_seeds": [
+        1972273000,
+        1972273001,
+        1972273002,
+        1972273003,
+        1972273004,
+        1972273005,
+        1972273006,
+        1972273007
+      ],
+      "cut_source": "results/plan_validity_independent_calibration_20261111/reacher_tracking/1972210000/select/private/frozen_cuts.json",
+      "selected_cuts": {
+        "label_reference": 0.01469428884054332,
+        "label_candidate": 0.015561968857092118
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "readout_prefix_seeds": [
+        1972283000,
+        1972283001,
+        1972283002,
+        1972283003,
+        1972283004,
+        1972283005,
+        1972283006,
+        1972283007
+      ],
+      "cut_source": "results/plan_validity_independent_calibration_20261111/reacher_tracking/1972220000/select/private/frozen_cuts.json",
+      "selected_cuts": {
+        "label_reference": -0.008709449918527346,
+        "label_candidate": -0.010969857202383887
+      }
+    }
+  ],
+  "new_prefixes_total": 32,
+  "new_states_total": 96,
+  "E_futures_per_state": 8,
+  "paired_conditional_futures": 768,
+  "permitted_model_fits": 0,
+  "permitted_cut_updates": 0,
+  "permitted_controller_updates": 0,
+  "submitted_phase_counts": {
+    "precheck": 4,
+    "sample": 8,
+    "select": 4,
+    "readout": 4
+  },
+  "scheduler_snapshot": [
+    {
+      "id": "t214504",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/pointmaze/1972110000/shard-1",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214504.log"
+    },
+    {
+      "id": "t214505",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/pointmaze/1972120000/shard-1",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214505.log"
+    },
+    {
+      "id": "t214506",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/reacher_tracking/1972210000/shard-1",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214506.log"
+    },
+    {
+      "id": "t214507",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/reacher_tracking/1972220000/shard-1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214507.log"
+    }
+  ],
+  "comparisons": [
+    "independent_minus_quantile",
+    "independent_minus_previous_full_calibration",
+    "independent_minus_C0"
+  ],
+  "statistics": "prefix_paired_t95_and_conditional_MC_SE_E4_halves_separate_roots_both_heads_no_winner_selection",
+  "scope": "single_intervention_on_C0_prefix_and_continuation_not_learned_head_closed_loop",
+  "local_raw_bank_or_model_downloads": 0,
+  "initial_native_progress_observed": {
+    "roots_with_at_least_two_complete_prefixes": 4,
+    "reported_errors": 0,
+    "source": "compact_server_public_progress_only"
+  },
+  "performance_readout": "pending_native_completion",
+  "next_step": "after_all_four_roots_finish_verify_exact_budgets_then_report_E4_halves_E8_prefix_CIs_all_heads_all_comparators_without_retuning",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}
