@@ -48,3 +48,8 @@ batch then remained queued because the scheduler required explicit CPU-training
 admission. The repair changes only admission metadata on the existing 64
 collection and 16 update tasks; commands, dependencies, budgets and IDs stay
 unchanged. See scheduler_cpu_admission_fix.json. No additional paths are created.
+
+V401 is complete and closed: both learned greedy policies chose joint at every
+development publication, matching the same-budget manual endpoints exactly.
+The strict journey-improvement screen failed. No independent confirmation or
+policy promotion follows. See [RESULTS.md](RESULTS.md).
