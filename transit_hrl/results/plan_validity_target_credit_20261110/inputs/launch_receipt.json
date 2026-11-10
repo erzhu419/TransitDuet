@@ -1,0 +1,22 @@
+{
+  "run_name": "plan_validity_target_credit_20261110",
+  "precheck_task_ids": ["t214182", "t214183", "t214184", "t214185"],
+  "precheck_results": "all_four_complete_precheck_passed",
+  "precheck_cpu_seconds": 138.79640759,
+  "precheck_environment_steps": 158800,
+  "main_task_ids": ["t214189", "t214190", "t214191", "t214192"],
+  "main_launch_node": "node003",
+  "main_launch_pids": [395214, 395200, 395109, 395092],
+  "placement": "dynamic_unpinned_node001_through_node006",
+  "cpu_cores_per_task": 1,
+  "ram_mb_per_task": 2048,
+  "native_threads": 1,
+  "protect_from_auto_eviction": true,
+  "automatic_requeue": false,
+  "source_controller_training": "none_reuse_original_pilot",
+  "local_retrieval": "public_json_only",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false,
+  "performance_claim_supported": false
+}

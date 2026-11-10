@@ -221,3 +221,9 @@ bindings remain pending. Root intervals with8 roots are approximate. Conditional
 MSE is not observable-state Bayes error; the local identity is not an episode
 regret theorem. Own-schedule full-algorithm ranking, named timing reproductions
 and universal/real-world deployment claims remain outside this registration.
+
+The 2026-11-10 [matched-target repair](freq_hrl_target_credit_repair_2026-11-10.md)
+compares L/W/G on common training prefixes, capacity and conditional futures.
+Four native prechecks passed before main submission. New development prefixes
+are reserved separately from the revealed pilot evaluation paths; no confirmation
+roots are accessed. This repair does not change the original gates or clear HOLD.
