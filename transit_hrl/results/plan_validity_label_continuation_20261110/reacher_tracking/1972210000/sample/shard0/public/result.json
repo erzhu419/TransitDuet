@@ -1,0 +1,126 @@
+{
+  "run_name": "plan_validity_label_continuation_20261110",
+  "task": "reacher_tracking",
+  "optimizer_seed": 1972210000,
+  "phase": "sample",
+  "shard_index": 0,
+  "status": "complete",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false,
+  "performance_claim_supported": false,
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "stage": "sample_complete",
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 1113.803010002,
+    "wall_seconds": 1116.230291429907,
+    "counts": {
+      "environment_opens": 1168,
+      "environment_resets": 1168,
+      "planner_calls": 28032,
+      "lower_calls": 1401600,
+      "environment_step_attempts": 1401600,
+      "environment_steps": 1401600,
+      "history_updates": 1401600,
+      "feature_vector_builds": 107351,
+      "trigger_score_checks": 106879
+    },
+    "phases": {
+      "label_continuation_sample": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1.0833799740000813,
+        "wall_seconds": 0.07521876972168684,
+        "counts": {}
+      },
+      "label_continuation_sample/load_frozen_sources": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1.3499562830000005,
+        "wall_seconds": 1.62432418204844,
+        "counts": {}
+      },
+      "label_continuation_sample/paired_candidate_states_sample": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1111.369673745,
+        "wall_seconds": 1114.530748478137,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 107351,
+          "trigger_score_checks": 106879
+        }
+      }
+    }
+  },
+  "completed_probes": 48,
+  "sampled_seeds": [
+    1972213000,
+    1972213001,
+    1972213002,
+    1972213003,
+    1972213004,
+    1972213005,
+    1972213006,
+    1972213007,
+    1972218000,
+    1972218001,
+    1972218002,
+    1972218003,
+    1972218004,
+    1972218005,
+    1972218006,
+    1972218007
+  ],
+  "states_per_continuation": 48,
+  "phase_counts": {
+    "0": 20,
+    "5": 10,
+    "10": 6,
+    "15": 6,
+    "20": 6
+  },
+  "available_candidate_phase_counts": {
+    "0": 320,
+    "5": 203,
+    "10": 190,
+    "15": 180,
+    "20": 171
+  },
+  "termination_development_eligible": true,
+  "peak_process_rss_mb": 443.890625
+}

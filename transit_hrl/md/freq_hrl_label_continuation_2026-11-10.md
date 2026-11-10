@@ -14,8 +14,8 @@ equality, shared future IDs, factual C0 replay, W+tail=G and 24-call budget.
 
 Four native prechecks use training prefixes only. Then eight 16-prefix sampling
 shards, four cache-only fit jobs and eight four-prefix probe shards, in that order.
-Only prechecks and training sampling are submitted now. All four roots must have
-frozen heads before any new probe prefix is accessed. Use one CPU/2GiB per job,
+The initial submission contains only prechecks and training sampling. All four
+roots must have frozen heads before any new probe prefix is accessed. Use one CPU/2GiB per job,
 dynamic unpinned placement on node001-node006; only public aggregates sync locally.
 Training uses 11,212,800 native steps; later probes 4,185,600; prechecks at most 76,800.
 Models and paid per-probe rows are retained on the shared server; previous
@@ -43,8 +43,17 @@ fresh-prefix evaluation is the primary transfer test, not full-pipeline OOF.
 73 related tests passed. Native prechecks t214317-t214320 passed on node004/node006:
 phase 5 causal pairing, factual replay, feature scoring and 24-call budgets held.
 They used 62,400 native steps, 63.480 CPU seconds and no fits. Training shards
-t214322-t214329 are running on node004/node005/node006, each with paid probes
-saved. Fit and probe jobs remain unsubmitted. The
+t214322-t214329 all completed with exit0:384 paired states,11,212,800 native
+steps and9,612.543 CPU seconds, with no fits or controller updates. The
 [launch receipt](../results/plan_validity_label_continuation_20261110/launch_receipt.json)
 retains actual placement and costs. The readout also distinguishes live phases
 from failed attempts; its targeted tests passed after this status-only correction.
+
+Cache-only fits t214363-t214366 completed and froze both heads on every root:
+96 fitting pairs/head, DF8,264 ridge calls total,8.657 CPU seconds and ZERO new
+environment steps. No models or raw banks were downloaded. Only after all four
+roots passed this gate were probe shards t214367-t214374 submitted. They are
+running on node004/node005, each with paid probes saved. The
+[fit/probe receipt](../results/plan_validity_label_continuation_20261110/fit_probe_launch_receipt.json)
+records the transition. Fresh-prefix performance remains pending; no new-head
+closed-loop episode jobs were submitted. Frozen policies, cuts and HOLD are unchanged.

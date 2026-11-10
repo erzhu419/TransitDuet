@@ -1,0 +1,126 @@
+{
+  "run_name": "plan_validity_label_continuation_20261110",
+  "task": "pointmaze",
+  "optimizer_seed": 1972110000,
+  "phase": "sample",
+  "shard_index": 0,
+  "status": "complete",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false,
+  "performance_claim_supported": false,
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "stage": "sample_complete",
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 1288.51634343,
+    "wall_seconds": 1291.9965798910707,
+    "counts": {
+      "environment_opens": 1168,
+      "environment_resets": 1168,
+      "planner_calls": 28032,
+      "lower_calls": 1401600,
+      "environment_step_attempts": 1401600,
+      "environment_steps": 1401600,
+      "history_updates": 1401600,
+      "feature_vector_builds": 112022,
+      "trigger_score_checks": 111677
+    },
+    "phases": {
+      "label_continuation_sample": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.20962005000001227,
+        "wall_seconds": 0.053550795651972294,
+        "counts": {}
+      },
+      "label_continuation_sample/load_frozen_sources": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1.282611713,
+        "wall_seconds": 1.3572957841679454,
+        "counts": {}
+      },
+      "label_continuation_sample/paired_candidate_states_sample": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1287.024111667,
+        "wall_seconds": 1290.5857333112508,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 112022,
+          "trigger_score_checks": 111677
+        }
+      }
+    }
+  },
+  "completed_probes": 48,
+  "sampled_seeds": [
+    1972113000,
+    1972113001,
+    1972113002,
+    1972113003,
+    1972113004,
+    1972113005,
+    1972113006,
+    1972113007,
+    1972118000,
+    1972118001,
+    1972118002,
+    1972118003,
+    1972118004,
+    1972118005,
+    1972118006,
+    1972118007
+  ],
+  "states_per_continuation": 48,
+  "phase_counts": {
+    "0": 20,
+    "5": 10,
+    "10": 8,
+    "15": 5,
+    "20": 5
+  },
+  "available_candidate_phase_counts": {
+    "0": 320,
+    "5": 244,
+    "10": 230,
+    "15": 212,
+    "20": 185
+  },
+  "termination_development_eligible": true,
+  "peak_process_rss_mb": 489.828125
+}

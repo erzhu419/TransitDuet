@@ -271,3 +271,7 @@ DF8, training-A OOF calibration and equal fitting information, and reserves new
 prefixes for a fixed-continuation one-step readout. Native prechecks precede
 sampling; all roots' fits precede new-prefix access. No new-head episode loop
 or confirmation is automatically scheduled.
+All eight training-sampling shards subsequently completed. The four cache-only
+fit jobs froze both DF8 heads/root without new simulation, then the eight
+reserved-prefix probe shards started. This preserves the frozen one-step scope;
+training-fit statistics do not establish fresh-prefix or closed-loop improvement.

@@ -1,0 +1,1278 @@
+{
+  "run_name": "plan_validity_label_continuation_20261110",
+  "recorded_at_utc": "2026-11-10T14:48:29.663074+00:00",
+  "code_commit": "d0f206d65a",
+  "manifest": "protocols/plan_validity_label_continuation_2026-11-10.json",
+  "sample_completion": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "shard_index": 0,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972113000,
+        1972113001,
+        1972113002,
+        1972113003,
+        1972113004,
+        1972113005,
+        1972113006,
+        1972113007,
+        1972118000,
+        1972118001,
+        1972118002,
+        1972118003,
+        1972118004,
+        1972118005,
+        1972118006,
+        1972118007
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 20,
+        "5": 10,
+        "10": 8,
+        "15": 5,
+        "20": 5
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1288.51634343,
+        "wall_seconds": 1291.9965798910707,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 112022,
+          "trigger_score_checks": 111677
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.20962005000001227,
+            "wall_seconds": 0.053550795651972294,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.282611713,
+            "wall_seconds": 1.3572957841679454,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1287.024111667,
+            "wall_seconds": 1290.5857333112508,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 112022,
+              "trigger_score_checks": 111677
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "shard_index": 1,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972118008,
+        1972118009,
+        1972118010,
+        1972118011,
+        1972118012,
+        1972118013,
+        1972118014,
+        1972118015,
+        1972118016,
+        1972118017,
+        1972118018,
+        1972118019,
+        1972118020,
+        1972118021,
+        1972118022,
+        1972118023
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 21,
+        "5": 12,
+        "10": 8,
+        "15": 4,
+        "20": 3
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1294.5397223520001,
+        "wall_seconds": 1297.4269281867892,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 113880,
+          "trigger_score_checks": 113580
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.0421398700000282,
+            "wall_seconds": 0.07027637865394354,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.3533233970000005,
+            "wall_seconds": 1.6152827758342028,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1292.1442590850002,
+            "wall_seconds": 1295.741369032301,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 113880,
+              "trigger_score_checks": 113580
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "shard_index": 0,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972123000,
+        1972123001,
+        1972123002,
+        1972123003,
+        1972123004,
+        1972123005,
+        1972123006,
+        1972123007,
+        1972128000,
+        1972128001,
+        1972128002,
+        1972128003,
+        1972128004,
+        1972128005,
+        1972128006,
+        1972128007
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 18,
+        "5": 10,
+        "10": 8,
+        "15": 7,
+        "20": 5
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1290.8954531069999,
+        "wall_seconds": 1294.530688107945,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 110415,
+          "trigger_score_checks": 110069
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.1358208829999512,
+            "wall_seconds": 0.04902966693043709,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.4501441019999999,
+            "wall_seconds": 1.640842673368752,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1289.309488122,
+            "wall_seconds": 1292.8408157676458,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 110415,
+              "trigger_score_checks": 110069
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "shard_index": 1,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972128008,
+        1972128009,
+        1972128010,
+        1972128011,
+        1972128012,
+        1972128013,
+        1972128014,
+        1972128015,
+        1972128016,
+        1972128017,
+        1972128018,
+        1972128019,
+        1972128020,
+        1972128021,
+        1972128022,
+        1972128023
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 26,
+        "5": 8,
+        "10": 3,
+        "15": 4,
+        "20": 7
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1294.102485347,
+        "wall_seconds": 1297.7040659720078,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 109849,
+          "trigger_score_checks": 109500
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.17211436300021887,
+            "wall_seconds": 0.04634078312665224,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.4298712929999997,
+            "wall_seconds": 1.6147686429321766,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1292.500499691,
+            "wall_seconds": 1296.042956545949,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 109849,
+              "trigger_score_checks": 109500
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "shard_index": 0,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972213000,
+        1972213001,
+        1972213002,
+        1972213003,
+        1972213004,
+        1972213005,
+        1972213006,
+        1972213007,
+        1972218000,
+        1972218001,
+        1972218002,
+        1972218003,
+        1972218004,
+        1972218005,
+        1972218006,
+        1972218007
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 20,
+        "5": 10,
+        "10": 6,
+        "15": 6,
+        "20": 6
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1113.803010002,
+        "wall_seconds": 1116.230291429907,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 107351,
+          "trigger_score_checks": 106879
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.0833799740000813,
+            "wall_seconds": 0.07521876972168684,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.3499562830000005,
+            "wall_seconds": 1.62432418204844,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1111.369673745,
+            "wall_seconds": 1114.530748478137,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 107351,
+              "trigger_score_checks": 106879
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "shard_index": 1,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972218008,
+        1972218009,
+        1972218010,
+        1972218011,
+        1972218012,
+        1972218013,
+        1972218014,
+        1972218015,
+        1972218016,
+        1972218017,
+        1972218018,
+        1972218019,
+        1972218020,
+        1972218021,
+        1972218022,
+        1972218023
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 20,
+        "5": 13,
+        "10": 2,
+        "15": 4,
+        "20": 9
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1116.0834191519998,
+        "wall_seconds": 1119.428743550554,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 104155,
+          "trigger_score_checks": 103623
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.20885757699988972,
+            "wall_seconds": 0.05336598865687847,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.3481013610000003,
+            "wall_seconds": 1.5809160871431231,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1114.5264602139998,
+            "wall_seconds": 1117.794461474754,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 104155,
+              "trigger_score_checks": 103623
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "shard_index": 0,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972223000,
+        1972223001,
+        1972223002,
+        1972223003,
+        1972223004,
+        1972223005,
+        1972223006,
+        1972223007,
+        1972228000,
+        1972228001,
+        1972228002,
+        1972228003,
+        1972228004,
+        1972228005,
+        1972228006,
+        1972228007
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 27,
+        "5": 4,
+        "10": 8,
+        "15": 5,
+        "20": 4
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1100.5491459070001,
+        "wall_seconds": 1103.716193457134,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 98675,
+          "trigger_score_checks": 98158
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.21539638800027205,
+            "wall_seconds": 0.05341960024088621,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.3602957950000003,
+            "wall_seconds": 1.5694503355771303,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1098.973453724,
+            "wall_seconds": 1102.093323521316,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 98675,
+              "trigger_score_checks": 98158
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "shard_index": 1,
+      "status": "complete",
+      "stage": "sample_complete",
+      "completed_probes": 48,
+      "sampled_seeds": [
+        1972228008,
+        1972228009,
+        1972228010,
+        1972228011,
+        1972228012,
+        1972228013,
+        1972228014,
+        1972228015,
+        1972228016,
+        1972228017,
+        1972228018,
+        1972228019,
+        1972228020,
+        1972228021,
+        1972228022,
+        1972228023
+      ],
+      "states_per_continuation": 48,
+      "phase_counts": {
+        "0": 20,
+        "5": 11,
+        "10": 6,
+        "15": 9,
+        "20": 2
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1114.053523616,
+        "wall_seconds": 1117.115081453696,
+        "counts": {
+          "environment_opens": 1168,
+          "environment_resets": 1168,
+          "planner_calls": 28032,
+          "lower_calls": 1401600,
+          "environment_step_attempts": 1401600,
+          "environment_steps": 1401600,
+          "history_updates": 1401600,
+          "feature_vector_builds": 96455,
+          "trigger_score_checks": 95952
+        },
+        "phases": {
+          "label_continuation_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.22564917299996523,
+            "wall_seconds": 0.056230791844427586,
+            "counts": {}
+          },
+          "label_continuation_sample/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.4051083889999996,
+            "wall_seconds": 1.5067641288042068,
+            "counts": {}
+          },
+          "label_continuation_sample/paired_candidate_states_sample": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1112.422766054,
+            "wall_seconds": 1115.5520865330473,
+            "counts": {
+              "environment_opens": 1168,
+              "environment_resets": 1168,
+              "planner_calls": 28032,
+              "lower_calls": 1401600,
+              "environment_step_attempts": 1401600,
+              "environment_steps": 1401600,
+              "history_updates": 1401600,
+              "feature_vector_builds": 96455,
+              "trigger_score_checks": 95952
+            }
+          }
+        }
+      }
+    }
+  ],
+  "fit_completion": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "status": "complete",
+      "stage": "heads_frozen_before_new_paths",
+      "training_paths": 32,
+      "training_states_per_head": 96,
+      "fitting_pairs_per_head": 96,
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 2.3886063269999998,
+        "wall_seconds": 1.7279795138165355,
+        "counts": {
+          "ridge_fit_calls": 66
+        },
+        "phases": {
+          "label_continuation_fit": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.9198670350000002,
+            "wall_seconds": 0.07417173124849796,
+            "counts": {}
+          },
+          "label_continuation_fit/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.379465348,
+            "wall_seconds": 1.5618188679218292,
+            "counts": {}
+          },
+          "label_continuation_fit/merge_paid_training_banks": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.014491946999999783,
+            "wall_seconds": 0.016444415785372257,
+            "counts": {}
+          },
+          "label_continuation_fit/paired_DF8_training_A_fits": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.07478199699999966,
+            "wall_seconds": 0.07554449886083603,
+            "counts": {
+              "ridge_fit_calls": 66
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "status": "complete",
+      "stage": "heads_frozen_before_new_paths",
+      "training_paths": 32,
+      "training_states_per_head": 96,
+      "fitting_pairs_per_head": 96,
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 2.348222087,
+        "wall_seconds": 1.6959035051986575,
+        "counts": {
+          "ridge_fit_calls": 66
+        },
+        "phases": {
+          "label_continuation_fit": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.9009500739999998,
+            "wall_seconds": 0.05018963012844324,
+            "counts": {}
+          },
+          "label_continuation_fit/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.3492636290000002,
+            "wall_seconds": 1.5443110605701804,
+            "counts": {}
+          },
+          "label_continuation_fit/merge_paid_training_banks": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.021763231000000438,
+            "wall_seconds": 0.024516398087143898,
+            "counts": {}
+          },
+          "label_continuation_fit/paired_DF8_training_A_fits": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.07624515299999945,
+            "wall_seconds": 0.07688641641288996,
+            "counts": {
+              "ridge_fit_calls": 66
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "status": "complete",
+      "stage": "heads_frozen_before_new_paths",
+      "training_paths": 32,
+      "training_states_per_head": 96,
+      "fitting_pairs_per_head": 96,
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 1.6276757060000002,
+        "wall_seconds": 1.6221310822293162,
+        "counts": {
+          "ridge_fit_calls": 66
+        },
+        "phases": {
+          "label_continuation_fit": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.25969646199999996,
+            "wall_seconds": 0.0541914738714695,
+            "counts": {}
+          },
+          "label_continuation_fit/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.289317965,
+            "wall_seconds": 1.4869667058810592,
+            "counts": {}
+          },
+          "label_continuation_fit/merge_paid_training_banks": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.00828655300000003,
+            "wall_seconds": 0.00978668313473463,
+            "counts": {}
+          },
+          "label_continuation_fit/paired_DF8_training_A_fits": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.07037472600000028,
+            "wall_seconds": 0.07118621934205294,
+            "counts": {
+              "ridge_fit_calls": 66
+            }
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "status": "complete",
+      "stage": "heads_frozen_before_new_paths",
+      "training_paths": 32,
+      "training_states_per_head": 96,
+      "fitting_pairs_per_head": 96,
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 2.292857077,
+        "wall_seconds": 1.66103246062994,
+        "counts": {
+          "ridge_fit_calls": 66
+        },
+        "phases": {
+          "label_continuation_fit": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.9302216790000002,
+            "wall_seconds": 0.0625358009710908,
+            "counts": {}
+          },
+          "label_continuation_fit/load_frozen_sources": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.2875695860000005,
+            "wall_seconds": 1.521189778111875,
+            "counts": {}
+          },
+          "label_continuation_fit/merge_paid_training_banks": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.007677369999999684,
+            "wall_seconds": 0.009167272597551346,
+            "counts": {}
+          },
+          "label_continuation_fit/paired_DF8_training_A_fits": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.0673884419999995,
+            "wall_seconds": 0.06813960894942284,
+            "counts": {
+              "ridge_fit_calls": 66
+            }
+          }
+        }
+      }
+    }
+  ],
+  "scheduler_snapshot": [
+    {
+      "id": "t214317",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/pointmaze/1972110000/shard-1",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        136023
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214318",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/pointmaze/1972120000/shard-1",
+      "status": "done",
+      "node": "node006",
+      "remote_pids": [
+        13869
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214319",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/reacher_tracking/1972210000/shard-1",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        136019
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214320",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/reacher_tracking/1972220000/shard-1",
+      "status": "done",
+      "node": "node006",
+      "remote_pids": [
+        13813
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214322",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972110000/shard0",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        138102
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214323",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972110000/shard1",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        137914
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214324",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972120000/shard0",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        137916
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214325",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972120000/shard1",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        137917
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214326",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972210000/shard0",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        137933
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214327",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972210000/shard1",
+      "status": "done",
+      "node": "node006",
+      "remote_pids": [
+        15450
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214328",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972220000/shard0",
+      "status": "done",
+      "node": "node005",
+      "remote_pids": [
+        63746
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214329",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972220000/shard1",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        138050
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 2048,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214363",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/pointmaze/1972110000/shard-1",
+      "status": "done",
+      "node": "node005",
+      "remote_pids": [
+        75861
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214364",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/pointmaze/1972120000/shard-1",
+      "status": "done",
+      "node": "node005",
+      "remote_pids": [
+        75868
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214365",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/reacher_tracking/1972210000/shard-1",
+      "status": "done",
+      "node": "node004",
+      "remote_pids": [
+        150994
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214366",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/reacher_tracking/1972220000/shard-1",
+      "status": "done",
+      "node": "node005",
+      "remote_pids": [
+        75871
+      ],
+      "exit_code": 0,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214367",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972110000/shard0",
+      "status": "running",
+      "node": "node004",
+      "remote_pids": [
+        152435
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214368",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972110000/shard1",
+      "status": "running",
+      "node": "node004",
+      "remote_pids": [
+        152308
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214369",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972120000/shard0",
+      "status": "running",
+      "node": "node004",
+      "remote_pids": [
+        152300
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214370",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972120000/shard1",
+      "status": "running",
+      "node": "node004",
+      "remote_pids": [
+        152408
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214371",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972210000/shard0",
+      "status": "running",
+      "node": "node004",
+      "remote_pids": [
+        152303
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214372",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972210000/shard1",
+      "status": "running",
+      "node": "node005",
+      "remote_pids": [
+        77180
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214373",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972220000/shard0",
+      "status": "running",
+      "node": "node004",
+      "remote_pids": [
+        152177
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214374",
+      "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972220000/shard1",
+      "status": "running",
+      "node": "node005",
+      "remote_pids": [
+        77232
+      ],
+      "exit_code": null,
+      "cpu": null,
+      "ram_mb": 531,
+      "protect_from_auto_eviction": true
+    }
+  ],
+  "initial_probe_progress": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "shard_index": 0,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "shard_index": 1,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "shard_index": 0,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "shard_index": 1,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "shard_index": 0,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "shard_index": 1,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "shard_index": 0,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "shard_index": 1,
+      "status": "running",
+      "stage": "paired_candidate_states_probe",
+      "completed_probes": 5,
+      "error": null,
+      "environment_steps": 218400
+    }
+  ],
+  "sample_environment_steps": 11212800,
+  "sample_cpu_seconds": 9612.543102913,
+  "fit_environment_steps": 0,
+  "fit_ridge_calls": 264,
+  "fit_cpu_seconds": 8.657361197,
+  "probe_environment_step_budget": 4185600,
+  "new_head_complete_episode_jobs_submitted": false,
+  "source_policies_and_frozen_heads_changed_after_fit": false,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}
