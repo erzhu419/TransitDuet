@@ -35,3 +35,8 @@ neural model, threshold search or change of HRL applicability scope is introduce
 Execution: four one-CPU/2-GiB prechecks, then four main jobs; dynamic scheduler
 placement on node001-node006, no Slurm or login-node installs. Full caches and
 models stay server-side; only compact public outputs are retrieved.
+Prechecks t214224-t214227 all passed on node005: 96.999 CPU seconds, 100,800
+simulator steps, 72 ridge calls; only 13,681 public bytes retrieved.
+Main task IDs: t214228-t214231, in the manifest's frozen task/root order.
+All four main tasks started on node004; placement remains unpinned across all six
+CPU nodes. The prechecks ran on node005 under the same shared runtime.

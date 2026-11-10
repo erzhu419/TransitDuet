@@ -231,3 +231,7 @@ All four main cells subsequently completed: W improves matched L on average but
 not the frozen history reference; G is not a reliable repair. The
 [readout](freq_hrl_target_credit_result_2026-11-10.md) retains root/half differences
 and separates independent-future prediction from new-prefix transfer.
+The subsequent [W factorial](freq_hrl_window_coverage_2026-11-10.md) freezes
+8-prefix/4-future versus 32-prefix/1-future training at DF2/DF8, with new held
+paths and unchanged controls. Its four native prechecks passed; parent HOLD and
+confirmation restrictions remain unchanged.
