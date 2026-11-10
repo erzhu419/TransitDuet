@@ -318,3 +318,12 @@ The subsequent user-authorized release submits eight calibration shards only
 The [sampling receipt](../results/plan_validity_independent_calibration_20261111/sampling_release.json)
 keeps this stage distinct from later cut freezing and fresh-prefix readout; neither
 later phase nor the original confirmation cohort is released.
+
+All eight samples completed within the exact budget, followed by four A4-only
+zero-simulation cut-freeze jobs. The
+[calibration result](freq_hrl_independent_calibration_result_2026-11-11.md) preserves
+positive W behavior and local C0/old-cut gains, but G remains unstable; the only
+both-half G gains versus quantile occur at a root with zero immediate renewals
+on the sampled states. All eight cuts are now frozen. Recommend the already
+declared whole-cohort E8 prefix-transfer test before any further calibration
+changes; no readout jobs or original confirmation are released by this analysis.

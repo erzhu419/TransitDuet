@@ -47,10 +47,19 @@ the eight frozen calibration shards, then cut freezing before fresh-prefix reado
 The subsequent authorized step submits only the eight frozen calibration shards,
 t214476-t214483, with 528,000 steps/shard (4,224,000 total). Each shard contains
 eight new prefixes, three states/prefix and A4+B4 futures/state. No parameters,
-cohort rosters, models or selection rules change. Cut-freeze and fresh-prefix
-readout jobs remain unsubmitted. The dated
+cohort rosters, models or selection rules change. At sampling release, cut-freeze
+and fresh-prefix readout jobs were unsubmitted. The dated
 [release receipt](../results/plan_validity_independent_calibration_20261111/sampling_release.json)
 records placement/status without changing the original frozen manifest.
-All eight jobs started on node004/node005 (four each). Initial public progress
-confirms at least one completed prefix/shard without errors; sampling is ongoing,
-not a completed performance readout. No raw banks or models were retrieved.
+All eight jobs started on node004/node005 (four each). The initial progress snapshot
+showed at least one completed prefix/shard without errors. No raw banks or models
+were retrieved.
+
+## Calibration Completion
+
+All eight samples completed at exactly 4,224,000 steps. The subsequent four
+zero-simulation A4-only jobs t214490-t214493 froze both heads/root before B4.
+The [result and next decision](freq_hrl_independent_calibration_result_2026-11-11.md)
+retain conditional positives, G half-group instability and sampled decision
+collapse. All cuts stay frozen; the whole-cohort E8 readout is recommended but
+remains unsubmitted, and no original confirmation or episode follow-up is released.
