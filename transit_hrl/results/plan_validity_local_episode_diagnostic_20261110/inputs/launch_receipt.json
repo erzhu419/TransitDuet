@@ -1,0 +1,111 @@
+{
+  "run_name": "plan_validity_local_episode_diagnostic_20261110",
+  "tasks": [
+    {
+      "id": "t214162",
+      "status": "running",
+      "node": "node003",
+      "remote_pids": [
+        379777
+      ],
+      "exit_code": null,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "require_node": null,
+      "preferred_node": null
+    },
+    {
+      "id": "t214163",
+      "status": "running",
+      "node": "node003",
+      "remote_pids": [
+        379765
+      ],
+      "exit_code": null,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "require_node": null,
+      "preferred_node": null
+    },
+    {
+      "id": "t214164",
+      "status": "running",
+      "node": "node003",
+      "remote_pids": [
+        379755
+      ],
+      "exit_code": null,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "require_node": null,
+      "preferred_node": null
+    },
+    {
+      "id": "t214165",
+      "status": "running",
+      "node": "node003",
+      "remote_pids": [
+        379869
+      ],
+      "exit_code": null,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "require_node": null,
+      "preferred_node": null
+    }
+  ],
+  "hostname": "node003",
+  "native_progress": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "status": "running",
+      "stage": "native_precheck_passed",
+      "error": null,
+      "validation_reproduction": {
+        "history": 0.991994033472304,
+        "threshold": 1.104563183541886,
+        "termination_history": 1.1653314118301203
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "status": "running",
+      "stage": "native_precheck_passed",
+      "error": null,
+      "validation_reproduction": {
+        "history": 1.3150617993730433,
+        "threshold": 1.2725571964792106,
+        "termination_history": 1.6208091188580913
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "status": "running",
+      "stage": "native_precheck_passed",
+      "error": null,
+      "validation_reproduction": {
+        "history": 4.404081600337276,
+        "threshold": 4.237017425712491,
+        "termination_history": 4.118874105366482
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "status": "complete",
+      "stage": "diagnostic_complete",
+      "error": null,
+      "validation_reproduction": {
+        "history": 4.894345576746082,
+        "threshold": 4.806159043760147,
+        "termination_history": 4.896112826024259
+      }
+    }
+  ],
+  "process_sample": "379789 379755 99.2 454348      07:41 python\n379795 379765 99.2 501224      07:41 python\n379801 379777 99.1 490044      07:41 python\n",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false
+}

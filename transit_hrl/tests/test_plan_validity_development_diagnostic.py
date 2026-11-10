@@ -13,6 +13,7 @@ from freq_hrl.experiments.pointmaze_goal_validation import _json_ready
 from freq_hrl.experiments.pointmaze_timing_baselines import TimingRule
 from scripts import run_plan_validity_development_diagnostic as worker
 from scripts import submit_plan_validity_diagnostic_scheduleurm as submitter
+from scripts import analyze_plan_validity_development_diagnostic as analyzer
 
 
 def probe(seed, local, full, *, score=0, stop=False):
@@ -171,6 +172,34 @@ class DevelopmentDiagnosticTest(unittest.TestCase):
             self.assertFalse(result["lifecycle_costs_complete"])
             self.assertEqual(result["cross_future_attribution"]["probe_states"], 12)
             self.assertEqual(len(result["episodes"]), 16)
+
+    def test_compact_analysis_does_not_inflate_roots_or_hide_a_missing_cell(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root, plan = Path(folder), draft_plan()
+            cells = submitter.diagnostic_cells(source_fixture(root, plan), plan)
+            manifest = {"run_name": "fixture", "scope": "development_only", "cells": cells}
+            for i, cell in enumerate(cells):
+                cell["output_directory"] = f"results/{i}"
+                row = {"run_name": "fixture", "status": "complete", **{k: cell[k] for k in
+                    ("task", "optimizer_seed", "evaluation_seeds", "probe_seeds")},
+                    "source_run_ids": {m: s["run_id"] for m, s in cell["sources"].items()},
+                    "episode_panels": {panel: {"mean_ise": {"history": 1, "threshold": 2, "termination_history": 3}}
+                                       for panel in ("all", "first_half", "second_half")},
+                    "local_errors": {}, "cross_future_attribution": {}, "termination_development_eligible": False,
+                    "occupancy": {"panels": {}}, "evaluation_cost": {"cpu_seconds": 10}}
+                p = root / cell["output_directory"] / "public/result.json"
+                p.parent.mkdir(parents=True)
+                p.write_text(json.dumps(row))
+            result = analyzer.summarize(manifest, root=root)
+            self.assertEqual(result["completed_root_cells"], 4)
+            self.assertEqual(result["task_means"]["reacher_tracking"]["optimizer_roots"], 2)
+            self.assertFalse(result["performance_claim_supported"])
+            self.assertEqual(result["candidate_recipe_decision"], "PILOT_RECIPE_HOLD")
+            p.unlink()
+            result = analyzer.summarize(manifest, root=root)
+            self.assertEqual(result["status"], "incomplete_or_failed")
+            self.assertIsNone(result["task_means"]["reacher_tracking"])
+            self.assertEqual(result["completed_evaluation_cpu_seconds"], 30)
 
 
 if __name__ == "__main__":

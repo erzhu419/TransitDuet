@@ -36,6 +36,8 @@ Full-episode ISE for all3 frozen methods is reported on16 paths and both8-path
 halves. Keep the failed Reacher termination eligibility and unknown interrupted
 costs visible. Only2 roots/task and4 probe paths/root exist; probes/futures do
 not inflate the independent root count or establish a confirmatory claim.
+Conditional futures fix the simulator's current latent state; their prediction
+errors are not observable-state Bayes-error bounds.
 
 ## Execution
 
@@ -44,3 +46,11 @@ freezes sources, seeds and4 one-CPU/2-GiB workers. Placement is unpinned within
 node001-node006. New outputs are isolated under
 `results/plan_validity_local_episode_diagnostic_20261110/`; only public JSONs
 are retrieved. Raw diagnostic records and all original models remain server-side.
+Submitted: t214162/t214163 for the two PointMaze roots and t214164/t214165 for
+the two Reacher roots, in the manifest's frozen order.
+All4 passed native reproduction and entered evaluation on node003 with unpinned
+placement; [launch receipt](../results/plan_validity_local_episode_diagnostic_20261110/inputs/launch_receipt.json).
+The reserved evaluation paths also have no overlap with each root's3072 resolved
+training seeds. This is a pipeline check, not a global historical-exposure audit.
+The read-only `scripts/analyze_plan_validity_development_diagnostic.py` combines
+public outputs, keeps incomplete task aggregates unknown and never clears HOLD.
