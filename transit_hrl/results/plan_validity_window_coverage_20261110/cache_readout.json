@@ -1,0 +1,694 @@
+{
+  "run_name": "plan_validity_window_coverage_20261110",
+  "analysis_role": "posthoc_descriptive_frozen_held_cache",
+  "interpretation": "one_intervention_on_original_history_states_not_repeated_policy_episode_gains",
+  "fit_calls": 0,
+  "new_simulator_steps": 0,
+  "confirmation_released": false,
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "paths": 8,
+      "states": 24,
+      "G_future_range": [
+        -0.6444524289149334,
+        0.17595034742144056
+      ],
+      "largest_state_fraction_of_G_future_squares": 0.5606845200662947,
+      "factorial_action_contrasts": {
+        "coverage_df2": {
+          "changed_states": 6,
+          "changed_paths": 4,
+          "stop_fraction_change": -0.25,
+          "blocks": {
+            "A": {
+              "window_gain": -0.0004816377421783266,
+              "full_gain": 0.0013254526041535433,
+              "changed_state_window_full_sign_disagreement": 0.0
+            },
+            "B": {
+              "window_gain": 0.0003911957785624717,
+              "full_gain": 0.003266359699562639,
+              "changed_state_window_full_sign_disagreement": 0.0
+            }
+          }
+        },
+        "coverage_df8": {
+          "changed_states": 3,
+          "changed_paths": 3,
+          "stop_fraction_change": -0.125,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0009889967579449009,
+              "full_gain": 0.005529545338349623,
+              "changed_state_window_full_sign_disagreement": 0.0
+            },
+            "B": {
+              "window_gain": -0.0004099110298096576,
+              "full_gain": -0.0028901607852760205,
+              "changed_state_window_full_sign_disagreement": 0.3333333333333333
+            }
+          }
+        },
+        "complexity_dense": {
+          "changed_states": 5,
+          "changed_paths": 4,
+          "stop_fraction_change": 0.125,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0014706345001232275,
+              "full_gain": 0.00420409273419608,
+              "changed_state_window_full_sign_disagreement": 0.0
+            },
+            "B": {
+              "window_gain": -0.0008011068083721293,
+              "full_gain": -0.00615652048483866,
+              "changed_state_window_full_sign_disagreement": 0.2
+            }
+          }
+        },
+        "complexity_wide": {
+          "changed_states": 0,
+          "changed_paths": 0,
+          "stop_fraction_change": 0.0,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0,
+              "full_gain": 0.0,
+              "changed_state_window_full_sign_disagreement": null
+            },
+            "B": {
+              "window_gain": 0.0,
+              "full_gain": 0.0,
+              "changed_state_window_full_sign_disagreement": null
+            }
+          }
+        }
+      },
+      "head_attribution": {
+        "dense_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.25,
+            "same_cut_information_stop_fraction": 0.5416666666666666,
+            "frozen_gain_over_factual": 9.0951457529601e-05,
+            "same_cut_information_gain_over_frozen": -0.0027932559970070543,
+            "target_zero_information_gain_over_frozen": -0.0027932559970070543,
+            "full_information_gain_over_frozen": 0.0003231676327707939,
+            "full_information_gain_over_selected_constant": 0.0076185165951406205,
+            "score_zero_gain_over_frozen": -0.0006395429757945562
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.25,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": -0.0016638932671056799,
+            "same_cut_information_gain_over_frozen": 0.003871849524440404,
+            "target_zero_information_gain_over_frozen": 0.002567378596946288,
+            "full_information_gain_over_frozen": 0.00034633062520046204,
+            "full_information_gain_over_selected_constant": -0.0009274768281804109,
+            "score_zero_gain_over_frozen": -0.00372388591418367
+          }
+        },
+        "dense_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.375,
+            "same_cut_information_stop_fraction": 0.5833333333333334,
+            "frozen_gain_over_factual": -0.0060655690273090585,
+            "same_cut_information_gain_over_frozen": 0.0027476334381753946,
+            "target_zero_information_gain_over_frozen": 0.003363264487831606,
+            "full_information_gain_over_frozen": 0.006479688117609453,
+            "full_information_gain_over_selected_constant": 0.0076185165951406205,
+            "score_zero_gain_over_frozen": 0.0022364291692294224
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.375,
+            "same_cut_information_stop_fraction": 0.5833333333333334,
+            "frozen_gain_over_factual": 0.0025401994670903997,
+            "same_cut_information_gain_over_frozen": -0.006948472558932356,
+            "target_zero_information_gain_over_frozen": -0.0016367141372497923,
+            "full_information_gain_over_frozen": -0.0038577621089956183,
+            "full_information_gain_over_selected_constant": -0.0009274768281804109,
+            "score_zero_gain_over_frozen": -0.0011265221257964631
+          }
+        },
+        "wide_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.125,
+            "same_cut_information_stop_fraction": 0.5416666666666666,
+            "frozen_gain_over_factual": -0.0027992093277464194,
+            "same_cut_information_gain_over_frozen": 9.69047882689664e-05,
+            "target_zero_information_gain_over_frozen": 9.69047882689664e-05,
+            "full_information_gain_over_frozen": 0.0032133284180468143,
+            "full_information_gain_over_selected_constant": 0.0076185165951406205,
+            "score_zero_gain_over_frozen": -0.0013584788504879635
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.125,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": 0.0038656520712439433,
+            "same_cut_information_gain_over_frozen": -0.0016576958139092191,
+            "target_zero_information_gain_over_frozen": -0.0029621667414033354,
+            "full_information_gain_over_frozen": -0.0051832147131491615,
+            "full_information_gain_over_selected_constant": -0.0009274768281804109,
+            "score_zero_gain_over_frozen": -0.0019562125321868906
+          }
+        },
+        "wide_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.125,
+            "same_cut_information_stop_fraction": 0.4583333333333333,
+            "frozen_gain_over_factual": -0.0027992093277464194,
+            "same_cut_information_gain_over_frozen": -0.0013332253458235935,
+            "target_zero_information_gain_over_frozen": 9.69047882689664e-05,
+            "full_information_gain_over_frozen": 0.0032133284180468143,
+            "full_information_gain_over_selected_constant": 0.0076185165951406205,
+            "score_zero_gain_over_frozen": 0.0003114084053435588
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.125,
+            "same_cut_information_stop_fraction": 0.4166666666666667,
+            "frozen_gain_over_factual": 0.0038656520712439433,
+            "same_cut_information_gain_over_frozen": 0.0008111805563373412,
+            "target_zero_information_gain_over_frozen": -0.0029621667414033354,
+            "full_information_gain_over_frozen": -0.0051832147131491615,
+            "full_information_gain_over_selected_constant": -0.0009274768281804109,
+            "score_zero_gain_over_frozen": 0.0011274405498798712
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "paths": 8,
+      "states": 24,
+      "G_future_range": [
+        -0.5993315056988149,
+        0.43832272832654806
+      ],
+      "largest_state_fraction_of_G_future_squares": 0.30881775701235953,
+      "factorial_action_contrasts": {
+        "coverage_df2": {
+          "changed_states": 0,
+          "changed_paths": 0,
+          "stop_fraction_change": 0.0,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0,
+              "full_gain": 0.0,
+              "changed_state_window_full_sign_disagreement": null
+            },
+            "B": {
+              "window_gain": 0.0,
+              "full_gain": 0.0,
+              "changed_state_window_full_sign_disagreement": null
+            }
+          }
+        },
+        "coverage_df8": {
+          "changed_states": 3,
+          "changed_paths": 3,
+          "stop_fraction_change": -0.041666666666666664,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0008051768908362021,
+              "full_gain": 0.0022212225382959535,
+              "changed_state_window_full_sign_disagreement": 0.6666666666666666
+            },
+            "B": {
+              "window_gain": -0.0004459626060393852,
+              "full_gain": 0.00024715110389050024,
+              "changed_state_window_full_sign_disagreement": 0.3333333333333333
+            }
+          }
+        },
+        "complexity_dense": {
+          "changed_states": 2,
+          "changed_paths": 2,
+          "stop_fraction_change": 0.0,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0008273323150244163,
+              "full_gain": 0.0015262209653658075,
+              "changed_state_window_full_sign_disagreement": 0.5
+            },
+            "B": {
+              "window_gain": 0.0006683825264827437,
+              "full_gain": 0.00016354703371981744,
+              "changed_state_window_full_sign_disagreement": 0.0
+            }
+          }
+        },
+        "complexity_wide": {
+          "changed_states": 1,
+          "changed_paths": 1,
+          "stop_fraction_change": 0.041666666666666664,
+          "blocks": {
+            "A": {
+              "window_gain": 2.2155424188214187e-05,
+              "full_gain": -0.0006950015729301461,
+              "changed_state_window_full_sign_disagreement": 1.0
+            },
+            "B": {
+              "window_gain": 0.001114345132522129,
+              "full_gain": -8.360407017068278e-05,
+              "changed_state_window_full_sign_disagreement": 1.0
+            }
+          }
+        }
+      },
+      "head_attribution": {
+        "dense_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.20833333333333334,
+            "same_cut_information_stop_fraction": 0.16666666666666666,
+            "frozen_gain_over_factual": -0.00016354703371981744,
+            "same_cut_information_gain_over_frozen": 0.0022640651904614595,
+            "target_zero_information_gain_over_frozen": -0.0038879851916967293,
+            "full_information_gain_over_frozen": -0.007300063147515963,
+            "full_information_gain_over_selected_constant": -0.007112294363208887,
+            "score_zero_gain_over_frozen": -0.01069977042077999
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.20833333333333334,
+            "same_cut_information_stop_fraction": 0.16666666666666666,
+            "frozen_gain_over_factual": -0.0015262209653658075,
+            "same_cut_information_gain_over_frozen": 0.008844967294677373,
+            "target_zero_information_gain_over_frozen": 0.012460157388911484,
+            "full_information_gain_over_frozen": 0.012367947625983774,
+            "full_information_gain_over_selected_constant": 0.008869621551726012,
+            "score_zero_gain_over_frozen": -0.009015550031106304
+          }
+        },
+        "dense_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.20833333333333334,
+            "same_cut_information_stop_fraction": 0.25,
+            "frozen_gain_over_factual": 0.0,
+            "same_cut_information_gain_over_frozen": 0.0021835550487537213,
+            "target_zero_information_gain_over_frozen": -0.004051532225416547,
+            "full_information_gain_over_frozen": -0.007463610181235779,
+            "full_information_gain_over_selected_constant": -0.007112294363208887,
+            "score_zero_gain_over_frozen": -0.0016786290637319432
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.20833333333333334,
+            "same_cut_information_stop_fraction": 0.2916666666666667,
+            "frozen_gain_over_factual": 0.0,
+            "same_cut_information_gain_over_frozen": 0.010341724025175239,
+            "target_zero_information_gain_over_frozen": 0.010933936423545676,
+            "full_information_gain_over_frozen": 0.010841726660617968,
+            "full_information_gain_over_selected_constant": 0.008869621551726012,
+            "score_zero_gain_over_frozen": -0.0030089857263186476
+          }
+        },
+        "wide_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.20833333333333334,
+            "same_cut_information_stop_fraction": 0.2916666666666667,
+            "frozen_gain_over_factual": 0.0,
+            "same_cut_information_gain_over_frozen": 0.002259754623637753,
+            "target_zero_information_gain_over_frozen": -0.004051532225416547,
+            "full_information_gain_over_frozen": -0.007463610181235779,
+            "full_information_gain_over_selected_constant": -0.007112294363208887,
+            "score_zero_gain_over_frozen": -0.0011007851781053037
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.20833333333333334,
+            "same_cut_information_stop_fraction": 0.2916666666666667,
+            "frozen_gain_over_factual": 0.0,
+            "same_cut_information_gain_over_frozen": 0.010341724025175239,
+            "target_zero_information_gain_over_frozen": 0.010933936423545676,
+            "full_information_gain_over_frozen": 0.010841726660617968,
+            "full_information_gain_over_selected_constant": 0.008869621551726012,
+            "score_zero_gain_over_frozen": -0.0005157148050291919
+          }
+        },
+        "wide_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.16666666666666666,
+            "same_cut_information_stop_fraction": 0.16666666666666666,
+            "frozen_gain_over_factual": 8.360407017068278e-05,
+            "same_cut_information_gain_over_frozen": 0.002016914086570959,
+            "target_zero_information_gain_over_frozen": -0.004135136295587229,
+            "full_information_gain_over_frozen": -0.007547214251406462,
+            "full_information_gain_over_selected_constant": -0.007112294363208887,
+            "score_zero_gain_over_frozen": -0.0038219815559220175
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.16666666666666666,
+            "same_cut_information_stop_fraction": 0.16666666666666666,
+            "frozen_gain_over_factual": 0.0006950015729301461,
+            "same_cut_information_gain_over_frozen": 0.006623744756381419,
+            "target_zero_information_gain_over_frozen": 0.01023893485061553,
+            "full_information_gain_over_frozen": 0.010146725087687821,
+            "full_information_gain_over_selected_constant": 0.008869621551726012,
+            "score_zero_gain_over_frozen": -0.007900564611357722
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "paths": 8,
+      "states": 24,
+      "G_future_range": [
+        -1.2600002407707906,
+        1.3013260178740342
+      ],
+      "largest_state_fraction_of_G_future_squares": 0.39703744488182274,
+      "factorial_action_contrasts": {
+        "coverage_df2": {
+          "changed_states": 6,
+          "changed_paths": 5,
+          "stop_fraction_change": 0.16666666666666666,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0025914132243671424,
+              "full_gain": -0.0004738374805910439,
+              "changed_state_window_full_sign_disagreement": 0.6666666666666666
+            },
+            "B": {
+              "window_gain": 0.002597594181915376,
+              "full_gain": 0.002328453380624207,
+              "changed_state_window_full_sign_disagreement": 0.16666666666666666
+            }
+          }
+        },
+        "coverage_df8": {
+          "changed_states": 7,
+          "changed_paths": 4,
+          "stop_fraction_change": 0.125,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0032464371701683933,
+              "full_gain": 0.0009007100003431643,
+              "changed_state_window_full_sign_disagreement": 0.5714285714285714
+            },
+            "B": {
+              "window_gain": 0.003088601922983797,
+              "full_gain": 0.0021985877067206053,
+              "changed_state_window_full_sign_disagreement": 0.14285714285714285
+            }
+          }
+        },
+        "complexity_dense": {
+          "changed_states": 2,
+          "changed_paths": 2,
+          "stop_fraction_change": 0.0,
+          "blocks": {
+            "A": {
+              "window_gain": -7.733679750827431e-05,
+              "full_gain": -0.0006645668028335596,
+              "changed_state_window_full_sign_disagreement": 0.5
+            },
+            "B": {
+              "window_gain": -4.465793982792255e-05,
+              "full_gain": -0.0010334911656119012,
+              "changed_state_window_full_sign_disagreement": 0.0
+            }
+          }
+        },
+        "complexity_wide": {
+          "changed_states": 5,
+          "changed_paths": 3,
+          "stop_fraction_change": 0.041666666666666664,
+          "blocks": {
+            "A": {
+              "window_gain": -0.0007323607433095252,
+              "full_gain": -0.002039114283767768,
+              "changed_state_window_full_sign_disagreement": 0.2
+            },
+            "B": {
+              "window_gain": -0.0005356656808963438,
+              "full_gain": -0.0009036254917082995,
+              "changed_state_window_full_sign_disagreement": 0.0
+            }
+          }
+        }
+      },
+      "head_attribution": {
+        "dense_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.25,
+            "same_cut_information_stop_fraction": 0.3333333333333333,
+            "frozen_gain_over_factual": 0.010160333320501064,
+            "same_cut_information_gain_over_frozen": 0.005221885023748239,
+            "target_zero_information_gain_over_frozen": 0.005809925701901479,
+            "full_information_gain_over_frozen": 0.005091625832995601,
+            "full_information_gain_over_selected_constant": -0.0025109770177224136,
+            "score_zero_gain_over_frozen": 0.0013373814536150237
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.25,
+            "same_cut_information_stop_fraction": 0.3333333333333333,
+            "frozen_gain_over_factual": -0.0015032640423380955,
+            "same_cut_information_gain_over_frozen": 0.0006153003973091015,
+            "target_zero_information_gain_over_frozen": -0.010073090293773729,
+            "full_information_gain_over_frozen": 0.005974613154637987,
+            "full_information_gain_over_selected_constant": 0.007134369538551737,
+            "score_zero_gain_over_frozen": -0.0006448241147240241
+          }
+        },
+        "dense_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.25,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": 0.009126842154889162,
+            "same_cut_information_gain_over_frozen": 0.006081634381134775,
+            "target_zero_information_gain_over_frozen": 0.006843416867513381,
+            "full_information_gain_over_frozen": 0.006125116998607502,
+            "full_information_gain_over_selected_constant": -0.0025109770177224136,
+            "score_zero_gain_over_frozen": 0.007221740045561022
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.25,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": -0.0021678308451716552,
+            "same_cut_information_gain_over_frozen": -0.015806026815330717,
+            "target_zero_information_gain_over_frozen": -0.00940852349094017,
+            "full_information_gain_over_frozen": 0.006639179957471546,
+            "full_information_gain_over_selected_constant": 0.007134369538551737,
+            "score_zero_gain_over_frozen": 0.005081658598132348
+          }
+        },
+        "wide_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.4166666666666667,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": 0.011455295535513369,
+            "same_cut_information_gain_over_frozen": 0.0037531810005105672,
+            "target_zero_information_gain_over_frozen": 0.004514963486889174,
+            "full_information_gain_over_frozen": 0.003796663617983295,
+            "full_information_gain_over_selected_constant": -0.0025109770177224136,
+            "score_zero_gain_over_frozen": 0.010489996338877108
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.4166666666666667,
+            "same_cut_information_stop_fraction": 0.5416666666666666,
+            "frozen_gain_over_factual": -0.002641668325762699,
+            "same_cut_information_gain_over_frozen": -0.00968284921676577,
+            "target_zero_information_gain_over_frozen": -0.008934686010349127,
+            "full_information_gain_over_frozen": 0.00711301743806259,
+            "full_information_gain_over_selected_constant": 0.007134369538551737,
+            "score_zero_gain_over_frozen": 0.017643666706544364
+          }
+        },
+        "wide_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.375,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": 0.01235892102722167,
+            "same_cut_information_gain_over_frozen": 0.002849555508802268,
+            "target_zero_information_gain_over_frozen": 0.0036113379951808744,
+            "full_information_gain_over_frozen": 0.002893038126274996,
+            "full_information_gain_over_selected_constant": -0.0025109770177224136,
+            "score_zero_gain_over_frozen": -0.00021203917039458453
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.375,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": -0.0006025540419949312,
+            "same_cut_information_gain_over_frozen": -0.01737130361850744,
+            "target_zero_information_gain_over_frozen": -0.010973800294116895,
+            "full_information_gain_over_frozen": 0.005073903154294822,
+            "full_information_gain_over_selected_constant": 0.007134369538551737,
+            "score_zero_gain_over_frozen": 0.001834043280245103
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "paths": 8,
+      "states": 24,
+      "G_future_range": [
+        -0.9197628640030988,
+        1.6737179489973606
+      ],
+      "largest_state_fraction_of_G_future_squares": 0.337206016979102,
+      "factorial_action_contrasts": {
+        "coverage_df2": {
+          "changed_states": 8,
+          "changed_paths": 7,
+          "stop_fraction_change": -0.25,
+          "blocks": {
+            "A": {
+              "window_gain": 0.004563196270808183,
+              "full_gain": -0.013426072474945414,
+              "changed_state_window_full_sign_disagreement": 0.5
+            },
+            "B": {
+              "window_gain": 0.0025404426479132577,
+              "full_gain": -0.01701783667142405,
+              "changed_state_window_full_sign_disagreement": 0.5
+            }
+          }
+        },
+        "coverage_df8": {
+          "changed_states": 9,
+          "changed_paths": 6,
+          "stop_fraction_change": -0.125,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0061575606466210625,
+              "full_gain": -0.01714946386962453,
+              "changed_state_window_full_sign_disagreement": 0.4444444444444444
+            },
+            "B": {
+              "window_gain": 0.004100110305171657,
+              "full_gain": -0.0035798409565048483,
+              "changed_state_window_full_sign_disagreement": 0.4444444444444444
+            }
+          }
+        },
+        "complexity_dense": {
+          "changed_states": 2,
+          "changed_paths": 2,
+          "stop_fraction_change": 0.08333333333333333,
+          "blocks": {
+            "A": {
+              "window_gain": 0.0016860472315197196,
+              "full_gain": 0.0033362260854637865,
+              "changed_state_window_full_sign_disagreement": 0.0
+            },
+            "B": {
+              "window_gain": 0.001517180085410471,
+              "full_gain": 6.148492194837467e-05,
+              "changed_state_window_full_sign_disagreement": 0.5
+            }
+          }
+        },
+        "complexity_wide": {
+          "changed_states": 5,
+          "changed_paths": 4,
+          "stop_fraction_change": -0.041666666666666664,
+          "blocks": {
+            "A": {
+              "window_gain": 9.168285570683905e-05,
+              "full_gain": 0.007059617480142902,
+              "changed_state_window_full_sign_disagreement": 0.0
+            },
+            "B": {
+              "window_gain": -4.248757184792894e-05,
+              "full_gain": -0.013376510792970827,
+              "changed_state_window_full_sign_disagreement": 0.6
+            }
+          }
+        }
+      },
+      "head_attribution": {
+        "dense_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.5416666666666666,
+            "same_cut_information_stop_fraction": 0.4583333333333333,
+            "frozen_gain_over_factual": -0.0033986538917524004,
+            "same_cut_information_gain_over_frozen": -0.010765847480392618,
+            "target_zero_information_gain_over_frozen": -0.010765847480392618,
+            "full_information_gain_over_frozen": -0.006237877096923444,
+            "full_information_gain_over_selected_constant": -0.012939830164774175,
+            "score_zero_gain_over_frozen": 0.00021935073950209624
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.5416666666666666,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": 0.018667620436513117,
+            "same_cut_information_gain_over_frozen": 0.011990603766176921,
+            "target_zero_information_gain_over_frozen": 0.011663649340450569,
+            "full_information_gain_over_frozen": -0.012449936628431251,
+            "full_information_gain_over_selected_constant": -0.018199781741380826,
+            "score_zero_gain_over_frozen": -0.00032695442572635197
+          }
+        },
+        "dense_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.625,
+            "same_cut_information_stop_fraction": 0.625,
+            "frozen_gain_over_factual": -0.0033371689698040254,
+            "same_cut_information_gain_over_frozen": -0.009705091468606,
+            "target_zero_information_gain_over_frozen": -0.010827332402340994,
+            "full_information_gain_over_frozen": -0.006299362018871819,
+            "full_information_gain_over_selected_constant": -0.012939830164774175,
+            "score_zero_gain_over_frozen": -0.005096528633016527
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.625,
+            "same_cut_information_stop_fraction": 0.7083333333333334,
+            "frozen_gain_over_factual": 0.022003846521976903,
+            "same_cut_information_gain_over_frozen": -0.006866987448684007,
+            "target_zero_information_gain_over_frozen": 0.008327423254986782,
+            "full_information_gain_over_frozen": -0.015786162713895036,
+            "full_information_gain_over_selected_constant": -0.018199781741380826,
+            "score_zero_gain_over_frozen": -0.004217117207841191
+          }
+        },
+        "wide_df2": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.375,
+            "same_cut_information_stop_fraction": 0.5833333333333334,
+            "frozen_gain_over_factual": -0.020355005641228077,
+            "same_cut_information_gain_over_frozen": 0.007442574479827606,
+            "target_zero_information_gain_over_frozen": 0.0061905042690830565,
+            "full_information_gain_over_frozen": 0.010718474652552231,
+            "full_information_gain_over_selected_constant": -0.012939830164774175,
+            "score_zero_gain_over_frozen": 0.0004988656106609211
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.375,
+            "same_cut_information_stop_fraction": 0.6666666666666666,
+            "frozen_gain_over_factual": 0.008577774047031491,
+            "same_cut_information_gain_over_frozen": 0.0061952141340708144,
+            "target_zero_information_gain_over_frozen": 0.021753495729932196,
+            "full_information_gain_over_frozen": -0.002360090238949624,
+            "full_information_gain_over_selected_constant": -0.018199781741380826,
+            "score_zero_gain_over_frozen": -0.002818398400575628
+          }
+        },
+        "wide_df8": {
+          "A_to_B": {
+            "frozen_stop_fraction": 0.4166666666666667,
+            "same_cut_information_stop_fraction": 0.5,
+            "frozen_gain_over_factual": -0.006978494848257248,
+            "same_cut_information_gain_over_frozen": -0.006031968050554282,
+            "target_zero_information_gain_over_frozen": -0.007186006523887771,
+            "full_information_gain_over_frozen": -0.002658036140418596,
+            "full_information_gain_over_selected_constant": -0.012939830164774175,
+            "score_zero_gain_over_frozen": 0.0
+          },
+          "B_to_A": {
+            "frozen_stop_fraction": 0.4166666666666667,
+            "same_cut_information_stop_fraction": 0.5416666666666666,
+            "frozen_gain_over_factual": 0.001518156566888589,
+            "same_cut_information_gain_over_frozen": 0.028813113210075098,
+            "target_zero_information_gain_over_frozen": 0.028813113210075098,
+            "full_information_gain_over_frozen": 0.004699527241193278,
+            "full_information_gain_over_selected_constant": -0.018199781741380826,
+            "score_zero_gain_over_frozen": 0.0
+          }
+        }
+      }
+    }
+  ]
+}

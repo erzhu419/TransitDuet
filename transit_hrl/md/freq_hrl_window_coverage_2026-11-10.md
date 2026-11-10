@@ -1,5 +1,7 @@
 # W Coverage And Complexity
 
+Completed: all four main tasks succeeded; [result](freq_hrl_window_coverage_result_2026-11-10.md).
+
 Freeze a development 2x2 factorial on the four existing task/root groups:
 8 prefixes x 4 fitting futures/state versus 32 prefixes x 1 fitting future/state;
 each at slope effective DF 2 and 8. Three states/prefix give 96 fitting

@@ -235,3 +235,8 @@ The subsequent [W factorial](freq_hrl_window_coverage_2026-11-10.md) freezes
 8-prefix/4-future versus 32-prefix/1-future training at DF2/DF8, with new held
 paths and unchanged controls. Its four native prechecks passed; parent HOLD and
 confirmation restrictions remain unchanged.
+All four factorial cells completed: wider fitting coverage improves held W
+prediction and Reacher ISE point estimates, but no arm beats pooled history or
+threshold. The [result](freq_hrl_window_coverage_result_2026-11-10.md) identifies
+bin-start-only supervision versus later deployed checks as the next support gap;
+it does not relax confirmation gates or alter the frozen models.
