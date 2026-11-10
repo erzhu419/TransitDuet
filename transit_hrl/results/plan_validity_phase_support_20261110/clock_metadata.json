@@ -1,0 +1,69 @@
+{
+  "scope": "scalar_clock_coefficients_only_no_model_download",
+  "rows": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "clock_models": {
+        "start_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": 0.0,
+          "standardized_remaining_weight": 0.0017238265307164056
+        },
+        "checks_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": 0.0005029998021276478,
+          "standardized_remaining_weight": 0.0015396442014874762
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "clock_models": {
+        "start_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": 0.0,
+          "standardized_remaining_weight": 0.000685884639821071
+        },
+        "checks_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": -0.00025848191549187737,
+          "standardized_remaining_weight": 0.0002152295381226943
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "clock_models": {
+        "start_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": 0.0,
+          "standardized_remaining_weight": 0.0001077277146897317
+        },
+        "checks_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": -0.00021739628331806559,
+          "standardized_remaining_weight": -0.00010358976201366683
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "clock_models": {
+        "start_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": 0.0,
+          "standardized_remaining_weight": 9.892077605178298e-05
+        },
+        "checks_clock": {
+          "kind": "phase_ridge",
+          "standardized_offset_weight": 0.00015142980776304717,
+          "standardized_remaining_weight": 7.488005992418195e-05
+        }
+      }
+    }
+  ]
+}

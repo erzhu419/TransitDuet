@@ -245,3 +245,8 @@ bin-start/reachable-check supervision from explicit clock information at DF8 and
 96 fitting futures/arm, using another held cohort. Four native prechecks passed,
 including real nonzero phases and unchanged 24-call budgets. It remains a
 development repair and does not release confirmation.
+The four phase-support cells completed. All optional phases and causal clock
+inputs are active, but the joint repair worsens PointMaze and gives only a fragile
+Reacher point gain, without surpassing the old controls. The
+[readout](freq_hrl_phase_support_result_2026-11-10.md) retains the whole cohort and
+prioritizes prefix/continuation consistency diagnostics; confirmation stays held.

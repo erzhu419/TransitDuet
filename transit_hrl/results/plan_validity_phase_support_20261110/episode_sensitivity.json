@@ -1,0 +1,606 @@
+{
+  "run_name": "plan_validity_phase_support_20261110",
+  "analysis_role": "posthoc_descriptive_not_a_new_primary_cohort",
+  "primary_exclusions": [],
+  "policy_selection": "none",
+  "tasks": {
+    "pointmaze": {
+      "joint_vs_start": {
+        "episodes": 16,
+        "primary_mean_difference": 0.06693059451168729,
+        "improved_paths": 5,
+        "largest_benefit_path": {
+          "optimizer_seed": 1972120000,
+          "seed": 1972129006,
+          "difference": -0.09499728371737337
+        },
+        "largest_harm_path": {
+          "optimizer_seed": 1972120000,
+          "seed": 1972129004,
+          "difference": 0.3295607006292449
+        },
+        "descriptive_mean_without_largest_benefit": 0.07772578639362467,
+        "descriptive_mean_without_largest_harm": 0.049421920770516777,
+        "paired_effects": [
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119000,
+            "difference": 0.23430010320266614
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119001,
+            "difference": 0.03508382259912124
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119002,
+            "difference": 0.008146404223366766
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119003,
+            "difference": 0.06060571612210275
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119004,
+            "difference": 0.19767082669998048
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119005,
+            "difference": 0.07803682580884352
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119006,
+            "difference": 0.015032936932528829
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119007,
+            "difference": 0.005361511700023858
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129000,
+            "difference": 0.007851993520219924
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129001,
+            "difference": -0.012298117456420066
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129002,
+            "difference": -0.02842789559492709
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129003,
+            "difference": -0.053698914594874414
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129004,
+            "difference": 0.3295607006292449
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129005,
+            "difference": -0.014859999711933192
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129006,
+            "difference": -0.09499728371737337
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129007,
+            "difference": 0.3035208818244264
+          }
+        ]
+      },
+      "clock_vs_start": {
+        "episodes": 16,
+        "primary_mean_difference": 0.01563479076336958,
+        "improved_paths": 6,
+        "largest_benefit_path": {
+          "optimizer_seed": 1972110000,
+          "seed": 1972119006,
+          "difference": -0.05627887846919155
+        },
+        "largest_harm_path": {
+          "optimizer_seed": 1972110000,
+          "seed": 1972119000,
+          "difference": 0.15401163458538802
+        },
+        "descriptive_mean_without_largest_benefit": 0.020429035378873653,
+        "descriptive_mean_without_largest_harm": 0.006409667841901682,
+        "paired_effects": [
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119000,
+            "difference": 0.15401163458538802
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119001,
+            "difference": -0.0157291189464297
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119002,
+            "difference": 0.008146404223366766
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119003,
+            "difference": 0.03669139932583443
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119004,
+            "difference": 0.13960792336601502
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119005,
+            "difference": 0.11495050128184947
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119006,
+            "difference": -0.05627887846919155
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119007,
+            "difference": -0.04429624318635428
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129000,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129001,
+            "difference": -0.050027482278634294
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129002,
+            "difference": -0.03166570347574682
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129003,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129004,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129005,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129006,
+            "difference": -0.00525378421218381
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129007,
+            "difference": 0.0
+          }
+        ]
+      },
+      "joint_vs_history": {
+        "episodes": 16,
+        "primary_mean_difference": 0.16516886971431494,
+        "improved_paths": 3,
+        "largest_benefit_path": {
+          "optimizer_seed": 1972120000,
+          "seed": 1972129005,
+          "difference": -0.40177117500394977
+        },
+        "largest_harm_path": {
+          "optimizer_seed": 1972110000,
+          "seed": 1972119001,
+          "difference": 0.7566280842152403
+        },
+        "descriptive_mean_without_largest_benefit": 0.20296487269553257,
+        "descriptive_mean_without_largest_harm": 0.12573825541425326,
+        "paired_effects": [
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119000,
+            "difference": 0.376341943758596
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119001,
+            "difference": 0.7566280842152403
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119002,
+            "difference": 0.1551767384267263
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119003,
+            "difference": 0.132255954615485
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119004,
+            "difference": 0.21508792209018412
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119005,
+            "difference": 0.17567789979098225
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119006,
+            "difference": 0.09874798622674053
+          },
+          {
+            "optimizer_seed": 1972110000,
+            "seed": 1972119007,
+            "difference": 0.19890985059853222
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129000,
+            "difference": 0.4704204096776453
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129001,
+            "difference": 0.0711325016133052
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129002,
+            "difference": -0.1594878117988352
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129003,
+            "difference": 0.024827923808350083
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129004,
+            "difference": 0.2876278697503837
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129005,
+            "difference": -0.40177117500394977
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129006,
+            "difference": -0.04309134969976092
+          },
+          {
+            "optimizer_seed": 1972120000,
+            "seed": 1972129007,
+            "difference": 0.28421716735941316
+          }
+        ]
+      }
+    },
+    "reacher_tracking": {
+      "joint_vs_start": {
+        "episodes": 16,
+        "primary_mean_difference": -0.05532154459571892,
+        "improved_paths": 8,
+        "largest_benefit_path": {
+          "optimizer_seed": 1972210000,
+          "seed": 1972219007,
+          "difference": -1.1707592196491516
+        },
+        "largest_harm_path": {
+          "optimizer_seed": 1972210000,
+          "seed": 1972219005,
+          "difference": 0.5539984177463761
+        },
+        "descriptive_mean_without_largest_benefit": 0.01904096707450993,
+        "descriptive_mean_without_largest_harm": -0.09594287541852525,
+        "paired_effects": [
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219000,
+            "difference": 0.0014043160081085304
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219001,
+            "difference": -0.01589308926500621
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219002,
+            "difference": -0.07303388000602506
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219003,
+            "difference": 0.10645443141455146
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219004,
+            "difference": 0.002448012389632215
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219005,
+            "difference": 0.5539984177463761
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219006,
+            "difference": -0.08745679334986178
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219007,
+            "difference": -1.1707592196491516
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229000,
+            "difference": -0.08280737998332643
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229001,
+            "difference": 0.06873993797262656
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229002,
+            "difference": -0.15094472503028644
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229003,
+            "difference": -0.6854709567167339
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229004,
+            "difference": 0.13766327135784184
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229005,
+            "difference": 0.5443119918187502
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229006,
+            "difference": -0.04737567011883259
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229007,
+            "difference": 0.013576621879834327
+          }
+        ]
+      },
+      "clock_vs_start": {
+        "episodes": 16,
+        "primary_mean_difference": -0.04224694790899425,
+        "improved_paths": 5,
+        "largest_benefit_path": {
+          "optimizer_seed": 1972220000,
+          "seed": 1972229003,
+          "difference": -0.6012470516413755
+        },
+        "largest_harm_path": {
+          "optimizer_seed": 1972210000,
+          "seed": 1972219002,
+          "difference": 0.04146229667917112
+        },
+        "descriptive_mean_without_largest_benefit": -0.004980274326835499,
+        "descriptive_mean_without_largest_harm": -0.047827564214871936,
+        "paired_effects": [
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219000,
+            "difference": -0.002916539157689968
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219001,
+            "difference": 0.0015994681915714182
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219002,
+            "difference": 0.04146229667917112
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219003,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219004,
+            "difference": -0.007620912473149666
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219005,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219006,
+            "difference": 0.004235956180307809
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219007,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229000,
+            "difference": 0.01902340943639036
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229001,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229002,
+            "difference": -0.12534235044404163
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229003,
+            "difference": -0.6012470516413755
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229004,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229005,
+            "difference": 0.0
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229006,
+            "difference": -0.005145443315091924
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229007,
+            "difference": 0.0
+          }
+        ]
+      },
+      "joint_vs_history": {
+        "episodes": 16,
+        "primary_mean_difference": 0.05326443956090032,
+        "improved_paths": 5,
+        "largest_benefit_path": {
+          "optimizer_seed": 1972210000,
+          "seed": 1972219001,
+          "difference": -0.4987226799054749
+        },
+        "largest_harm_path": {
+          "optimizer_seed": 1972220000,
+          "seed": 1972229005,
+          "difference": 0.6606544357019182
+        },
+        "descriptive_mean_without_largest_benefit": 0.09006358085865868,
+        "descriptive_mean_without_largest_harm": 0.012771773151499133,
+        "paired_effects": [
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219000,
+            "difference": 0.2016072864671532
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219001,
+            "difference": -0.4987226799054749
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219002,
+            "difference": 0.4866186593110733
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219003,
+            "difference": 0.09736008205017033
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219004,
+            "difference": 0.04626263105353212
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219005,
+            "difference": -0.2570341671389178
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219006,
+            "difference": 0.037978922578114194
+          },
+          {
+            "optimizer_seed": 1972210000,
+            "seed": 1972219007,
+            "difference": 0.42708495754000175
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229000,
+            "difference": -0.12535552153694862
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229001,
+            "difference": 0.03678916613470795
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229002,
+            "difference": -0.07017052385739309
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229003,
+            "difference": -0.4654382160963717
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229004,
+            "difference": 0.11858690533439376
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229005,
+            "difference": 0.6606544357019182
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229006,
+            "difference": 0.026619321857740186
+          },
+          {
+            "optimizer_seed": 1972220000,
+            "seed": 1972229007,
+            "difference": 0.12938977348070635
+          }
+        ]
+      }
+    }
+  }
+}

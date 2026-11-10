@@ -1,5 +1,7 @@
 # W Sampling And Clock Support
 
+Completed: all four main tasks succeeded; [result](freq_hrl_phase_support_result_2026-11-10.md).
+
 Freeze a 2x2 development comparison: bin-start versus uniformly sampled optional
 checks actually visited by original history, crossed with plain 39 features versus
 39+offset_fraction+remaining_fraction (41). Both use slope DF8, the fixed 0.75
