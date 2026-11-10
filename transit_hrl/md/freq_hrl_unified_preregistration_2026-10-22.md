@@ -301,3 +301,10 @@ repairs the empirical full-score W floor and improves B W point behavior, but G
 is still root-dependent and no G prefix interval excludes zero. Separate
 calibration information is the next design need, not another B-based cut search.
 No further jobs or confirmation are released.
+
+The [independent-prefix calibration protocol](freq_hrl_independent_calibration_2026-11-11.md)
+now separates new precheck, 16-path calibration and 8-path readout cohorts/root.
+All eight heads stay fixed, A4 alone selects cuts, and all four roots must freeze
+before new readout access. Only four native prechecks are released (48,000-step
+cap); 6,336,000 formal sampling/readout steps remain unsubmitted pending a separate
+decision. This is development work, not release of the original confirmation cohort.
