@@ -23,3 +23,8 @@ Full-score A calibration is in-sample with respect to the head. OOF cuts are not
 nested policy validation. B is previously revealed development data on known
 training prefixes. This diagnostic can isolate score-source mismatch, not establish
 fresh-prefix, complete-episode, lifecycle-budget or end-to-end HRL improvement.
+
+All four tasks t214466-t214469 completed with exit 0. The
+[readout](freq_hrl_score_source_result_2026-11-11.md) finds aligned A W constraints
+and positive B W point gains, but no stable cross-root G repair. No extra native
+evaluation or confirmation is released.

@@ -295,3 +295,9 @@ freezes OOF-selected and full-score-selected A-only cuts, crosses both score vie
 and compares them directly on identical full-model scores. It reuses saved OOF
 predictions with zero new fits or native steps. Full-score A calibration is
 in-sample; previously revealed B is diagnostic only. Original gates stay held.
+All four controls completed with zero fits/native steps. The
+[readout](freq_hrl_score_source_result_2026-11-11.md) finds that score alignment
+repairs the empirical full-score W floor and improves B W point behavior, but G
+is still root-dependent and no G prefix interval excludes zero. Separate
+calibration information is the next design need, not another B-based cut search.
+No further jobs or confirmation are released.
