@@ -18,6 +18,10 @@ measurements. The [complete readout](freq_hrl_native_development_complete_2026-1
 retains PointMaze positives but finds no stable Reacher advantage; one Reacher
 stopping head fails its registered best-clock competence test. Interrupted costs
 remain unknown. Recipe lock and confirmation remain blocked.
+Update2026-11-10: the bounded [frozen diagnostic](freq_hrl_local_episode_result_2026-11-10.md)
+completed on reserved pilot evaluation paths without fitting. PointMaze positives
+remain; Reacher has opposing root effects and both prediction/credit limitations.
+This diagnostic does not clear the failed competence or lifecycle-accounting gates.
 
 ## Questions And Claims
 
