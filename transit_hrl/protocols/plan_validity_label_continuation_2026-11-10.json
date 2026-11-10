@@ -1,0 +1,2260 @@
+{
+  "protocol_version": "paired_candidate_state_label_continuation_v1",
+  "run_name": "plan_validity_label_continuation_20261110",
+  "source_hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "sources": {
+        "history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/history/private/plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972110000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972110000:pointmaze:history:1972110000",
+          "validation_ise": 0.991994033472304,
+          "selected_rule_summary": {
+            "name": "causal_validity_interactions",
+            "kind": "legacy",
+            "view": "causal_validity_interactions",
+            "threshold": 0.06372662548661602,
+            "feature": "plan_age_fraction"
+          }
+        },
+        "threshold": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/threshold/private/plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972110000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972110000:pointmaze:threshold:1972110000",
+          "validation_ise": 1.104563183541886,
+          "selected_rule_summary": {
+            "name": "threshold_tracking_distance_3",
+            "kind": "threshold",
+            "view": "history",
+            "threshold": 0.29498744010925293,
+            "feature": "tracking_distance"
+          }
+        },
+        "termination_history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972110000/termination_history/private/plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972110000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972110000:pointmaze:termination_history:1972110000",
+          "validation_ise": 1.1653314118301203,
+          "selected_rule_summary": {
+            "name": "termination_history_round_1",
+            "kind": "termination",
+            "view": "history",
+            "threshold": 0.0,
+            "feature": "plan_age_fraction"
+          }
+        }
+      },
+      "expected_configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972110000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972111000,
+          1972111001,
+          1972111002,
+          1972111003,
+          1972111004,
+          1972111005,
+          1972111006,
+          1972111007
+        ],
+        "selection_seeds": [
+          1972112000,
+          1972112001,
+          1972112002,
+          1972112003,
+          1972112004,
+          1972112005,
+          1972112006,
+          1972112007
+        ],
+        "branch_fit_seeds": [
+          1972113000,
+          1972113001,
+          1972113002,
+          1972113003,
+          1972113004,
+          1972113005,
+          1972113006,
+          1972113007
+        ],
+        "trigger_eval_seeds": [
+          1972115000,
+          1972115001,
+          1972115002,
+          1972115003,
+          1972115004,
+          1972115005,
+          1972115006,
+          1972115007,
+          1972115008,
+          1972115009,
+          1972115010,
+          1972115011,
+          1972115012,
+          1972115013,
+          1972115014,
+          1972115015
+        ],
+        "timing_selection_seeds": [
+          1972114000,
+          1972114001,
+          1972114002,
+          1972114003,
+          1972114004,
+          1972114005,
+          1972114006,
+          1972114007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "history"
+      },
+      "output_directory": "results/plan_validity_label_continuation_20261110/pointmaze/1972110000",
+      "training_prefix_seeds": [
+        1972113000,
+        1972113001,
+        1972113002,
+        1972113003,
+        1972113004,
+        1972113005,
+        1972113006,
+        1972113007
+      ],
+      "previous_evaluation_seeds": [
+        1972119000,
+        1972119001,
+        1972119002,
+        1972119003,
+        1972119004,
+        1972119005,
+        1972119006,
+        1972119007
+      ],
+      "source_cache_directory": "results/plan_validity_target_credit_20261110/pointmaze/1972110000/run/private",
+      "source_public_result": "results/plan_validity_target_credit_20261110/pointmaze/1972110000/run/public/result.json",
+      "previous_held_prefix_seeds": [
+        1972116000,
+        1972116001,
+        1972116002,
+        1972116003,
+        1972116004,
+        1972116005,
+        1972116006,
+        1972116007
+      ],
+      "held_prefix_seeds": [
+        1972119000,
+        1972119001,
+        1972119002,
+        1972119003,
+        1972119004,
+        1972119005,
+        1972119006,
+        1972119007
+      ],
+      "new_training_prefix_seeds": [
+        1972118000,
+        1972118001,
+        1972118002,
+        1972118003,
+        1972118004,
+        1972118005,
+        1972118006,
+        1972118007,
+        1972118008,
+        1972118009,
+        1972118010,
+        1972118011,
+        1972118012,
+        1972118013,
+        1972118014,
+        1972118015,
+        1972118016,
+        1972118017,
+        1972118018,
+        1972118019,
+        1972118020,
+        1972118021,
+        1972118022,
+        1972118023
+      ],
+      "target_cache_directory": "results/plan_validity_target_credit_20261110/pointmaze/1972110000/run/private",
+      "coverage_cache_directory": "results/plan_validity_window_coverage_20261110/pointmaze/1972110000/run/private",
+      "coverage_public_result": "results/plan_validity_window_coverage_20261110/pointmaze/1972110000/run/public/result.json",
+      "fit_prefix_seeds": [
+        1972113000,
+        1972113001,
+        1972113002,
+        1972113003,
+        1972113004,
+        1972113005,
+        1972113006,
+        1972113007,
+        1972118000,
+        1972118001,
+        1972118002,
+        1972118003,
+        1972118004,
+        1972118005,
+        1972118006,
+        1972118007,
+        1972118008,
+        1972118009,
+        1972118010,
+        1972118011,
+        1972118012,
+        1972118013,
+        1972118014,
+        1972118015,
+        1972118016,
+        1972118017,
+        1972118018,
+        1972118019,
+        1972118020,
+        1972118021,
+        1972118022,
+        1972118023
+      ],
+      "exposed_held_prefix_seeds": [
+        1972116000,
+        1972116001,
+        1972116002,
+        1972116003,
+        1972116004,
+        1972116005,
+        1972116006,
+        1972116007,
+        1972117000,
+        1972117001,
+        1972117002,
+        1972117003,
+        1972117004,
+        1972117005,
+        1972117006,
+        1972117007
+      ],
+      "phase_cache_directory": "results/plan_validity_phase_support_20261110/pointmaze/1972110000/run/private",
+      "phase_public_result": "results/plan_validity_phase_support_20261110/pointmaze/1972110000/run/public/result.json",
+      "evaluation_seeds": [
+        1972160000,
+        1972160001,
+        1972160002,
+        1972160003,
+        1972160004,
+        1972160005,
+        1972160006,
+        1972160007
+      ],
+      "revealed_diagnostic_seeds": [
+        1972130000,
+        1972130001,
+        1972130002,
+        1972130003,
+        1972130004,
+        1972130005,
+        1972130006,
+        1972130007
+      ]
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "sources": {
+        "history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/history/private/plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972120000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_history_1972120000:pointmaze:history:1972120000",
+          "validation_ise": 1.3150617993730433,
+          "selected_rule_summary": {
+            "name": "causal_validity_interactions",
+            "kind": "legacy",
+            "view": "causal_validity_interactions",
+            "threshold": 0.0664154606131048,
+            "feature": "plan_age_fraction"
+          }
+        },
+        "threshold": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/threshold/private/plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972120000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_threshold_1972120000:pointmaze:threshold:1972120000",
+          "validation_ise": 1.2725571964792106,
+          "selected_rule_summary": {
+            "name": "threshold_tracking_distance_3",
+            "kind": "threshold",
+            "view": "history",
+            "threshold": 0.36727166920900345,
+            "feature": "tracking_distance"
+          }
+        },
+        "termination_history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/pointmaze/1972120000/termination_history/private/plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972120000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_pointmaze_termination_history_1972120000:pointmaze:termination_history:1972120000",
+          "validation_ise": 1.6208091188580913,
+          "selected_rule_summary": {
+            "name": "termination_history_round_1",
+            "kind": "termination",
+            "view": "history",
+            "threshold": 0.0,
+            "feature": "plan_age_fraction"
+          }
+        }
+      },
+      "expected_configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972120000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972121000,
+          1972121001,
+          1972121002,
+          1972121003,
+          1972121004,
+          1972121005,
+          1972121006,
+          1972121007
+        ],
+        "selection_seeds": [
+          1972122000,
+          1972122001,
+          1972122002,
+          1972122003,
+          1972122004,
+          1972122005,
+          1972122006,
+          1972122007
+        ],
+        "branch_fit_seeds": [
+          1972123000,
+          1972123001,
+          1972123002,
+          1972123003,
+          1972123004,
+          1972123005,
+          1972123006,
+          1972123007
+        ],
+        "trigger_eval_seeds": [
+          1972125000,
+          1972125001,
+          1972125002,
+          1972125003,
+          1972125004,
+          1972125005,
+          1972125006,
+          1972125007,
+          1972125008,
+          1972125009,
+          1972125010,
+          1972125011,
+          1972125012,
+          1972125013,
+          1972125014,
+          1972125015
+        ],
+        "timing_selection_seeds": [
+          1972124000,
+          1972124001,
+          1972124002,
+          1972124003,
+          1972124004,
+          1972124005,
+          1972124006,
+          1972124007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "pointmaze"
+        ],
+        "method": "history"
+      },
+      "output_directory": "results/plan_validity_label_continuation_20261110/pointmaze/1972120000",
+      "training_prefix_seeds": [
+        1972123000,
+        1972123001,
+        1972123002,
+        1972123003,
+        1972123004,
+        1972123005,
+        1972123006,
+        1972123007
+      ],
+      "previous_evaluation_seeds": [
+        1972129000,
+        1972129001,
+        1972129002,
+        1972129003,
+        1972129004,
+        1972129005,
+        1972129006,
+        1972129007
+      ],
+      "source_cache_directory": "results/plan_validity_target_credit_20261110/pointmaze/1972120000/run/private",
+      "source_public_result": "results/plan_validity_target_credit_20261110/pointmaze/1972120000/run/public/result.json",
+      "previous_held_prefix_seeds": [
+        1972126000,
+        1972126001,
+        1972126002,
+        1972126003,
+        1972126004,
+        1972126005,
+        1972126006,
+        1972126007
+      ],
+      "held_prefix_seeds": [
+        1972129000,
+        1972129001,
+        1972129002,
+        1972129003,
+        1972129004,
+        1972129005,
+        1972129006,
+        1972129007
+      ],
+      "new_training_prefix_seeds": [
+        1972128000,
+        1972128001,
+        1972128002,
+        1972128003,
+        1972128004,
+        1972128005,
+        1972128006,
+        1972128007,
+        1972128008,
+        1972128009,
+        1972128010,
+        1972128011,
+        1972128012,
+        1972128013,
+        1972128014,
+        1972128015,
+        1972128016,
+        1972128017,
+        1972128018,
+        1972128019,
+        1972128020,
+        1972128021,
+        1972128022,
+        1972128023
+      ],
+      "target_cache_directory": "results/plan_validity_target_credit_20261110/pointmaze/1972120000/run/private",
+      "coverage_cache_directory": "results/plan_validity_window_coverage_20261110/pointmaze/1972120000/run/private",
+      "coverage_public_result": "results/plan_validity_window_coverage_20261110/pointmaze/1972120000/run/public/result.json",
+      "fit_prefix_seeds": [
+        1972123000,
+        1972123001,
+        1972123002,
+        1972123003,
+        1972123004,
+        1972123005,
+        1972123006,
+        1972123007,
+        1972128000,
+        1972128001,
+        1972128002,
+        1972128003,
+        1972128004,
+        1972128005,
+        1972128006,
+        1972128007,
+        1972128008,
+        1972128009,
+        1972128010,
+        1972128011,
+        1972128012,
+        1972128013,
+        1972128014,
+        1972128015,
+        1972128016,
+        1972128017,
+        1972128018,
+        1972128019,
+        1972128020,
+        1972128021,
+        1972128022,
+        1972128023
+      ],
+      "exposed_held_prefix_seeds": [
+        1972126000,
+        1972126001,
+        1972126002,
+        1972126003,
+        1972126004,
+        1972126005,
+        1972126006,
+        1972126007,
+        1972127000,
+        1972127001,
+        1972127002,
+        1972127003,
+        1972127004,
+        1972127005,
+        1972127006,
+        1972127007
+      ],
+      "phase_cache_directory": "results/plan_validity_phase_support_20261110/pointmaze/1972120000/run/private",
+      "phase_public_result": "results/plan_validity_phase_support_20261110/pointmaze/1972120000/run/public/result.json",
+      "evaluation_seeds": [
+        1972170000,
+        1972170001,
+        1972170002,
+        1972170003,
+        1972170004,
+        1972170005,
+        1972170006,
+        1972170007
+      ],
+      "revealed_diagnostic_seeds": [
+        1972140000,
+        1972140001,
+        1972140002,
+        1972140003,
+        1972140004,
+        1972140005,
+        1972140006,
+        1972140007
+      ]
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "sources": {
+        "history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/history/private/plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972210000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972210000:reacher_tracking:history:1972210000",
+          "validation_ise": 4.404081600337276,
+          "selected_rule_summary": {
+            "name": "causal_validity_interactions",
+            "kind": "legacy",
+            "view": "causal_validity_interactions",
+            "threshold": 0.02735778355600585,
+            "feature": "plan_age_fraction"
+          }
+        },
+        "threshold": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/threshold/attempts/preempt1/private/plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972210000_attempt_preempt1.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972210000_attempt_preempt1:reacher_tracking:threshold:1972210000",
+          "validation_ise": 4.237017425712491,
+          "selected_rule_summary": {
+            "name": "threshold_tracking_distance_1",
+            "kind": "threshold",
+            "view": "history",
+            "threshold": 0.4585979953408241,
+            "feature": "tracking_distance"
+          }
+        },
+        "termination_history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972210000/termination_history/private/plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972210000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972210000:reacher_tracking:termination_history:1972210000",
+          "validation_ise": 4.118874105366482,
+          "selected_rule_summary": {
+            "name": "termination_history_round_2",
+            "kind": "termination",
+            "view": "history",
+            "threshold": 0.0,
+            "feature": "plan_age_fraction"
+          }
+        }
+      },
+      "expected_configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972210000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972211000,
+          1972211001,
+          1972211002,
+          1972211003,
+          1972211004,
+          1972211005,
+          1972211006,
+          1972211007
+        ],
+        "selection_seeds": [
+          1972212000,
+          1972212001,
+          1972212002,
+          1972212003,
+          1972212004,
+          1972212005,
+          1972212006,
+          1972212007
+        ],
+        "branch_fit_seeds": [
+          1972213000,
+          1972213001,
+          1972213002,
+          1972213003,
+          1972213004,
+          1972213005,
+          1972213006,
+          1972213007
+        ],
+        "trigger_eval_seeds": [
+          1972215000,
+          1972215001,
+          1972215002,
+          1972215003,
+          1972215004,
+          1972215005,
+          1972215006,
+          1972215007,
+          1972215008,
+          1972215009,
+          1972215010,
+          1972215011,
+          1972215012,
+          1972215013,
+          1972215014,
+          1972215015
+        ],
+        "timing_selection_seeds": [
+          1972214000,
+          1972214001,
+          1972214002,
+          1972214003,
+          1972214004,
+          1972214005,
+          1972214006,
+          1972214007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "history"
+      },
+      "output_directory": "results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000",
+      "training_prefix_seeds": [
+        1972213000,
+        1972213001,
+        1972213002,
+        1972213003,
+        1972213004,
+        1972213005,
+        1972213006,
+        1972213007
+      ],
+      "previous_evaluation_seeds": [
+        1972219000,
+        1972219001,
+        1972219002,
+        1972219003,
+        1972219004,
+        1972219005,
+        1972219006,
+        1972219007
+      ],
+      "source_cache_directory": "results/plan_validity_target_credit_20261110/reacher_tracking/1972210000/run/private",
+      "source_public_result": "results/plan_validity_target_credit_20261110/reacher_tracking/1972210000/run/public/result.json",
+      "previous_held_prefix_seeds": [
+        1972216000,
+        1972216001,
+        1972216002,
+        1972216003,
+        1972216004,
+        1972216005,
+        1972216006,
+        1972216007
+      ],
+      "held_prefix_seeds": [
+        1972219000,
+        1972219001,
+        1972219002,
+        1972219003,
+        1972219004,
+        1972219005,
+        1972219006,
+        1972219007
+      ],
+      "new_training_prefix_seeds": [
+        1972218000,
+        1972218001,
+        1972218002,
+        1972218003,
+        1972218004,
+        1972218005,
+        1972218006,
+        1972218007,
+        1972218008,
+        1972218009,
+        1972218010,
+        1972218011,
+        1972218012,
+        1972218013,
+        1972218014,
+        1972218015,
+        1972218016,
+        1972218017,
+        1972218018,
+        1972218019,
+        1972218020,
+        1972218021,
+        1972218022,
+        1972218023
+      ],
+      "target_cache_directory": "results/plan_validity_target_credit_20261110/reacher_tracking/1972210000/run/private",
+      "coverage_cache_directory": "results/plan_validity_window_coverage_20261110/reacher_tracking/1972210000/run/private",
+      "coverage_public_result": "results/plan_validity_window_coverage_20261110/reacher_tracking/1972210000/run/public/result.json",
+      "fit_prefix_seeds": [
+        1972213000,
+        1972213001,
+        1972213002,
+        1972213003,
+        1972213004,
+        1972213005,
+        1972213006,
+        1972213007,
+        1972218000,
+        1972218001,
+        1972218002,
+        1972218003,
+        1972218004,
+        1972218005,
+        1972218006,
+        1972218007,
+        1972218008,
+        1972218009,
+        1972218010,
+        1972218011,
+        1972218012,
+        1972218013,
+        1972218014,
+        1972218015,
+        1972218016,
+        1972218017,
+        1972218018,
+        1972218019,
+        1972218020,
+        1972218021,
+        1972218022,
+        1972218023
+      ],
+      "exposed_held_prefix_seeds": [
+        1972216000,
+        1972216001,
+        1972216002,
+        1972216003,
+        1972216004,
+        1972216005,
+        1972216006,
+        1972216007,
+        1972217000,
+        1972217001,
+        1972217002,
+        1972217003,
+        1972217004,
+        1972217005,
+        1972217006,
+        1972217007
+      ],
+      "phase_cache_directory": "results/plan_validity_phase_support_20261110/reacher_tracking/1972210000/run/private",
+      "phase_public_result": "results/plan_validity_phase_support_20261110/reacher_tracking/1972210000/run/public/result.json",
+      "evaluation_seeds": [
+        1972260000,
+        1972260001,
+        1972260002,
+        1972260003,
+        1972260004,
+        1972260005,
+        1972260006,
+        1972260007
+      ],
+      "revealed_diagnostic_seeds": [
+        1972230000,
+        1972230001,
+        1972230002,
+        1972230003,
+        1972230004,
+        1972230005,
+        1972230006,
+        1972230007
+      ]
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "sources": {
+        "history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/history/attempts/preempt1/private/plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972220000_attempt_preempt1.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_history_1972220000_attempt_preempt1:reacher_tracking:history:1972220000",
+          "validation_ise": 4.894345576746082,
+          "selected_rule_summary": {
+            "name": "causal_validity_interactions",
+            "kind": "legacy",
+            "view": "causal_validity_interactions",
+            "threshold": 0.027721522946206983,
+            "feature": "plan_age_fraction"
+          }
+        },
+        "threshold": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/threshold/private/plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972220000.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_threshold_1972220000:reacher_tracking:threshold:1972220000",
+          "validation_ise": 4.806159043760147,
+          "selected_rule_summary": {
+            "name": "threshold_tracking_distance_1",
+            "kind": "threshold",
+            "view": "history",
+            "threshold": 0.4358142912387848,
+            "feature": "tracking_distance"
+          }
+        },
+        "termination_history": {
+          "report": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_dev_20261028_r2/cost_pilot/reacher_tracking/1972220000/termination_history/attempts/preempt1/private/plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972220000_attempt_preempt1.json",
+          "run_id": "plan_validity_dev_20261028_r2_cost_pilot_reacher_tracking_termination_history_1972220000_attempt_preempt1:reacher_tracking:termination_history:1972220000",
+          "validation_ise": 4.896112826024259,
+          "selected_rule_summary": {
+            "name": "termination_history_round_1",
+            "kind": "termination",
+            "view": "history",
+            "threshold": 0.0,
+            "feature": "plan_age_fraction"
+          }
+        }
+      },
+      "expected_configuration": {
+        "env_id": "PointMaze_UMaze-v3",
+        "iterations": 384,
+        "horizon": 1200,
+        "optimizer_seed": 1972220000,
+        "upper_period_seconds": 0.5,
+        "history_seconds": 0.64,
+        "fast_period_seconds": 0.04,
+        "maximum_subgoal_delta": 0.75,
+        "reference_hidden_dim": 128,
+        "learning_rate": 0.0003,
+        "checkpoint_evaluation_interval": 8,
+        "branch_window_seconds": 0.5,
+        "max_events_per_class": 4,
+        "ridge_alpha_grid": [
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0,
+          1000.0,
+          10000.0
+        ],
+        "threshold_quantile": 0.75,
+        "max_offset_steps": 25,
+        "check_stride_steps": 5,
+        "regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "target_speed_modes": [
+          -1.25,
+          -0.55,
+          0.55,
+          1.25
+        ],
+        "force_pulse_amplitude": 0.18,
+        "force_pulse_duration_seconds": [
+          0.04,
+          0.1
+        ],
+        "force_pulse_gap_seconds": [
+          0.45,
+          1.1
+        ],
+        "distractor_amplitude": 0.5,
+        "distractor_dwell_seconds": [
+          0.35,
+          0.85
+        ],
+        "train_seeds": [
+          1972221000,
+          1972221001,
+          1972221002,
+          1972221003,
+          1972221004,
+          1972221005,
+          1972221006,
+          1972221007
+        ],
+        "selection_seeds": [
+          1972222000,
+          1972222001,
+          1972222002,
+          1972222003,
+          1972222004,
+          1972222005,
+          1972222006,
+          1972222007
+        ],
+        "branch_fit_seeds": [
+          1972223000,
+          1972223001,
+          1972223002,
+          1972223003,
+          1972223004,
+          1972223005,
+          1972223006,
+          1972223007
+        ],
+        "trigger_eval_seeds": [
+          1972225000,
+          1972225001,
+          1972225002,
+          1972225003,
+          1972225004,
+          1972225005,
+          1972225006,
+          1972225007,
+          1972225008,
+          1972225009,
+          1972225010,
+          1972225011,
+          1972225012,
+          1972225013,
+          1972225014,
+          1972225015
+        ],
+        "timing_selection_seeds": [
+          1972224000,
+          1972224001,
+          1972224002,
+          1972224003,
+          1972224004,
+          1972224005,
+          1972224006,
+          1972224007
+        ],
+        "timing_rounds": 2,
+        "pairs_per_path": 12,
+        "termination_epochs": 200,
+        "termination_hidden_dim": 64,
+        "effective_df": 8.0,
+        "tasks": [
+          "reacher_tracking"
+        ],
+        "method": "history"
+      },
+      "output_directory": "results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000",
+      "training_prefix_seeds": [
+        1972223000,
+        1972223001,
+        1972223002,
+        1972223003,
+        1972223004,
+        1972223005,
+        1972223006,
+        1972223007
+      ],
+      "previous_evaluation_seeds": [
+        1972229000,
+        1972229001,
+        1972229002,
+        1972229003,
+        1972229004,
+        1972229005,
+        1972229006,
+        1972229007
+      ],
+      "source_cache_directory": "results/plan_validity_target_credit_20261110/reacher_tracking/1972220000/run/private",
+      "source_public_result": "results/plan_validity_target_credit_20261110/reacher_tracking/1972220000/run/public/result.json",
+      "previous_held_prefix_seeds": [
+        1972226000,
+        1972226001,
+        1972226002,
+        1972226003,
+        1972226004,
+        1972226005,
+        1972226006,
+        1972226007
+      ],
+      "held_prefix_seeds": [
+        1972229000,
+        1972229001,
+        1972229002,
+        1972229003,
+        1972229004,
+        1972229005,
+        1972229006,
+        1972229007
+      ],
+      "new_training_prefix_seeds": [
+        1972228000,
+        1972228001,
+        1972228002,
+        1972228003,
+        1972228004,
+        1972228005,
+        1972228006,
+        1972228007,
+        1972228008,
+        1972228009,
+        1972228010,
+        1972228011,
+        1972228012,
+        1972228013,
+        1972228014,
+        1972228015,
+        1972228016,
+        1972228017,
+        1972228018,
+        1972228019,
+        1972228020,
+        1972228021,
+        1972228022,
+        1972228023
+      ],
+      "target_cache_directory": "results/plan_validity_target_credit_20261110/reacher_tracking/1972220000/run/private",
+      "coverage_cache_directory": "results/plan_validity_window_coverage_20261110/reacher_tracking/1972220000/run/private",
+      "coverage_public_result": "results/plan_validity_window_coverage_20261110/reacher_tracking/1972220000/run/public/result.json",
+      "fit_prefix_seeds": [
+        1972223000,
+        1972223001,
+        1972223002,
+        1972223003,
+        1972223004,
+        1972223005,
+        1972223006,
+        1972223007,
+        1972228000,
+        1972228001,
+        1972228002,
+        1972228003,
+        1972228004,
+        1972228005,
+        1972228006,
+        1972228007,
+        1972228008,
+        1972228009,
+        1972228010,
+        1972228011,
+        1972228012,
+        1972228013,
+        1972228014,
+        1972228015,
+        1972228016,
+        1972228017,
+        1972228018,
+        1972228019,
+        1972228020,
+        1972228021,
+        1972228022,
+        1972228023
+      ],
+      "exposed_held_prefix_seeds": [
+        1972226000,
+        1972226001,
+        1972226002,
+        1972226003,
+        1972226004,
+        1972226005,
+        1972226006,
+        1972226007,
+        1972227000,
+        1972227001,
+        1972227002,
+        1972227003,
+        1972227004,
+        1972227005,
+        1972227006,
+        1972227007
+      ],
+      "phase_cache_directory": "results/plan_validity_phase_support_20261110/reacher_tracking/1972220000/run/private",
+      "phase_public_result": "results/plan_validity_phase_support_20261110/reacher_tracking/1972220000/run/public/result.json",
+      "evaluation_seeds": [
+        1972270000,
+        1972270001,
+        1972270002,
+        1972270003,
+        1972270004,
+        1972270005,
+        1972270006,
+        1972270007
+      ],
+      "revealed_diagnostic_seeds": [
+        1972240000,
+        1972240001,
+        1972240002,
+        1972240003,
+        1972240004,
+        1972240005,
+        1972240006,
+        1972240007
+      ]
+    }
+  ],
+  "jobs": {
+    "precheck": [
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label precheck pointmaze 1972110000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/pointmaze/1972110000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 0 --phase precheck --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/precheck/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/precheck/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label precheck pointmaze 1972120000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/pointmaze/1972120000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 1 --phase precheck --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/precheck/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/precheck/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label precheck reacher_tracking 1972210000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/reacher_tracking/1972210000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 2 --phase precheck --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/precheck/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/precheck/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label precheck reacher_tracking 1972220000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/precheck/reacher_tracking/1972220000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 3 --phase precheck --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/precheck/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/precheck/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      }
+    ],
+    "sample": [
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample pointmaze 1972110000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972110000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 0 --phase sample --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/sample/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/sample/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample pointmaze 1972110000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972110000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 0 --phase sample --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/sample/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/sample/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample pointmaze 1972120000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972120000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 1 --phase sample --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/sample/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/sample/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample pointmaze 1972120000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/pointmaze/1972120000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 1 --phase sample --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/sample/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/sample/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample reacher_tracking 1972210000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972210000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 2 --phase sample --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/sample/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/sample/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample reacher_tracking 1972210000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972210000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 2 --phase sample --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/sample/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/sample/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample reacher_tracking 1972220000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972220000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 3 --phase sample --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/sample/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/sample/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label sample reacher_tracking 1972220000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/sample/reacher_tracking/1972220000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 3 --phase sample --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/sample/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/sample/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      }
+    ],
+    "fit": [
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label fit pointmaze 1972110000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/pointmaze/1972110000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 0 --phase fit --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/fit/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/fit/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label fit pointmaze 1972120000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/pointmaze/1972120000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 1 --phase fit --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/fit/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/fit/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label fit reacher_tracking 1972210000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/reacher_tracking/1972210000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 2 --phase fit --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/fit/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/fit/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label fit reacher_tracking 1972220000 shard-1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/fit/reacher_tracking/1972220000/shard-1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 3 --phase fit --shard-index -1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/fit/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/fit/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      }
+    ],
+    "probe": [
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe pointmaze 1972110000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972110000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 0 --phase probe --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/probe/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/probe/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe pointmaze 1972110000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972110000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 0 --phase probe --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/probe/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972110000/probe/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe pointmaze 1972120000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972120000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 1 --phase probe --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/probe/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/probe/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe pointmaze 1972120000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/pointmaze/1972120000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 1 --phase probe --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/probe/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/pointmaze/1972120000/probe/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe reacher_tracking 1972210000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972210000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 2 --phase probe --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/probe/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/probe/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe reacher_tracking 1972210000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972210000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 2 --phase probe --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/probe/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972210000/probe/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe reacher_tracking 1972220000 shard0",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972220000/shard0",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 3 --phase probe --shard-index 0",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/probe/shard0/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/probe/shard0/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      },
+      {
+        "project": "Freq-HRL-LabelContinuation",
+        "description": "Paired label probe reacher_tracking 1972220000 shard1",
+        "signature": "Freq-HRL/label-continuation/plan_validity_label_continuation_20261110/probe/reacher_tracking/1972220000/shard1",
+        "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_label_continuation.py --manifest protocols/plan_validity_label_continuation_2026-11-10.json --cell-index 3 --phase probe --shard-index 1",
+        "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+        "cpu": 1,
+        "vram": 0,
+        "ram_mb": 2048,
+        "priority": "high",
+        "protect_from_auto_eviction": true,
+        "allowed_nodes": [
+          "node001",
+          "node002",
+          "node003",
+          "node004",
+          "node005",
+          "node006"
+        ],
+        "require_node": null,
+        "preferred_node": null,
+        "no_auto_requeue": true,
+        "reroute_on_node_down": false,
+        "skip_resume_scan": true,
+        "skip_launch_staging": false,
+        "stage_excludes": [
+          "results",
+          "data",
+          "freq_transitduet",
+          "scheduler_results",
+          "**/__pycache__"
+        ],
+        "stage_input_paths": [],
+        "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/probe/shard1/public",
+        "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_label_continuation_20261110/reacher_tracking/1972220000/probe/shard1/public",
+        "wait_for_files": [
+          "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_label_continuation_2026-11-10.json"
+        ],
+        "allow_duplicate": false
+      }
+    ]
+  },
+  "prefix_policy": "frozen_phase_checks_clock",
+  "label_continuations": [
+    "original_history",
+    "frozen_phase_checks_clock"
+  ],
+  "probes_per_path": 3,
+  "shards_per_root": 2,
+  "training_paths_per_shard": 16,
+  "evaluation_paths_per_shard": 4,
+  "fitting_futures": 1,
+  "independent_B_futures": 4,
+  "evaluation_A_futures": 4,
+  "evaluation_B_futures": 4,
+  "effective_df": 8,
+  "threshold_quantile": 0.75,
+  "feature_count": 41,
+  "fitting_pairs_per_head": 96,
+  "threshold_source": "training_A_leave_prefix_out_fixed_quantile_B_never_calibrates",
+  "sampling": "617_bins_839_uniform_candidate_optional_clock_not_R_C_intersection",
+  "training_future_tag": 1003,
+  "evaluation_future_tag": 1004,
+  "future_seed_recipe": "SeedSequence([optimizer_seed,path_seed,step,replica_index,phase_tag])",
+  "precheck_environment_step_upper_bound": 76800,
+  "training_environment_steps": 11212800,
+  "probe_environment_steps": 4185600,
+  "single_step_primary": "both_heads_on_fixed_candidate_prefix_and_candidate_continuation_W_MSE_and_W_tail_G_gains",
+  "single_step_secondary": "reference_continuation_train_A_independent_B_prefix_oof_and_fresh_prefix_A_B",
+  "episode_followup": "not_scheduled_requires_separate_readout_decision_no_automatic_candidate_promotion",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "lifecycle_costs_complete": false,
+  "performance_claim_supported": false
+}
