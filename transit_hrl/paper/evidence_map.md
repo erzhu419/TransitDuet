@@ -21,6 +21,8 @@ a negative repeated-decision boundary, not same-algorithm domain transfer.
 | Table2 | Stage298 and301 independent E32 | Two separate 400-prefix cohorts; paired single-intervention outcomes, fixed profiles averaged within prefixes | Raw-relative cost/wait gains; learned fleet increment is not established |
 | Table3 / Results5.4 | Stage304 | 320 complete scenes, four paired controllers, one fixed profile, two upper decisions | Registered dual-win and statistical half-base retention fail; no extra joint cost benefit |
 | Limitations | Stage10 learned termination | Revealed Stage9 confirmation paths; mostly deadline-only deployment | Failed development baseline, not competitive learned-termination superiority |
+| Follow-up boundary | [Frozen pilot episode diagnostic](../md/freq_hrl_local_episode_result_2026-11-10.md) | Two existing optimizer roots/task, 16 held-out development paths/root; selected threshold and learned termination | PointMaze directional support; mixed Reacher and failed best-clock eligibility on one root; no independent strong-baseline claim |
+| Follow-up boundary | [Fresh-prefix conditioning](../md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md) | 16 fresh prefixes/root, four frozen roots; boundary tail at `t + 50`, zero fits | No conditioning upgrade; Wide beats zero on three roots, not an episode-policy result |
 
 The current-only and history predictors have different feature maps and sizes
 (170 versus 39). Timing controls share jitter-trained actor weights. These

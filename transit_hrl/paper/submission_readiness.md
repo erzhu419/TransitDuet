@@ -24,6 +24,50 @@ Freq-HRL is not intended to replace general-purpose PPO/SAC learning backends.
 The dominant issue is comparative and external evidence, not wording,
 another encoder interface or more seeds on the same cached states.
 
+## November 11 decision
+
+Stop the boundary-conditioning upgrade. In the [frozen fresh-prefix test](../md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md#completed-result),
+all 64 prefixes and 14,822,400 native steps completed without fitting. The
+primary tracking gate is only 0.78% below Wide in MSE, with a crossing-zero
+interval, a loss in the second prefix half and 93.43% of the net gain from one
+prefix. Wide beats zero on three roots, but is 15.23% above zero on the primary
+Reacher root at the point estimate. Keep the controls and all outcomes. Even
+this prediction uses both realized boundary states at `t + 50`, unavailable at
+decision time `t`. It neither validates a deployable trigger nor establishes
+that useful continuation information is absent.
+
+The [frozen episode diagnostic](../md/freq_hrl_local_episode_result_2026-11-10.md#complete-episodes)
+is closer to the paper's endpoint: PointMaze is 4.83% below the selected
+threshold and 14.28% below learned termination on two pilot roots, but the
+second pooled path half loses to threshold. Reacher nearly ties threshold in
+aggregate (+0.023% ISE); its two roots have opposite directions, and the one
+that beats termination compares against a head that failed best-clock
+competence. Better local prediction, wider coverage and separate calibration
+have not closed this gap. The two-task C1/C2 protocol remains on HOLD.
+
+**Next priority: a PointMaze-only strong-comparator study, not a critic search.**
+Prepare a separate prospective protocol for the exact Stage9 renewal rule with
+a shared controller, best constant clock, strongest development-selected simple
+threshold and a competent learned termination. Keep optional clocks, inputs
+available at a check and the 24-call contract comparable. Declare development
+and fresh optimizer/evaluation roles, total cost caps and a practically relevant
+episode ISE effect before evaluation. Include branch acquisition, fitting,
+selection, scoring and p99 latency. Proceed to fresh roots only if both primary
+comparators are eligible, the development effect is practically useful against
+both, and budgets are measurable. This does not revise the two-task protocol.
+
+Keep Reacher as a reported transfer boundary. Before any further Reacher critic
+fit, require a distinct reason to expect decision value: on the existing
+development bank, check whether adding continuation information to short-window
+value improves *which checks* renew at matched renewal frequency, not whether it
+lowers boundary MSE. Use disjoint window halves for selecting and scoring
+actions, retain both directions and compare against the fixed short-window and
+simple-timing choices. This is a finite-sample information diagnostic, not a
+deployable policy or an upper bound. Without stable, material headroom, keep
+this branch closed; with it, test causal prediction at `t` before another native
+episode evaluation. The exposed readouts remain reporting-only. No new job is
+released by this decision.
+
 ## Competent timing baselines and mechanism isolation
 
 The strongest unresolved comparator is a learned termination/timing policy that
@@ -44,8 +88,9 @@ The [prepared baseline suite](../md/freq_hrl_strong_timing_baselines_protocol_20
 now implements simple thresholds, equal-parameter/effective-DF ridge controls,
 and paired learned termination with equal-capacity current/history heads.
 It preserves collapsed best checkpoints and reserves test access until freeze.
-Preparation and unit tests do not close this scientific gap; no performance
-run or faithful named-method reproduction has been completed for the new suite.
+The [completed native pilot](../md/freq_hrl_native_development_complete_2026-10-29.md)
+and frozen episode diagnostic provide development results, not independent
+strong-baseline confirmation or a faithful named-method reproduction.
 
 ## Same algorithm beyond one task family
 
@@ -62,8 +107,8 @@ The [prepared second task](../md/freq_hrl_second_task_protocol_2026-10-22.md) is
 moving-target Reacher on the standard articulated-arm dynamics. Both plants now
 have a shared execution/label path and the same comparison/fitting function,
 without changing the 50-step keep/renew target, ridge recipe or one-call/bin rule.
-Only deterministic equivalence tests and a six-step Reacher interface check have
-run; this is preparation, not evidence of second-task effectiveness.
+The native pilot and frozen Reacher episodes have since run. They do not show a
+stable advantage over threshold on this second task.
 
 Stage304 is a completed negative boundary, not a broken run to resubmit.
 Its changed profile mix, callback positions and state distribution prevent
@@ -84,8 +129,9 @@ now measures complete single-method development pipelines on one-thread CPU
 workers, including branch supervision, fitting, selection, scoring and all-step
 control latency. Its budget selector charges every declared trial, including
 failures, and admits configurations using development data only. Missing costs
-block admission. No measurement or matched-budget performance result exists yet;
-the original fixed-call guarantee is unchanged.
+block admission. Native pilot costs and latencies have been measured, but three
+interrupted attempts still have unknown costs and no matched-lifecycle performance
+result exists. The original fixed-call guarantee is unchanged.
 
 Simulator event metadata selects the training queries and neutral windows.
 Deployment features are causal and exclude event labels, but acquisition is
@@ -108,7 +154,8 @@ target against adaptive full-episode continuations with independent conditional
 futures, and separates opportunity and tail effects. Full-episode mean/tail ISE
 and sustained-failure inference use frozen margins and independent paths/roots;
 zero observed harmful events do not close the risk criterion automatically.
-This is executable preparation, not a global guarantee or a new positive result.
+The frozen diagnostic found local and episode signs can disagree; the planned
+independent-root full-episode risk claim has not been tested.
 
 Practical effect size and robustness also remain central. Transit Stage301
 service-only saves about 0.074s per single intervention; Stage304's service-only
