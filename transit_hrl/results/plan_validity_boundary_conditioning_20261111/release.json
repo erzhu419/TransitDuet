@@ -1,0 +1,76 @@
+{
+  "run_name": "plan_validity_boundary_conditioning_20261111",
+  "snapshot_at_utc": "2026-11-11T06:41:55.037847+00:00",
+  "implementation_commit": "dda97c3794",
+  "manifest": "protocols/plan_validity_boundary_conditioning_2026-11-11.json",
+  "worker_status": "complete",
+  "worker_stage": "boundary_conditioning_A_complete",
+  "completed_roots": 4,
+  "new_ridge_fits": 512,
+  "baseline_refits": 0,
+  "new_environment_steps": 0,
+  "evaluation_prefixes_accessed": false,
+  "frozen_models_modified": false,
+  "primary_training_A_followup_rule_passed": true,
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 8.330300295,
+    "wall_seconds": 8.16822588071227,
+    "counts": {
+      "frozen_model_window_predictions": 1536,
+      "ridge_fit_calls": 512,
+      "diagnostic_model_window_predictions": 196608
+    },
+    "phases": {
+      "boundary_conditioning_A": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.24934170600000094,
+        "wall_seconds": 0.03695917967706919,
+        "counts": {}
+      },
+      "boundary_conditioning_A/verify_all_A_banks_and_reuse_uniform_moments": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.362174086,
+        "wall_seconds": 0.3739327723160386,
+        "counts": {
+          "frozen_model_window_predictions": 1536
+        }
+      },
+      "boundary_conditioning_A/fixed_DF_conditioned_folds_and_paired_readout": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 7.718784503,
+        "wall_seconds": 7.757333928719163,
+        "counts": {
+          "ridge_fit_calls": 512,
+          "diagnostic_model_window_predictions": 196608
+        }
+      }
+    }
+  },
+  "public_summary": "summary.json",
+  "derived_diagnosis": "diagnosis.json",
+  "retrieved_compact_public_bytes": 116147,
+  "remote_complete_public_bytes": 492885,
+  "retrieval_scope": "public_root_views_strata_halves_sign_counts_and_all_primary_prefix_metrics_no_models_or_raw_rows",
+  "focused_tests_passed": 21,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "scope": "primary_training_A_development_gate_only_not_global_or_fresh_prefix_or_policy_confirmation",
+  "scheduler_snapshot": [
+    {
+      "id": "t214743",
+      "signature": "Freq-HRL/boundary-conditioning/plan_validity_boundary_conditioning_20261111",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "allow_cpu_training": true,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214743.log"
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "roots": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "rule_passed": false,
+      "methods": {
+        "tracking_distance": {
+          "held_pct_vs_uniform": 1.3011984583476632,
+          "matched_future_pct_vs_uniform": 1.0688974747542934,
+          "held_pct_vs_zero": -1.6560830957035089,
+          "matched_pct_vs_zero": -2.6706032191020523,
+          "prefix_gap_reduction_fraction": -0.2995733883962861
+        },
+        "state_rms": {
+          "held_pct_vs_uniform": 0.5012760406056804,
+          "matched_future_pct_vs_uniform": 0.34560671231231854,
+          "held_pct_vs_zero": -2.4326534125161614,
+          "matched_pct_vs_zero": -3.367132570510656,
+          "prefix_gap_reduction_fraction": -0.1970430331854074
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "rule_passed": false,
+      "methods": {
+        "tracking_distance": {
+          "held_pct_vs_uniform": 1.3332794380348068,
+          "matched_future_pct_vs_uniform": 0.9557797055072426,
+          "held_pct_vs_zero": -4.737851137922943,
+          "matched_pct_vs_zero": -6.923046376720466,
+          "prefix_gap_reduction_fraction": -0.20530288610355907
+        },
+        "state_rms": {
+          "held_pct_vs_uniform": 0.6535266334982914,
+          "matched_future_pct_vs_uniform": 0.7438701051477148,
+          "held_pct_vs_zero": -5.376878249393968,
+          "matched_pct_vs_zero": -7.118418054325515,
+          "prefix_gap_reduction_fraction": 0.03940713585697486
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "rule_passed": true,
+      "methods": {
+        "tracking_distance": {
+          "held_pct_vs_uniform": -2.3819075793117483,
+          "matched_future_pct_vs_uniform": -0.986589426882778,
+          "held_pct_vs_zero": 2.818979996175286,
+          "matched_pct_vs_zero": -6.18323133670714,
+          "prefix_gap_reduction_fraction": 0.14882468738010635
+        },
+        "state_rms": {
+          "held_pct_vs_uniform": -1.7877398994262883,
+          "matched_future_pct_vs_uniform": -0.378980509630622,
+          "held_pct_vs_zero": 3.444803686001552,
+          "matched_pct_vs_zero": -5.607512301299256,
+          "prefix_gap_reduction_fraction": 0.14408720196555003
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "rule_passed": false,
+      "methods": {
+        "tracking_distance": {
+          "held_pct_vs_uniform": 0.26551990772523126,
+          "matched_future_pct_vs_uniform": 0.1962765054270621,
+          "held_pct_vs_zero": 0.27918119161991495,
+          "matched_pct_vs_zero": 0.9619074663557381,
+          "prefix_gap_reduction_fraction": 0.0903120904175746
+        },
+        "state_rms": {
+          "held_pct_vs_uniform": -0.28954912072667316,
+          "matched_future_pct_vs_uniform": -0.18316175018302516,
+          "held_pct_vs_zero": -0.27596346557839935,
+          "matched_pct_vs_zero": 0.579569804835689,
+          "prefix_gap_reduction_fraction": -0.13994187881864195
+        }
+      }
+    }
+  ],
+  "primary_prefix_influence": {
+    "tracking_distance_minus_uniform": {
+      "mean_held_delta": -0.0008478540398959746,
+      "improving_prefixes_mean_views": 21,
+      "improving_prefixes_per_A_view": [
+        15,
+        26
+      ],
+      "largest_benefit_prefix": 1972277014,
+      "largest_benefit_prefix_delta": -0.022120288954007694,
+      "largest_benefit_share_of_net_gain": 0.8153042826776561,
+      "held_delta_after_omitting_largest_readout_prefix_no_refit": -0.00016164646202140306,
+      "top5_prefix_deltas": [
+        {
+          "seed": 1972277014,
+          "delta": -0.022120288954007694
+        },
+        {
+          "seed": 1972277009,
+          "delta": -0.0036061321917456113
+        },
+        {
+          "seed": 1972277010,
+          "delta": -0.0017253289626365945
+        },
+        {
+          "seed": 1972277008,
+          "delta": -0.0016869769704891712
+        },
+        {
+          "seed": 1972275005,
+          "delta": -0.0010571563665739468
+        }
+      ]
+    },
+    "state_rms_minus_uniform": {
+      "mean_held_delta": -0.000636356552696217,
+      "improving_prefixes_mean_views": 17,
+      "improving_prefixes_per_A_view": [
+        14,
+        21
+      ],
+      "largest_benefit_prefix": 1972277014,
+      "largest_benefit_prefix_delta": -0.01797348835772089,
+      "largest_benefit_share_of_net_gain": 0.8826364854718607,
+      "held_delta_after_omitting_largest_readout_prefix_no_refit": -7.709423640509845e-05,
+      "top5_prefix_deltas": [
+        {
+          "seed": 1972277014,
+          "delta": -0.01797348835772089
+        },
+        {
+          "seed": 1972275005,
+          "delta": -0.005393758535849353
+        },
+        {
+          "seed": 1972277009,
+          "delta": -0.0014511652526620503
+        },
+        {
+          "seed": 1972277010,
+          "delta": -0.0005270534340152402
+        },
+        {
+          "seed": 1972277021,
+          "delta": -0.00041696764824560056
+        }
+      ]
+    },
+    "tracking_distance_minus_state_rms": {
+      "mean_held_delta": -0.0002114974871997573,
+      "improving_prefixes_mean_views": 21,
+      "improving_prefixes_per_A_view": [
+        16,
+        23
+      ],
+      "largest_benefit_prefix": 1972277014,
+      "largest_benefit_prefix_delta": -0.0041468005962867985,
+      "largest_benefit_share_of_net_gain": 0.6127142234629404,
+      "held_delta_after_omitting_largest_readout_prefix_no_refit": -8.455222561630434e-05,
+      "top5_prefix_deltas": [
+        {
+          "seed": 1972277014,
+          "delta": -0.0041468005962867985
+        },
+        {
+          "seed": 1972277009,
+          "delta": -0.00215496693908356
+        },
+        {
+          "seed": 1972277008,
+          "delta": -0.0013151389032532725
+        },
+        {
+          "seed": 1972277010,
+          "delta": -0.0011982755286213543
+        },
+        {
+          "seed": 1972277022,
+          "delta": -0.0011149781586830458
+        }
+      ]
+    }
+  },
+  "source_public_bytes": 492885,
+  "scope": "training_A_development_only_no_E_no_winner_selection_or_policy_claim"
+}

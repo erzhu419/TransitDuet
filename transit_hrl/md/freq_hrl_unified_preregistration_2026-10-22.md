@@ -472,3 +472,10 @@ baseline refits/native steps. Preserve both A views, matched31-prefix controls,
 strata and window halves. The primary Reacher1 development gate requires held
 gains versus both controls without loss of matched-future gains. E and all
 original models remain unchanged; no policy or fresh confirmation is released.
+The conditioning job completed the exact 512-fit, zero-native budget. Primary
+Reacher1 passes the frozen A-development rule: -2.38% held MSE versus uniform,
+matched-future gain retained, both views/halves beat both controls. Held error
+still exceeds zero and other roots do not improve uniformly; no global upgrade.
+Freeze both gate recipes. Next prepare full-A models and a separately released
+fresh-prefix test retaining older base and Wide controls; no reuse of exposed E,
+additional fitting/native work or original policy confirmation is released here.
