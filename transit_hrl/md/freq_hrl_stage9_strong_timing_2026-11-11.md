@@ -26,6 +26,28 @@ freeze before evaluation: 4,096 paired-mode episodes, 4,915,200 evaluation
 steps. Primary paired t intervals use eight optimizer roots; tail ISE and
 failure counts at the existing 1.0/25-step threshold are descriptive.
 
+## Development result
+
+[Measured readout](../results/pointmaze_stage9_strong_timing_20261111/development_summary.json).
+Native preflights t214802-t214803 reproduce controller tensors, selection ISE,
+termination eligibility and original Stage9 calls/ISE/return. The two earlier
+pairs failed at checkpoint comparison or stale launch staging, before native
+steps; retain both. Audits t214804-t214805 complete 256 full episodes on 64
+fresh paths. Total new PointMaze steps: 484,800, zero fits.
+
+| Reference | Pooled ISE improvement | First / last half | Root 1 / root 2 |
+| --- | ---: | ---: | ---: |
+| Strongest threshold | 8.21% | 10.96% / 5.49% | 9.20% / 7.32% |
+| Learned termination | 23.45% | 26.57% / 20.27% | 19.80% / 26.41% |
+| Best clock | 39.11% | 42.94% / 35.02% | 40.18% / 38.12% |
+
+Both learned termination rules pass the frozen selection/audit competence
+criterion. All methods pass the caps (max charged 6,918 CPU seconds,
+4,972,800 offline steps and 1.69ms p99). This passes the release gate, not
+independent-training confirmation. The scheduler coordinator submits fresh
+builds now and evaluation only after the global admission check; no waiter
+jobs are queued. It retrieves only public ledgers and the fixed readout.
+
 ## Reacher branch decision
 
 The [cached readout](../results/pointmaze_stage9_strong_timing_20261111/reacher_tail_decisions.json)

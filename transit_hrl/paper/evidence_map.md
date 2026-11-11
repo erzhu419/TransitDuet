@@ -23,6 +23,7 @@ a negative repeated-decision boundary, not same-algorithm domain transfer.
 | Limitations | Stage10 learned termination | Revealed Stage9 confirmation paths; mostly deadline-only deployment | Failed development baseline, not competitive learned-termination superiority |
 | Follow-up boundary | [Frozen pilot episode diagnostic](../md/freq_hrl_local_episode_result_2026-11-10.md) | Two existing optimizer roots/task, 16 held-out development paths/root; selected threshold and learned termination | PointMaze directional support; mixed Reacher and failed best-clock eligibility on one root; no independent strong-baseline claim |
 | Follow-up boundary | [Fresh-prefix conditioning](../md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md) | 16 fresh prefixes/root, four frozen roots; boundary tail at `t + 50`, zero fits | No conditioning upgrade; Wide beats zero on three roots, not an episode-policy result |
+| Strong timing follow-up | [Stage9 development gate](../md/freq_hrl_stage9_strong_timing_2026-11-11.md#development-result) | Two frozen PointMaze roots, 32 new paired episodes/root per rule; measured cost caps | Positive against selected threshold and eligible termination; releases new-root confirmation, not a confirmatory claim |
 
 The current-only and history predictors have different feature maps and sizes
 (170 versus 39). Timing controls share jitter-trained actor weights. These

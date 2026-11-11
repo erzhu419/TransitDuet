@@ -68,6 +68,13 @@ this branch closed; with it, test causal prediction at `t` before another native
 episode evaluation. The exposed readouts remain reporting-only. No new job is
 released by this decision.
 
+**PointMaze development gate passed.** The [separate Stage9 audit](../md/freq_hrl_stage9_strong_timing_2026-11-11.md#development-result)
+reports 8.21% lower episode ISE versus the selected threshold and 23.45% versus
+eligible learned termination, with both roots and path halves favorable and
+all measured caps satisfied. This releases only the new PointMaze confirmation,
+with its global freeze; it does not release the original two-task protocol.
+The cached Reacher timing audit does not support reopening the tail critic.
+
 ## Competent timing baselines and mechanism isolation
 
 The strongest unresolved comparator is a learned termination/timing policy that

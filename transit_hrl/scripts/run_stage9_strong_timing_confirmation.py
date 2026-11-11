@@ -55,12 +55,14 @@ def build(plan, cell, workdir, shared, records):
     with single_thread_runtime() as profile:
         if profile != plan["hardware_profile"]:
             raise ValueError("confirmation must use the registered hardware/runtime")
+        print(cell["optimizer_seed"], "development gate passed; training one shared controller", flush=True)
         with shared.recording("shared_controller"):
             payload, controller = train_shared_controller(spec, args, time_contract(args))
             checkpoint = workdir / "private/controller.pt"
             torch.save(controller.state_dict(), checkpoint)
         common = shared.summary()
         for method in METHODS:
+            print(cell["optimizer_seed"], "building frozen timing rule", method, flush=True)
             args = SimpleNamespace(**{**params, "method": method, "output": workdir / f"private/{method}.json"})
             record = run_trial(args, "pointmaze", shared_training=(payload, controller, checkpoint))
             records[method] = record
