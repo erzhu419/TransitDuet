@@ -1,0 +1,69 @@
+{
+  "protocol_version": "full_A_conditioned_potential_global_freeze_v1",
+  "run_name": "plan_validity_boundary_conditioning_freeze_20261111",
+  "source_manifest": "protocols/plan_validity_boundary_conditioning_2026-11-11.json",
+  "design_manifest": "protocols/plan_validity_boundary_information_2026-11-11.json",
+  "output_directory": "results/plan_validity_boundary_conditioning_freeze_20261111",
+  "total_effective_df": 3,
+  "ridge_fit_calls": 8,
+  "expected_counts": {
+    "frozen_model_window_predictions": 1536,
+    "ridge_fit_calls": 8,
+    "full_A_gate_window_predictions": 3072
+  },
+  "fit_target": "full_mean_of_two_A_labels_per_window_equal_window_weights_32_prefixes_384_windows_768_labels_per_root",
+  "source_gate": "completed512_fit_comparison_primary_A_followup_passed_all_training_A_and_old_controls_verified_before_fits",
+  "freeze": "all8_models_and_unchanged_base_wide_constant_causal_t_controls_saved_together_no_training_metric_selection",
+  "baseline_refits": 0,
+  "new_simulation_steps": 0,
+  "confirmation_sampling_released": false,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "jobs": [
+    {
+      "project": "Freq-HRL-BoundaryConditioning-Freeze",
+      "description": "Freeze eight full-A mean gate models; copy old controls; zero native work",
+      "signature": "Freq-HRL/boundary-conditioning-freeze/plan_validity_boundary_conditioning_freeze_20261111",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_conditioning_freeze.py --manifest protocols/plan_validity_boundary_conditioning_freeze_2026-11-11.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_conditioning_freeze_20261111/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_conditioning_freeze_20261111/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_information_2026-11-11.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_conditioning_2026-11-11.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_conditioning_freeze_2026-11-11.json"
+      ],
+      "allow_duplicate": false,
+      "allow_cpu_training": true
+    }
+  ]
+}

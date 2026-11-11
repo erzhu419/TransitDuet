@@ -479,3 +479,10 @@ still exceeds zero and other roots do not improve uniformly; no global upgrade.
 Freeze both gate recipes. Next prepare full-A models and a separately released
 fresh-prefix test retaining older base and Wide controls; no reuse of exposed E,
 additional fitting/native work or original policy confirmation is released here.
+The next user authorization releases only the
+[eight-model full-A freeze](freq_hrl_boundary_conditioning_freeze_2026-11-11.md):
+both gate recipes on full two-A means for all four roots, zero baseline refits
+or native work. Old eight-prefix base and uniform Wide are copied unchanged.
+A separate confirmation plan reserves 16 fresh prefixes/root and suffixes 40-47,
+excluding registered/effective training roles. Its 14,822,400-step budget is
+proposed, not released: no native jobs or fresh-prefix access in this stage.

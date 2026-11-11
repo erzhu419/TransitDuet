@@ -1,0 +1,189 @@
+{
+  "protocol_version": "frozen_conditioning_fresh_prefix_confirmation_plan_v1",
+  "run_name": "plan_validity_boundary_conditioning_confirmation_20261111",
+  "freeze_manifest": "protocols/plan_validity_boundary_conditioning_freeze_2026-11-11.json",
+  "primary_root": {
+    "task": "reacher_tracking",
+    "optimizer_seed": 1972210000
+  },
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "readout_prefix_seeds": [
+        1972179000,
+        1972179001,
+        1972179002,
+        1972179003,
+        1972179004,
+        1972179005,
+        1972179006,
+        1972179007,
+        1972179008,
+        1972179009,
+        1972179010,
+        1972179011,
+        1972179012,
+        1972179013,
+        1972179014,
+        1972179015
+      ],
+      "bootstrap_seed": 1972179800,
+      "proposed_environment_steps": 3705600
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "readout_prefix_seeds": [
+        1972189000,
+        1972189001,
+        1972189002,
+        1972189003,
+        1972189004,
+        1972189005,
+        1972189006,
+        1972189007,
+        1972189008,
+        1972189009,
+        1972189010,
+        1972189011,
+        1972189012,
+        1972189013,
+        1972189014,
+        1972189015
+      ],
+      "bootstrap_seed": 1972189800,
+      "proposed_environment_steps": 3705600
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "readout_prefix_seeds": [
+        1972279000,
+        1972279001,
+        1972279002,
+        1972279003,
+        1972279004,
+        1972279005,
+        1972279006,
+        1972279007,
+        1972279008,
+        1972279009,
+        1972279010,
+        1972279011,
+        1972279012,
+        1972279013,
+        1972279014,
+        1972279015
+      ],
+      "bootstrap_seed": 1972279800,
+      "proposed_environment_steps": 3705600
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "readout_prefix_seeds": [
+        1972289000,
+        1972289001,
+        1972289002,
+        1972289003,
+        1972289004,
+        1972289005,
+        1972289006,
+        1972289007,
+        1972289008,
+        1972289009,
+        1972289010,
+        1972289011,
+        1972289012,
+        1972289013,
+        1972289014,
+        1972289015
+      ],
+      "bootstrap_seed": 1972289800,
+      "proposed_environment_steps": 3705600
+    }
+  ],
+  "horizon": 1200,
+  "checks_per_prefix": 3,
+  "windows_per_state": 4,
+  "suffix_indices": [
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47
+  ],
+  "methods": [
+    "zero",
+    "constant",
+    "causal_t",
+    "base",
+    "wide",
+    "tracking_distance",
+    "state_rms"
+  ],
+  "primary_comparators": [
+    "wide",
+    "state_rms",
+    "base",
+    "zero"
+  ],
+  "seed_exclusion": "all_protocol_literal_roles_plus_effective_controller_training_seeds",
+  "exclusion_audit": {
+    "registered_and_effective_count": 70964
+  },
+  "sampling": "unchanged_C0_observe617_839_three_checks_original11401_windows_11402_suffix_indices_no_outcome_selection",
+  "proposed_shards": 16,
+  "prefixes_per_shard": 4,
+  "proposed_steps_per_shard": 926400,
+  "proposed_environment_steps": 14822400,
+  "new_paired_futures": 6144,
+  "factual_episodes": 64,
+  "bootstrap_replicates": 10000,
+  "bootstrap_unit": "whole_prefix_mean_paired_loss_contrast_all_checks_windows_futures_stay_together",
+  "bootstrap_pairing": "same_resampled_prefix_indices_for_all_method_contrasts_on_each_root",
+  "primary_rule": "tracking_minus_each_of_four_controls_has_nominal_one_sided_prefix_bootstrap95_upper_below_zero_and_negative_means_in_both_suffix_window_and_prefix_halves",
+  "bound_scope": "each_comparison_nominal_bounds_not_simultaneous_coverage_no_suffix_MC_variance_subtraction_or_double_addition",
+  "halves": {
+    "suffix": [
+      [
+        40,
+        41,
+        42,
+        43
+      ],
+      [
+        44,
+        45,
+        46,
+        47
+      ]
+    ],
+    "window": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "prefix": "first8_last8_in_declared_order"
+  },
+  "statistics": "separate_roots_prefix_uncertainty_and_conditional_suffix_MC_SE_no_pseudotraining_seeds",
+  "freeze_gate": "all_eight_models_and_all_old_controls_complete_before_any_fresh_prefix_access",
+  "stopping": "fixed_16_prefixes_per_root_no_outcome_based_early_stop_or_budget_extension",
+  "scope": "frozen_model_boundary_tail_prediction_not_complete_episode_control_or_independent_training_seed_confirmation",
+  "native_sampling_released": false,
+  "evaluation_prefixes_accessed": false,
+  "jobs": [],
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}

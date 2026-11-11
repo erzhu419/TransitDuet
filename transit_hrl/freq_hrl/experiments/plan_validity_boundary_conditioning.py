@@ -3,7 +3,8 @@
 import numpy as np
 
 from .compute_budget import count_work
-from .plan_validity_boundary_parent_scale import ridge_solution, scaled_basis
+from .plan_validity_boundary_parent_scale import predict_parent, ridge_solution, scaled_basis
+from .plan_validity_boundary_tail import predict
 
 
 METHODS = ("tracking_distance", "state_rms")
@@ -27,6 +28,16 @@ def conditioned_basis(arms, model):
 
 def predict_conditioned(model, now, wait):
     return (conditioned_basis(wait, model) - conditioned_basis(now, model)) @ np.asarray(model["weights"])
+
+
+def predict_frozen_bundle(models, data):
+    result = {"zero": np.zeros(len(data["now"])), "constant": np.full(len(data["now"]), models["constant"]["value"]),
+        "causal_t": predict(models["causal_t"], data["causal_t"])}
+    for method in ("base", "wide"):
+        result[method] = predict_parent(models[method], data["now"], data["wait_one_check"])
+    for method in METHODS:
+        result[method] = predict_conditioned(models[method], data["now"], data["wait_one_check"])
+    return result
 
 
 def fit_conditioned_targets(now, wait, training_mean, train, *, total_df, gate_kind):
