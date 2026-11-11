@@ -27,3 +27,9 @@ progress/moment summaries are retrieved. No aggregate job waits in the queue;
 analysis starts after all paid shards finish. This confirms boundary-tail
 prediction, not complete-episode control or independent-training-seed gains.
 The original policy recipe remains HOLD.
+
+Launched: `t214752-t214767`, all running on scheduler-selected node002-006,
+all sixteen past the global freeze gate. The launch snapshot records 468,000
+native steps from six completed states, not final results. Only 3,608 public
+progress bytes returned; [receipt](../results/plan_validity_boundary_conditioning_confirmation_20261111/release.json).
+Implementation and statistics were pushed as `b4e853d25c` before sampling.

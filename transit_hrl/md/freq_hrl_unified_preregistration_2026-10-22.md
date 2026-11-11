@@ -498,3 +498,6 @@ rules remain unchanged. Statistics and whole-prefix bootstrap are committed
 before fresh labels; all sixteen completed ledgers are required before analysis.
 No queued aggregate, exposed-E tuning, extra candidate or budget extension is
 released. Original policy confirmation and full-episode claims remain on HOLD.
+Tasks t214752-t214767 are now running after all sixteen global freeze checks;
+the launch snapshot records 468,000 initial native steps. The separate release
+does not change the historical reservation or any frozen predictor.
