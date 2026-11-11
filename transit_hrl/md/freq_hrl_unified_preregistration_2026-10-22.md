@@ -369,3 +369,8 @@ The user's next-step authorization now releases only the
 four frozen root jobs, total DF 3, eight whole-prefix folds, suffix 0/1 fitting
 and 2/3 readout. Budget: 72 ridge fits, 36 constant fits, zero native steps.
 No policy, threshold, upstream distillation or original confirmation is released.
+All four cache workers completed the exact 72/36-fit, zero-step budget.
+Only Reacher root1 meets the frozen boundary-tail rule. PointMaze exposes
+near-zero contrast-scale extrapolation; Reacher root2 remains half-group mixed.
+Preserve v1 losses and fixed-model attribution. A parent-feature scaling repair
+is the next design, not an automatic refit or evidence of deployable timing gain.

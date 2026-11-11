@@ -1,0 +1,131 @@
+{
+  "source_run": "plan_validity_boundary_tail_20261111",
+  "analysis_role": "posthoc_fixed_model_term_attribution_no_selection",
+  "new_fits": 0,
+  "new_environment_steps": 0,
+  "retrieved_derived_bytes": 3073,
+  "cells": [
+    {
+      "root": 1972110000,
+      "held_prefix": 1972175003,
+      "step": 720,
+      "window": 0,
+      "largest_prediction": 124.21023447096786,
+      "tail_A": 0.015306377603334365,
+      "tail_B": 0.016833486212527615,
+      "ungated_parent_training_arm_std": 0.5574805499285075,
+      "ungated_parent_training_arm_range": [
+        1.4901161193847656e-08,
+        2.4499988108873367
+      ],
+      "top_terms": [
+        {
+          "name": "velocity_001_minus_050_norm__spent",
+          "contribution": 124.21848675779007,
+          "held_feature": 0.5760017745196819,
+          "training_min": -4.0531158447265625e-06,
+          "training_max": 0.0,
+          "scale": 6.254093526257425e-07,
+          "weight": 0.00013487354870064604
+        },
+        {
+          "name": "waypoint_error_dot_velocity_001",
+          "contribution": -0.0042529291838530724,
+          "held_feature": 0.5494026410218789,
+          "training_min": -0.282912282550285,
+          "training_max": 0.18669065717276112,
+          "scale": 0.07199513496146341,
+          "weight": -0.0005573147773799197
+        },
+        {
+          "name": "waypoint_error_dot_velocity_010",
+          "contribution": -0.0042139571879282025,
+          "held_feature": 0.549401855096221,
+          "training_min": -0.28291255235671997,
+          "training_max": 0.18669034559955833,
+          "scale": 0.07066889752782933,
+          "weight": -0.0005420362271041162
+        },
+        {
+          "name": "waypoint_error_dot_velocity_025",
+          "contribution": -0.0034334980453063907,
+          "held_feature": 0.5494018681949819,
+          "training_min": -0.2829125456115591,
+          "training_max": 0.18669037230583285,
+          "scale": 0.06854970155421564,
+          "weight": -0.0004284027410864301
+        },
+        {
+          "name": "target_error_dot_velocity_001_minus_050__spent",
+          "contribution": 0.0030744067457305234,
+          "held_feature": 0.2174228671682531,
+          "training_min": -0.09310983124200334,
+          "training_max": 0.03967978028131547,
+          "scale": 0.017348707037712685,
+          "weight": 0.0002453144999931013
+        }
+      ]
+    },
+    {
+      "root": 1972120000,
+      "held_prefix": 1972185005,
+      "step": 955,
+      "window": 0,
+      "largest_prediction": 735.3360664379607,
+      "tail_A": 0.035491835702196495,
+      "tail_B": 0.056496748269761254,
+      "ungated_parent_training_arm_std": 0.7882528788565627,
+      "ungated_parent_training_arm_range": [
+        2.682209014892578e-07,
+        2.310490530398207
+      ],
+      "top_terms": [
+        {
+          "name": "velocity_001_minus_050_norm__spent",
+          "contribution": 734.6028065561298,
+          "held_feature": 0.899998813867569,
+          "training_min": -3.8743019104003906e-07,
+          "training_max": 0.0,
+          "scale": 6.656063811206401e-08,
+          "weight": 5.4328551115717257e-05
+        },
+        {
+          "name": "waypoint_error_dot_velocity_001_minus_050__spent",
+          "contribution": 0.7090041847471082,
+          "held_feature": 0.673011381563601,
+          "training_min": -1.8161588055676248e-07,
+          "training_max": 0.009209888416883416,
+          "scale": 0.001517086468183084,
+          "weight": 0.001598220600766124
+        },
+        {
+          "name": "target_error_dot_velocity_001_minus_050__spent",
+          "contribution": 0.01826893196912653,
+          "held_feature": 0.5243847969325905,
+          "training_min": -0.017098783188018274,
+          "training_max": 0.29178763594721957,
+          "scale": 0.05020524784569897,
+          "weight": 0.001749090100917087
+        },
+        {
+          "name": "target_error_dot_velocity_001__spent",
+          "contribution": 0.012293184446804167,
+          "held_feature": 0.7283124832504484,
+          "training_min": -0.4380291254589608,
+          "training_max": 0.21168012473671283,
+          "scale": 0.06191243774310244,
+          "weight": 0.0010450198702217145
+        },
+        {
+          "name": "tracking_distance__spent",
+          "contribution": -0.007946557463032774,
+          "held_feature": 0.5874301791191101,
+          "training_min": -0.3788703680038452,
+          "training_max": 0.0,
+          "scale": 0.06578128603231247,
+          "weight": -0.0008898670651069393
+        }
+      ]
+    }
+  ]
+}
