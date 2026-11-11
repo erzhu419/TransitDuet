@@ -17,6 +17,12 @@ Eight 1CPU/2GiB scheduler shards, four prefixes each: 926,400 steps/shard,
 1,200-step replay. No fitting or extra precheck simulation. Private rows and
 predictions remain remote; public progress and summaries alone are retrieved.
 
+Tasks t214699-t214706 launched on node004/node005/node006 by unpinned scheduler
+placement. All eight passed the global model-freeze gate and sampled their first
+state: 78,000 counted steps each, 624,000 total, no reported errors at the launch
+snapshot. The [launch receipt](../results/plan_validity_boundary_information_20261111/readout_release.json)
+retains identities, permissions and progress; only 1,705 status bytes were pulled.
+
 Report MSE for all six controls and paired contrasts base/zero, Dense/zero,
 Wide/zero, Dense/base, Wide/base and Wide/Dense separately for each root.
 For a contrast p versus q, use p^2-q^2-2(p-q)*mean(E); the shared squared-label

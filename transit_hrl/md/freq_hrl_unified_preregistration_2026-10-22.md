@@ -426,3 +426,5 @@ must pass the global freeze gate before any E access; no fitting, threshold
 revision or root-specific version selection is admitted. Preserve paired losses,
 conditional suffix MC SE, prefix dispersion and both declared half partitions.
 This boundary-prediction release does not release original policy confirmation.
+Tasks t214699-t214706 are running with actual E sampling after the global freeze
+gate; the linked launch receipt records 624,000 initial steps, not final results.
