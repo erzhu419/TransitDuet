@@ -27,7 +27,9 @@ ISE = "tracking_squared_error_integral"
 
 def same_controller(left, right):
     a, b = left.state_dict(), right.state_dict()
-    return a.keys() == b.keys() and all(torch.equal(a[k], b[k]) for k in a)
+    return a["config"] == b["config"] and all(
+        a[m].keys() == b[m].keys() and all(torch.equal(a[m][k], b[m][k]) for k in a[m])
+        for m in ("upper_actor", "lower_actor", "upper_value", "lower_value"))
 
 
 def load_development(cell, design):
@@ -118,8 +120,8 @@ def panels(rows):
     return output
 
 
-def audit(cell, design, args, source, rules, evaluate, ledger):
-    all_preflights = [json.loads((ROOT / c["directory"] / "preflight/public/result.json").read_text())
+def audit(cell, design, args, source, rules, evaluate, ledger, preflight_directory):
+    all_preflights = [json.loads((ROOT / c["directory"] / preflight_directory / "public/result.json").read_text())
                       for c in design["development_cells"]]
     if any((r["status"], r["phase"], r["optimizer_seed"], r["legacy_parity"], r["audit_accessed"]) !=
            ("complete", "preflight", c["optimizer_seed"], True, False)
@@ -194,6 +196,7 @@ def main():
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--phase", choices=("preflight", "audit", "readout"), required=True)
     parser.add_argument("--cell", type=int)
+    parser.add_argument("--preflight-directory", default="preflight")
     opts = parser.parse_args()
     design = json.loads(opts.manifest.read_text())
     if opts.phase == "readout":
@@ -202,7 +205,8 @@ def main():
         print(json.dumps({**readout(design, reports), "roots": reports}, separators=(",", ":")))
         return 0
     cell = design["development_cells"][opts.cell]
-    directory = ROOT / cell["directory"] / opts.phase / "public"
+    phase_directory = opts.preflight_directory if opts.phase == "preflight" else opts.phase
+    directory = ROOT / cell["directory"] / phase_directory / "public"
     directory.mkdir(parents=True, exist_ok=False)
     ledger = ComputeLedger()
     result = {"phase": opts.phase, "optimizer_seed": cell["optimizer_seed"], "status": "running"}
@@ -222,7 +226,7 @@ def main():
             if opts.phase == "preflight":
                 result.update(preflight(cell, controller, args, source, rules, evaluate))
             else:
-                result.update(audit(cell, design, args, source, rules, evaluate, ledger))
+                result.update(audit(cell, design, args, source, rules, evaluate, ledger, opts.preflight_directory))
         if ledger.summary()["counts"]["environment_steps"] != design[f"{opts.phase}_steps_per_root"]:
             raise RuntimeError("worker did not close its registered native-step budget")
         result["status"] = "complete"

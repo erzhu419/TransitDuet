@@ -1,4 +1,5 @@
 from copy import deepcopy
+from types import SimpleNamespace
 import unittest
 
 import torch
@@ -46,9 +47,11 @@ class Stage9StrongTimingTest(unittest.TestCase):
                 self.assertFalse(readout(plan, rows)["confirmation_builds_allowed"])
 
     def test_compares_actual_controller_parameters(self):
-        model = torch.nn.Linear(2, 2)
-        other = deepcopy(model)
+        params = {"config": {}, **{name: torch.nn.Linear(2, 2).state_dict() for name in
+                  ("upper_actor", "lower_actor", "upper_value", "lower_value")}}
+        copy = deepcopy(params)
+        model = SimpleNamespace(state_dict=lambda: params)
+        other = SimpleNamespace(state_dict=lambda: copy)
         self.assertTrue(same_controller(model, other))
-        with torch.no_grad():
-            other.bias[0] += 1
+        copy["upper_actor"]["bias"][0] += 1
         self.assertFalse(same_controller(model, other))
