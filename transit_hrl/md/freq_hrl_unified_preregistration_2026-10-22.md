@@ -332,3 +332,10 @@ readouts (t214504-t214507; 2,112,000 steps), with all four roots and both heads.
 The [E8 release receipt](../results/plan_validity_independent_calibration_20261111/readout_release.json)
 keeps launch separate from outcome. No cut/model revision, extra roots, original
 confirmation or complete-episode follow-up is released.
+
+The four E8 readouts completed at exactly 2,112,000 steps. The
+[frozen result](freq_hrl_independent_calibration_result_2026-11-11.md#frozen-e8-result)
+does not meet both-root joint W/G stability. Preserve PointMaze root2's positive
+half-group points and Reacher's short-window losses; do not generalize either
+beyond the sampled interventions. Stop scalar-cut repair and keep E8 as exposed
+evidence. No new tasks or original confirmation are released.

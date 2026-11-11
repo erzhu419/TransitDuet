@@ -1,0 +1,1053 @@
+{
+  "run_name": "plan_validity_independent_calibration_20261111",
+  "stage": "frozen_E8_complete",
+  "snapshot_at_utc": "2026-11-11T00:42:35.843608+00:00",
+  "source_manifest": "protocols/plan_validity_independent_calibration_2026-11-11.json",
+  "frozen_implementation_commit": "e2f6ef9c93",
+  "scheduler_snapshot": [
+    {
+      "id": "t214504",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/pointmaze/1972110000/shard-1",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214505",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/pointmaze/1972120000/shard-1",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214506",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/reacher_tracking/1972210000/shard-1",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214507",
+      "signature": "Freq-HRL/independent-calibration/plan_validity_independent_calibration_20261111/readout/reacher_tracking/1972220000/shard-1",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    }
+  ],
+  "submitted_phase_counts": {
+    "precheck": 4,
+    "sample": 8,
+    "select": 4,
+    "readout": 4
+  },
+  "sources": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "public_result": "results/plan_validity_independent_calibration_20261111/pointmaze/1972110000/readout/public/result.json",
+      "readout_prefixes": [
+        1972173000,
+        1972173001,
+        1972173002,
+        1972173003,
+        1972173004,
+        1972173005,
+        1972173006,
+        1972173007
+      ],
+      "states": 24,
+      "environment_steps": 528000,
+      "measured_phase_cpu_seconds": 498.001460339
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "public_result": "results/plan_validity_independent_calibration_20261111/pointmaze/1972120000/readout/public/result.json",
+      "readout_prefixes": [
+        1972183000,
+        1972183001,
+        1972183002,
+        1972183003,
+        1972183004,
+        1972183005,
+        1972183006,
+        1972183007
+      ],
+      "states": 24,
+      "environment_steps": 528000,
+      "measured_phase_cpu_seconds": 496.985282439
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "public_result": "results/plan_validity_independent_calibration_20261111/reacher_tracking/1972210000/readout/public/result.json",
+      "readout_prefixes": [
+        1972273000,
+        1972273001,
+        1972273002,
+        1972273003,
+        1972273004,
+        1972273005,
+        1972273006,
+        1972273007
+      ],
+      "states": 24,
+      "environment_steps": 528000,
+      "measured_phase_cpu_seconds": 432.318705146
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "public_result": "results/plan_validity_independent_calibration_20261111/reacher_tracking/1972220000/readout/public/result.json",
+      "readout_prefixes": [
+        1972283000,
+        1972283001,
+        1972283002,
+        1972283003,
+        1972283004,
+        1972283005,
+        1972283006,
+        1972283007
+      ],
+      "states": 24,
+      "environment_steps": 528000,
+      "measured_phase_cpu_seconds": 420.304445392
+    }
+  ],
+  "new_prefixes": 32,
+  "states": 96,
+  "conditional_future_pairs": 768,
+  "environment_steps": 2112000,
+  "measured_phase_cpu_seconds": 1847.609893316,
+  "public_result_download_bytes": 76587,
+  "new_model_fits": 0,
+  "new_controller_updates": 0,
+  "diagnostics": {
+    "positive_W_both_halves_heads_vs_quantile": 3,
+    "positive_joint_both_halves_all_comparators": [
+      {
+        "task": "pointmaze",
+        "optimizer_seed": 1972120000,
+        "head": "label_reference"
+      },
+      {
+        "task": "pointmaze",
+        "optimizer_seed": 1972120000,
+        "head": "label_candidate"
+      }
+    ],
+    "positive_joint_both_roots_vs_quantile": [],
+    "strictly_positive_E8_prefix_intervals": 0,
+    "negative_W_prefix_intervals": [
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972220000,
+        "head": "label_reference",
+        "comparison": "independent_minus_quantile",
+        "interval": [
+          -0.00714894264477319,
+          -0.00014891010989824842
+        ]
+      },
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972220000,
+        "head": "label_reference",
+        "comparison": "independent_minus_previous_full_calibration",
+        "interval": [
+          -0.00714894264477319,
+          -0.00014891010989824842
+        ]
+      },
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972220000,
+        "head": "label_candidate",
+        "comparison": "independent_minus_previous_full_calibration",
+        "interval": [
+          -0.007507950525659618,
+          -0.0001917247135173085
+        ]
+      }
+    ]
+  },
+  "head_readouts": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "head": "label_reference",
+      "choose_now": {
+        "quantile": 10,
+        "previous_full_calibration": 14,
+        "independent_calibration": 17,
+        "C0": 10
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 7,
+        "independent_minus_previous_full_calibration": 3,
+        "independent_minus_C0": 7
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            -0.0014689234630147683,
+            -0.008261539100389263
+          ],
+          "E4_W_G": [
+            [
+              -0.00134373918583967,
+              -0.008875291650940585
+            ],
+            [
+              -0.0015941077401898658,
+              -0.007647786549837942
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.006885610972679798,
+              0.003947764046650263
+            ],
+            [
+              -0.02299050420026784,
+              0.006467425999489311
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0008120698301541299,
+            0.0030424572299674146
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            -0.001683964654629948,
+            -0.004883752438669846
+          ],
+          "E4_W_G": [
+            [
+              -0.0010576382770681482,
+              -0.0064225558581063845
+            ],
+            [
+              -0.002310291032191748,
+              -0.003344949019233308
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.004046849549630312,
+              0.0006789202403704158
+            ],
+            [
+              -0.014535708250050815,
+              0.004768203372711124
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0003553883578900498,
+            0.002239660548505633
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            0.0008127340202071718,
+            -0.004371241612490937
+          ],
+          "E4_W_G": [
+            [
+              -0.00011142047307680974,
+              -0.004646492250127267
+            ],
+            [
+              0.0017368885134911537,
+              -0.004095990974854607
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.0031848995881921327,
+              0.004810367628606476
+            ],
+            [
+              -0.01594070328127213,
+              0.007198220056290258
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0009313575489405529,
+            0.0029142879199385214
+          ]
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "head": "label_candidate",
+      "choose_now": {
+        "quantile": 8,
+        "previous_full_calibration": 14,
+        "independent_calibration": 14,
+        "C0": 10
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 6,
+        "independent_minus_previous_full_calibration": 0,
+        "independent_minus_C0": 8
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            0.0008346006176669713,
+            -0.0031689668266916935
+          ],
+          "E4_W_G": [
+            [
+              0.00032289086718128917,
+              -0.003505107323469557
+            ],
+            [
+              0.0013463103681526534,
+              -0.0028328263299138303
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.003099344540431177,
+              0.00476854577576512
+            ],
+            [
+              -0.01483775325323058,
+              0.008499819599847193
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.000730537540371186,
+            0.002313497820776663
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            0.0,
+            0.0
+          ],
+          "E4_W_G": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0,
+            0.0
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            0.00249669867483712,
+            0.0005125108261789096
+          ],
+          "E4_W_G": [
+            [
+              0.0009462178039913383,
+              0.0017760636079791174
+            ],
+            [
+              0.0040471795456829005,
+              -0.0007510419556212983
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.0008312698405397328,
+              0.005824667190213973
+            ],
+            [
+              -0.015079390224399658,
+              0.016104411876757478
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0009967888692667692,
+            0.003665584646561965
+          ]
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "head": "label_reference",
+      "choose_now": {
+        "quantile": 4,
+        "previous_full_calibration": 22,
+        "independent_calibration": 10,
+        "C0": 5
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 6,
+        "independent_minus_previous_full_calibration": 12,
+        "independent_minus_C0": 5
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            0.002122785696759172,
+            0.0023820790743131637
+          ],
+          "E4_W_G": [
+            [
+              0.0022086281500670554,
+              0.0013068938019517387
+            ],
+            [
+              0.002036943243451288,
+              0.0034572643466745886
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.0017845246393197278,
+              0.006030096032838071
+            ],
+            [
+              -0.004041092270031436,
+              0.008805250418657764
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0003361278870277725,
+            0.0016674222522817883
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            0.003368160503243485,
+            0.006356752810030736
+          ],
+          "E4_W_G": [
+            [
+              0.0034958381621056356,
+              0.005751668289282359
+            ],
+            [
+              0.0032404828443813338,
+              0.006961837330779115
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.0010756757427346146,
+              0.007811996749221582
+            ],
+            [
+              -0.011514262470638591,
+              0.024227768090700066
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.000494017891811921,
+            0.0040003417666614255
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            0.00197589557116021,
+            0.0014981907907952827
+          ],
+          "E4_W_G": [
+            [
+              0.002097151683642671,
+              0.0011289324921859498
+            ],
+            [
+              0.0018546394586777492,
+              0.0018674490894046158
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.001975066729989832,
+              0.0059268578723102525
+            ],
+            [
+              -0.004747151593971728,
+              0.007743533175562293
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00033415803450947604,
+            0.0015617442780220447
+          ]
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "head": "label_candidate",
+      "choose_now": {
+        "quantile": 4,
+        "previous_full_calibration": 22,
+        "independent_calibration": 9,
+        "C0": 5
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 5,
+        "independent_minus_previous_full_calibration": 13,
+        "independent_minus_C0": 4
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            0.0016455945886014003,
+            0.001969325416941298
+          ],
+          "E4_W_G": [
+            [
+              0.0017277779612134636,
+              0.0005312098692026543
+            ],
+            [
+              0.0015634112159893358,
+              0.0034074409646799413
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.002295054729511335,
+              0.0055862439067141355
+            ],
+            [
+              -0.004134681283052577,
+              0.008073332116935172
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00033416396291440035,
+            0.0010734544960720102
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            0.002890969395085712,
+            0.005943999152658873
+          ],
+          "E4_W_G": [
+            [
+              0.003014987973252043,
+              0.004975984356533274
+            ],
+            [
+              0.0027669508169193818,
+              0.006912013948784468
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.0015229495945433668,
+              0.00730488838471479
+            ],
+            [
+              -0.011954706645983124,
+              0.023842704951300864
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0004953484427727548,
+            0.0041988958861066215
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            0.0014987044630024383,
+            0.001085437133423417
+          ],
+          "E4_W_G": [
+            [
+              0.001616301494789079,
+              0.00035324855943686534
+            ],
+            [
+              0.001381107431215797,
+              0.0018176257074099683
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.002471152701481187,
+              0.005468561627486063
+            ],
+            [
+              -0.004781694672657311,
+              0.006952568939504144
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00033218246446815636,
+            0.0009005846865605358
+          ]
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "head": "label_reference",
+      "choose_now": {
+        "quantile": 8,
+        "previous_full_calibration": 7,
+        "independent_calibration": 0,
+        "C0": 8
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 8,
+        "independent_minus_previous_full_calibration": 7,
+        "independent_minus_C0": 8
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            0.00021393128293386784,
+            -0.019771313895616434
+          ],
+          "E4_W_G": [
+            [
+              0.001006842542842467,
+              -0.016812782457602666
+            ],
+            [
+              -0.0005789799769747311,
+              -0.022729845333630202
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.02207405759556534,
+              0.022501920161433077
+            ],
+            [
+              -0.06219233800155757,
+              0.022649710210324706
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0007233611308486537,
+            0.012160619625955686
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            0.0005933482914350705,
+            -0.018770621234072513
+          ],
+          "E4_W_G": [
+            [
+              0.0013769155202719892,
+              -0.01576460439256601
+            ],
+            [
+              -0.00019021893740184953,
+              -0.021776638075579016
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.021668499486692274,
+              0.022855196069562416
+            ],
+            [
+              -0.061478372159826725,
+              0.0239371296916817
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0007232486720384195,
+            0.012156922423302694
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            -0.004901410683955995,
+            0.007317836797657078
+          ],
+          "E4_W_G": [
+            [
+              -0.004929642780518616,
+              -0.007005978822674258
+            ],
+            [
+              -0.004873178587393374,
+              0.021641652417988416
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.010413545583917907,
+              0.0006107242160059163
+            ],
+            [
+              -0.028427060055698134,
+              0.04306273365101229
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            8.671138520848896e-05,
+            0.009880212236224567
+          ]
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "head": "label_candidate",
+      "choose_now": {
+        "quantile": 5,
+        "previous_full_calibration": 2,
+        "independent_calibration": 2,
+        "C0": 8
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 3,
+        "independent_minus_previous_full_calibration": 0,
+        "independent_minus_C0": 6
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            -0.0019333107502610338,
+            0.006662236379746708
+          ],
+          "E4_W_G": [
+            [
+              -0.0019276460781388722,
+              0.004882575505139357
+            ],
+            [
+              -0.0019389754223831958,
+              0.00844189725435406
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.004956111287416327,
+              0.0010894897868942589
+            ],
+            [
+              -0.007779622790815026,
+              0.02110409555030844
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            1.1904125887362642e-05,
+            0.005411782325742537
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            0.0,
+            0.0
+          ],
+          "E4_W_G": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0,
+            0.0
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            -0.0015969191289849074,
+            0.012953651346536012
+          ],
+          "E4_W_G": [
+            [
+              -0.001611927218176026,
+              0.0008886953464671693
+            ],
+            [
+              -0.0015819110397937888,
+              0.025018607346604854
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.004677990973512554,
+              0.0014841527155427395
+            ],
+            [
+              -0.015933989169765742,
+              0.04184129186283776
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            2.5982332110837335e-05,
+            0.00867704933141625
+          ]
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "head": "label_reference",
+      "choose_now": {
+        "quantile": 5,
+        "previous_full_calibration": 5,
+        "independent_calibration": 21,
+        "C0": 8
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 16,
+        "independent_minus_previous_full_calibration": 16,
+        "independent_minus_C0": 13
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            -0.0036489263773357185,
+            0.005288393529663454
+          ],
+          "E4_W_G": [
+            [
+              -0.0033514221760132822,
+              -0.006489029868000533
+            ],
+            [
+              -0.003946430578658156,
+              0.017065816927327445
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.00714894264477319,
+              -0.00014891010989824842
+            ],
+            [
+              -0.053329053726867616,
+              0.06390584078619452
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00017347075898387323,
+            0.017747774721842233
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            -0.0036489263773357185,
+            0.005288393529663454
+          ],
+          "E4_W_G": [
+            [
+              -0.0033514221760132822,
+              -0.006489029868000533
+            ],
+            [
+              -0.003946430578658156,
+              0.017065816927327445
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.00714894264477319,
+              -0.00014891010989824842
+            ],
+            [
+              -0.053329053726867616,
+              0.06390584078619452
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00017347075898387323,
+            0.017747774721842233
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            -0.0038201020295794666,
+            0.0155804397224541
+          ],
+          "E4_W_G": [
+            [
+              -0.003608760677070675,
+              0.01676529148715631
+            ],
+            [
+              -0.004031443382088259,
+              0.014395587957751893
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.010235286682221227,
+              0.002595082623062292
+            ],
+            [
+              -0.007802832064073603,
+              0.038963711508981806
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00025825110848796615,
+            0.011931814575401484
+          ]
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "head": "label_candidate",
+      "choose_now": {
+        "quantile": 6,
+        "previous_full_calibration": 7,
+        "independent_calibration": 21,
+        "C0": 8
+      },
+      "changed_actions": {
+        "independent_minus_quantile": 15,
+        "independent_minus_previous_full_calibration": 14,
+        "independent_minus_C0": 13
+      },
+      "comparisons": {
+        "independent_minus_quantile": {
+          "E8_W_G": [
+            -0.0036691403125570544,
+            0.006501153194214057
+          ],
+          "E4_W_G": [
+            [
+              -0.0034165215074835214,
+              -0.006722104600787346
+            ],
+            [
+              -0.003921759117630588,
+              0.01972441098921546
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.0073845093046407545,
+              4.622867952664561e-05
+            ],
+            [
+              -0.052060841943375104,
+              0.06506314833180321
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0001742149723957881,
+            0.0177355231861908
+          ]
+        },
+        "independent_minus_previous_full_calibration": {
+          "E8_W_G": [
+            -0.0038498376195884635,
+            0.0014466170685182463
+          ],
+          "E4_W_G": [
+            [
+              -0.0036491398386911543,
+              -0.00885938141553385
+            ],
+            [
+              -0.004050535400485771,
+              0.011752615552570345
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.007507950525659618,
+              -0.0001917247135173085
+            ],
+            [
+              -0.05357842225186022,
+              0.05647165638889671
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.0001709883868360294,
+            0.017565441618689552
+          ]
+        },
+        "independent_minus_C0": {
+          "E8_W_G": [
+            -0.0038201020295794666,
+            0.0155804397224541
+          ],
+          "E4_W_G": [
+            [
+              -0.003608760677070675,
+              0.01676529148715631
+            ],
+            [
+              -0.004031443382088259,
+              0.014395587957751893
+            ]
+          ],
+          "prefix_t95_W_G": [
+            [
+              -0.010235286682221227,
+              0.002595082623062292
+            ],
+            [
+              -0.007802832064073603,
+              0.038963711508981806
+            ]
+          ],
+          "conditional_MC_SE_W_G": [
+            0.00025825110848796615,
+            0.011931814575401484
+          ]
+        }
+      }
+    }
+  ],
+  "decision": "stop_scalar_cut_repair_joint_transfer_not_met",
+  "E8_is_exposed_evidence_not_future_tuning_data": true,
+  "next_direction": "redesign_plan_value_representation_and_long_horizon_credit_without_repeating_direct_G_regression_or_E8_cut_search",
+  "new_followup_jobs_submitted": 0,
+  "statistical_scope": "paired_single_interventions_on_8_fresh_C0_prefixes_per_root_not_closed_loop_or_cross_root_inference",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}

@@ -75,5 +75,13 @@ records launch status separately from completed evaluation. This is the planned
 single-intervention prefix-transfer diagnostic, not original-cohort confirmation
 or a learned-head complete-episode experiment.
 All four jobs started: three on node004 and one on node005. Initial public
-progress confirms at least two complete prefixes/root without errors. Evaluation
-is still in progress; only progress metadata returned locally, no raw banks/models.
+progress confirmed at least two complete prefixes/root without errors, before
+any outcome was read. No raw banks or models were retrieved.
+
+## E8 Completion
+
+All four readouts exited 0 at the exact budget. The
+[E8 result](freq_hrl_independent_calibration_result_2026-11-11.md#frozen-e8-result)
+retains a local PointMaze root2 signal, but no head meets the both-root joint W/G
+criterion. Scalar-cut repair stops here; all cuts and paid results remain frozen.
+No follow-up jobs or original confirmation are released.
