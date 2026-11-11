@@ -101,6 +101,11 @@ class BoundaryWideTransferTest(unittest.TestCase):
                 _, prepared = worker.load_wide_inputs(manifest)
             self.assertEqual(len(prepared), 4)
             np.testing.assert_array_equal(prepared[0]['data']['training_replicas'], data['training_replicas'])
+            for i in (0, 1, 3):
+                (root / f'wide{i}/private/rows.json').unlink()
+            with patch.object(worker, 'ROOT', root), patch.object(worker, 'load_cache', return_value=cached):
+                _, subset = worker.load_wide_inputs(manifest, cell_indices=(2,))
+            self.assertEqual([p['cell']['task'] for p in subset], ['fixture2'])
 
     def test_worker_verifies_all_banks_before_fitting_and_preserves_exact_budget(self):
         @contextmanager

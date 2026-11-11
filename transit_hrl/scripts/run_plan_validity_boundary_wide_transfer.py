@@ -20,7 +20,7 @@ from freq_hrl.experiments.pointmaze_goal_validation import _json_ready
 from scripts.run_plan_validity_boundary_tail import load_cache
 
 
-def load_wide_inputs(manifest):
+def load_wide_inputs(manifest, *, cell_indices=(0, 1, 2, 3)):
     design = json.loads((ROOT / manifest["design_manifest"]).read_text())
     sample = json.loads((ROOT / manifest["sample_manifest"]).read_text())
     fit = json.loads((ROOT / manifest["fit_manifest"]).read_text())
@@ -33,7 +33,8 @@ def load_wide_inputs(manifest):
         raise ValueError("matching completed frozen Wide source is required")
     source = json.loads((ROOT / design["source_manifest"]).read_text())
     prepared = []
-    for i, (cell, frozen, prior) in enumerate(zip(design["cells"], saved["cells"], report["cells"])):
+    for i in cell_indices:
+        cell, frozen, prior = design["cells"][i], saved["cells"][i], report["cells"][i]
         identity = (cell["task"], cell["optimizer_seed"])
         if any(identity != (c["task"], c["optimizer_seed"]) for c in (frozen, prior)):
             raise ValueError("source root identities differ")
@@ -49,7 +50,8 @@ def load_wide_inputs(manifest):
         expected = prior["training_readout"]["wide"]["MSE_to_own_training_A_mean"]["wide"]
         if not np.isclose(mse, expected, rtol=1e-10, atol=1e-12):
             raise ValueError("training A bank does not reproduce frozen Wide loss")
-        prepared.append({"cell": cell, "data": data, "frozen_mean_A_MSE": mse})
+        prepared.append({"cell": cell, "data": data, "frozen_mean_A_MSE": mse,
+            "frozen_model": frozen["models"]["wide"]})
     return design, prepared
 
 

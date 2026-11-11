@@ -1,0 +1,82 @@
+{
+  "protocol_version": "fixed_Wide_fold_label_response_geometry_v1",
+  "run_name": "plan_validity_boundary_wide_influence_20261111",
+  "source_manifest": "protocols/plan_validity_boundary_wide_transfer_2026-11-11.json",
+  "design_manifest": "protocols/plan_validity_boundary_information_2026-11-11.json",
+  "cell_index": 2,
+  "output_directory": "results/plan_validity_boundary_wide_influence_20261111",
+  "target": {
+    "task": "reacher_tracking",
+    "optimizer_seed": 1972210000
+  },
+  "expected_counts": {
+    "frozen_model_window_predictions": 384,
+    "saved_fold_window_predictions": 24576,
+    "geometry_svd_calls": 32
+  },
+  "ridge_fit_calls": 0,
+  "new_simulation_steps": 0,
+  "baseline_refits": 0,
+  "coordinates": "exact_raw_basis_reexpression_of_saved_fold_models_no_coefficient_optimization",
+  "loss_blocks": [
+    "state",
+    "clock",
+    "state_x_remaining",
+    "state_x_spent"
+  ],
+  "label_response": "stored_ridge_alpha_and_parent_geometry_operator_never_an_alternative_fit",
+  "attribution": "additive_quadratic_loss_allocation_by_training_prefix_and_own_prefix_not_causal_deletion",
+  "geometry": "ridge_leverage_nullspace_scale_and_mean_drift_relative_to_frozen_full_Wide_feature_geometry",
+  "noise": "descriptive_two_A_label_variance_propagation_no_CI_or_gap_noise_subtraction",
+  "evaluation_prefixes_accessed": false,
+  "frozen_models_modified": false,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "jobs": [
+    {
+      "project": "Freq-HRL-BoundaryWide-FixedInfluence",
+      "description": "Reacher1 cached-fold label and geometry attribution: zero fits or simulation",
+      "signature": "Freq-HRL/boundary-wide-influence/plan_validity_boundary_wide_influence_20261111",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_wide_influence.py --manifest protocols/plan_validity_boundary_wide_influence_2026-11-11.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_wide_influence_20261111/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_wide_influence_20261111/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_information_2026-11-11.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_wide_transfer_2026-11-11.json",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_wide_influence_2026-11-11.json"
+      ],
+      "allow_duplicate": false,
+      "allow_cpu_training": true
+    }
+  ]
+}

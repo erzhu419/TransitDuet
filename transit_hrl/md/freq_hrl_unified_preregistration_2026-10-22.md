@@ -449,3 +449,10 @@ after whole-prefix exclusion in both views, strata and window halves. Reacher2
 already lacks a matched-future gain and its held views conflict; do not explain
 both roots as the same transfer failure or infer that higher capacity is needed.
 Keep E frozen and all original models unchanged. No further budget is released.
+The next user authorization releases only the
+[Reacher1 fixed-fold attribution](freq_hrl_boundary_wide_influence_2026-11-11.md):
+common raw-coordinate loss blocks, fixed-model label response and support
+geometry on training A. Budget: 32 geometry SVDs, 24,576 saved-fold scores,
+384 frozen-source checks, zero fits/native steps. Preserve all saved models;
+label allocations are not causal deletion effects, and geometry association is
+not an alternative-normalization experiment. No B/E targets or policy release.
