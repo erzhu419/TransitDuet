@@ -48,6 +48,12 @@ independent-training confirmation. The scheduler coordinator submits fresh
 builds now and evaluation only after the global admission check; no waiter
 jobs are queued. It retrieves only public ledgers and the fixed readout.
 
+Launched `t214806-t214813`: all eight workers passed the development gate
+and started one shared-controller build each on scheduler-selected
+node003/004/006. [Release receipt](../results/pointmaze_stage9_strong_timing_20261111/confirmation_release.json).
+The running coordinator will save the final decision in
+`results/pointmaze_stage9_strong_timing_20261111/confirmation_decision.json`.
+
 ## Reacher branch decision
 
 The [cached readout](../results/pointmaze_stage9_strong_timing_20261111/reacher_tail_decisions.json)
