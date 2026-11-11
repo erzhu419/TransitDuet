@@ -1,0 +1,15 @@
+{
+  "protocol_id": "v407_service_continuation",
+  "regimes": {"nominal": {}, "heavy": {"demand_scale": 1.2}},
+  "days": {"nominal": [2470001, 2470002], "heavy": [2470201, 2470202]},
+  "arms": ["fixed_cap_10", "fixed_cap_15", "v406_single", "service_single"],
+  "physical_start_cap": 16,
+  "max_concurrent_paths": 16,
+  "automatic_retry": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "scope": "Four new development days. Repair only finite-window service continuation and endpoint obligations. Freeze V406 predictors, scenario multiplier, cost weights, seven actions and physical fleet. No paired actions, release edits or new trained values. Retain original window bound, clipped only to the known evaluation endpoint; known demand cutoff is enforced.",
+  "model_contract": "All currently published unlaunched trips due within the window enter native FIFO dispatch. At window end, pending trips retain censored public/readiness delays and unfinished vehicles/passenger stocks remain explicit. Candidate must not strand a trip dispatched by the reference or leave more total passenger stock, in addition to unchanged cost/CV2/delay nonharm tests. This is a finite-window comparison, not a whole-day guarantee.",
+  "screen": "Primary: service_single mean journey improves within both regimes against always-active fixed_cap_10, with actual CV2, public delay and readiness nonworse on every paired day. Compare service_single with frozen v406_single to identify the correction's effects. Fixed_cap_15 is a prespecified stronger-holding operating point, not a matched-dose or full-frontier proof. All contrasts and negative outcomes retained; V406 gates are not revised. No test-day selection, parameter adjustment, confirmation expansion or promotion.",
+  "engineering_gate": "Synthetic checks and same-input native-continuation tests must pass before any traffic. Measure old/new fixed-fixture solve time and event count; inspect the workload before freezing the traffic launch. Failures consume starts; no automatic traffic retry. Scheduler high/manual on node001-node006 only."
+}
