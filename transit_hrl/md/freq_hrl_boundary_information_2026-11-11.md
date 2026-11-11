@@ -65,3 +65,11 @@ indices 4/5. Full factual/replay cost is 11,289,600 steps: 4,656 new paired
 futures and 96 factual episodes. Old A0/1 remains resident; no B or E sampling,
 model fitting, retuning or original confirmation is released. Each state is
 saved privately as completed; public progress/costs only are retrieved.
+Tasks t214643-t214674 started unpinned on node002-node006. The
+[launch snapshot](../results/plan_validity_boundary_information_20261111/sample_release.json)
+records all 32 with native progress, 22 completed public workers/326 states and
+no reported errors or fitting. The CPU execution permission was corrected on
+the existing tasks before native work; no duplicate jobs or budget extension.
+Fourteen focused tests passed, with the CPU-permission assertion covered by a
+five-test sampling-module rerun. Reconcile all 32 final rosters and costs before
+any fitting; the launch snapshot is not final budget closure.

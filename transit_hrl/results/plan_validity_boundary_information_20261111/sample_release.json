@@ -1,0 +1,670 @@
+{
+  "run_name": "plan_validity_boundary_information_20261111",
+  "snapshot_at_utc": "2026-11-11T03:55:50.594285+00:00",
+  "phase": "training_A_acquisition_only",
+  "acquisition_implementation_commit": "7868961ebf",
+  "CPU_execution_metadata_commit": "d82756e976",
+  "release_manifest": "protocols/plan_validity_boundary_information_sample_2026-11-11.json",
+  "released_environment_steps": 11289600,
+  "released_shards": 32,
+  "dense_shards": 8,
+  "wide_shards": 24,
+  "new_paired_futures": 4656,
+  "factual_episodes": 96,
+  "scheduler_snapshot": [
+    {
+      "id": "t214643",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972110000/shard0",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214643.log"
+    },
+    {
+      "id": "t214644",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972110000/shard1",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214644.log"
+    },
+    {
+      "id": "t214645",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard0",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214645.log"
+    },
+    {
+      "id": "t214646",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard1",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214646.log"
+    },
+    {
+      "id": "t214647",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard2",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214647.log"
+    },
+    {
+      "id": "t214648",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard3",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214648.log"
+    },
+    {
+      "id": "t214649",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard4",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214649.log"
+    },
+    {
+      "id": "t214650",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard5",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214650.log"
+    },
+    {
+      "id": "t214651",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972120000/shard0",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214651.log"
+    },
+    {
+      "id": "t214652",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972120000/shard1",
+      "status": "running",
+      "node": "node003",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214652.log"
+    },
+    {
+      "id": "t214653",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard0",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214653.log"
+    },
+    {
+      "id": "t214654",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214654.log"
+    },
+    {
+      "id": "t214655",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard2",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214655.log"
+    },
+    {
+      "id": "t214656",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard3",
+      "status": "running",
+      "node": "node003",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214656.log"
+    },
+    {
+      "id": "t214657",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard4",
+      "status": "running",
+      "node": "node002",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214657.log"
+    },
+    {
+      "id": "t214658",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard5",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214658.log"
+    },
+    {
+      "id": "t214659",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972210000/shard0",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214659.log"
+    },
+    {
+      "id": "t214660",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972210000/shard1",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214660.log"
+    },
+    {
+      "id": "t214661",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard0",
+      "status": "running",
+      "node": "node003",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214661.log"
+    },
+    {
+      "id": "t214662",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard1",
+      "status": "running",
+      "node": "node002",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214662.log"
+    },
+    {
+      "id": "t214663",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard2",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214663.log"
+    },
+    {
+      "id": "t214664",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard3",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214664.log"
+    },
+    {
+      "id": "t214665",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard4",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214665.log"
+    },
+    {
+      "id": "t214666",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard5",
+      "status": "running",
+      "node": "node003",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214666.log"
+    },
+    {
+      "id": "t214667",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972220000/shard0",
+      "status": "running",
+      "node": "node002",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214667.log"
+    },
+    {
+      "id": "t214668",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972220000/shard1",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214668.log"
+    },
+    {
+      "id": "t214669",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard0",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214669.log"
+    },
+    {
+      "id": "t214670",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard1",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214670.log"
+    },
+    {
+      "id": "t214671",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard2",
+      "status": "running",
+      "node": "node003",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214671.log"
+    },
+    {
+      "id": "t214672",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard3",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214672.log"
+    },
+    {
+      "id": "t214673",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard4",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214673.log"
+    },
+    {
+      "id": "t214674",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard5",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214674.log"
+    }
+  ],
+  "public_progress_snapshot": [
+    {
+      "release_shard_index": 0,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 5,
+      "completed_pairs": 123,
+      "error": null,
+      "environment_steps": 295200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 1,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 5,
+      "completed_pairs": 121,
+      "error": null,
+      "environment_steps": 290400,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 2,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 3,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 4,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 5,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 6,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 7,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 8,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 4,
+      "completed_pairs": 98,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 9,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 5,
+      "completed_pairs": 121,
+      "error": null,
+      "environment_steps": 290400,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 10,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 11,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 12,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 13,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 14,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 15,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 16,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 6,
+      "completed_pairs": 148,
+      "error": null,
+      "environment_steps": 355200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 17,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 6,
+      "completed_pairs": 146,
+      "error": null,
+      "environment_steps": 350400,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 18,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 19,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 20,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 21,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 22,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 23,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 24,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 6,
+      "completed_pairs": 148,
+      "error": null,
+      "environment_steps": 355200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 25,
+      "status": "running",
+      "stage": "sampling_dense",
+      "completed_states": 7,
+      "completed_pairs": 171,
+      "error": null,
+      "environment_steps": 410400,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 26,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 27,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 28,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 29,
+      "status": "complete",
+      "stage": "boundary_information_sample_complete",
+      "completed_states": 12,
+      "completed_pairs": 96,
+      "error": null,
+      "environment_steps": 235200,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 30,
+      "status": "running",
+      "stage": "sampling_wide",
+      "completed_states": 9,
+      "completed_pairs": 72,
+      "error": null,
+      "environment_steps": 176400,
+      "fit_or_optimizer_calls": 0
+    },
+    {
+      "release_shard_index": 31,
+      "status": "running",
+      "stage": "sampling_wide",
+      "completed_states": 9,
+      "completed_pairs": 72,
+      "error": null,
+      "environment_steps": 176400,
+      "fit_or_optimizer_calls": 0
+    }
+  ],
+  "progress_scope": "last_public_state_completion_not_final_budget_accounting",
+  "retrieved_progress_bytes": 6285,
+  "raw_or_model_downloads": 0,
+  "duplicate_submissions": 0,
+  "scheduler_CPU_guard": "explicit_CPU_permission_added_in_place_to_existing_32_tasks_before_native_work",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "new_fits_released": 0,
+  "readout_released": false,
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "next_stage": "reconcile_all_32_completed_rosters_and_costs_before_fitting"
+}

@@ -405,3 +405,6 @@ The subsequent user authorization now releases the linked 32-shard training
 acquisition manifest only: 11,289,600 native steps, zero fits. Workers verify
 all four prechecks, preserve partial paid rows and never access readout seeds.
 No automatic fitting, E readout or policy promotion follows acquisition.
+The 32 acquisition tasks have launched with actual native progress; the linked
+snapshot retains task identities, CPU permissions, costs and partial completion.
+No model fitting or E-prefix access is released while acquisition is pending.
