@@ -17,7 +17,8 @@ def errors(included_mean, included_square_mean, excluded, fit_target, future_tar
         "held_minus_matched": float(np.mean(p ** 2 - q2 - 2 * (p - q) * y))}
 
 
-def diagnose(data, old_prefixes, *, total_df):
+def diagnose(data, old_prefixes, *, total_df, fit_targets=None):
+    fitter = fit_parent_targets if fit_targets is None else fit_targets
     keys = np.asarray(data["window_keys"])
     groups, windows = keys[:, 0], keys[:, 2]
     labels = np.asarray(data["training_replicas"])
@@ -33,7 +34,7 @@ def diagnose(data, old_prefixes, *, total_df):
         folds = []
         for held in prefixes:
             train = groups != held
-            scores, model = fit_parent_targets(data["now"], data["wait_one_check"], target, train, total_df=total_df)
+            scores, model = fitter(data["now"], data["wait_one_check"], target, train, total_df=total_df)
             count_work("diagnostic_model_window_predictions", len(scores))
             excluded[~train] = scores[~train]
             # Average losses of individual DF-3 models, not an ensemble prediction.

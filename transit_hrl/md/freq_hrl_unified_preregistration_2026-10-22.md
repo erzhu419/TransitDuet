@@ -463,3 +463,12 @@ own-prefix label dependence dominate the fixed-model allocations. Retain all
 prefixes and both views; these associations are not causal deletion/geometry
 effects. Next consider fixed-capacity conditioning/coverage on training A only;
 no further training, native sampling or policy confirmation is released.
+The next user authorization releases the
+[fixed-capacity A-only conditioning comparison](freq_hrl_boundary_conditioning_2026-11-11.md):
+tracking-distance versus generic state-RMS gates, 240 columns and ridge DF3,
+with the exact uniform lift reusing cached original moments. Both gates fit
+only training covariates. Exactly 512 new fits across all four roots, zero
+baseline refits/native steps. Preserve both A views, matched31-prefix controls,
+strata and window halves. The primary Reacher1 development gate requires held
+gains versus both controls without loss of matched-future gains. E and all
+original models remain unchanged; no policy or fresh confirmation is released.

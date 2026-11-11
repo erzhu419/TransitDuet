@@ -36,6 +36,14 @@ def fit_parent_targets(now, wait, training_mean, train, *, total_df):
     scale = np.where(scale > 1e-8, scale, 1.)
     x = scaled_basis(wait[train], mean, scale) - scaled_basis(now[train], mean, scale)
     y = training_mean[train]
+    weights, alpha, df = ridge_solution(x, y, total_df=total_df)
+    model = {"parent_mean": mean.tolist(), "parent_scale": scale.tolist(), "weights": weights.tolist(),
+        "alpha": alpha, "intercept": 0., "total_effective_df": df, "effective_df_slopes": df,
+        "geometry": "training_arm_parent_scale_before_products_and_difference_no_contrast_scaling"}
+    return predict_parent(model, now, wait), model
+
+
+def ridge_solution(x, y, *, total_df):
     u, s, vt = np.linalg.svd(x, full_matrices=False)
     eigenvalues = s ** 2
     rank = int(np.sum(eigenvalues > max(1., eigenvalues[0]) * 1e-12))
@@ -51,10 +59,7 @@ def fit_parent_targets(now, wait, training_mean, train, *, total_df):
     # Direct SVD ridge: reusing a column-standardizing solver would undo the repair.
     weights = vt.T @ ((s / (eigenvalues + upper)) * (u.T @ y))
     df = float(np.sum(eigenvalues / (eigenvalues + upper)))
-    model = {"parent_mean": mean.tolist(), "parent_scale": scale.tolist(), "weights": weights.tolist(),
-        "alpha": upper, "intercept": 0., "total_effective_df": df, "effective_df_slopes": df,
-        "geometry": "training_arm_parent_scale_before_products_and_difference_no_contrast_scaling"}
-    return predict_parent(model, now, wait), model
+    return weights, upper, df
 
 
 def verify_prior(data, previous, public):
