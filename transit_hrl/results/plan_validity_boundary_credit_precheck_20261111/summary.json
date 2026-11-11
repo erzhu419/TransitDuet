@@ -1,0 +1,91 @@
+{
+  "run_name": "plan_validity_boundary_credit_precheck_20261111",
+  "status": "four_boundary_prechecks_passed",
+  "snapshot_at_utc": "2026-11-11T01:06:56.325139+00:00",
+  "source_manifest": "protocols/plan_validity_boundary_credit_precheck_2026-11-11.json",
+  "frozen_implementation_commit": "2b850b5950",
+  "scheduler_snapshot": [
+    {
+      "id": "t214553",
+      "signature": "Freq-HRL/boundary-credit/plan_validity_boundary_credit_precheck_20261111/precheck/pointmaze/1972110000",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214554",
+      "signature": "Freq-HRL/boundary-credit/plan_validity_boundary_credit_precheck_20261111/precheck/pointmaze/1972120000",
+      "status": "done",
+      "node": "node003",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214555",
+      "signature": "Freq-HRL/boundary-credit/plan_validity_boundary_credit_precheck_20261111/precheck/reacher_tracking/1972210000",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    },
+    {
+      "id": "t214556",
+      "signature": "Freq-HRL/boundary-credit/plan_validity_boundary_credit_precheck_20261111/precheck/reacher_tracking/1972220000",
+      "status": "done",
+      "node": "node002",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true
+    }
+  ],
+  "roots": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "precheck_seed": 1972174000,
+      "intervention_step": 55,
+      "boundary_step": 105,
+      "new_environment_steps": 13200,
+      "causal_feature_count": 37
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "precheck_seed": 1972184000,
+      "intervention_step": 105,
+      "boundary_step": 155,
+      "new_environment_steps": 13200,
+      "causal_feature_count": 37
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "precheck_seed": 1972274000,
+      "intervention_step": 105,
+      "boundary_step": 155,
+      "new_environment_steps": 13200,
+      "causal_feature_count": 37
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "precheck_seed": 1972284000,
+      "intervention_step": 55,
+      "boundary_step": 105,
+      "new_environment_steps": 13200,
+      "causal_feature_count": 37
+    }
+  ],
+  "environment_steps": 52800,
+  "measured_phase_cpu_seconds": 55.624931536999995,
+  "public_result_download_bytes": 10795,
+  "new_model_fits": 0,
+  "new_controller_updates": 0,
+  "formal_variance_tasks_submitted": 0,
+  "next_step": "freeze_a_cost_accounted_nested_variance_diagnostic_on_separate_development_prefixes_before_any_boundary_value_fit",
+  "statistical_scope": "two_by_two_mechanical_check_not_variance_or_performance_evidence",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}

@@ -346,3 +346,7 @@ realized windows and paired conditional suffix redraws separate two sources of
 credit noise. Only four mechanical prechecks (52,800 steps, zero fits) are in
 scope. E8 stays exposed evidence; formal variance sampling and policy fitting
 are not released.
+All four prechecks passed at the exact replay-only budget. This establishes the
+boundary-label acquisition path; it does not qualify a continuation critic.
+The next decision is a cost-accounted variance diagnostic on separate
+development prefixes, not a new threshold or deployment trial.

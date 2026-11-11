@@ -27,3 +27,14 @@ Next design the budgeted variance readout before training any boundary critic.
 An action-sensitive tail target must beat zero-tail on whole held-out prefixes
 before policy testing. No formal sampling, training, E8 retuning or original
 confirmation is released by this protocol. `PILOT_RECIPE_HOLD` remains.
+
+## Execution
+
+All four prechecks t214553-t214556 exited 0 on node002/node003/node005 at
+implementation `2b850b5950`. Factual C0 replay, fixed-window and boundary-context
+invariance, and W+tail reconstruction passed on both tasks. Total: 52,800
+steps, 55.625 measured CPU seconds, 10,795 public bytes and zero fits. The 52
+related tests passed; a focused rerun also checks both native driver fork calls
+and their shared seeds in the deterministic test plant. See the
+[execution summary](../results/plan_validity_boundary_credit_precheck_20261111/summary.json).
+No formal variance experiment or model training was submitted.
