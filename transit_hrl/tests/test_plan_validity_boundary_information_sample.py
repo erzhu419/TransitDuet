@@ -41,6 +41,7 @@ class BoundaryInformationSampleTest(unittest.TestCase):
             self.assertIsNone(job["require_node"])
             self.assertIsNone(job["preferred_node"])
             self.assertTrue(job["protect_from_auto_eviction"])
+            self.assertTrue(job["allow_cpu_training"])
             self.assertTrue(job["result_dir"].endswith("/public"))
             self.assertIn("/sample/", job["signature"])
         self.assertEqual(release["new_fits"], 0)

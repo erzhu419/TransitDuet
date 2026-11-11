@@ -29,6 +29,7 @@ def prepare(design, design_path, manifest_path):
                     "--manifest", str(manifest_path), "--shard-index", str(len(shards))]
                 job = deepcopy(design["jobs"][i])
                 job.update(project="Freq-HRL-BoundaryInformation-Sample", description=f"Training A {method} {cell['task']} {cell['optimizer_seed']} shard{j}",
+                    allow_cpu_training=True,
                     signature=f"Freq-HRL/boundary-information/{design['run_name']}/sample/{method}/{cell['task']}/{cell['optimizer_seed']}/shard{j}",
                     cmd=job["cmd"].split(DEFAULT_LINUX_PYTHON)[0] + shlex.join(cmd),
                     result_dir=str(ROOT / directory / "public"), local_result_dir=str(ROOT / directory / "public"),
