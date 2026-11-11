@@ -490,3 +490,11 @@ The full-A freeze completed: eight models and all unchanged controls verified
 server-side, exact eight fits and zero native work; no training-metric selection.
 The reserved confirmation plan is ready, but has no jobs and no sampling release.
 Do not reinterpret model readiness as fresh-prefix or episode-level evidence.
+The next user authorization releases the separate
+[fresh-prefix conditioning confirmation](freq_hrl_boundary_conditioning_confirmation_2026-11-11.md):
+16 single-core shards, 64 fresh prefixes and exactly 14,822,400 native steps,
+seven frozen predictors and zero fits. The reservation, all models and timing
+rules remain unchanged. Statistics and whole-prefix bootstrap are committed
+before fresh labels; all sixteen completed ledgers are required before analysis.
+No queued aggregate, exposed-E tuning, extra candidate or budget extension is
+released. Original policy confirmation and full-episode claims remain on HOLD.

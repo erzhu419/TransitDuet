@@ -23,14 +23,14 @@ def merge_loss(parts, weights):
     return result
 
 
-def merge_root(panels):
+def merge_root(panels, *, comparisons=COMPARISONS):
     total = sum(p["windows"] for p in panels)
     weights = [p["windows"] / total for p in panels]
     result = {k: sum(p[k] for p in panels) for k in ("prefixes", "states", "windows", "E_pairs")}
     result.update(MSE_to_E_mean={m: float(sum(w * p["MSE_to_E_mean"][m] for w, p in zip(weights, panels)))
         for m in panels[0]["MSE_to_E_mean"]}, empirical_E_mean_noise_variance=float(sum(
             w * p["empirical_E_mean_noise_variance"] for w, p in zip(weights, panels))), comparisons={})
-    for candidate, reference in COMPARISONS:
+    for candidate, reference in comparisons:
         name = candidate + "_minus_" + reference
         parts = [p["comparisons"][name] for p in panels]
         prefixes = sorted([r for p in parts for r in p["prefix_reports"]], key=lambda r: r["seed"])
