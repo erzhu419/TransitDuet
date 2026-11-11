@@ -1,0 +1,52 @@
+{
+  "run_name": "plan_validity_boundary_parent_scale_20261111",
+  "snapshot_at_utc": "2026-11-11T02:17:09.122419+00:00",
+  "frozen_implementation_commit": "4063651197",
+  "protocol": "protocols/plan_validity_boundary_parent_scale_2026-11-11.json",
+  "scheduler_snapshot": [
+    {
+      "id": "t214585",
+      "signature": "Freq-HRL/boundary-parent-scale/plan_validity_boundary_parent_scale_20261111/pointmaze/1972110000",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214585.log"
+    },
+    {
+      "id": "t214586",
+      "signature": "Freq-HRL/boundary-parent-scale/plan_validity_boundary_parent_scale_20261111/pointmaze/1972120000",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214586.log"
+    },
+    {
+      "id": "t214587",
+      "signature": "Freq-HRL/boundary-parent-scale/plan_validity_boundary_parent_scale_20261111/reacher_tracking/1972210000",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214587.log"
+    },
+    {
+      "id": "t214588",
+      "signature": "Freq-HRL/boundary-parent-scale/plan_validity_boundary_parent_scale_20261111/reacher_tracking/1972220000",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214588.log"
+    }
+  ],
+  "public_workers_complete": 4,
+  "released_ridge_fits": 36,
+  "baseline_fits": 0,
+  "new_environment_steps": 0,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "no_further_fits_or_simulation_released": true
+}
