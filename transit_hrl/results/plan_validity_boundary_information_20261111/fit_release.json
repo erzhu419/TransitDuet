@@ -1,0 +1,401 @@
+{
+  "run_name": "plan_validity_boundary_information_20261111",
+  "snapshot_at_utc": "2026-11-11T04:30:03.359210+00:00",
+  "phase": "all_training_banks_audited_and_eight_models_frozen",
+  "implementation_commit": "5e7ba8a6c6",
+  "fit_manifest": "protocols/plan_validity_boundary_information_fit_2026-11-11.json",
+  "public_summary": "fit_summary.json",
+  "public_summary_remote_bytes": 11389,
+  "acquisition_tasks_completed": 32,
+  "acquisition_sampled_states": 384,
+  "acquisition_environment_steps": 11289600,
+  "acquisition_new_pairs": 4656,
+  "acquisition_cpu_seconds_by_method": {
+    "dense": 5588.445529466999,
+    "wide": 5721.973486536
+  },
+  "new_ridge_fits": 8,
+  "baseline_refits": 0,
+  "fit_environment_steps": 0,
+  "fit_measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 0.9296116530000003,
+    "wall_seconds": 0.7695384472608566,
+    "counts": {
+      "ridge_fit_calls": 8
+    },
+    "phases": {
+      "boundary_information_fit": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.26397368800000054,
+        "wall_seconds": 0.05391939729452133,
+        "counts": {}
+      },
+      "boundary_information_fit/audit_all_public_and_private_training_banks": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.607830275,
+        "wall_seconds": 0.6565256789326668,
+        "counts": {}
+      },
+      "boundary_information_fit/fixed_DF_A_only_potential_fits": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.039661499999999794,
+        "wall_seconds": 0.040904304943978786,
+        "counts": {
+          "ridge_fit_calls": 8
+        }
+      },
+      "boundary_information_fit/training_only_descriptive_readout": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.01814618999999995,
+        "wall_seconds": 0.01818906608968973,
+        "counts": {}
+      }
+    }
+  },
+  "all_models_frozen": true,
+  "freeze_order": "all_private_training_banks_audited_then_all_eight_models_frozen_then_training_only_metrics",
+  "evaluation_prefixes_accessed": false,
+  "evaluation_released": false,
+  "confirmation_released": false,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "retrieved": "public fit JSON only; private banks and model coefficients remain remote",
+  "scheduler_snapshot": [
+    {
+      "id": "t214643",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972110000/shard0",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214643.log"
+    },
+    {
+      "id": "t214644",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972110000/shard1",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214644.log"
+    },
+    {
+      "id": "t214645",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard0",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214645.log"
+    },
+    {
+      "id": "t214646",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard1",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214646.log"
+    },
+    {
+      "id": "t214647",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard2",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214647.log"
+    },
+    {
+      "id": "t214648",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard3",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214648.log"
+    },
+    {
+      "id": "t214649",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard4",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214649.log"
+    },
+    {
+      "id": "t214650",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972110000/shard5",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214650.log"
+    },
+    {
+      "id": "t214651",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972120000/shard0",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214651.log"
+    },
+    {
+      "id": "t214652",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/pointmaze/1972120000/shard1",
+      "status": "done",
+      "node": "node003",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214652.log"
+    },
+    {
+      "id": "t214653",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard0",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214653.log"
+    },
+    {
+      "id": "t214654",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard1",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214654.log"
+    },
+    {
+      "id": "t214655",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard2",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214655.log"
+    },
+    {
+      "id": "t214656",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard3",
+      "status": "done",
+      "node": "node003",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214656.log"
+    },
+    {
+      "id": "t214657",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard4",
+      "status": "done",
+      "node": "node002",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214657.log"
+    },
+    {
+      "id": "t214658",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/pointmaze/1972120000/shard5",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214658.log"
+    },
+    {
+      "id": "t214659",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972210000/shard0",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214659.log"
+    },
+    {
+      "id": "t214660",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972210000/shard1",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214660.log"
+    },
+    {
+      "id": "t214661",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard0",
+      "status": "done",
+      "node": "node003",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214661.log"
+    },
+    {
+      "id": "t214662",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard1",
+      "status": "done",
+      "node": "node002",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214662.log"
+    },
+    {
+      "id": "t214663",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard2",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214663.log"
+    },
+    {
+      "id": "t214664",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard3",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214664.log"
+    },
+    {
+      "id": "t214665",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard4",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214665.log"
+    },
+    {
+      "id": "t214666",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972210000/shard5",
+      "status": "done",
+      "node": "node003",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214666.log"
+    },
+    {
+      "id": "t214667",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972220000/shard0",
+      "status": "done",
+      "node": "node002",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214667.log"
+    },
+    {
+      "id": "t214668",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/dense/reacher_tracking/1972220000/shard1",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214668.log"
+    },
+    {
+      "id": "t214669",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard0",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214669.log"
+    },
+    {
+      "id": "t214670",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard1",
+      "status": "done",
+      "node": "node006",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214670.log"
+    },
+    {
+      "id": "t214671",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard2",
+      "status": "done",
+      "node": "node003",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214671.log"
+    },
+    {
+      "id": "t214672",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard3",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214672.log"
+    },
+    {
+      "id": "t214673",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard4",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214673.log"
+    },
+    {
+      "id": "t214674",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/sample/wide/reacher_tracking/1972220000/shard5",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214674.log"
+    },
+    {
+      "id": "t214694",
+      "signature": "Freq-HRL/boundary-information/plan_validity_boundary_information_20261111/fit",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "protect_from_auto_eviction": true,
+      "allow_cpu_training": true,
+      "log_path": "/tmp/sched_t214694.log"
+    }
+  ]
+}

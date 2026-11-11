@@ -413,3 +413,8 @@ The next [audit-and-fit release](freq_hrl_boundary_information_fit_2026-11-11.md
 audits every private bank before fitting eight DF-3 potentials, zero native
 steps and zero baseline refits. Full A means include Dense's eight/nine labels.
 All models freeze before training metrics; E readout is still not released.
+The audit-and-fit task t214694 completed: all private banks passed, exactly
+eight DF-3 models froze, zero baseline refits and zero native steps. Own-bank
+training changes are mixed and do not select Dense versus Wide. The linked
+result and receipt preserve closure; the reserved fresh-prefix E stage remains
+unreleased, with original confirmation and performance claims still on HOLD.

@@ -1,0 +1,396 @@
+{
+  "run_name": "plan_validity_boundary_information_20261111",
+  "status": "complete",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "stage": "boundary_information_fit_complete",
+  "sampling_audit": {
+    "source_run_name": "plan_validity_boundary_information_20261111",
+    "shards": 32,
+    "environment_steps": 11289600,
+    "new_pairs": 4656,
+    "costs_by_root_method": {
+      "pointmaze/1972110000/dense": {
+        "environment_steps": 1411200,
+        "new_pairs": 588,
+        "cpu_seconds": 1392.853483717,
+        "shards": 2
+      },
+      "pointmaze/1972110000/wide": {
+        "environment_steps": 1411200,
+        "new_pairs": 576,
+        "cpu_seconds": 1526.800269375,
+        "shards": 6
+      },
+      "pointmaze/1972120000/dense": {
+        "environment_steps": 1411200,
+        "new_pairs": 588,
+        "cpu_seconds": 1733.791154707,
+        "shards": 2
+      },
+      "pointmaze/1972120000/wide": {
+        "environment_steps": 1411200,
+        "new_pairs": 576,
+        "cpu_seconds": 1611.107138479,
+        "shards": 6
+      },
+      "reacher_tracking/1972210000/dense": {
+        "environment_steps": 1411200,
+        "new_pairs": 588,
+        "cpu_seconds": 1185.5018506059998,
+        "shards": 2
+      },
+      "reacher_tracking/1972210000/wide": {
+        "environment_steps": 1411200,
+        "new_pairs": 576,
+        "cpu_seconds": 1365.5428319880002,
+        "shards": 6
+      },
+      "reacher_tracking/1972220000/dense": {
+        "environment_steps": 1411200,
+        "new_pairs": 588,
+        "cpu_seconds": 1276.2990404369998,
+        "shards": 2
+      },
+      "reacher_tracking/1972220000/wide": {
+        "environment_steps": 1411200,
+        "new_pairs": 576,
+        "cpu_seconds": 1218.523246694,
+        "shards": 6
+      }
+    },
+    "training_rosters": [
+      {
+        "task": "pointmaze",
+        "optimizer_seed": 1972110000,
+        "strategies": {
+          "dense": {
+            "prefixes": 8,
+            "windows": 96,
+            "A_pairs": 780
+          },
+          "wide": {
+            "prefixes": 32,
+            "windows": 384,
+            "A_pairs": 768
+          }
+        }
+      },
+      {
+        "task": "pointmaze",
+        "optimizer_seed": 1972120000,
+        "strategies": {
+          "dense": {
+            "prefixes": 8,
+            "windows": 96,
+            "A_pairs": 780
+          },
+          "wide": {
+            "prefixes": 32,
+            "windows": 384,
+            "A_pairs": 768
+          }
+        }
+      },
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972210000,
+        "strategies": {
+          "dense": {
+            "prefixes": 8,
+            "windows": 96,
+            "A_pairs": 780
+          },
+          "wide": {
+            "prefixes": 32,
+            "windows": 384,
+            "A_pairs": 768
+          }
+        }
+      },
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972220000,
+        "strategies": {
+          "dense": {
+            "prefixes": 8,
+            "windows": 96,
+            "A_pairs": 780
+          },
+          "wide": {
+            "prefixes": 32,
+            "windows": 384,
+            "A_pairs": 768
+          }
+        }
+      }
+    ],
+    "B_or_E_labels_used_for_fitting": false
+  },
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 0.9296116530000003,
+    "wall_seconds": 0.7695384472608566,
+    "counts": {
+      "ridge_fit_calls": 8
+    },
+    "phases": {
+      "boundary_information_fit": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.26397368800000054,
+        "wall_seconds": 0.05391939729452133,
+        "counts": {}
+      },
+      "boundary_information_fit/audit_all_public_and_private_training_banks": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.607830275,
+        "wall_seconds": 0.6565256789326668,
+        "counts": {}
+      },
+      "boundary_information_fit/fixed_DF_A_only_potential_fits": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.039661499999999794,
+        "wall_seconds": 0.040904304943978786,
+        "counts": {
+          "ridge_fit_calls": 8
+        }
+      },
+      "boundary_information_fit/training_only_descriptive_readout": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.01814618999999995,
+        "wall_seconds": 0.01818906608968973,
+        "counts": {}
+      }
+    }
+  },
+  "all_models_frozen": true,
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "actual_effective_df": {
+        "dense": 3.0,
+        "wide": 3.0
+      },
+      "training_readout": {
+        "dense": {
+          "prefixes": 8,
+          "windows": 96,
+          "A_pairs": 780,
+          "A_count_histogram": {
+            "9": 12,
+            "8": 84
+          },
+          "empirical_A_mean_noise_variance": 0.00028215380408796184,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.0010356368000323194,
+            "constant": 0.0010466436412978372,
+            "causal_t": 0.0009680363696608346,
+            "base": 0.0006453341883239948,
+            "dense": 0.0006443973296509481,
+            "wide": 0.0008305323609498052
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        },
+        "wide": {
+          "prefixes": 32,
+          "windows": 384,
+          "A_pairs": 768,
+          "A_count_histogram": {
+            "2": 384
+          },
+          "empirical_A_mean_noise_variance": 0.0021072441109253894,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.002678781213327812,
+            "constant": 0.002685339144534858,
+            "causal_t": 0.0026174654479368957,
+            "base": 0.002379445200714475,
+            "dense": 0.0024376146433534515,
+            "wide": 0.0023917237629742104
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "actual_effective_df": {
+        "dense": 3.0,
+        "wide": 3.0
+      },
+      "training_readout": {
+        "dense": {
+          "prefixes": 8,
+          "windows": 96,
+          "A_pairs": 780,
+          "A_count_histogram": {
+            "9": 12,
+            "8": 84
+          },
+          "empirical_A_mean_noise_variance": 0.0003931242411838378,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.0018372668465606496,
+            "constant": 0.001826140580814713,
+            "causal_t": 0.0016761235949727445,
+            "base": 0.0014657548297521677,
+            "dense": 0.0013678286117250616,
+            "wide": 0.0015241008327412126
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        },
+        "wide": {
+          "prefixes": 32,
+          "windows": 384,
+          "A_pairs": 768,
+          "A_count_histogram": {
+            "2": 384
+          },
+          "empirical_A_mean_noise_variance": 0.002422800564729594,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.0039591787056154565,
+            "constant": 0.003941284516660661,
+            "causal_t": 0.0038743536577769953,
+            "base": 0.0036399779640687983,
+            "dense": 0.003554644561816277,
+            "wide": 0.00339415723574172
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "actual_effective_df": {
+        "dense": 3.0,
+        "wide": 3.0
+      },
+      "training_readout": {
+        "dense": {
+          "prefixes": 8,
+          "windows": 96,
+          "A_pairs": 780,
+          "A_count_histogram": {
+            "9": 12,
+            "8": 84
+          },
+          "empirical_A_mean_noise_variance": 0.0024982394406302855,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.010463894345195929,
+            "constant": 0.010297510285122265,
+            "causal_t": 0.009157877914335665,
+            "base": 0.00664504514903672,
+            "dense": 0.0067757015368557815,
+            "wide": 0.009696978594900473
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        },
+        "wide": {
+          "prefixes": 32,
+          "windows": 384,
+          "A_pairs": 768,
+          "A_count_histogram": {
+            "2": 384
+          },
+          "empirical_A_mean_noise_variance": 0.012550928914192969,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.02124413040330844,
+            "constant": 0.02135602345186861,
+            "causal_t": 0.02108653646564465,
+            "base": 0.020975361860830672,
+            "dense": 0.02222901975015328,
+            "wide": 0.019233471363354418
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "actual_effective_df": {
+        "dense": 3.0,
+        "wide": 3.0
+      },
+      "training_readout": {
+        "dense": {
+          "prefixes": 8,
+          "windows": 96,
+          "A_pairs": 780,
+          "A_count_histogram": {
+            "9": 12,
+            "8": 84
+          },
+          "empirical_A_mean_noise_variance": 0.008308558309432286,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.0291930519305857,
+            "constant": 0.03126252754585174,
+            "causal_t": 0.030293088746820334,
+            "base": 0.03093012472599162,
+            "dense": 0.025317745684002513,
+            "wide": 0.030091326173744673
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        },
+        "wide": {
+          "prefixes": 32,
+          "windows": 384,
+          "A_pairs": 768,
+          "A_count_histogram": {
+            "2": 384
+          },
+          "empirical_A_mean_noise_variance": 0.027668447466624394,
+          "MSE_to_own_training_A_mean": {
+            "zero": 0.03435042249221165,
+            "constant": 0.03491481722417437,
+            "causal_t": 0.03481185486080787,
+            "base": 0.033038201876375274,
+            "dense": 0.03460762688798714,
+            "wide": 0.033027524547515195
+          },
+          "scope": "training_descriptive_only_not_independent_quality_or_dense_wide_ranking"
+        }
+      }
+    }
+  ],
+  "new_ridge_fits": 8,
+  "evaluation_prefixes_accessed": false,
+  "scope": "A_only_training_fit_not_independent_evaluation_or_policy_effect",
+  "new_environment_steps": 0,
+  "peak_process_rss_mb": 370.3203125
+}
