@@ -392,3 +392,8 @@ PointMaze root1 is not single-prefix driven; Reacher root1's pooled improvement
 is smaller than its suffix SE, while root2 also has persistent prefix/known-state
 problems. Preserve these distinctions; the next data design must separate
 training-future information from prefix coverage, without retuning this bank.
+The next [boundary information design](freq_hrl_boundary_information_2026-11-11.md)
+freezes dense/wide at 1,411,200 incremental native steps/root each, including
+wide factual overhead; labels are 780/768, CPU is measured rather than assumed
+equal. Only four 22,800-step mechanical prechecks are released now. Formal
+sampling, eight potential fits and reserved new-prefix E readout remain gated.
