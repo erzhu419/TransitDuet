@@ -339,3 +339,10 @@ does not meet both-root joint W/G stability. Preserve PointMaze root2's positive
 half-group points and Reacher's short-window losses; do not generalize either
 beyond the sampled interventions. Stop scalar-cut repair and keep E8 as exposed
 evidence. No new tasks or original confirmation are released.
+
+The subsequent [nested boundary-credit precheck](freq_hrl_boundary_credit_precheck_2026-11-11.md)
+changes label acquisition rather than reopening the frozen cuts. Independent
+realized windows and paired conditional suffix redraws separate two sources of
+credit noise. Only four mechanical prechecks (52,800 steps, zero fits) are in
+scope. E8 stays exposed evidence; formal variance sampling and policy fitting
+are not released.

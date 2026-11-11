@@ -65,7 +65,8 @@ def jitter_schedule(args, seed):
 def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=None,
                 rule=None, sample=False, branch_step=None, renew=False,
                 intervention_step=None, arm=None, feature_steps=(), latency_recorder=None,
-                risk_spec=None, continuation_seed=None, continuation_rule=None):
+                risk_spec=None, continuation_seed=None, continuation_rule=None,
+                boundary_future_seed=None):
     """One execution loop: scheduled training, adaptive timing, or paired keep/renew."""
     period = time_scale.upper_period_steps
     mode_name = rule.name if rule is not None else "scheduled"
@@ -93,6 +94,8 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         raise ValueError("timing intervention must be a nondeadline check")
     if continuation_seed is not None and (branch_step is None) == (intervention_step is None):
         raise ValueError("a conditional future requires exactly one causal branch point")
+    if boundary_future_seed is not None and (intervention_step is None or continuation_seed is None):
+        raise ValueError("a boundary redraw requires a sampled intervention window")
     if continuation_rule is not None and (intervention_step is None or branch_step is not None
         or schedule is not None or sample or continuation_rule.kind == "jitter"):
         raise ValueError("a continuation policy requires an adaptive timing intervention")
@@ -125,8 +128,13 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         for step in range(end_step):
             if continuation_rule is not None and step == intervention_step + 1:
                 rule = continuation_rule
+            future_seed = None
             if continuation_seed is not None and step in (branch_step, intervention_step):
-                task.driver = task.driver.conditional_future(step=step, seed=continuation_seed)
+                future_seed = continuation_seed
+            elif boundary_future_seed is not None and step == intervention_step + period:
+                future_seed = boundary_future_seed
+            if future_seed is not None:
+                task.driver = task.driver.conditional_future(step=step, seed=future_seed)
                 if not np.array_equal(np.concatenate(task.driver.sample(step)), observation.task_measurement):
                     raise RuntimeError("conditional future changed the current causal observation")
             if latency_recorder is not None:
