@@ -387,3 +387,8 @@ The next [fixed-prediction noise attribution](freq_hrl_boundary_noise_attributio
 is a single read-only scheduler job: paired-loss suffix-B MC SE, prefix readout
 deletion and noise-corrected fixed-prefix dispersion, no fit or native step.
 No A/B-gap test, confidence interval, additional sampling or policy release.
+The fixed-prediction readout completed with zero counted fit/native work.
+PointMaze root1 is not single-prefix driven; Reacher root1's pooled improvement
+is smaller than its suffix SE, while root2 also has persistent prefix/known-state
+problems. Preserve these distinctions; the next data design must separate
+training-future information from prefix coverage, without retuning this bank.
