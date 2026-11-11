@@ -76,7 +76,7 @@ def assemble(cell, design, cached_rows, new_rows, method):
         raise ValueError("Dense extensions do not match the saved state roster")
     states = base if method == "dense" else {**base, **added}
     extras = {(k["seed"], k["state_index"], k["window_index"]) for k in cell["dense_extra_windows"]}
-    origins, now, wait, targets, variances, sizes, keys = [], [], [], [], [], [], []
+    origins, now, wait, targets, variances, sizes, keys, replicas = [], [], [], [], [], [], [], []
     state_indices = {}
     for seed in sorted({key[0] for key in states}):
         for i, key in enumerate(sorted(k for k in states if k[0] == seed)):
@@ -105,6 +105,7 @@ def assemble(cell, design, cached_rows, new_rows, method):
             origins.append({**row, "offset_fraction": (step % design["period"]) / 25,
                 "remaining_fraction": (design["horizon"] - step) / design["horizon"], "call_spent": False})
             targets.append(float(np.mean(labels)))
+            replicas.append(labels)
             variances.append(float(np.var(labels, ddof=1) / len(labels)))
             sizes.append(len(labels))
             keys.append([seed, step, j])
@@ -112,7 +113,8 @@ def assemble(cell, design, cached_rows, new_rows, method):
         raise ValueError("assembled A information differs from the declared pair budget")
     return {"now": basis(now), "wait_one_check": basis(wait), "causal_t": basis(origins),
         "training_mean": np.asarray(targets), "A_mean_noise_estimate": np.asarray(variances),
-        "label_counts": sizes, "window_keys": keys, "prefixes": sorted({s for s, _, _ in keys})}
+        "label_counts": sizes, "training_replicas": replicas, "window_keys": keys,
+        "prefixes": sorted({s for s, _, _ in keys})}
 
 
 def frozen_predictions(data, models):

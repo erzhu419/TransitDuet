@@ -435,3 +435,11 @@ only three roots; influential-prefix dependence remains. Dense training gains
 do not transfer consistently. Preserve the full E result, stop Dense expansion,
 and keep E out of subsequent fitting/tuning. No further tasks or original policy
 confirmation are released; Wide remains a candidate rather than a proven replacement.
+The next user authorization releases the
+[Wide A-only matched-size diagnostic](freq_hrl_boundary_wide_transfer_2026-11-11.md):
+two reciprocal A views, 32 whole-prefix folds/view/root, exactly 256 DF-3 fits.
+Both included and excluded probes use 31-prefix fits; included controls average
+individual model losses from existing folds, not ensemble predictions. No B/E
+access, native simulation, Dense expansion or frozen-model replacement. All
+four source Wide rosters/losses must reproduce before fitting; report both views,
+cached/new strata and prefixes without selecting a new deployment model.
