@@ -1,12 +1,14 @@
 from copy import deepcopy
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
 
 from scripts.analyze_reacher_stage9_tail_decisions import top_at_equal_counts
 from scripts.run_stage9_strong_timing import ISE, METHODS, panels, readout, same_controller
+from scripts import run_stage9_strong_timing_confirmation as confirm
 
 
 def fixture():
@@ -63,3 +65,20 @@ class Stage9StrongTimingTest(unittest.TestCase):
         clocks = np.array([0, 0, 5, 5, 10])
         selected = top_at_equal_counts(np.array([0., 1., 0., 2., 100.]), factual, clocks)
         np.testing.assert_array_equal(selected, [False, True, False, True, False])
+
+    def test_confirmation_gates_test_access_and_uses_root_not_path_intervals(self):
+        plan, records = fixture()
+        with patch.object(confirm, "require_global_freeze", side_effect=ValueError("no freeze")), \
+             patch.object(confirm, "load_controller") as load:
+            with self.assertRaisesRegex(ValueError, "no freeze"):
+                confirm.evaluate(plan, {}, None, None)
+            load.assert_not_called()
+        cells = [{"optimizer_seed": i, "trigger_eval_seeds": [100 + i, 200 + i]} for i in range(8)]
+        plan["confirmation_reservation"] = cells
+        reports = [{**deepcopy(records[i % 2]), "optimizer_seed": i,
+                    "evaluation_seeds": c["trigger_eval_seeds"]} for i, c in enumerate(cells)]
+        result = confirm.confirmation_readout(plan, reports)
+        self.assertTrue(result["pointmaze_strong_timing_supported"])
+        self.assertEqual(result["contrasts"]["threshold"]["n"], 8)
+        reports[-1]["panels"]["last"]["threshold"]["mean_ise"] = .5
+        self.assertFalse(confirm.confirmation_readout(plan, reports)["pointmaze_strong_timing_supported"])

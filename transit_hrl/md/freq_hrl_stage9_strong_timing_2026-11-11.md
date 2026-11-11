@@ -19,6 +19,12 @@ both pooled path halves. No replacement, recalibration or seed extension.
 Eight fresh optimizer roots with 128 paired paths each are reserved, not
 released until the development gate passes. This is an in-distribution timing
 study under shared controller weights, not the original two-task C1/C2 study.
+The [confirmation runner](../scripts/run_stage9_strong_timing_confirmation.py)
+builds one controller per root and charges each comparator its share of the
+measured development and full local build costs. All eight admitted builds must
+freeze before evaluation: 4,096 paired-mode episodes, 4,915,200 evaluation
+steps. Primary paired t intervals use eight optimizer roots; tail ISE and
+failure counts at the existing 1.0/25-step threshold are descriptive.
 
 ## Reacher branch decision
 

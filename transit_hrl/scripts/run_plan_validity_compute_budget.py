@@ -49,7 +49,7 @@ def prepare(args):
             "budget_overrun_rule": "retain_cost_and_failure_do_not_pad_or_truncate_to_call_it_matched"}
 
 
-def run_trial(args, task_name):
+def run_trial(args, task_name, *, shared_training=None):
     ledger, latency = ComputeLedger(), ControlLatency()
     spec = PlanValidityTaskSpec(task_name, _task_options(args), args.env_id)
     time_scale = time_contract(args)
@@ -67,8 +67,11 @@ def run_trial(args, task_name):
         with single_thread_runtime() as profile:
             result["hardware_profile"] = profile
             with ledger.recording():
-                with measured_phase("controller"):
-                    payload, controller = train_shared_controller(spec, args, time_scale)
+                if shared_training is None:
+                    with measured_phase("controller"):
+                        payload, controller = train_shared_controller(spec, args, time_scale)
+                else:
+                    payload, controller, _ = shared_training
 
                 selection_cache = {}
 
@@ -149,8 +152,11 @@ def run_trial(args, task_name):
                     row for row in payload["history"]
                     if row["iteration"] < 0 or row.get("checkpoint_evaluation_performed")])
                 with measured_phase("artifact_export"):
-                    checkpoint = args.output.with_name(f"{args.output.stem}.{task_name}.controller.pt")
-                    torch.save(controller.state_dict(), checkpoint)
+                    if shared_training is None:
+                        checkpoint = args.output.with_name(f"{args.output.stem}.{task_name}.controller.pt")
+                        torch.save(controller.state_dict(), checkpoint)
+                    else:
+                        checkpoint = shared_training[2]
                     result["controller_checkpoint"] = str(checkpoint)
                     if cache:
                         cache_path = args.output.with_name(f"{args.output.stem}.{task_name}.fit-cache.json")
