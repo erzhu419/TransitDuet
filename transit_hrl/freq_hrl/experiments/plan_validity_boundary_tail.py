@@ -94,6 +94,12 @@ def fit_probe(data, *, total_df, publish=lambda _: None):
             oof[method][held] = scores[method][held]
         fold_models.append({"held_prefix": int(group), "training_prefixes": groups[groups != group].tolist(), "models": models})
         publish({"stage": "prefix_folds", "completed_prefix_folds": len(fold_models)})
+    return summarize_probe(data, full, oof, full_models, fold_models, total_df=total_df)
+
+
+def summarize_probe(data, full, oof, full_models, fold_models, *, total_df):
+    groups = np.unique(data["groups"])
+    all_rows = np.ones(len(data["tail"]), dtype=bool)
     panels = {"training": readout(full, data, all_rows, independent=False),
         "prefix_oof": readout(oof, data, all_rows, independent=True)}
     halves = [readout(oof, data, data["windows"] < 2, independent=True),

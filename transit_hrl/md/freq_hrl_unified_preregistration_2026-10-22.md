@@ -374,3 +374,8 @@ Only Reacher root1 meets the frozen boundary-tail rule. PointMaze exposes
 near-zero contrast-scale extrapolation; Reacher root2 remains half-group mixed.
 Preserve v1 losses and fixed-model attribution. A parent-feature scaling repair
 is the next design, not an automatic refit or evidence of deployable timing gain.
+The next user authorization releases the single
+[parent-scale repair](freq_hrl_boundary_parent_scale_2026-11-11.md): 36 potential
+ridge fits only, frozen baseline predictions reused, zero new native steps.
+Keep DF 3, suffix A/B, whole-prefix folds and the original qualification rule.
+No clipping, additional geometry search or policy confirmation is released.
