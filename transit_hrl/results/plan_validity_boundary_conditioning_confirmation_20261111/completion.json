@@ -1,0 +1,220 @@
+{
+  "run_name": "plan_validity_boundary_conditioning_confirmation_20261111",
+  "snapshot_at_utc": "2026-11-11T08:41:20.500290+00:00",
+  "implementation_commit": "b4e853d25c",
+  "analysis_implementation_commit": "b4e853d25c",
+  "status": "complete",
+  "scheduler_snapshot": [
+    {
+      "id": "t214752",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972110000/shard0",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214752.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214753",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972110000/shard1",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214753.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214754",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972110000/shard2",
+      "node": "node004",
+      "log_path": "/tmp/sched_t214754.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214755",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972110000/shard3",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214755.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214756",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972120000/shard0",
+      "node": "node004",
+      "log_path": "/tmp/sched_t214756.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214757",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972120000/shard1",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214757.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214758",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972120000/shard2",
+      "node": "node004",
+      "log_path": "/tmp/sched_t214758.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214759",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/pointmaze/1972120000/shard3",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214759.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214760",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972210000/shard0",
+      "node": "node004",
+      "log_path": "/tmp/sched_t214760.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214761",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972210000/shard1",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214761.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214762",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972210000/shard2",
+      "node": "node006",
+      "log_path": "/tmp/sched_t214762.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214763",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972210000/shard3",
+      "node": "node004",
+      "log_path": "/tmp/sched_t214763.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214764",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972220000/shard0",
+      "node": "node005",
+      "log_path": "/tmp/sched_t214764.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214765",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972220000/shard1",
+      "node": "node006",
+      "log_path": "/tmp/sched_t214765.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214766",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972220000/shard2",
+      "node": "node003",
+      "log_path": "/tmp/sched_t214766.log",
+      "status": "done",
+      "exit_code": 0
+    },
+    {
+      "id": "t214767",
+      "signature": "Freq-HRL/boundary-conditioning-confirmation/plan_validity_boundary_conditioning_confirmation_20261111/reacher_tracking/1972220000/shard3",
+      "node": "node002",
+      "log_path": "/tmp/sched_t214767.log",
+      "status": "done",
+      "exit_code": 0
+    }
+  ],
+  "scheduler_verification": "all sixteen exact signatures observed done with exit_code 0; each public shard complete at 926400 steps and 384 pairs",
+  "completed_shards": 16,
+  "completed_prefixes": 64,
+  "completed_states": 192,
+  "paired_futures": 6144,
+  "evaluation_environment_steps": 14822400,
+  "evaluation_measured_cost": {
+    "counts": {
+      "environment_opens": 12352,
+      "environment_resets": 12352,
+      "planner_calls": 296448,
+      "lower_calls": 14822400,
+      "environment_step_attempts": 14822400,
+      "environment_steps": 14822400,
+      "history_updates": 14822400,
+      "feature_vector_builds": 1179485,
+      "trigger_score_checks": 1176390,
+      "frozen_model_window_predictions": 5376
+    },
+    "cpu_seconds": 13166.414314673002,
+    "sum_shard_wall_seconds_not_parallel_makespan": 13196.217723669484
+  },
+  "aggregation_measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 0.06799698199999993,
+    "wall_seconds": 0.06990372948348522,
+    "counts": {
+      "bootstrap_prefix_resamples": 40000
+    },
+    "phases": {
+      "confirmation_public_moments_and_prefix_bootstrap": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.06799698199999993,
+        "wall_seconds": 0.06990372948348522,
+        "counts": {
+          "bootstrap_prefix_resamples": 40000
+        }
+      }
+    }
+  },
+  "new_fits": 0,
+  "aggregation_new_environment_steps": 0,
+  "primary_prediction_rule_passed": false,
+  "root_rules": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "passed": false
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "passed": false
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "passed": false
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "passed": false
+    }
+  ],
+  "descriptive_primary_gain_concentration": {
+    "comparison": "tracking_distance_minus_wide",
+    "prefix": 1972279000,
+    "share_of_net_mean_gain": 0.9342694791526539,
+    "posthoc_not_a_selection_or_exclusion_rule": true
+  },
+  "retrieved_public_summary_bytes": 64586,
+  "retrieved": "compact merged public moments only; no raw rows, prediction arrays, model coefficients or checkpoints",
+  "public_summary": "summary.json",
+  "server_full_public_result": "results/plan_validity_boundary_conditioning_confirmation_20261111/public/result.json",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "followup_jobs_created": 0,
+  "exposed_confirmation_data_reused_for_fitting_or_tuning": false,
+  "decision": "do_not_promote_conditioning_gates; preserve old base/Wide controls and all negative results"
+}

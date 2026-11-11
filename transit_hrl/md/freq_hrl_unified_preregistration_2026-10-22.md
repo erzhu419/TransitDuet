@@ -501,3 +501,11 @@ released. Original policy confirmation and full-episode claims remain on HOLD.
 Tasks t214752-t214767 are now running after all sixteen global freeze checks;
 the launch snapshot records 468,000 initial native steps. The separate release
 does not change the historical reservation or any frozen predictor.
+All sixteen tasks completed with exit 0 and exact 14,822,400-step/zero-fit
+accounting. The frozen public-moment bootstrap fails the primary and all four
+root rules. Primary tracking versus Wide is -0.78% but its interval crosses zero
+and the second prefix half regresses; RMS/base/zero point contrasts are worse.
+Both PointMaze roots reject a tracking upgrade versus Wide. Preserve Wide's
+positive zero-reference comparisons on three roots, retain all old controls,
+and keep both gates unpromoted. Fresh confirmation labels are now exposed and
+reporting-only. No new task, fitting, tuning or episode-policy release follows.

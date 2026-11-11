@@ -1,0 +1,3897 @@
+{
+  "run_name": "plan_validity_boundary_conditioning_confirmation_20261111",
+  "status": "complete",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "primary_prediction_rule_passed": false,
+  "completed_shards": 16,
+  "completed_prefixes": 64,
+  "completed_states": 192,
+  "E_pairs": 6144,
+  "evaluation_environment_steps": 14822400,
+  "evaluation_measured_cost": {
+    "counts": {
+      "environment_opens": 12352,
+      "environment_resets": 12352,
+      "planner_calls": 296448,
+      "lower_calls": 14822400,
+      "environment_step_attempts": 14822400,
+      "environment_steps": 14822400,
+      "history_updates": 14822400,
+      "feature_vector_builds": 1179485,
+      "trigger_score_checks": 1176390,
+      "frozen_model_window_predictions": 5376
+    },
+    "cpu_seconds": 13166.414314673002,
+    "sum_shard_wall_seconds_not_parallel_makespan": 13196.217723669484
+  },
+  "stage": "boundary_conditioning_confirmation_merged",
+  "new_fits": 0,
+  "new_environment_steps": 0,
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 0.06799698199999993,
+    "wall_seconds": 0.06990372948348522,
+    "counts": {
+      "bootstrap_prefix_resamples": 40000
+    },
+    "phases": {
+      "confirmation_public_moments_and_prefix_bootstrap": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.06799698199999993,
+        "wall_seconds": 0.06990372948348522,
+        "counts": {
+          "bootstrap_prefix_resamples": 40000
+        }
+      }
+    }
+  },
+  "scope": "frozen_model_boundary_tail_prediction_not_complete_episode_control_or_independent_training_seed_confirmation",
+  "bound_scope": "each_comparison_nominal_bounds_not_simultaneous_coverage_no_suffix_MC_variance_subtraction_or_double_addition",
+  "source": "sixteen_completed_public_moment_JSONs_no_raw_trajectory_model_or_checkpoint_reads",
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "readout": {
+        "prefixes": 16,
+        "states": 48,
+        "windows": 192,
+        "E_pairs": 1536,
+        "MSE_to_E_mean": {
+          "zero": 0.0031031731963305116,
+          "constant": 0.003138289118405197,
+          "causal_t": 0.003132968451545644,
+          "base": 0.0022227060166462595,
+          "wide": 0.0024642487630699423,
+          "tracking_distance": 0.0026002417271543815,
+          "state_rms": 0.002518076361642268
+        },
+        "empirical_E_mean_noise_variance": 0.000336509970166568,
+        "prediction_confirmation_rule_passed": false,
+        "bootstrap": {
+          "replicates": 10000,
+          "seed": 1972179800,
+          "unit": "whole_prefix_mean_paired_loss",
+          "paired_resamples_shared_across_comparisons": true,
+          "scope": "nominal_each_comparison_given_frozen_models_not_simultaneous_or_training_seed_coverage"
+        },
+        "comparisons": {
+          "tracking_distance_minus_wide": {
+            "MSE_delta": 0.00013599296408444014,
+            "squared_prediction_term": -4.904371764049215e-05,
+            "alignment_term": 0.0001850366817249323,
+            "conditional_suffix_MC_SE": 1.1912865990466666e-05,
+            "improving_prefixes": 4,
+            "prefix_delta_SD_descriptive": 0.00016441484581066585,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                5.7957731620974565e-05,
+                0.00021408797839255633
+              ],
+              "nominal_one_sided_95_upper": 0.0002014923615234358
+            },
+            "suffix_halves": [
+              0.00014932774249698882,
+              0.00012265818567189145
+            ],
+            "window_halves": [
+              9.557698707915238e-05,
+              0.0001764089410897279
+            ],
+            "prefix_halves": [
+              7.390572194795127e-05,
+              0.000198080206220929
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": 0.00016248817228652068
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": -2.455965774074364e-05
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": 2.4963790749877535e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": 0.0003541963754430104
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -6.1405010916153e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": 0.00024040526684094806
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": 6.578097904820082e-06
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": -0.00011142125898466991
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": 0.00034670812202648455
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": 0.00026515815062926724
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": 0.0003212270190316894
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": 0.00010126194464524028
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": 0.00010852801037622446
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": -1.9740587064929022e-05
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": 0.000391477676315955
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": 7.002131380749998e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_state_rms": {
+            "MSE_delta": 8.216536551211416e-05,
+            "squared_prediction_term": -2.5028795195359116e-05,
+            "alignment_term": 0.00010719416070747327,
+            "conditional_suffix_MC_SE": 7.619104597533653e-06,
+            "improving_prefixes": 4,
+            "prefix_delta_SD_descriptive": 9.910744206531304e-05,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                3.6058980156196996e-05,
+                0.00012951757679084724
+              ],
+              "nominal_one_sided_95_upper": 0.0001220477292398186
+            },
+            "suffix_halves": [
+              9.222970471402752e-05,
+              7.210102631020078e-05
+            ],
+            "window_halves": [
+              6.588734042595175e-05,
+              9.844339059827653e-05
+            ],
+            "prefix_halves": [
+              4.3232927900264344e-05,
+              0.00012109780312396395
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": 2.1836800099607243e-05
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": -1.0795132370245393e-05
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": 2.1654422971730516e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": 0.00021415092834683222
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -4.5563456295682706e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": 0.00016673394180240794
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": 1.941593965124045e-06
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": -2.409567531765915e-05
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": 0.0002356157206627118
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": 0.000172945268058081
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": 0.00015118210699284403
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": 5.532095208110117e-05
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": 7.814151014245266e-05
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": -1.975179711264206e-05
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": 0.00023855465276618971
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": 5.677401140097333e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_base": {
+            "MSE_delta": 0.0003775357105081224,
+            "squared_prediction_term": -0.00018063644818390795,
+            "alignment_term": 0.0005581721586920303,
+            "conditional_suffix_MC_SE": 3.648950357494369e-05,
+            "improving_prefixes": 4,
+            "prefix_delta_SD_descriptive": 0.0004526252492016783,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                0.0001668214452506604,
+                0.0005938305015811796
+              ],
+              "nominal_one_sided_95_upper": 0.0005587327809984446
+            },
+            "suffix_halves": [
+              0.0003964032405045614,
+              0.0003586681805116835
+            ],
+            "window_halves": [
+              0.00021600227132481333,
+              0.0005390691496914314
+            ],
+            "prefix_halves": [
+              0.00024406058060538098,
+              0.0005110108404108637
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": 0.0005985097033590235
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": -0.00013271496772864356
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": 5.854502909619078e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": 0.001047730975000871
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -0.00010348471251787577
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": 0.0002946440592774185
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": 2.0838499207183118e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": 0.0001684160591488804
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": 0.0008342270515660938
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": 0.0009529877454893094
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": 0.0008162790059100992
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": 0.00021538794532880156
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": 0.00031610985904801617
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": -0.00012483041780051379
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": 0.0011459902702101875
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -6.806473646508407e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_zero": {
+            "MSE_delta": -0.0005029314691761291,
+            "squared_prediction_term": 6.173622906557668e-05,
+            "alignment_term": -0.0005646676982417058,
+            "conditional_suffix_MC_SE": 3.5440633780122736e-05,
+            "improving_prefixes": 13,
+            "prefix_delta_SD_descriptive": 0.0006012916252816677,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.000803730447533176,
+                -0.00023477357493864682
+              ],
+              "nominal_one_sided_95_upper": -0.0002718762405570194
+            },
+            "suffix_halves": [
+              -0.0005206862809464569,
+              -0.00048517665740580116
+            ],
+            "window_halves": [
+              -0.000334292736705567,
+              -0.0006715702016466912
+            ],
+            "prefix_halves": [
+              -0.00028766604746619277,
+              -0.0007181968908860654
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": -0.00041926253415106756
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": 1.7272598498851658e-05
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": -4.747589942053064e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": -0.0015288847354816477
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -3.482956968513451e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": -0.0003132408696875146
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": -1.534425738508866e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": 4.043688758259011e-05
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": -0.0010565368775982235
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": -0.0009691661727998443
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": -0.001098533031755872
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": -0.00011220803176950901
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": -0.0002583217342870089
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": 3.5481911507607716e-06
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": -0.0018238008077825403
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -0.00043055666224628517
+              }
+            ]
+          },
+          "state_rms_minus_wide": {
+            "MSE_delta": 5.3827598572325994e-05,
+            "squared_prediction_term": -2.4014922445133032e-05,
+            "alignment_term": 7.784252101745903e-05,
+            "conditional_suffix_MC_SE": 5.190548243184114e-06,
+            "improving_prefixes": 3,
+            "prefix_delta_SD_descriptive": 7.434959026481285e-05,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                1.863341916481347e-05,
+                8.827693481166661e-05
+              ],
+              "nominal_one_sided_95_upper": 8.325642870961905e-05
+            },
+            "suffix_halves": [
+              5.7098037782961304e-05,
+              5.0557159361690684e-05
+            ],
+            "window_halves": [
+              2.9689646653200618e-05,
+              7.796555049145136e-05
+            ],
+            "prefix_halves": [
+              3.067279404768694e-05,
+              7.698240309696504e-05
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": 0.00014065137218691344
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": -1.376452537049825e-05
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": 3.309367778147022e-06
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": 0.00014004544709617813
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -1.584155462047029e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": 7.367132503854016e-05
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": 4.636503939696037e-06
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": -8.732558366701075e-05
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": 0.00011109240136377286
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": 9.221288257118621e-05
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": 0.00017004491203884533
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": 4.594099256413911e-05
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": 3.0386500233771804e-05
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": 1.121004771303635e-08
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": 0.00015292302354976534
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": 1.3247302406526673e-05
+              }
+            ]
+          },
+          "state_rms_minus_base": {
+            "MSE_delta": 0.00029537034499600826,
+            "squared_prediction_term": -0.00015560765298854883,
+            "alignment_term": 0.0004509779979845571,
+            "conditional_suffix_MC_SE": 2.978840606299568e-05,
+            "improving_prefixes": 4,
+            "prefix_delta_SD_descriptive": 0.00036935437889279676,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                0.00012334297329677895,
+                0.0004732851492231404
+              ],
+              "nominal_one_sided_95_upper": 0.0004435196270729638
+            },
+            "suffix_halves": [
+              0.00030417353579053393,
+              0.00028656715420148263
+            ],
+            "window_halves": [
+              0.00015011493089886157,
+              0.0004406257590931549
+            ],
+            "prefix_halves": [
+              0.0002008276527051167,
+              0.0003899130372868998
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": 0.0005766729032594163
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": -0.00012191983535839815
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": 3.689060612446027e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": 0.000833580046654039
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -5.792125622219306e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": 0.00012791011747501058
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": 1.8896905242059067e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": 0.00019251173446653956
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": 0.0005986113309033821
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": 0.0007800424774312283
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": 0.0006650968989172552
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": 0.0001600669932477004
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": 0.00023796834890556353
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": -0.00010507862068787172
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": 0.0009074356174439976
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -0.00012483874786605739
+              }
+            ]
+          },
+          "state_rms_minus_zero": {
+            "MSE_delta": -0.0005850968346882432,
+            "squared_prediction_term": 8.676502426093579e-05,
+            "alignment_term": -0.000671861858949179,
+            "conditional_suffix_MC_SE": 4.190264565762674e-05,
+            "improving_prefixes": 12,
+            "prefix_delta_SD_descriptive": 0.0006911021412393304,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0009301621684548449,
+                -0.00027383413155366204
+              ],
+              "nominal_one_sided_95_upper": -0.00031851412935809644
+            },
+            "suffix_halves": [
+              -0.0006129159856604844,
+              -0.0005572776837160019
+            ],
+            "window_halves": [
+              -0.00040018007713151865,
+              -0.0007700135922449678
+            ],
+            "prefix_halves": [
+              -0.00033089897536645713,
+              -0.0008392946940100293
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": -0.0004410993342506749
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": 2.8067730869097055e-05
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": -6.913032239226117e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": -0.00174303566382848
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": 1.0733886610548212e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": -0.00047997481148992266
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": -1.7285851350212703e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": 6.453256290024929e-05
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": -0.0012921525982609356
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": -0.0011421114408579252
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": -0.001249715138748716
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": -0.00016752898385061018
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": -0.0003364632444294616
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": 2.3299988263402823e-05
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": -0.0020623554605487303
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -0.0004873306736472586
+              }
+            ]
+          },
+          "wide_minus_base": {
+            "MSE_delta": 0.00024154274642368228,
+            "squared_prediction_term": -0.00013159273054341584,
+            "alignment_term": 0.00037313547696709806,
+            "conditional_suffix_MC_SE": 2.568677884933475e-05,
+            "improving_prefixes": 4,
+            "prefix_delta_SD_descriptive": 0.00031038098362766334,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                9.64041909796065e-05,
+                0.0003911234266160945
+              ],
+              "nominal_one_sided_95_upper": 0.00036671210500584326
+            },
+            "suffix_halves": [
+              0.00024707549800757265,
+              0.000236009994839792
+            ],
+            "window_halves": [
+              0.00012042528424566093,
+              0.0003626602086017036
+            ],
+            "prefix_halves": [
+              0.0001701548586574298,
+              0.0003129306341899348
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": 0.00043602153107250295
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": -0.00010815530998789992
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": 3.358123834631324e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": 0.000693534599557861
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": -4.207970160172277e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": 5.4238792436470445e-05
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": 1.4260401302363033e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": 0.00027983731813355033
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": 0.0004875189295396094
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": 0.000687829594860042
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": 0.0004950519868784099
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": 0.00011412600068356125
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": 0.00020758184867179178
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": -0.00010508983073558478
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": 0.0007545125938942326
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -0.00013808605027258407
+              }
+            ]
+          },
+          "wide_minus_zero": {
+            "MSE_delta": -0.0006389244332605693,
+            "squared_prediction_term": 0.00011077994670606881,
+            "alignment_term": -0.000749704379966638,
+            "conditional_suffix_MC_SE": 4.628697083195762e-05,
+            "improving_prefixes": 12,
+            "prefix_delta_SD_descriptive": 0.0007544404529168943,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0010141521489310725,
+                -0.00029845507213635227
+              ],
+              "nominal_one_sided_95_upper": -0.00034647403842432095
+            },
+            "suffix_halves": [
+              -0.0006700140234434458,
+              -0.0006078348430776926
+            ],
+            "window_halves": [
+              -0.0004298697237847194,
+              -0.000847979142736419
+            ],
+            "prefix_halves": [
+              -0.000361571769414144,
+              -0.0009162770971069944
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": -0.0005817507064375884
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": 4.1832256239595306e-05
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": -7.243969017040819e-05
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": -0.0018830811109246581
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": 2.6575441231018504e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": -0.0005536461365284627
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": -2.1922355289908738e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": 0.00015185814656726003
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": -0.001403244999624708
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": -0.0012343243234291116
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": -0.0014197600507875614
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": -0.0002134699764147493
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": -0.00036684974466323335
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": 2.328877821568979e-05
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": -0.002215278484098496
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -0.0005005779760537852
+              }
+            ]
+          },
+          "base_minus_zero": {
+            "MSE_delta": -0.0008804671796842513,
+            "squared_prediction_term": 0.00024237267724948463,
+            "alignment_term": -0.001122839856933736,
+            "conditional_suffix_MC_SE": 6.895971931781723e-05,
+            "improving_prefixes": 13,
+            "prefix_delta_SD_descriptive": 0.0010340184430667723,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0013930966389599005,
+                -0.00040809779303169815
+              ],
+              "nominal_one_sided_95_upper": -0.00047800336883173806
+            },
+            "suffix_halves": [
+              -0.0009170895214510185,
+              -0.0008438448379174845
+            ],
+            "window_halves": [
+              -0.0005502950080303803,
+              -0.0012106393513381226
+            ],
+            "prefix_halves": [
+              -0.0005317266280715739,
+              -0.001229207731296929
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972179000,
+                "MSE_delta": -0.0010177722375100911
+              },
+              {
+                "seed": 1972179001,
+                "MSE_delta": 0.00014998756622749523
+              },
+              {
+                "seed": 1972179002,
+                "MSE_delta": -0.00010602092851672143
+              },
+              {
+                "seed": 1972179003,
+                "MSE_delta": -0.0025766157104825196
+              },
+              {
+                "seed": 1972179004,
+                "MSE_delta": 6.865514283274127e-05
+              },
+              {
+                "seed": 1972179005,
+                "MSE_delta": -0.0006078849289649331
+              },
+              {
+                "seed": 1972179006,
+                "MSE_delta": -3.618275659227178e-05
+              },
+              {
+                "seed": 1972179007,
+                "MSE_delta": -0.00012797917156629032
+              },
+              {
+                "seed": 1972179008,
+                "MSE_delta": -0.0018907639291643177
+              },
+              {
+                "seed": 1972179009,
+                "MSE_delta": -0.0019221539182891535
+              },
+              {
+                "seed": 1972179010,
+                "MSE_delta": -0.0019148120376659711
+              },
+              {
+                "seed": 1972179011,
+                "MSE_delta": -0.00032759597709831054
+              },
+              {
+                "seed": 1972179012,
+                "MSE_delta": -0.0005744315933350251
+              },
+              {
+                "seed": 1972179013,
+                "MSE_delta": 0.00012837860895127453
+              },
+              {
+                "seed": 1972179014,
+                "MSE_delta": -0.0029697910779927284
+              },
+              {
+                "seed": 1972179015,
+                "MSE_delta": -0.0003624919257812011
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "readout": {
+        "prefixes": 16,
+        "states": 48,
+        "windows": 192,
+        "E_pairs": 1536,
+        "MSE_to_E_mean": {
+          "zero": 0.0034470344360896404,
+          "constant": 0.0033700105275061487,
+          "causal_t": 0.0033949420463366357,
+          "base": 0.003095194393005398,
+          "wide": 0.002592507595565158,
+          "tracking_distance": 0.002782482797271329,
+          "state_rms": 0.0026845596678679463
+        },
+        "empirical_E_mean_noise_variance": 0.0005805561284045749,
+        "prediction_confirmation_rule_passed": false,
+        "bootstrap": {
+          "replicates": 10000,
+          "seed": 1972189800,
+          "unit": "whole_prefix_mean_paired_loss",
+          "paired_resamples_shared_across_comparisons": true,
+          "scope": "nominal_each_comparison_given_frozen_models_not_simultaneous_or_training_seed_coverage"
+        },
+        "comparisons": {
+          "tracking_distance_minus_wide": {
+            "MSE_delta": 0.00018997520170617015,
+            "squared_prediction_term": -4.6555611979722124e-05,
+            "alignment_term": 0.0002365308136858923,
+            "conditional_suffix_MC_SE": 1.4394745686517662e-05,
+            "improving_prefixes": 2,
+            "prefix_delta_SD_descriptive": 0.0002984416506977987,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                6.954779261428675e-05,
+                0.000350132487897499
+              ],
+              "nominal_one_sided_95_upper": 0.000318233131786468
+            },
+            "suffix_halves": [
+              0.00018719920537830573,
+              0.0001927511980340346
+            ],
+            "window_halves": [
+              0.00024321105446750395,
+              0.0001367393489448364
+            ],
+            "prefix_halves": [
+              0.00021172808505370285,
+              0.0001682223183586375
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": 0.00010195082547066243
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": 0.00019990460554735666
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 1.0734695401119554e-05
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": 5.8844785708347194e-05
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 8.209791274478187e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": 0.00012363751197302328
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": 0.0008754534238704325
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": 0.00024120091971389923
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": 0.0009868381812920706
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -5.673045833849865e-07
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": 6.511051170187065e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": 1.4764038392409843e-05
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": 0.00012138631592566324
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": 0.00013850953016979027
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 2.5397495419703187e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": -5.660221449022822e-06
+              }
+            ]
+          },
+          "tracking_distance_minus_state_rms": {
+            "MSE_delta": 9.792312940338276e-05,
+            "squared_prediction_term": -2.2987399788097306e-05,
+            "alignment_term": 0.00012091052919148006,
+            "conditional_suffix_MC_SE": 9.828044866603423e-06,
+            "improving_prefixes": 2,
+            "prefix_delta_SD_descriptive": 0.00012911535925256448,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                4.5575459230568716e-05,
+                0.00016762671734357504
+              ],
+              "nominal_one_sided_95_upper": 0.00015502223871157492
+            },
+            "suffix_halves": [
+              9.739510846507791e-05,
+              9.84511503416876e-05
+            ],
+            "window_halves": [
+              0.00012077257536694829,
+              7.507368343981721e-05
+            ],
+            "prefix_halves": [
+              0.00013715011218510257,
+              5.86961466216629e-05
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": 0.00011187556381597161
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": 0.00014578539374059593
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 9.426896038854438e-06
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": 8.65348437222289e-06
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 7.083855496098083e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": 7.734256558211049e-05
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": 0.0004914881206251965
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": 0.00018179031834488797
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": 0.0002677894845100991
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -5.239619335838633e-07
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": 4.798645504279058e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": 8.128204836817105e-06
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": 8.408507255961166e-05
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": 4.8594200027076766e-05
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 1.9791889996295046e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": -6.282172065803118e-06
+              }
+            ]
+          },
+          "tracking_distance_minus_base": {
+            "MSE_delta": -0.00031271159573406936,
+            "squared_prediction_term": 1.803392852817208e-05,
+            "alignment_term": -0.0003307455242622415,
+            "conditional_suffix_MC_SE": 2.7186063742843208e-05,
+            "improving_prefixes": 8,
+            "prefix_delta_SD_descriptive": 0.0009721509944199929,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0008567745520259405,
+                5.037490742498013e-05
+              ],
+              "nominal_one_sided_95_upper": 3.0097662504802096e-05
+            },
+            "suffix_halves": [
+              -0.00032183897749688526,
+              -0.00030358421397125356
+            ],
+            "window_halves": [
+              -0.0005380829228467733,
+              -8.734026862136537e-05
+            ],
+            "prefix_halves": [
+              -0.0004041704373486727,
+              -0.0002212527541194662
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": 4.2968303874125955e-05
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": 5.20534640906875e-05
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": -1.180188207310669e-05
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.00017250934841167118
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 0.00012608497852921634
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.00020779630918102692
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -0.003434400881640467
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": 0.0003720381760228602
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.001921888682590265
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -1.5746320461804064e-05
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": 1.2091274157302288e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": -5.201163184031321e-05
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": 7.692775196927686e-05
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": 0.00010072595984035293
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 3.0128775866342127e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": -2.4915989662142306e-07
+              }
+            ]
+          },
+          "tracking_distance_minus_zero": {
+            "MSE_delta": -0.0006645516388183113,
+            "squared_prediction_term": 8.363778933891339e-05,
+            "alignment_term": -0.0007481894281572245,
+            "conditional_suffix_MC_SE": 4.032266930916089e-05,
+            "improving_prefixes": 11,
+            "prefix_delta_SD_descriptive": 0.0012846484813908558,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0013547958582022458,
+                -0.00015108458187995777
+              ],
+              "nominal_one_sided_95_upper": -0.00019717089051865725
+            },
+            "suffix_halves": [
+              -0.0006497163302211064,
+              -0.000679386947415516
+            ],
+            "window_halves": [
+              -0.000872576934564718,
+              -0.00045652634307190445
+            ],
+            "prefix_halves": [
+              -0.000710977339251499,
+              -0.0006181259383851233
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -0.00015160855128963668
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": -0.0003300127528870629
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 1.4625906703547016e-05
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.0007514015930882209
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 4.071752391751922e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.0007949339537935471
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -0.0035283595684685726
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": -0.00018684572510601778
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.004196762250214666
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -2.4507415175573077e-07
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": -2.7798543389456614e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": 7.664234046333188e-06
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": -0.00012519282428772474
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": -0.0006139789519638753
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 3.0712267779006285e-06
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 8.234676102258405e-06
+              }
+            ]
+          },
+          "state_rms_minus_wide": {
+            "MSE_delta": 9.205207230278743e-05,
+            "squared_prediction_term": -2.3568212191624808e-05,
+            "alignment_term": 0.00011562028449441225,
+            "conditional_suffix_MC_SE": 6.519795396781238e-06,
+            "improving_prefixes": 2,
+            "prefix_delta_SD_descriptive": 0.00019149867675873612,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                2.096414979496432e-05,
+                0.00019697966560521646
+              ],
+              "nominal_one_sided_95_upper": 0.00017813553163213247
+            },
+            "suffix_halves": [
+              8.980409691322785e-05,
+              9.430004769234702e-05
+            ],
+            "window_halves": [
+              0.00012243847910055566,
+              6.166566550501922e-05
+            ],
+            "prefix_halves": [
+              7.457797286860028e-05,
+              0.00010952617173697457
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -9.924738345309146e-06
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": 5.411921180676077e-05
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 1.3077993622651181e-06
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": 5.019130133612429e-05
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 1.1259357783801021e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": 4.629494639091281e-05
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": 0.0003839653032452361
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": 5.9410601369011306e-05
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": 0.0007190486967819714
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -4.3342649801123434e-08
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": 1.7124056659080043e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": 6.6358335555927426e-06
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": 3.73012433660516e-05
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": 8.991533014271347e-05
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 5.6056054234081395e-06
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 6.219506167802945e-07
+              }
+            ]
+          },
+          "state_rms_minus_base": {
+            "MSE_delta": -0.0004106347251374522,
+            "squared_prediction_term": 4.1021328316269387e-05,
+            "alignment_term": -0.0004516560534537216,
+            "conditional_suffix_MC_SE": 2.8938083199314422e-05,
+            "improving_prefixes": 11,
+            "prefix_delta_SD_descriptive": 0.0010858104556713247,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0010235268832495946,
+                -1.1104208654719192e-05
+              ],
+              "nominal_one_sided_95_upper": -2.6775706158402454e-05
+            },
+            "suffix_halves": [
+              -0.00041923408596196307,
+              -0.00040203536431294117
+            ],
+            "window_halves": [
+              -0.0006588554982137219,
+              -0.0001624139520611826
+            ],
+            "prefix_halves": [
+              -0.0005413205495337751,
+              -0.0002799489007411291
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -6.890725994184563e-05
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": -9.373192964990838e-05
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": -2.1228778111961132e-05
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.00018116283278389405
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 5.524642356823548e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.0002851388747631374
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -0.003925889002265663
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": 0.00019024785767797226
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.0021896781671003644
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -1.5222358528220197e-05
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": -3.5895180885488304e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": -6.0139836677130317e-05
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": -7.1573205903347944e-06
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": 5.213175981327616e-05
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 1.0336885870047081e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 6.033012169181695e-06
+              }
+            ]
+          },
+          "state_rms_minus_zero": {
+            "MSE_delta": -0.0007624747682216939,
+            "squared_prediction_term": 0.0001066251891270107,
+            "alignment_term": -0.0008690999573487046,
+            "conditional_suffix_MC_SE": 4.56035844809399e-05,
+            "improving_prefixes": 13,
+            "prefix_delta_SD_descriptive": 0.0013916353047193966,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0015171884705933092,
+                -0.00020769626280805966
+              ],
+              "nominal_one_sided_95_upper": -0.0002533972021098283
+            },
+            "suffix_halves": [
+              -0.0007471114386861842,
+              -0.0007778380977572036
+            ],
+            "window_halves": [
+              -0.000993349509931666,
+              -0.0005316000265117218
+            ],
+            "prefix_halves": [
+              -0.0008481274514366016,
+              -0.0006768220850067862
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -0.00026348411510560834
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": -0.00047579814662765895
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 5.199010664692579e-06
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.0007600550774604436
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": -3.0121031043461623e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.0008722765193756573
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -0.00401984768909377
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": -0.0003686360434509058
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.004464551734724766
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": 2.7888778182813525e-07
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": -7.57849984322472e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": -4.6397079048391527e-07
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": -0.00020927789684733634
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": -0.000662573151990952
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": -1.6720663218394424e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 1.4516848168061528e-05
+              }
+            ]
+          },
+          "wide_minus_base": {
+            "MSE_delta": -0.0005026867974402395,
+            "squared_prediction_term": 6.458954050789421e-05,
+            "alignment_term": -0.0005672763379481337,
+            "conditional_suffix_MC_SE": 3.296936766050116e-05,
+            "improving_prefixes": 12,
+            "prefix_delta_SD_descriptive": 0.0012439630556989416,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0011962188395257386,
+                -3.5714176742767005e-05
+              ],
+              "nominal_one_sided_95_upper": -5.2675090752846894e-05
+            },
+            "suffix_halves": [
+              -0.000509038182875191,
+              -0.0004963354120052883
+            ],
+            "window_halves": [
+              -0.0007812939773142773,
+              -0.00022407961756620178
+            ],
+            "prefix_halves": [
+              -0.0006158985224023754,
+              -0.00038947507247810367
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -5.8982521596536496e-05
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": -0.00014785114145666914
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": -2.253657747422625e-05
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.00023135413412001834
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": 4.3987065784434457e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.0003314338211540502
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -0.004309854305510898
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": 0.00013083725630896095
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.0029087268638823354
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": -1.5179015878419078e-05
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": -5.301923754456835e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": -6.677567023272305e-05
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": -4.445856395638638e-05
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": -3.778357032943732e-05
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": 4.731280446638938e-06
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 5.4110615524014e-06
+              }
+            ]
+          },
+          "wide_minus_zero": {
+            "MSE_delta": -0.0008545268405244814,
+            "squared_prediction_term": 0.0001301934013186355,
+            "alignment_term": -0.0009847202418431168,
+            "conditional_suffix_MC_SE": 5.081470171920311e-05,
+            "improving_prefixes": 13,
+            "prefix_delta_SD_descriptive": 0.0015757869482255437,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0017012676301714862,
+                -0.00022998155293888972
+              ],
+              "nominal_one_sided_95_upper": -0.0002809890766755311
+            },
+            "suffix_halves": [
+              -0.0008369155355994122,
+              -0.0008721381454495505
+            ],
+            "window_halves": [
+              -0.0011157879890322218,
+              -0.0005932656920167409
+            ],
+            "prefix_halves": [
+              -0.0009227054243052019,
+              -0.0007863482567437608
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -0.00025355937676029916
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": -0.0005299173584344196
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 3.891211302427458e-06
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.0008102463787965679
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": -4.1380388827262644e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.0009185714657665701
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -0.004403812992339006
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": -0.000428046644819917
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.005183600431506737
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": 3.2223043162925487e-07
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": -9.290905509132728e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": -7.099804346076659e-06
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": -0.00024657914021338796
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": -0.0007524884821336656
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": -2.2326268641802565e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 1.3894897551281231e-05
+              }
+            ]
+          },
+          "base_minus_zero": {
+            "MSE_delta": -0.0003518400430842418,
+            "squared_prediction_term": 6.56038608107413e-05,
+            "alignment_term": -0.0004174439038949831,
+            "conditional_suffix_MC_SE": 3.2394860134190796e-05,
+            "improving_prefixes": 12,
+            "prefix_delta_SD_descriptive": 0.0005741711002464113,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0006612968766640023,
+                -0.00012885265089348407
+              ],
+              "nominal_one_sided_95_upper": -0.00015311533175436945
+            },
+            "suffix_halves": [
+              -0.0003278773527242212,
+              -0.00037580273344426236
+            ],
+            "window_halves": [
+              -0.0003344940117179444,
+              -0.00036918607445053913
+            ],
+            "prefix_halves": [
+              -0.00030680690190282636,
+              -0.00039687318426565716
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972189000,
+                "MSE_delta": -0.00019457685516376276
+              },
+              {
+                "seed": 1972189001,
+                "MSE_delta": -0.00038206621697775046
+              },
+              {
+                "seed": 1972189002,
+                "MSE_delta": 2.6427788776653707e-05
+              },
+              {
+                "seed": 1972189003,
+                "MSE_delta": -0.0005788922446765497
+              },
+              {
+                "seed": 1972189004,
+                "MSE_delta": -8.536745461169712e-05
+              },
+              {
+                "seed": 1972189005,
+                "MSE_delta": -0.00058713764461252
+              },
+              {
+                "seed": 1972189006,
+                "MSE_delta": -9.395868682810659e-05
+              },
+              {
+                "seed": 1972189007,
+                "MSE_delta": -0.0005588839011288782
+              },
+              {
+                "seed": 1972189008,
+                "MSE_delta": -0.0022748735676244016
+              },
+              {
+                "seed": 1972189009,
+                "MSE_delta": 1.5501246310048332e-05
+              },
+              {
+                "seed": 1972189010,
+                "MSE_delta": -3.988981754675891e-05
+              },
+              {
+                "seed": 1972189011,
+                "MSE_delta": 5.967586588664641e-05
+              },
+              {
+                "seed": 1972189012,
+                "MSE_delta": -0.00020212057625700159
+              },
+              {
+                "seed": 1972189013,
+                "MSE_delta": -0.0007147049118042283
+              },
+              {
+                "seed": 1972189014,
+                "MSE_delta": -2.70575490884415e-05
+              },
+              {
+                "seed": 1972189015,
+                "MSE_delta": 8.483835998879836e-06
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "readout": {
+        "prefixes": 16,
+        "states": 48,
+        "windows": 192,
+        "E_pairs": 1536,
+        "MSE_to_E_mean": {
+          "zero": 0.005439112609533823,
+          "constant": 0.005439825323290378,
+          "causal_t": 0.006327018586359656,
+          "base": 0.006190244896769942,
+          "wide": 0.006267538165637089,
+          "tracking_distance": 0.006218470201253368,
+          "state_rms": 0.006114718055283209
+        },
+        "empirical_E_mean_noise_variance": 0.002258740437097808,
+        "prediction_confirmation_rule_passed": false,
+        "bootstrap": {
+          "replicates": 10000,
+          "seed": 1972279800,
+          "unit": "whole_prefix_mean_paired_loss",
+          "paired_resamples_shared_across_comparisons": true,
+          "scope": "nominal_each_comparison_given_frozen_models_not_simultaneous_or_training_seed_coverage"
+        },
+        "comparisons": {
+          "tracking_distance_minus_wide": {
+            "MSE_delta": -4.9067964383719776e-05,
+            "squared_prediction_term": -4.9537743355050925e-05,
+            "alignment_term": 4.697789713311528e-07,
+            "conditional_suffix_MC_SE": 5.0464538442507516e-05,
+            "improving_prefixes": 8,
+            "prefix_delta_SD_descriptive": 0.00022768199169119008,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0001657487033209387,
+                4.640713439969571e-05
+              ],
+              "nominal_one_sided_95_upper": 3.3020318577636526e-05
+            },
+            "suffix_halves": [
+              -7.10373101450745e-05,
+              -2.709861862236503e-05
+            ],
+            "window_halves": [
+              -3.577762301151184e-05,
+              -6.235830575592769e-05
+            ],
+            "prefix_halves": [
+              -0.00014482037471028194,
+              4.668444594284242e-05
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": -0.0007334832244457411
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": -7.935662066030892e-05
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": -4.0526478808448146e-06
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": 0.00012926898401731832
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": -6.733472739461663e-05
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -4.599903366948682e-05
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 1.638094958674863e-05
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": -0.0003739866772353242
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": 7.192436772890216e-06
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": -9.830324692554792e-06
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.00013018396619438974
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 5.57795434779658e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 7.384156731262538e-06
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": -0.00010731056742250106
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": 0.00027628776571793015
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": 1.3788590763356802e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_state_rms": {
+            "MSE_delta": 0.00010375214597015875,
+            "squared_prediction_term": 9.168525318266754e-06,
+            "alignment_term": 9.4583620651892e-05,
+            "conditional_suffix_MC_SE": 4.2704190885662525e-05,
+            "improving_prefixes": 8,
+            "prefix_delta_SD_descriptive": 0.00037785117673070414,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -4.8711160345039365e-05,
+                0.0003095111248877492
+              ],
+              "nominal_one_sided_95_upper": 0.0002653060171297212
+            },
+            "suffix_halves": [
+              8.691977639292442e-05,
+              0.00012058451554739308
+            ],
+            "window_halves": [
+              0.00013573477700748492,
+              7.176951493283256e-05
+            ],
+            "prefix_halves": [
+              0.00011453627055827803,
+              9.296802138203946e-05
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": -0.00012290559463421508
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": -7.361528023278121e-05
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": -9.87447175779248e-07
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": 0.0010206777075381515
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": -3.974268302778638e-05
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -1.5020049250608649e-05
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 1.065301060966412e-06
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": 0.00014681821018827683
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": 7.125499295240356e-06
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": -1.1786677261548443e-05
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.0010688863681924056
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 1.6318017359283802e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 4.750659572565107e-06
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": -0.0001069350537468694
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": -0.0002692617719527493
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": 3.464712959798784e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_base": {
+            "MSE_delta": 2.82253044834258e-05,
+            "squared_prediction_term": -0.0003274805021789326,
+            "alignment_term": 0.00035570580666235843,
+            "conditional_suffix_MC_SE": 0.0001453129071726095,
+            "improving_prefixes": 10,
+            "prefix_delta_SD_descriptive": 0.0014892328829859106,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0005555316482976187,
+                0.0008236891124570637
+              ],
+              "nominal_one_sided_95_upper": 0.0006770407192372765
+            },
+            "suffix_halves": [
+              0.00019329904330963796,
+              -0.00013684843434278633
+            ],
+            "window_halves": [
+              -0.0002708777382587492,
+              0.00032732834722560075
+            ],
+            "prefix_halves": [
+              -0.00046993736302653014,
+              0.0005263879719933816
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": 0.000495000817690309
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": -0.0002358906535154695
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": -2.762734758953355e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": -0.0017969726574296524
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": -0.0004262917868420335
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": 3.229357816460133e-05
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 3.3096169156542475e-06
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": -0.0018033204716061168
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": -0.0005234398559001354
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 7.89387197536209e-06
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.004981784751262205
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": -1.558165149997712e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": -0.0002967401055876686
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": -0.000608717094457367
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": 0.0008534800616570893
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": -0.0001875762015024548
+              }
+            ]
+          },
+          "tracking_distance_minus_zero": {
+            "MSE_delta": 0.0007793575917195455,
+            "squared_prediction_term": 7.46602457820173e-05,
+            "alignment_term": 0.0007046973459375281,
+            "conditional_suffix_MC_SE": 0.0001507806529693813,
+            "improving_prefixes": 3,
+            "prefix_delta_SD_descriptive": 0.002114539033958141,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -4.307923123569764e-05,
+                0.001930080370170049
+              ],
+              "nominal_one_sided_95_upper": 0.0016912014272935944
+            },
+            "suffix_halves": [
+              0.0007602464963837979,
+              0.0007984686870552926
+            ],
+            "window_halves": [
+              0.0006981295516893442,
+              0.0008605856317497463
+            ],
+            "prefix_halves": [
+              0.0007940667095806223,
+              0.0007646484738584682
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": 0.0004437358253746856
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": 2.2088990550451204e-06
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": 1.7905980962852505e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": 0.005381594611937348
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": 4.8511921823250555e-05
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -0.00019830850740008328
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 1.1730693430017496e-05
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": 0.0006451542514618628
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": -5.957808420931621e-05
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 1.1546330381704175e-05
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.006809826628748085
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 7.809103219003834e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 4.3216322367847397e-05
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": 3.724496804176748e-05
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": -0.0008818744044095756
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": 7.871499775719542e-05
+              }
+            ]
+          },
+          "state_rms_minus_wide": {
+            "MSE_delta": -0.00015282011035387848,
+            "squared_prediction_term": -5.8706268673317674e-05,
+            "alignment_term": -9.411384168056083e-05,
+            "conditional_suffix_MC_SE": 5.127447534380596e-05,
+            "improving_prefixes": 10,
+            "prefix_delta_SD_descriptive": 0.00038710688871806785,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0003491936272728312,
+                2.4479625095125046e-05
+              ],
+              "nominal_one_sided_95_upper": -2.735762834864251e-06
+            },
+            "suffix_halves": [
+              -0.00015795708653799893,
+              -0.00014768313416975806
+            ],
+            "window_halves": [
+              -0.00017151240001899673,
+              -0.0001341278206887603
+            ],
+            "prefix_halves": [
+              -0.00025935664526855997,
+              -4.628357543919703e-05
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": -0.0006105776298115261
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": -5.741340427527723e-06
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": -3.0652007050655657e-06
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": -0.0008914087235208332
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": -2.7592044366830233e-05
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -3.097898441887818e-05
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 1.5315648525782218e-05
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": -0.000520804887423601
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": 6.693747764983991e-08
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 1.95635256899365e-06
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": -0.0009387024019980158
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 3.9461526118682e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 2.633497158697432e-06
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": -3.755136756316924e-07
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": 0.0005455495376706795
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": -2.0858538834631034e-05
+              }
+            ]
+          },
+          "state_rms_minus_base": {
+            "MSE_delta": -7.552684148673306e-05,
+            "squared_prediction_term": -0.0003366490274971994,
+            "alignment_term": 0.0002611221860104664,
+            "conditional_suffix_MC_SE": 0.00016522345394806548,
+            "improving_prefixes": 10,
+            "prefix_delta_SD_descriptive": 0.0014013739290477702,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0006946505880625503,
+                0.0006252511517296944
+              ],
+              "nominal_one_sided_95_upper": 0.0005025704841672265
+            },
+            "suffix_halves": [
+              0.0001063792669167134,
+              -0.00025743294989017936
+            ],
+            "window_halves": [
+              -0.0004066125152662342,
+              0.00025555883229276804
+            ],
+            "prefix_halves": [
+              -0.0005844736335848082,
+              0.0004334199506113422
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": 0.0006179064123245242
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": -0.00016227537328268832
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": -2.6639900413754303e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": -0.002817650364967804
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": -0.00038654910381424716
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": 4.731362741520998e-05
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 2.2443158546878373e-06
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": -0.0019501386817943932
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": -0.0005305653551953757
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 1.9680549236910538e-05
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.003912898383069799
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": -3.1899668859260974e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": -0.00030149076516023375
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": -0.0005017820407104976
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": 0.0011227418336098387
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": -0.0002222233311004426
+              }
+            ]
+          },
+          "state_rms_minus_zero": {
+            "MSE_delta": 0.0006756054457493866,
+            "squared_prediction_term": 6.549172046375054e-05,
+            "alignment_term": 0.000610113725285636,
+            "conditional_suffix_MC_SE": 0.00011963677366164536,
+            "improving_prefixes": 3,
+            "prefix_delta_SD_descriptive": 0.0017454368334524272,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -3.5112239982250164e-06,
+                0.001625643117466908
+              ],
+              "nominal_one_sided_95_upper": 0.0014354270666881764
+            },
+            "suffix_halves": [
+              0.0006733267199908735,
+              0.0006778841715078997
+            ],
+            "window_halves": [
+              0.0005623947746818593,
+              0.0007888161168169139
+            ],
+            "prefix_halves": [
+              0.0006795304390223442,
+              0.000671680452476429
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": 0.0005666414200089006
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": 7.582417928782634e-05
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": 1.8893428138631746e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": 0.0043609169043991956
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": 8.825460485103694e-05
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -0.00018328845814947461
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 1.0665392369051079e-05
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": 0.0004983360412735862
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": -6.670358350455659e-05
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 2.3333007643252616e-05
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.00574094026055568
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 6.177301483075451e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 3.8465662795282286e-05
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": 0.00014418002178863689
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": -0.0006126126324568265
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": 4.4067868159207585e-05
+              }
+            ]
+          },
+          "wide_minus_base": {
+            "MSE_delta": 7.729326886714551e-05,
+            "squared_prediction_term": -0.0002779427588238817,
+            "alignment_term": 0.0003552360276910273,
+            "conditional_suffix_MC_SE": 0.00015429618407784243,
+            "improving_prefixes": 11,
+            "prefix_delta_SD_descriptive": 0.0014576191229704737,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0004992395427521845,
+                0.000848977951535348
+              ],
+              "nominal_one_sided_95_upper": 0.0007023651032427639
+            },
+            "suffix_halves": [
+              0.00026433635345471233,
+              -0.00010974981572042122
+            ],
+            "window_halves": [
+              -0.00023510011524723734,
+              0.0003896866529815285
+            ],
+            "prefix_halves": [
+              -0.00032511698831624814,
+              0.0004797035260505392
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": 0.0012284840421360502
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": -0.00015653403285516057
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": -2.3574699708688744e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": -0.0019262416414469706
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": -0.000358957059447417
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": 7.829261183408813e-05
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": -1.3071332671094384e-05
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": -0.0014293337943707925
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": -0.0005306322926730256
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 1.7724196667916885e-05
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.004851600785067815
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": -7.136119497794294e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": -0.00030412426231893113
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": -0.000501406527034866
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": 0.0005771922959391592
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": -0.0002013647922658116
+              }
+            ]
+          },
+          "wide_minus_zero": {
+            "MSE_delta": 0.000828425556103265,
+            "squared_prediction_term": 0.0001241979891370682,
+            "alignment_term": 0.0007042275669661968,
+            "conditional_suffix_MC_SE": 0.00016382764269357814,
+            "improving_prefixes": 4,
+            "prefix_delta_SD_descriptive": 0.002082712091144324,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -8.309175022341868e-06,
+                0.0019485272237192422
+              ],
+              "nominal_one_sided_95_upper": 0.0017342776793646477
+            },
+            "suffix_halves": [
+              0.0008312838065288726,
+              0.0008255673056776577
+            ],
+            "window_halves": [
+              0.0007339071747008561,
+              0.0009229439375056741
+            ],
+            "prefix_halves": [
+              0.0009388870842909043,
+              0.0007179640279156261
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": 0.0011772190498204266
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": 8.156551971535405e-05
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": 2.1958628843697315e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": 0.005252325627920029
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": 0.00011584664921786717
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -0.0001523094737305965
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": -4.650256156731138e-06
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": 0.0010191409286971873
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": -6.677052098220642e-05
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 2.1376655074258964e-05
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.006679642662553697
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 2.2311488712072516e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 3.583216563658486e-05
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": 0.00014455553546426856
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": -0.001158162170127506
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": 6.492640699383862e-05
+              }
+            ]
+          },
+          "base_minus_zero": {
+            "MSE_delta": 0.0007511322872361196,
+            "squared_prediction_term": 0.00040214074796094995,
+            "alignment_term": 0.00034899153927516965,
+            "conditional_suffix_MC_SE": 0.00023733946104112215,
+            "improving_prefixes": 3,
+            "prefix_delta_SD_descriptive": 0.0019325395541964915,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -1.5831127692421064e-05,
+                0.001828167814074966
+              ],
+              "nominal_one_sided_95_upper": 0.0016216126259949914
+            },
+            "suffix_halves": [
+              0.0005669474530741602,
+              0.000935317121398079
+            ],
+            "window_halves": [
+              0.0009690072899480933,
+              0.0005332572845241455
+            ],
+            "prefix_halves": [
+              0.0012640040726071525,
+              0.00023826050186508666
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972279000,
+                "MSE_delta": -5.1264992315623513e-05
+              },
+              {
+                "seed": 1972279001,
+                "MSE_delta": 0.00023809955257051465
+              },
+              {
+                "seed": 1972279002,
+                "MSE_delta": 4.5533328552386055e-05
+              },
+              {
+                "seed": 1972279003,
+                "MSE_delta": 0.0071785672693669995
+              },
+              {
+                "seed": 1972279004,
+                "MSE_delta": 0.00047480370866528416
+              },
+              {
+                "seed": 1972279005,
+                "MSE_delta": -0.00023060208556468462
+              },
+              {
+                "seed": 1972279006,
+                "MSE_delta": 8.421076514363248e-06
+              },
+              {
+                "seed": 1972279007,
+                "MSE_delta": 0.0024484747230679796
+              },
+              {
+                "seed": 1972279008,
+                "MSE_delta": 0.00046386177169081925
+              },
+              {
+                "seed": 1972279009,
+                "MSE_delta": 3.652458406342083e-06
+              },
+              {
+                "seed": 1972279010,
+                "MSE_delta": 0.001828041877485881
+              },
+              {
+                "seed": 1972279011,
+                "MSE_delta": 9.367268369001544e-05
+              },
+              {
+                "seed": 1972279012,
+                "MSE_delta": 0.00033995642795551595
+              },
+              {
+                "seed": 1972279013,
+                "MSE_delta": 0.0006459620624991346
+              },
+              {
+                "seed": 1972279014,
+                "MSE_delta": -0.001735354466066665
+              },
+              {
+                "seed": 1972279015,
+                "MSE_delta": 0.0002662911992596502
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "readout": {
+        "prefixes": 16,
+        "states": 48,
+        "windows": 192,
+        "E_pairs": 1536,
+        "MSE_to_E_mean": {
+          "zero": 0.027795139811051982,
+          "constant": 0.02824054244959835,
+          "causal_t": 0.02794366672112853,
+          "base": 0.02594148682348055,
+          "wide": 0.025922574539670624,
+          "tracking_distance": 0.026306626509650433,
+          "state_rms": 0.0259607701243821
+        },
+        "empirical_E_mean_noise_variance": 0.011965762501890931,
+        "prediction_confirmation_rule_passed": false,
+        "bootstrap": {
+          "replicates": 10000,
+          "seed": 1972289800,
+          "unit": "whole_prefix_mean_paired_loss",
+          "paired_resamples_shared_across_comparisons": true,
+          "scope": "nominal_each_comparison_given_frozen_models_not_simultaneous_or_training_seed_coverage"
+        },
+        "comparisons": {
+          "tracking_distance_minus_wide": {
+            "MSE_delta": 0.0003840519699798119,
+            "squared_prediction_term": -0.00019066175923549116,
+            "alignment_term": 0.0005747137292153031,
+            "conditional_suffix_MC_SE": 0.0001739128766382732,
+            "improving_prefixes": 8,
+            "prefix_delta_SD_descriptive": 0.0014088627546683153,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -6.968855220414455e-05,
+                0.0011522604485909652
+              ],
+              "nominal_one_sided_95_upper": 0.0010491190428501649
+            },
+            "suffix_halves": [
+              0.0005231670058356798,
+              0.00024493693412394406
+            ],
+            "window_halves": [
+              0.0002365456725225994,
+              0.0005315582674370245
+            ],
+            "prefix_halves": [
+              7.06076714090812e-05,
+              0.0006974962685505426
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -2.6934729735717948e-05
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": -8.602115208244335e-05
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": -3.1784602918693404e-05
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": 0.001225503178271646
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": 3.5880835017771686e-05
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": -0.00028315948150442813
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": 9.445954419898847e-05
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": -0.0003630822199744735
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": 0.0001467521292707412
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": 0.00551005043096503
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": 4.130648137889094e-05
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": -9.300538090009499e-05
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 2.962520924843212e-05
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": -4.924011910038822e-05
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": -4.897341114262055e-05
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": 4.3454808684350815e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_state_rms": {
+            "MSE_delta": 0.00034585638526833624,
+            "squared_prediction_term": -0.0001384632717448077,
+            "alignment_term": 0.00048431965701314396,
+            "conditional_suffix_MC_SE": 0.0001501816186825288,
+            "improving_prefixes": 8,
+            "prefix_delta_SD_descriptive": 0.0012532441704825386,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -5.1981835820993406e-05,
+                0.0010254170329422533
+              ],
+              "nominal_one_sided_95_upper": 0.0009437536957450696
+            },
+            "suffix_halves": [
+              0.0004415417143330637,
+              0.00025017105620360887
+            ],
+            "window_halves": [
+              0.00022592984604581323,
+              0.00046578292449085917
+            ],
+            "prefix_halves": [
+              9.598441363938302e-05,
+              0.0005957283568972896
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -5.361896970363903e-05
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": 0.00021331317066068927
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": -2.1971112339232704e-05
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": 0.0009611742001500027
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": 2.2795063102895143e-05
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": -0.00032931566492694526
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": 8.113267935481097e-05
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": -0.00010563405718351679
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": -0.00013601331571828698
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": 0.004932800395089936
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": 7.567150324704744e-05
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": -5.380893111379588e-05
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 1.5160455180697317e-06
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": -9.592613929661111e-05
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 6.576650489137307e-05
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": -2.417920743941436e-05
+              }
+            ]
+          },
+          "tracking_distance_minus_base": {
+            "MSE_delta": 0.0003651396861698834,
+            "squared_prediction_term": -0.0010660008776420074,
+            "alignment_term": 0.0014311405638118909,
+            "conditional_suffix_MC_SE": 0.000596492601794516,
+            "improving_prefixes": 7,
+            "prefix_delta_SD_descriptive": 0.003676627233068035,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.001178742685133285,
+                0.0023281952822094875
+              ],
+              "nominal_one_sided_95_upper": 0.0019417829121216893
+            },
+            "suffix_halves": [
+              6.202241545807491e-06,
+              0.0007240771307939594
+            ],
+            "window_halves": [
+              -0.0006989885444358024,
+              0.0014292679167755688
+            ],
+            "prefix_halves": [
+              -0.0009482860468462764,
+              0.0016785654191860432
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -0.0010941228312613472
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": 0.0020385854506666957
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": -0.0006246687312709154
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": -0.0064721300628173915
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": -0.0010111326037382426
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": 0.0002140526223970123
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": 0.0005318857370067676
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": -0.0011687579557527906
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": 0.0017670047028815346
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": 0.012170149487847578
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": 0.00019039152713455526
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": -0.0008846306005599574
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": -0.001182265572623079
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": 5.483420322921696e-05
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 0.0003160273822623135
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": 0.0009970122233161828
+              }
+            ]
+          },
+          "tracking_distance_minus_zero": {
+            "MSE_delta": -0.0014885133014015534,
+            "squared_prediction_term": 0.00027949078832941105,
+            "alignment_term": -0.0017680040897309645,
+            "conditional_suffix_MC_SE": 0.0004987294471695363,
+            "improving_prefixes": 11,
+            "prefix_delta_SD_descriptive": 0.0033395992298266204,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0032883500210767035,
+                -0.00011147262797378873
+              ],
+              "nominal_one_sided_95_upper": -0.00029642675201399857
+            },
+            "suffix_halves": [
+              -0.0018201425956061211,
+              -0.0011568840071969858
+            ],
+            "window_halves": [
+              -0.0013811932867789252,
+              -0.0015958333160241817
+            ],
+            "prefix_halves": [
+              -0.0014290934787597506,
+              -0.0015479331240433561
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -7.917402875376945e-05
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": -0.004741617666965674
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": 1.4343816276888254e-05
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": -0.006343338272807664
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": -0.00011297986089323775
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": -0.0005304755076974538
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": -0.00013171851411811704
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": 0.0004922122048810243
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": -0.0010116940345115814
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": -0.011738867615339824
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": -0.00013032314801079614
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": 0.00022687842533662022
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 0.0005712257879374842
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": -0.00018208176868174183
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 0.0002600488381067724
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": -0.00037865147718378167
+              }
+            ]
+          },
+          "state_rms_minus_wide": {
+            "MSE_delta": 3.819558471147559e-05,
+            "squared_prediction_term": -5.219848749068348e-05,
+            "alignment_term": 9.039407220215908e-05,
+            "conditional_suffix_MC_SE": 4.141167786123059e-05,
+            "improving_prefixes": 6,
+            "prefix_delta_SD_descriptive": 0.00020692930893211834,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -5.469739022776042e-05,
+                0.00014111381862031138
+              ],
+              "nominal_one_sided_95_upper": 0.00012463278411604074
+            },
+            "suffix_halves": [
+              8.162529150261596e-05,
+              -5.234122079664809e-06
+            ],
+            "window_halves": [
+              1.0615826476786049e-05,
+              6.577534294616513e-05
+            ],
+            "prefix_halves": [
+              -2.5376742230301853e-05,
+              0.00010176791165325299
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": 2.6684239967921054e-05
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": -0.00029933432274313235
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": -9.813490579460699e-06
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": 0.0002643289781216428
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": 1.3085771914876544e-05
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": 4.615618342251707e-05
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": 1.3326864844177507e-05
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": -0.00025744816279095673
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": 0.0002827654449890282
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": 0.0005772500358750944
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": -3.436502186815651e-05
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": -3.9196449786299117e-05
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 2.8109163730362396e-05
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": 4.6686020196222895e-05
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": -0.0001147399160339936
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": 6.763401612376519e-05
+              }
+            ]
+          },
+          "state_rms_minus_base": {
+            "MSE_delta": 1.9283300901546855e-05,
+            "squared_prediction_term": -0.0009275376058971998,
+            "alignment_term": 0.0009468209067987467,
+            "conditional_suffix_MC_SE": 0.00048812210539241004,
+            "improving_prefixes": 7,
+            "prefix_delta_SD_descriptive": 0.0028513960959558986,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0013561071100827706,
+                0.0013799857745528602
+              ],
+              "nominal_one_sided_95_upper": 0.001137343583241104
+            },
+            "suffix_halves": [
+              -0.0004353394727872566,
+              0.0004739060745903501
+            ],
+            "window_halves": [
+              -0.0009249183904816162,
+              0.0009634849922847101
+            ],
+            "prefix_halves": [
+              -0.001044270460485659,
+              0.0010828370622887533
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -0.001040503861557708
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": 0.0018252722800060081
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": -0.0006026976189316827
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": -0.0074333042629673935
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": -0.0010339276668411377
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": 0.0005433682873239575
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": 0.0004507530576519568
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": -0.0010631238985692741
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": 0.001903018018599822
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": 0.0072373490927576415
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": 0.00011472002388750776
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": -0.0008308216694461615
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": -0.0011837816181411486
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": 0.0001507603425258281
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 0.0002502608773709403
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": 0.0010211914307555962
+              }
+            ]
+          },
+          "state_rms_minus_zero": {
+            "MSE_delta": -0.0018343696866698898,
+            "squared_prediction_term": 0.0004179540600742187,
+            "alignment_term": -0.0022523237467441085,
+            "conditional_suffix_MC_SE": 0.0006321948150814699,
+            "improving_prefixes": 11,
+            "prefix_delta_SD_descriptive": 0.0045008161023240515,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.00429726627854714,
+                -6.583324597820186e-05
+              ],
+              "nominal_one_sided_95_upper": -0.0002778152535704621
+            },
+            "suffix_halves": [
+              -0.0022616843099391853,
+              -0.0014070550634005948
+            ],
+            "window_halves": [
+              -0.0016071231328247384,
+              -0.002061616240515042
+            ],
+            "prefix_halves": [
+              -0.0015250778923991332,
+              -0.002143661480940646
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -2.555505905013045e-05
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": -0.004954930837626364
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": 3.631492861612097e-05
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": -0.007304512472957665
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": -0.00013577492399613293
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": -0.0002011598427705085
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": -0.000212851193472928
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": 0.000597846262064541
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": -0.0008756807187932943
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": -0.016671668010429762
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": -0.00020599465125784359
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": 0.000280687356450416
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 0.0005697097424194144
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": -8.615562938513073e-05
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 0.00019428233321539928
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": -0.0003544722697443672
+              }
+            ]
+          },
+          "wide_minus_base": {
+            "MSE_delta": -1.8912283809928586e-05,
+            "squared_prediction_term": -0.0008753391184065163,
+            "alignment_term": 0.0008564268345965877,
+            "conditional_suffix_MC_SE": 0.0004782088386330318,
+            "improving_prefixes": 7,
+            "prefix_delta_SD_descriptive": 0.0027998707684267414,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.0014041453439288863,
+                0.001278235271382885
+              ],
+              "nominal_one_sided_95_upper": 0.0010565773437300233
+            },
+            "suffix_halves": [
+              -0.0005169647642898725,
+              0.0004791401966700154
+            ],
+            "window_halves": [
+              -0.0009355342169584021,
+              0.0008977096493385452
+            ],
+            "prefix_halves": [
+              -0.0010188937182553572,
+              0.0009810691506355002
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -0.0010671881015256292
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": 0.0021246066027491408
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": -0.000592884128352222
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": -0.007697633241089036
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": -0.0010470134387560142
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": 0.0004972121039014405
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": 0.00043742619280777916
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": -0.0008056757357783171
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": 0.0016202525736107934
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": 0.006660099056882547
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": 0.00014908504575566429
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": -0.0007916252196598626
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": -0.0012118907818715109
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": 0.00010407432232960517
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 0.00036500079340493396
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": 0.0009535574146318311
+              }
+            ]
+          },
+          "wide_minus_zero": {
+            "MSE_delta": -0.0018725652713813656,
+            "squared_prediction_term": 0.0004701525475649022,
+            "alignment_term": -0.002342717818946268,
+            "conditional_suffix_MC_SE": 0.0006601670781373252,
+            "improving_prefixes": 11,
+            "prefix_delta_SD_descriptive": 0.004642645764916122,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.004415442040143431,
+                -7.89757053012416e-05
+              ],
+              "nominal_one_sided_95_upper": -0.0002586648414725647
+            },
+            "suffix_halves": [
+              -0.0023433096014418013,
+              -0.0014018209413209296
+            ],
+            "window_halves": [
+              -0.0016177389593015241,
+              -0.002127391583461206
+            ],
+            "prefix_halves": [
+              -0.0014997011501688322,
+              -0.0022454293925938985
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": -5.223929901805146e-05
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": -0.004655596514883232
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": 4.612841919558166e-05
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": -0.007568841451079312
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": -0.00014886069591100946
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": -0.00024731602619302575
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": -0.00022617805831710551
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": 0.0008552944248554977
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": -0.0011584461637823226
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": -0.01724891804630485
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": -0.0001716296293896871
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": 0.0003198838062367152
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 0.000541600578689052
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": -0.00013284164958135363
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": 0.00030902224924939293
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": -0.0004221062858681326
+              }
+            ]
+          },
+          "base_minus_zero": {
+            "MSE_delta": -0.0018536529875714366,
+            "squared_prediction_term": 0.0013454916659714183,
+            "alignment_term": -0.0031991446535428554,
+            "conditional_suffix_MC_SE": 0.0010284552236749101,
+            "improving_prefixes": 9,
+            "prefix_delta_SD_descriptive": 0.006232906991194593,
+            "prefix_bootstrap": {
+              "nominal_two_sided_95": [
+                -0.005222244421727357,
+                0.000330234627505839
+              ],
+              "nominal_one_sided_95_upper": 0.00015300560278276888
+            },
+            "suffix_halves": [
+              -0.0018263448371519282,
+              -0.0018809611379909455
+            ],
+            "window_halves": [
+              -0.0006822047423431225,
+              -0.003025101232799752
+            ],
+            "prefix_halves": [
+              -0.0004808074319134745,
+              -0.0032264985432293994
+            ],
+            "prefix_deltas": [
+              {
+                "seed": 1972289000,
+                "MSE_delta": 0.0010149488025075776
+              },
+              {
+                "seed": 1972289001,
+                "MSE_delta": -0.006780203117632373
+              },
+              {
+                "seed": 1972289002,
+                "MSE_delta": 0.0006390125475478038
+              },
+              {
+                "seed": 1972289003,
+                "MSE_delta": 0.0001287917900097261
+              },
+              {
+                "seed": 1972289004,
+                "MSE_delta": 0.0008981527428450051
+              },
+              {
+                "seed": 1972289005,
+                "MSE_delta": -0.0007445281300944663
+              },
+              {
+                "seed": 1972289006,
+                "MSE_delta": -0.0006636042511248847
+              },
+              {
+                "seed": 1972289007,
+                "MSE_delta": 0.0016609701606338152
+              },
+              {
+                "seed": 1972289008,
+                "MSE_delta": -0.0027786987373931166
+              },
+              {
+                "seed": 1972289009,
+                "MSE_delta": -0.023909017103187404
+              },
+              {
+                "seed": 1972289010,
+                "MSE_delta": -0.00032071467514535135
+              },
+              {
+                "seed": 1972289011,
+                "MSE_delta": 0.0011115090258965777
+              },
+              {
+                "seed": 1972289012,
+                "MSE_delta": 0.0017534913605605634
+              },
+              {
+                "seed": 1972289013,
+                "MSE_delta": -0.0002369159719109588
+              },
+              {
+                "seed": 1972289014,
+                "MSE_delta": -5.597854415554087e-05
+              },
+              {
+                "seed": 1972289015,
+                "MSE_delta": -0.0013756637004999634
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

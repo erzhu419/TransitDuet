@@ -33,3 +33,48 @@ all sixteen past the global freeze gate. The launch snapshot records 468,000
 native steps from six completed states, not final results. Only 3,608 public
 progress bytes returned; [receipt](../results/plan_validity_boundary_conditioning_confirmation_20261111/release.json).
 Implementation and statistics were pushed as `b4e853d25c` before sampling.
+
+## Completed Result
+
+All sixteen tasks exited 0: 64 prefixes, 192 states, 6,144 paired futures,
+14,822,400 native steps and 5,376 frozen predictor scores. No fitting or budget
+extension occurred. The unchanged analyzer used 40,000 bootstrap resamples,
+0.068 CPU seconds and zero native steps. All four registered root rules fail.
+[Public summary](../results/plan_validity_boundary_conditioning_confirmation_20261111/summary.json)
+and [completion receipt](../results/plan_validity_boundary_conditioning_confirmation_20261111/completion.json).
+
+Tracking-gate MSE changes against each frozen reference (negative is better):
+
+| Root | Wide | RMS | Old base | Zero |
+| --- | ---: | ---: | ---: | ---: |
+| PointMaze 1972110000 | +5.52% | +3.26% | +16.99% | -16.21% |
+| PointMaze 1972120000 | +7.33% | +3.65% | -10.10% | -19.28% |
+| Reacher 1972210000 (primary) | -0.78% | +1.70% | +0.46% | +14.33% |
+| Reacher 1972220000 | +1.48% | +1.33% | +1.41% | -5.36% |
+
+Primary paired MSE differences and nominal prefix-bootstrap bounds, in units
+of 1e-4:
+
+| Reference | Mean | Two-sided 95% | One-sided 95% upper |
+| --- | ---: | --- | ---: |
+| Wide | -0.491 | [-1.657, +0.464] | +0.330 |
+| RMS | +1.038 | [-0.487, +3.095] | +2.653 |
+| Old base | +0.282 | [-5.555, +8.237] | +6.770 |
+| Zero | +7.794 | [-0.431, +19.301] | +16.912 |
+
+The primary gain versus Wide survives both suffix/window halves but reverses
+in the second prefix half; prefix 1972279000 supplies 93.43% of its net gain.
+Its squared-output term falls by 4.954e-5 while alignment worsens by 4.698e-7:
+the small aggregate gain is not evidence of better target alignment. Tracking
+is worse than Wide on both PointMaze roots with two-sided intervals above zero.
+Wide still beats zero on both PointMaze roots and Reacher2, with two-sided
+intervals below zero and all half means negative. Preserve those positive results.
+
+Decision: do not promote either gate or retrospectively select RMS. Preserve
+base/Wide and the full negative readout; this exposed cohort is reporting-only.
+No follow-up jobs were created. The next decision needs a distinct training-only
+hypothesis, not more futures or a gate revision on this confirmation cohort.
+
+Limits: percentages use observed MSE to the eight-future mean; inference uses
+paired loss contrasts, with conditional MC uncertainty separate. This is frozen
+boundary-tail prediction, not zero-action control or an episode-policy test.
