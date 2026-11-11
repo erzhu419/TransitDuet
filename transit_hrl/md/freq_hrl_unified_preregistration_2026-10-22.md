@@ -401,3 +401,7 @@ All four information prechecks passed at exactly 91,200 steps and zero fits.
 Cached/fresh invariants hold; no reserved training/evaluation role was accessed.
 Next phase is 32 training-acquisition shards, not model fitting or E readout;
 that formal release has not occurred.
+The subsequent user authorization now releases the linked 32-shard training
+acquisition manifest only: 11,289,600 native steps, zero fits. Workers verify
+all four prechecks, preserve partial paid rows and never access readout seeds.
+No automatic fitting, E readout or policy promotion follows acquisition.

@@ -54,3 +54,14 @@ See [summary](../results/plan_validity_boundary_information_20261111/precheck_su
 and [receipt](../results/plan_validity_boundary_information_20261111/precheck_release.json).
 Next release is training acquisition only: two Dense plus six Wide shards/root,
 32 jobs/11,289,600 steps total. No fitting or E readout follows automatically.
+
+## Training Acquisition Release
+
+The next user authorization releases exactly those 32 shards through the
+[sampling manifest](../protocols/plan_validity_boundary_information_sample_2026-11-11.json).
+Four prechecks gate every worker before native access. Dense new indices are
+4-9 plus the declared index-10 windows; Wide uses new training prefixes and
+indices 4/5. Full factual/replay cost is 11,289,600 steps: 4,656 new paired
+futures and 96 factual episodes. Old A0/1 remains resident; no B or E sampling,
+model fitting, retuning or original confirmation is released. Each state is
+saved privately as completed; public progress/costs only are retrieved.

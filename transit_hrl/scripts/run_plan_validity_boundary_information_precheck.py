@@ -20,22 +20,27 @@ from scripts.run_plan_validity_boundary_tail import load_cache
 from scripts.run_plan_validity_target_credit import load_sources
 
 
-def run_cell(cell, manifest):
-    source = json.loads((ROOT / manifest["source_manifest"]).read_text())
+def load_frozen_C0(cell, manifest):
     variance = json.loads((ROOT / manifest["source_variance_manifest"]).read_text())
     old_manifest = json.loads((ROOT / variance["source_manifest"]).read_text())
     old, = [c for c in old_manifest["cells"] if (c["task"], c["optimizer_seed"]) == (cell["task"], cell["optimizer_seed"])]
-    with measured_phase("read_existing_training_windows"):
-        rows = load_cache(cell, source)
-        cached = min(rows, key=lambda r: (r["seed"], r["opportunity_step"]))
     with measured_phase("load_unchanged_C0"):
         _, controllers, _, args = load_sources(old)
         rule = TimingRule(**json.loads((ROOT / old["phase_cache_directory"] / "frozen_rules.json").read_text())["checks_clock"])
         if args.horizon != manifest["horizon"]:
             raise ValueError("frozen horizon differs from the information budget")
     spec = PlanValidityTaskSpec(cell["task"], _task_options(args), args.env_id)
+    return controllers["history"], rule, args, spec
+
+
+def run_cell(cell, manifest):
+    source = json.loads((ROOT / manifest["source_manifest"]).read_text())
+    with measured_phase("read_existing_training_windows"):
+        rows = load_cache(cell, source)
+        cached = min(rows, key=lambda r: (r["seed"], r["opportunity_step"]))
+    controller, rule, args, spec = load_frozen_C0(cell, manifest)
     with measured_phase("cached_and_fresh_native_precheck"):
-        return native_precheck(controllers["history"], rule, cached, spec=spec, args=args, seed=cell["precheck_seed"])
+        return native_precheck(controller, rule, cached, spec=spec, args=args, seed=cell["precheck_seed"])
 
 
 def main(argv=None):
