@@ -364,3 +364,8 @@ The linked readout separates window and suffix uncertainty; G suffix variance
 shares are 71.7%-87.0%, with no cross-root stable sign claim. Only compact
 moments were retrieved. The next proposed cache-only boundary-tail probe is
 not released by these results; original confirmation remains on HOLD.
+The user's next-step authorization now releases only the
+[cache-only boundary-tail probe](freq_hrl_boundary_tail_probe_2026-11-11.md):
+four frozen root jobs, total DF 3, eight whole-prefix folds, suffix 0/1 fitting
+and 2/3 readout. Budget: 72 ridge fits, 36 constant fits, zero native steps.
+No policy, threshold, upstream distillation or original confirmation is released.

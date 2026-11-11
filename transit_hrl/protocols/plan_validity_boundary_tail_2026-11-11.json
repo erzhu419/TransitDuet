@@ -1,0 +1,297 @@
+{
+  "protocol_version": "cache_only_matched_capacity_boundary_tail_v1",
+  "run_name": "plan_validity_boundary_tail_20261111",
+  "source_run_name": "plan_validity_boundary_variance_20261111",
+  "source_hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "horizon": 1200,
+  "period": 50,
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "development_prefix_seeds": [
+        1972175000,
+        1972175001,
+        1972175002,
+        1972175003,
+        1972175004,
+        1972175005,
+        1972175006,
+        1972175007
+      ],
+      "output_directory": "results/plan_validity_boundary_tail_20261111/pointmaze/1972110000",
+      "cache_directory": "results/plan_validity_boundary_variance_20261111/pointmaze/1972110000"
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "development_prefix_seeds": [
+        1972185000,
+        1972185001,
+        1972185002,
+        1972185003,
+        1972185004,
+        1972185005,
+        1972185006,
+        1972185007
+      ],
+      "output_directory": "results/plan_validity_boundary_tail_20261111/pointmaze/1972120000",
+      "cache_directory": "results/plan_validity_boundary_variance_20261111/pointmaze/1972120000"
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "development_prefix_seeds": [
+        1972275000,
+        1972275001,
+        1972275002,
+        1972275003,
+        1972275004,
+        1972275005,
+        1972275006,
+        1972275007
+      ],
+      "output_directory": "results/plan_validity_boundary_tail_20261111/reacher_tracking/1972210000",
+      "cache_directory": "results/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000"
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "development_prefix_seeds": [
+        1972285000,
+        1972285001,
+        1972285002,
+        1972285003,
+        1972285004,
+        1972285005,
+        1972285006,
+        1972285007
+      ],
+      "output_directory": "results/plan_validity_boundary_tail_20261111/reacher_tracking/1972220000",
+      "cache_directory": "results/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000"
+    }
+  ],
+  "jobs": [
+    {
+      "project": "Freq-HRL-BoundaryTail",
+      "description": "Cache-only tail probe pointmaze 1972110000",
+      "signature": "Freq-HRL/boundary-tail/plan_validity_boundary_tail_20261111/pointmaze/1972110000",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_tail.py --manifest protocols/plan_validity_boundary_tail_2026-11-11.json --cell-index 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/pointmaze/1972110000/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/pointmaze/1972110000/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_tail_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryTail",
+      "description": "Cache-only tail probe pointmaze 1972120000",
+      "signature": "Freq-HRL/boundary-tail/plan_validity_boundary_tail_20261111/pointmaze/1972120000",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_tail.py --manifest protocols/plan_validity_boundary_tail_2026-11-11.json --cell-index 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/pointmaze/1972120000/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/pointmaze/1972120000/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_tail_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryTail",
+      "description": "Cache-only tail probe reacher_tracking 1972210000",
+      "signature": "Freq-HRL/boundary-tail/plan_validity_boundary_tail_20261111/reacher_tracking/1972210000",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_tail.py --manifest protocols/plan_validity_boundary_tail_2026-11-11.json --cell-index 2",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/reacher_tracking/1972210000/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/reacher_tracking/1972210000/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_tail_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryTail",
+      "description": "Cache-only tail probe reacher_tracking 1972220000",
+      "signature": "Freq-HRL/boundary-tail/plan_validity_boundary_tail_20261111/reacher_tracking/1972220000",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_tail.py --manifest protocols/plan_validity_boundary_tail_2026-11-11.json --cell-index 3",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/reacher_tracking/1972220000/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_tail_20261111/reacher_tracking/1972220000/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_tail_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    }
+  ],
+  "methods": [
+    "zero",
+    "constant",
+    "causal_t",
+    "boundary_delta"
+  ],
+  "total_effective_df": 3,
+  "features": "39_existing_causal_interactions_plus_clock_remaining_spent_plus_39_times_remaining_plus_39_times_spent",
+  "boundary_model": "shared_linear_potential_wait_minus_now_sign_augmented_no_intercept",
+  "capacity": "causal_t_1_intercept_plus_2_slope_DF_boundary_0_intercept_plus_3_slope_DF",
+  "fit_suffix_indices": [
+    0,
+    1
+  ],
+  "readout_suffix_indices": [
+    2,
+    3
+  ],
+  "folds": "leave_one_whole_prefix_out_8_folds_no_hyperparameter_search",
+  "ridge_fits_per_root": 18,
+  "constant_fits_per_root": 9,
+  "total_ridge_fits": 72,
+  "total_constant_fits": 36,
+  "new_environment_steps": 0,
+  "new_controller_updates": 0,
+  "E8_reused": false,
+  "qualifying_rule": "boundary_prefix_OOF_B_MSE_below_zero_constant_causal_t_overall_and_both_window_halves_each_root",
+  "statistics": "training_A_no_noise_correction_B_and_prefix_OOF_correct_conditional_suffix_noise_negative_estimates_retained",
+  "data_scope": "previously_exposed_development_prefixes_not_new_confirmation_no_policy_decision",
+  "followup": "none_no_upstream_distillation_simulation_or_policy_release_automatically",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}
