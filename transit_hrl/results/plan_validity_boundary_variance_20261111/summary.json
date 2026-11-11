@@ -1,0 +1,3362 @@
+{
+  "run_name": "plan_validity_boundary_variance_20261111",
+  "status": "complete",
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "summary": {
+        "states": 24,
+        "prefixes": 8,
+        "targets": {
+          "W": {
+            "mean": 0.005381910291561032,
+            "within_window": 0.0,
+            "between_window_corrected": 3.712313834264658e-05,
+            "total_corrected": 3.712313834264658e-05,
+            "nested_mean_variance": 9.280784585661645e-06,
+            "equal_pair_count_independent_projection": 2.3201961464154112e-06,
+            "across_fixed_state_mean_variance": 0.0003852482815575068,
+            "across_fixed_states_corrected": 0.00037596749697184513,
+            "negative_between_window_estimates": 0,
+            "window_half_sign_agreement": 22,
+            "suffix_half_sign_agreement": 24,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.0,
+            "nested_over_independent_variance_projection": 4.0,
+            "largest_state_share_of_nested_variance": 0.2813370419148368,
+            "half_means": {
+              "window": [
+                0.005972726506421787,
+                0.00479109407670028
+              ],
+              "suffix": [
+                0.005381910291561032,
+                0.005381910291561032
+              ]
+            }
+          },
+          "tail": {
+            "mean": -0.002048996404264382,
+            "within_window": 0.002716395945550324,
+            "between_window_corrected": 0.0006348103586127229,
+            "total_corrected": 0.0033512063041630474,
+            "nested_mean_variance": 0.00032847733625007594,
+            "equal_pair_count_independent_projection": 0.00020945039401019046,
+            "across_fixed_state_mean_variance": 0.0005702833032044612,
+            "across_fixed_states_corrected": 0.00024180596695438526,
+            "negative_between_window_estimates": 8,
+            "window_half_sign_agreement": 14,
+            "suffix_half_sign_agreement": 19,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.8105725816330293,
+            "nested_over_independent_variance_projection": 1.5682822551009115,
+            "largest_state_share_of_nested_variance": 0.29721799747190675,
+            "half_means": {
+              "window": [
+                0.0024247451871796154,
+                -0.0065227379957083775
+              ],
+              "suffix": [
+                0.0019203103549303828,
+                -0.006018303163459149
+              ]
+            }
+          },
+          "G": {
+            "mean": 0.0033329138872965785,
+            "within_window": 0.0027163959455503415,
+            "between_window_corrected": 0.0008972879404447933,
+            "total_corrected": 0.003613683885995135,
+            "nested_mean_variance": 0.00039409673170809475,
+            "equal_pair_count_independent_projection": 0.00022585524287469593,
+            "across_fixed_state_mean_variance": 0.0015704874479009333,
+            "across_fixed_states_corrected": 0.0011763907161928386,
+            "negative_between_window_estimates": 8,
+            "window_half_sign_agreement": 16,
+            "suffix_half_sign_agreement": 22,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.7516971686642983,
+            "nested_over_independent_variance_projection": 1.7449084940071056,
+            "largest_state_share_of_nested_variance": 0.29476909624357145,
+            "half_means": {
+              "window": [
+                0.008397471693601189,
+                -0.0017316439190080335
+              ],
+              "suffix": [
+                0.007302220646491289,
+                -0.0006363928718981343
+              ]
+            }
+          }
+        },
+        "mean_between_window_W_tail_covariance": 0.00011267722174471606
+      },
+      "prefix_reports": [
+        {
+          "seed": 1972175000,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.023669662884849365,
+              "within_window": 0.0,
+              "between_window_corrected": 1.9389461612456343e-06,
+              "total_corrected": 1.9389461612456343e-06,
+              "nested_mean_variance": 4.847365403114086e-07,
+              "equal_pair_count_independent_projection": 1.2118413507785214e-07,
+              "across_fixed_state_mean_variance": 0.0005782826303824285,
+              "across_fixed_states_corrected": 0.0005777978938421171,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8051750194546707,
+              "half_means": {
+                "window": [
+                  0.023261738013861836,
+                  0.024077587755836894
+                ],
+                "suffix": [
+                  0.023669662884849365,
+                  0.023669662884849365
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.0012296239127076857,
+              "within_window": 0.0006415885381661086,
+              "between_window_corrected": -7.421945703769765e-05,
+              "total_corrected": 0.0005673690811284109,
+              "nested_mean_variance": 2.1544419375957368e-05,
+              "equal_pair_count_independent_projection": 3.546056757052568e-05,
+              "across_fixed_state_mean_variance": 0.00017841551688354328,
+              "across_fixed_states_corrected": 0.0001568710975075859,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.1308133620712755,
+              "nested_over_independent_variance_projection": 0.6075599137861736,
+              "largest_state_share_of_nested_variance": 0.4908440132791172,
+              "half_means": {
+                "window": [
+                  -0.002066737598996088,
+                  0.00452598542441146
+                ],
+                "suffix": [
+                  0.0004454577017941041,
+                  0.0020137901236212674
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.02489928679755694,
+              "within_window": 0.0006415885381661181,
+              "between_window_corrected": -7.781439556005659e-05,
+              "total_corrected": 0.0005637741426060616,
+              "nested_mean_variance": 2.0645684745368235e-05,
+              "equal_pair_count_independent_projection": 3.523588391287885e-05,
+              "across_fixed_state_mean_variance": 0.001398730856567634,
+              "across_fixed_states_corrected": 0.0013780851718222659,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.138024059067976,
+              "nested_over_independent_variance_projection": 0.5859278227960718,
+              "largest_state_share_of_nested_variance": 0.4780481992194335,
+              "half_means": {
+                "window": [
+                  0.021195000414865387,
+                  0.028603573180248504
+                ],
+                "suffix": [
+                  0.02411512058664325,
+                  0.02568345300847064
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -2.7669423418006053e-06
+        },
+        {
+          "seed": 1972175001,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.0010690412043684752,
+              "within_window": 0.0,
+              "between_window_corrected": 3.1094619164811274e-06,
+              "total_corrected": 3.1094619164811274e-06,
+              "nested_mean_variance": 7.773654791202818e-07,
+              "equal_pair_count_independent_projection": 1.9434136978007046e-07,
+              "across_fixed_state_mean_variance": 3.187425741460901e-05,
+              "across_fixed_states_corrected": 3.1096891935488726e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.7389150796171795,
+              "half_means": {
+                "window": [
+                  0.0005518795251795982,
+                  0.0015862028835573524
+                ],
+                "suffix": [
+                  0.0010690412043684752,
+                  0.0010690412043684752
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.013803381361296644,
+              "within_window": 0.0012880178615362532,
+              "between_window_corrected": -0.00010016500268810777,
+              "total_corrected": 0.0011878528588481453,
+              "nested_mean_variance": 5.545986567398888e-05,
+              "equal_pair_count_independent_projection": 7.424080367800908e-05,
+              "across_fixed_state_mean_variance": 0.0003568228477466808,
+              "across_fixed_states_corrected": 0.00030136298207269195,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.084324419427872,
+              "nested_over_independent_variance_projection": 0.7470267417163843,
+              "largest_state_share_of_nested_variance": 0.38027685406221406,
+              "half_means": {
+                "window": [
+                  -0.0195353702719244,
+                  -0.008071392450668888
+                ],
+                "suffix": [
+                  -0.007971188222773054,
+                  -0.019635574499820233
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.012734340156928203,
+              "within_window": 0.0012880178615362562,
+              "between_window_corrected": -6.574738568320469e-05,
+              "total_corrected": 0.0012222704758530515,
+              "nested_mean_variance": 6.406426992521484e-05,
+              "equal_pair_count_independent_projection": 7.639190474081572e-05,
+              "across_fixed_state_mean_variance": 0.0005486638562102457,
+              "across_fixed_states_corrected": 0.0004845995862850309,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0537911918696374,
+              "nested_over_independent_variance_projection": 0.8386264243910874,
+              "largest_state_share_of_nested_variance": 0.39331955258719886,
+              "half_means": {
+                "window": [
+                  -0.018983490746744845,
+                  -0.006485189567111564
+                ],
+                "suffix": [
+                  -0.006902147018404636,
+                  -0.018566533295451774
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 1.565407754421235e-05
+        },
+        {
+          "seed": 1972175002,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.0032164538834942758,
+              "within_window": 0.0,
+              "between_window_corrected": 1.0257115480581118e-07,
+              "total_corrected": 1.0257115480581118e-07,
+              "nested_mean_variance": 2.5642788701452794e-08,
+              "equal_pair_count_independent_projection": 6.410697175363199e-09,
+              "across_fixed_state_mean_variance": 0.0003519470668794806,
+              "across_fixed_states_corrected": 0.00035192142409077914,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8182108402307188,
+              "half_means": {
+                "window": [
+                  -0.0032166529382828646,
+                  -0.0032162548287056887
+                ],
+                "suffix": [
+                  -0.0032164538834942758,
+                  -0.0032164538834942758
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.008117466096882449,
+              "within_window": 0.004246271243605055,
+              "between_window_corrected": -0.00036724236746066025,
+              "total_corrected": 0.003879028876144395,
+              "nested_mean_variance": 0.00017358136086015091,
+              "equal_pair_count_independent_projection": 0.00024243930475902468,
+              "across_fixed_state_mean_variance": 0.0025281355334529545,
+              "across_fixed_states_corrected": 0.002354554172592804,
+              "negative_between_window_estimates": 3,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.094673790576595,
+              "nested_over_independent_variance_projection": 0.7159786282702142,
+              "largest_state_share_of_nested_variance": 0.5394826642187212,
+              "half_means": {
+                "window": [
+                  -0.014925942401492908,
+                  -0.0013089897922719887
+                ],
+                "suffix": [
+                  -0.00340338648661198,
+                  -0.01283154570715292
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.011333919980376549,
+              "within_window": 0.0042462712436050504,
+              "between_window_corrected": -0.00037659313569962557,
+              "total_corrected": 0.003869678107905425,
+              "nested_mean_variance": 0.00017124366880040925,
+              "equal_pair_count_independent_projection": 0.00024185488174408907,
+              "across_fixed_state_mean_variance": 0.0047378821950150194,
+              "across_fixed_states_corrected": 0.0045666385262146105,
+              "negative_between_window_estimates": 3,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0973189824058691,
+              "nested_over_independent_variance_projection": 0.7080430527823921,
+              "largest_state_share_of_nested_variance": 0.5336914326723051,
+              "half_means": {
+                "window": [
+                  -0.018142595339775636,
+                  -0.004525244620977462
+                ],
+                "suffix": [
+                  -0.0066198403701062765,
+                  -0.01604799959064682
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -4.726669696888919e-06
+        },
+        {
+          "seed": 1972175003,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.016413408045897814,
+              "within_window": 0.0,
+              "between_window_corrected": 8.165402229568502e-05,
+              "total_corrected": 8.165402229568502e-05,
+              "nested_mean_variance": 2.0413505573921255e-05,
+              "equal_pair_count_independent_projection": 5.103376393480314e-06,
+              "across_fixed_state_mean_variance": 0.0008221007327617727,
+              "across_fixed_states_corrected": 0.0008016872271878515,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.9719682578635602,
+              "half_means": {
+                "window": [
+                  -0.015623626288605834,
+                  -0.01720318980318979
+                ],
+                "suffix": [
+                  -0.016413408045897814,
+                  -0.016413408045897814
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.020314690078749153,
+              "within_window": 0.004069902061895309,
+              "between_window_corrected": 0.0013133592262450028,
+              "total_corrected": 0.005383261288140311,
+              "nested_mean_variance": 0.0005827086854297075,
+              "equal_pair_count_independent_projection": 0.00033645383050876946,
+              "across_fixed_state_mean_variance": 0.0007466332161969306,
+              "across_fixed_states_corrected": 0.0001639245307672231,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.7560290768091786,
+              "nested_over_independent_variance_projection": 1.7319127695724645,
+              "largest_state_share_of_nested_variance": 0.7313981233047335,
+              "half_means": {
+                "window": [
+                  0.0042123797718082055,
+                  -0.04484175992930651
+                ],
+                "suffix": [
+                  -0.014221463825580342,
+                  -0.026407916331917965
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.03672809812464712,
+              "within_window": 0.004069902061895316,
+              "between_window_corrected": 0.0017810595407972028,
+              "total_corrected": 0.00585096160269252,
+              "nested_mean_variance": 0.0006996337640677581,
+              "equal_pair_count_independent_projection": 0.0003656851001682825,
+              "across_fixed_state_mean_variance": 0.0029438804464213056,
+              "across_fixed_states_corrected": 0.0022442466823535475,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6955954146105509,
+              "nested_over_independent_variance_projection": 1.9132137561683473,
+              "largest_state_share_of_nested_variance": 0.6110738234560145,
+              "half_means": {
+                "window": [
+                  -0.011411246516797804,
+                  -0.06204494973249644
+                ],
+                "suffix": [
+                  -0.03063487187147826,
+                  -0.04282132437781599
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.0001930231461282566
+        },
+        {
+          "seed": 1972175004,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.013605332020098943,
+              "within_window": 0.0,
+              "between_window_corrected": 9.786624434543848e-05,
+              "total_corrected": 9.786624434543848e-05,
+              "nested_mean_variance": 2.446656108635962e-05,
+              "equal_pair_count_independent_projection": 6.116640271589905e-06,
+              "across_fixed_state_mean_variance": 2.1366515183934564e-05,
+              "across_fixed_states_corrected": -3.100045902425057e-06,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8537459670814266,
+              "half_means": {
+                "window": [
+                  0.01698010020742186,
+                  0.010230563832776027
+                ],
+                "suffix": [
+                  0.013605332020098943,
+                  0.013605332020098943
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.0039990049324174545,
+              "within_window": 0.0004740161693054425,
+              "between_window_corrected": 0.001021396896532486,
+              "total_corrected": 0.0014954130658379283,
+              "nested_mean_variance": 0.0002849752347147116,
+              "equal_pair_count_independent_projection": 9.346331661487052e-05,
+              "across_fixed_state_mean_variance": 3.6902536187419666e-05,
+              "across_fixed_states_corrected": -0.00024807269852729195,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 0,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.3169800907415744,
+              "nested_over_independent_variance_projection": 3.0490597277752767,
+              "largest_state_share_of_nested_variance": 0.9352923471269914,
+              "half_means": {
+                "window": [
+                  0.021456326849261964,
+                  -0.013458316984427057
+                ],
+                "suffix": [
+                  0.00469251732429287,
+                  0.0033054925405420397
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.017604336952516234,
+              "within_window": 0.0004740161693054413,
+              "between_window_corrected": 0.0016193943192572785,
+              "total_corrected": 0.00209341048856272,
+              "nested_mean_variance": 0.00043447459039590975,
+              "equal_pair_count_independent_projection": 0.00013083815553517,
+              "across_fixed_state_mean_variance": 8.657887725761046e-06,
+              "across_fixed_states_corrected": -0.0004258167026701487,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.22643249945255037,
+              "nested_over_independent_variance_projection": 3.3207025016423484,
+              "largest_state_share_of_nested_variance": 0.9608654573103136,
+              "half_means": {
+                "window": [
+                  0.03843642705668342,
+                  -0.0032277531516509464
+                ],
+                "suffix": [
+                  0.018297849344391548,
+                  0.016910824560640924
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00025006558918969204
+        },
+        {
+          "seed": 1972175005,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.005140630610674089,
+              "within_window": 0.0,
+              "between_window_corrected": 3.2322985309592664e-05,
+              "total_corrected": 3.2322985309592664e-05,
+              "nested_mean_variance": 8.080746327398166e-06,
+              "equal_pair_count_independent_projection": 2.0201865818495415e-06,
+              "across_fixed_state_mean_variance": 8.255578209343496e-05,
+              "across_fixed_states_corrected": 7.44750357660368e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8294548152199153,
+              "half_means": {
+                "window": [
+                  -0.003514360043380535,
+                  -0.006766901177967644
+                ],
+                "suffix": [
+                  -0.005140630610674089,
+                  -0.005140630610674089
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.002495483837604088,
+              "within_window": 0.004607390249375013,
+              "between_window_corrected": 0.002349849782063169,
+              "total_corrected": 0.006957240031438182,
+              "nested_mean_variance": 0.0008754243361017306,
+              "equal_pair_count_independent_projection": 0.00043482750196488637,
+              "across_fixed_state_mean_variance": 0.0004789610721277622,
+              "across_fixed_states_corrected": -0.00039646326397396845,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.662243968665055,
+              "nested_over_independent_variance_projection": 2.0132680940048355,
+              "largest_state_share_of_nested_variance": 0.8921787715420193,
+              "half_means": {
+                "window": [
+                  0.028594892812373148,
+                  -0.02360392513716497
+                ],
+                "suffix": [
+                  0.007670242479691111,
+                  -0.0026792748044829353
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.0026451467730701805,
+              "within_window": 0.004607390249375084,
+              "between_window_corrected": 0.00295223806221367,
+              "total_corrected": 0.0075596283115887545,
+              "nested_mean_variance": 0.0010260214061393604,
+              "equal_pair_count_independent_projection": 0.00047247676947429715,
+              "across_fixed_state_mean_variance": 0.0006764816958106778,
+              "across_fixed_states_corrected": -0.00034953971032868265,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6094731195066893,
+              "nested_over_independent_variance_projection": 2.1715806414799323,
+              "largest_state_share_of_nested_variance": 0.9057708678827449,
+              "half_means": {
+                "window": [
+                  0.02508053276899219,
+                  -0.03037082631513255
+                ],
+                "suffix": [
+                  0.002529611869016568,
+                  -0.00781990541515693
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00028503264742046983
+        },
+        {
+          "seed": 1972175006,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.02443961665317319,
+              "within_window": 0.0,
+              "between_window_corrected": 5.790678465668276e-05,
+              "total_corrected": 5.790678465668276e-05,
+              "nested_mean_variance": 1.447669616417069e-05,
+              "equal_pair_count_independent_projection": 3.6191740410426724e-06,
+              "across_fixed_state_mean_variance": 0.00032974957943029227,
+              "across_fixed_states_corrected": 0.0003152728832661216,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8822028838100355,
+              "half_means": {
+                "window": [
+                  0.025494674916197436,
+                  0.02338455839014895
+                ],
+                "suffix": [
+                  0.02443961665317319,
+                  0.02443961665317319
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.016506832146945136,
+              "within_window": 0.003207136809631018,
+              "between_window_corrected": 0.0005258182394740608,
+              "total_corrected": 0.003732955049105079,
+              "nested_mean_variance": 0.00033190061047045385,
+              "equal_pair_count_independent_projection": 0.00023330969056906744,
+              "across_fixed_state_mean_variance": 0.00024590283781913806,
+              "across_fixed_states_corrected": -8.59977726513158e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8591415560709421,
+              "nested_over_independent_variance_projection": 1.4225753317871734,
+              "largest_state_share_of_nested_variance": 0.9645567602919668,
+              "half_means": {
+                "window": [
+                  0.0020623784560022847,
+                  0.030951285837887987
+                ],
+                "suffix": [
+                  0.017949200260619805,
+                  0.015064464033270464
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.04094644880011839,
+              "within_window": 0.0032071368096310755,
+              "between_window_corrected": 0.0007992089863040479,
+              "total_corrected": 0.004006345795935124,
+              "nested_mean_variance": 0.00040024829717795425,
+              "equal_pair_count_independent_projection": 0.00025039661224594525,
+              "across_fixed_state_mean_variance": 0.0011154968177332933,
+              "across_fixed_states_corrected": 0.000715248520555339,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.800514227425168,
+              "nested_over_independent_variance_projection": 1.5984573177244956,
+              "largest_state_share_of_nested_variance": 0.9524748179448149,
+              "half_means": {
+                "window": [
+                  0.02755705337219963,
+                  0.05433584422803716
+                ],
+                "suffix": [
+                  0.0423888169137932,
+                  0.03950408068644359
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00010774198108666273
+        },
+        {
+          "seed": 1972175007,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.005042122110064465,
+              "within_window": 0.0,
+              "between_window_corrected": 2.2084090901241142e-05,
+              "total_corrected": 2.2084090901241142e-05,
+              "nested_mean_variance": 5.5210227253102854e-06,
+              "equal_pair_count_independent_projection": 1.3802556813275714e-06,
+              "across_fixed_state_mean_variance": 4.697268026595408e-05,
+              "across_fixed_states_corrected": 4.1451657540643794e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.744772338522938,
+              "half_means": {
+                "window": [
+                  0.0038480586589827886,
+                  0.006236185561146142
+                ],
+                "suffix": [
+                  0.005042122110064465,
+                  0.005042122110064465
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.0016126214731388283,
+              "within_window": 0.003196844630888392,
+              "between_window_corrected": 0.0004096855517735305,
+              "total_corrected": 0.0036065301826619226,
+              "nested_mean_variance": 0.0003022241773739071,
+              "equal_pair_count_independent_projection": 0.00022540813641637016,
+              "across_fixed_state_mean_variance": 0.0005849839570460576,
+              "across_fixed_states_corrected": 0.0002827597796721505,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8864045131957975,
+              "nested_over_independent_variance_projection": 1.3407864604126074,
+              "largest_state_share_of_nested_variance": 0.7405817015998445,
+              "half_means": {
+                "window": [
+                  -0.00039996611959528666,
+                  0.003625209065872941
+                ],
+                "suffix": [
+                  0.010201103608010548,
+                  -0.006975860661732894
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.006654743583203105,
+              "within_window": 0.0031968446308883887,
+              "between_window_corrected": 0.000546557531929034,
+              "total_corrected": 0.0037434021628174226,
+              "nested_mean_variance": 0.0003364421724127828,
+              "equal_pair_count_independent_projection": 0.0002339626351760889,
+              "across_fixed_state_mean_variance": 0.0003180782770548893,
+              "across_fixed_states_corrected": -1.8363895357893486e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8539944392408871,
+              "nested_over_independent_variance_projection": 1.4380166822773388,
+              "largest_state_share_of_nested_variance": 0.6529731536141602,
+              "half_means": {
+                "window": [
+                  0.0034480925393871715,
+                  0.009861394627019036
+                ],
+                "suffix": [
+                  0.015243225718074923,
+                  -0.001933738551668715
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 5.739394462712442e-05
+        }
+      ]
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "summary": {
+        "states": 24,
+        "prefixes": 8,
+        "targets": {
+          "W": {
+            "mean": 0.00687414102346521,
+            "within_window": 0.0,
+            "between_window_corrected": 0.00010503038549384814,
+            "total_corrected": 0.00010503038549384814,
+            "nested_mean_variance": 2.6257596373462034e-05,
+            "equal_pair_count_independent_projection": 6.5643990933655085e-06,
+            "across_fixed_state_mean_variance": 0.0006187997092395689,
+            "across_fixed_states_corrected": 0.0005925421128661069,
+            "negative_between_window_estimates": 0,
+            "window_half_sign_agreement": 21,
+            "suffix_half_sign_agreement": 24,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.0,
+            "nested_over_independent_variance_projection": 4.0,
+            "largest_state_share_of_nested_variance": 0.5718331388736865,
+            "half_means": {
+              "window": [
+                0.007435111303144557,
+                0.006313170743785862
+              ],
+              "suffix": [
+                0.006874141023465212,
+                0.006874141023465212
+              ]
+            }
+          },
+          "tail": {
+            "mean": -0.0033122224243519647,
+            "within_window": 0.0026043412790083737,
+            "between_window_corrected": 0.000671766907606796,
+            "total_corrected": 0.0032761081866151697,
+            "nested_mean_variance": 0.0003307130568397223,
+            "equal_pair_count_independent_projection": 0.0002047567616634481,
+            "across_fixed_state_mean_variance": 0.0010080143371763697,
+            "across_fixed_states_corrected": 0.0006773012803366475,
+            "negative_between_window_estimates": 8,
+            "window_half_sign_agreement": 14,
+            "suffix_half_sign_agreement": 15,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.7949497179759327,
+            "nested_over_independent_variance_projection": 1.6151508460722013,
+            "largest_state_share_of_nested_variance": 0.2583278890811262,
+            "half_means": {
+              "window": [
+                -0.005331719369294419,
+                -0.0012927254794095103
+              ],
+              "suffix": [
+                -0.002904438599732591,
+                -0.0037200062489713384
+              ]
+            }
+          },
+          "G": {
+            "mean": 0.0035619185991132125,
+            "within_window": 0.0026043412790083785,
+            "between_window_corrected": 0.0010269747923946297,
+            "total_corrected": 0.003631316071403008,
+            "nested_mean_variance": 0.0004195150280366811,
+            "equal_pair_count_independent_projection": 0.000226957254462688,
+            "across_fixed_state_mean_variance": 0.0016557039878760719,
+            "across_fixed_states_corrected": 0.0012361889598393907,
+            "negative_between_window_estimates": 5,
+            "window_half_sign_agreement": 19,
+            "suffix_half_sign_agreement": 21,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.7171893682067053,
+            "nested_over_independent_variance_projection": 1.8484318953798842,
+            "largest_state_share_of_nested_variance": 0.26417440047657303,
+            "half_means": {
+              "window": [
+                0.0021033919338500923,
+                0.005020445264376331
+              ],
+              "suffix": [
+                0.003969702423732568,
+                0.003154134774493855
+              ]
+            }
+          }
+        },
+        "mean_between_window_W_tail_covariance": 0.00012508874964699927
+      },
+      "prefix_reports": [
+        {
+          "seed": 1972185000,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.02450618572902351,
+              "within_window": 0.0,
+              "between_window_corrected": 8.339139514106732e-05,
+              "total_corrected": 8.339139514106732e-05,
+              "nested_mean_variance": 2.0847848785266825e-05,
+              "equal_pair_count_independent_projection": 5.211962196316707e-06,
+              "across_fixed_state_mean_variance": 0.00028964244132535165,
+              "across_fixed_states_corrected": 0.0002687945925400848,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.9999999999999996,
+              "largest_state_share_of_nested_variance": 0.9109194186143545,
+              "half_means": {
+                "window": [
+                  0.022690645931905184,
+                  0.02632172552614184
+                ],
+                "suffix": [
+                  0.02450618572902351,
+                  0.02450618572902351
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.005488695033609859,
+              "within_window": 0.00021369305995836077,
+              "between_window_corrected": 0.00011142280427564682,
+              "total_corrected": 0.0003251158642340076,
+              "nested_mean_variance": 4.121151731630926e-05,
+              "equal_pair_count_independent_projection": 2.0319741514625475e-05,
+              "across_fixed_state_mean_variance": 7.20508656718952e-05,
+              "across_fixed_states_corrected": 3.083934835558594e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6572827827452665,
+              "nested_over_independent_variance_projection": 2.0281516517642006,
+              "largest_state_share_of_nested_variance": 0.4793669816111273,
+              "half_means": {
+                "window": [
+                  -0.010330898912462442,
+                  -0.0006464911547572767
+                ],
+                "suffix": [
+                  -0.006098787237340122,
+                  -0.004878602829879596
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.019017490695413936,
+              "within_window": 0.00021369305995836045,
+              "between_window_corrected": 0.00026484596802824273,
+              "total_corrected": 0.00047853902798660326,
+              "nested_mean_variance": 7.95673082544582e-05,
+              "equal_pair_count_independent_projection": 2.9908689249162704e-05,
+              "across_fixed_state_mean_variance": 0.0004046502565394355,
+              "across_fixed_states_corrected": 0.0003250829482849773,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.44655304470661233,
+              "nested_over_independent_variance_projection": 2.6603408658801624,
+              "largest_state_share_of_nested_variance": 0.6533442374352232,
+              "half_means": {
+                "window": [
+                  0.012359747019443488,
+                  0.025675234371384387
+                ],
+                "suffix": [
+                  0.018407398491683744,
+                  0.019627582899144128
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 3.501588430577377e-05
+        },
+        {
+          "seed": 1972185001,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.008198773699766413,
+              "within_window": 0.0,
+              "between_window_corrected": 3.2177614020097467e-06,
+              "total_corrected": 3.2177614020097467e-06,
+              "nested_mean_variance": 8.044403505024367e-07,
+              "equal_pair_count_independent_projection": 2.0111008762560917e-07,
+              "across_fixed_state_mean_variance": 0.0003912634151116226,
+              "across_fixed_states_corrected": 0.0003904589747611201,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8950591163521124,
+              "half_means": {
+                "window": [
+                  0.00821062064087644,
+                  0.008186926758656385
+                ],
+                "suffix": [
+                  0.008198773699766413,
+                  0.008198773699766413
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.004406473348348007,
+              "within_window": 0.006822795245831056,
+              "between_window_corrected": 0.0005261042624333524,
+              "total_corrected": 0.007348899508264408,
+              "nested_mean_variance": 0.0005579507684727791,
+              "equal_pair_count_independent_projection": 0.0004593062192665255,
+              "across_fixed_state_mean_variance": 0.0006008038690384002,
+              "across_fixed_states_corrected": 4.2853100565621075e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.9284104699157054,
+              "nested_over_independent_variance_projection": 1.2147685902528838,
+              "largest_state_share_of_nested_variance": 0.6121418020703951,
+              "half_means": {
+                "window": [
+                  -0.012199223781295754,
+                  0.0033862770845997417
+                ],
+                "suffix": [
+                  -0.0024964536209245852,
+                  -0.006316493075771428
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.0037923003514186058,
+              "within_window": 0.0068227952458310885,
+              "between_window_corrected": 0.0006288005228258668,
+              "total_corrected": 0.007451595768656956,
+              "nested_mean_variance": 0.0005836248335709098,
+              "equal_pair_count_independent_projection": 0.00046572473554105974,
+              "across_fixed_state_mean_variance": 0.0008136288501072984,
+              "across_fixed_states_corrected": 0.0002300040165363886,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.9156153202149343,
+              "nested_over_independent_variance_projection": 1.2531540393551968,
+              "largest_state_share_of_nested_variance": 0.6263540095040651,
+              "half_means": {
+                "window": [
+                  -0.003988603140419239,
+                  0.01157320384325645
+                ],
+                "suffix": [
+                  0.005702320078842092,
+                  0.0018822806239951195
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 4.973924949525598e-05
+        },
+        {
+          "seed": 1972185002,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 4.534268839678085e-05,
+              "within_window": 0.0,
+              "between_window_corrected": 2.419546574257583e-07,
+              "total_corrected": 2.419546574257583e-07,
+              "nested_mean_variance": 6.048866435643957e-08,
+              "equal_pair_count_independent_projection": 1.5122166089109892e-08,
+              "across_fixed_state_mean_variance": 0.0008587880289878623,
+              "across_fixed_states_corrected": 0.0008587275403235059,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.6134383344752902,
+              "half_means": {
+                "window": [
+                  -0.00019685406237220787,
+                  0.00028753943916576957
+                ],
+                "suffix": [
+                  4.534268839678085e-05,
+                  4.534268839678085e-05
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.03242317531931726,
+              "within_window": 0.004698623350020215,
+              "between_window_corrected": 0.0025989032862689834,
+              "total_corrected": 0.0072975266362892,
+              "nested_mean_variance": 0.000943389780943509,
+              "equal_pair_count_independent_projection": 0.000456095414768075,
+              "across_fixed_state_mean_variance": 0.005801858242831174,
+              "across_fixed_states_corrected": 0.004858468461887665,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6438651866859743,
+              "nested_over_independent_variance_projection": 2.068404439942076,
+              "largest_state_share_of_nested_variance": 0.724471751470776,
+              "half_means": {
+                "window": [
+                  0.03554564598082638,
+                  0.02930070465780814
+                ],
+                "suffix": [
+                  0.03462353894279562,
+                  0.030222811695838903
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.03246851800771408,
+              "within_window": 0.00469862335002024,
+              "between_window_corrected": 0.0026299945580129623,
+              "total_corrected": 0.007328617908033202,
+              "nested_mean_variance": 0.0009511625988795056,
+              "equal_pair_count_independent_projection": 0.00045803861925207515,
+              "across_fixed_state_mean_variance": 0.002726082446322215,
+              "across_fixed_states_corrected": 0.0017749198474427096,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6411336228717673,
+              "nested_over_independent_variance_projection": 2.076599131384698,
+              "largest_state_share_of_nested_variance": 0.7248732871611125,
+              "half_means": {
+                "window": [
+                  0.03534879191845421,
+                  0.029588244096973953
+                ],
+                "suffix": [
+                  0.03466888163119236,
+                  0.0302681543842358
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 1.5424658543296118e-05
+        },
+        {
+          "seed": 1972185003,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.00274414546660715,
+              "within_window": 0.0,
+              "between_window_corrected": 9.674323783494055e-05,
+              "total_corrected": 9.674323783494055e-05,
+              "nested_mean_variance": 2.4185809458735137e-05,
+              "equal_pair_count_independent_projection": 6.046452364683784e-06,
+              "across_fixed_state_mean_variance": 0.0015730325217066504,
+              "across_fixed_states_corrected": 0.0015488467122479152,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.7709287175133736,
+              "half_means": {
+                "window": [
+                  -0.004434634625744389,
+                  -0.0010536563074699083
+                ],
+                "suffix": [
+                  -0.00274414546660715,
+                  -0.00274414546660715
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.015052079810429017,
+              "within_window": 0.0005219357061922012,
+              "between_window_corrected": 0.0006292397111112946,
+              "total_corrected": 0.0011511754173034957,
+              "nested_mean_variance": 0.00018993090941483624,
+              "equal_pair_count_independent_projection": 7.194846358146848e-05,
+              "across_fixed_state_mean_variance": 0.0007904932270261069,
+              "across_fixed_states_corrected": 0.0006005623176112706,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.4533937211887128,
+              "nested_over_independent_variance_projection": 2.639818836433862,
+              "largest_state_share_of_nested_variance": 0.9661901190164671,
+              "half_means": {
+                "window": [
+                  -0.01630048197899196,
+                  -0.01380367764186607
+                ],
+                "suffix": [
+                  -0.017570485540419355,
+                  -0.012533674080438673
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.01779622527703649,
+              "within_window": 0.0005219357061921989,
+              "between_window_corrected": 0.0009364254227632775,
+              "total_corrected": 0.0014583611289554763,
+              "nested_mean_variance": 0.0002667273373278318,
+              "equal_pair_count_independent_projection": 9.114757055971727e-05,
+              "across_fixed_state_mean_variance": 0.004522261266928714,
+              "across_fixed_states_corrected": 0.004255533929600882,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.35789194859165335,
+              "nested_over_independent_variance_projection": 2.92632415422504,
+              "largest_state_share_of_nested_variance": 0.8428530352644241,
+              "half_means": {
+                "window": [
+                  -0.020735116604736675,
+                  -0.014857333949336304
+                ],
+                "suffix": [
+                  -0.020314631007027007,
+                  -0.01527781954704597
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00010522123690852749
+        },
+        {
+          "seed": 1972185004,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.011335514824198707,
+              "within_window": 0.0,
+              "between_window_corrected": 6.777938127159588e-05,
+              "total_corrected": 6.777938127159588e-05,
+              "nested_mean_variance": 1.694484531789897e-05,
+              "equal_pair_count_independent_projection": 4.236211329474743e-06,
+              "across_fixed_state_mean_variance": 0.00018844051862970928,
+              "across_fixed_states_corrected": 0.0001714956733118103,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8019379687057404,
+              "half_means": {
+                "window": [
+                  0.010538273208178586,
+                  0.012132756440218828
+                ],
+                "suffix": [
+                  0.011335514824198707,
+                  0.011335514824198707
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.0002694918963425594,
+              "within_window": 0.0020460334791948327,
+              "between_window_corrected": 0.0003194945666791075,
+              "total_corrected": 0.00236552804587394,
+              "nested_mean_variance": 0.00020775073411945396,
+              "equal_pair_count_independent_projection": 0.00014784550286712125,
+              "across_fixed_state_mean_variance": 4.6346674182205484e-05,
+              "across_fixed_states_corrected": -0.00016140405993724847,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8649373161157891,
+              "nested_over_independent_variance_projection": 1.4051880516526336,
+              "largest_state_share_of_nested_variance": 0.6165325373543001,
+              "half_means": {
+                "window": [
+                  0.0040613515546907555,
+                  -0.0035223677620056376
+                ],
+                "suffix": [
+                  0.001486599560208808,
+                  -0.0009476157675236905
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.011605006720541341,
+              "within_window": 0.002046033479194824,
+              "between_window_corrected": 0.00040288584927867426,
+              "total_corrected": 0.0024489193284734988,
+              "nested_mean_variance": 0.00022859855476934504,
+              "equal_pair_count_independent_projection": 0.00015305745802959367,
+              "across_fixed_state_mean_variance": 0.0004048009358319735,
+              "across_fixed_states_corrected": 0.00017620238106262848,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.835484229882816,
+              "nested_over_independent_variance_projection": 1.493547310351551,
+              "largest_state_share_of_nested_variance": 0.5468391199520952,
+              "half_means": {
+                "window": [
+                  0.014599624762869154,
+                  0.008610388678213529
+                ],
+                "suffix": [
+                  0.012822114384407732,
+                  0.010387899056674949
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 7.805950663973592e-06
+        },
+        {
+          "seed": 1972185005,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.011431491661055115,
+              "within_window": 0.0,
+              "between_window_corrected": 0.0005720524679605211,
+              "total_corrected": 0.0005720524679605211,
+              "nested_mean_variance": 0.00014301311699013028,
+              "equal_pair_count_independent_projection": 3.575327924753257e-05,
+              "across_fixed_state_mean_variance": 0.0016779947476716047,
+              "across_fixed_states_corrected": 0.0015349816306814744,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8399209286265031,
+              "half_means": {
+                "window": [
+                  -0.0006557833239410107,
+                  -0.022207199998169214
+                ],
+                "suffix": [
+                  -0.011431491661055115,
+                  -0.011431491661055115
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.022851503075951015,
+              "within_window": 0.0034050790403958296,
+              "between_window_corrected": 0.0009296258721745533,
+              "total_corrected": 0.004334704912570383,
+              "nested_mean_variance": 0.0004452239080683776,
+              "equal_pair_count_independent_projection": 0.00027091905703564894,
+              "across_fixed_state_mean_variance": 0.0010239802265808585,
+              "across_fixed_states_corrected": 0.0005787563185124809,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.7855388334558382,
+              "nested_over_independent_variance_projection": 1.6433834996324852,
+              "largest_state_share_of_nested_variance": 0.8097812564130512,
+              "half_means": {
+                "window": [
+                  -0.010724043521233713,
+                  -0.03497896263066831
+                ],
+                "suffix": [
+                  -0.029922067159710575,
+                  -0.015780938992191445
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.0342829947370061,
+              "within_window": 0.0034050790403958235,
+              "between_window_corrected": 0.0030305659668802367,
+              "total_corrected": 0.006435645007276061,
+              "nested_mean_variance": 0.0009704589317447982,
+              "equal_pair_count_independent_projection": 0.0004022278129547538,
+              "across_fixed_state_mean_variance": 0.004463868664609357,
+              "across_fixed_states_corrected": 0.0034934097328645592,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.5290967784186484,
+              "nested_over_independent_variance_projection": 2.412709664744054,
+              "largest_state_share_of_nested_variance": 0.9135894566769501,
+              "half_means": {
+                "window": [
+                  -0.01137982684517487,
+                  -0.057186162628837335
+                ],
+                "suffix": [
+                  -0.04135355882076581,
+                  -0.027212430653246397
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.0007644438133726017
+        },
+        {
+          "seed": 1972185006,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.007287597599420181,
+              "within_window": 0.0,
+              "between_window_corrected": 1.6255165323346792e-05,
+              "total_corrected": 1.6255165323346792e-05,
+              "nested_mean_variance": 4.063791330836699e-06,
+              "equal_pair_count_independent_projection": 1.0159478327091745e-06,
+              "across_fixed_state_mean_variance": 0.0006543553836819187,
+              "across_fixed_states_corrected": 0.000650291592351082,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.000000000000001,
+              "largest_state_share_of_nested_variance": 0.8082025155703042,
+              "half_means": {
+                "window": [
+                  0.00564267875239545,
+                  0.008932516446444912
+                ],
+                "suffix": [
+                  0.007287597599420181,
+                  0.007287597599420181
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.012125277525942566,
+              "within_window": 0.002028792070329086,
+              "between_window_corrected": 0.00018638327102869084,
+              "total_corrected": 0.002215175341357777,
+              "nested_mean_variance": 0.00017339532215274062,
+              "equal_pair_count_independent_projection": 0.00013844845883486106,
+              "across_fixed_state_mean_variance": 0.00020471058564494818,
+              "across_fixed_states_corrected": 3.1315263492207566e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.9158607142518802,
+              "nested_over_independent_variance_projection": 1.2524178572443596,
+              "largest_state_share_of_nested_variance": 0.7704225161346785,
+              "half_means": {
+                "window": [
+                  -0.028046456482444162,
+                  0.0037959014305590337
+                ],
+                "suffix": [
+                  -0.004544737046146726,
+                  -0.019705818005738406
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.0048376799265226755,
+              "within_window": 0.0020287920703290874,
+              "between_window_corrected": 0.00023940938075649892,
+              "total_corrected": 0.002268201451085586,
+              "nested_mean_variance": 0.00018665184958469274,
+              "equal_pair_count_independent_projection": 0.00014176259069284913,
+              "across_fixed_state_mean_variance": 0.0006650470937048862,
+              "across_fixed_states_corrected": 0.0004783952441201934,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8944496836284472,
+              "nested_over_independent_variance_projection": 1.3166509491146592,
+              "largest_state_share_of_nested_variance": 0.7699447269920189,
+              "half_means": {
+                "window": [
+                  -0.022403777730048948,
+                  0.012728417877003595
+                ],
+                "suffix": [
+                  0.0027428605532732464,
+                  -0.012418220406318597
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 1.8385472202233618e-05
+        },
+        {
+          "seed": 1972185007,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.017795350774578358,
+              "within_window": 0.0,
+              "between_window_corrected": 5.617203598778425e-07,
+              "total_corrected": 5.617203598778425e-07,
+              "nested_mean_variance": 1.4043008996946063e-07,
+              "equal_pair_count_independent_projection": 3.510752249236516e-08,
+              "across_fixed_state_mean_variance": 9.333251883452426e-05,
+              "across_fixed_states_corrected": 9.31920887445548e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8637481905625044,
+              "half_means": {
+                "window": [
+                  0.017685943903858418,
+                  0.017904757645298298
+                ],
+                "suffix": [
+                  0.01779535077457836,
+                  0.01779535077457836
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.0007335821838049186,
+              "within_window": 0.0010977782801454092,
+              "between_window_corrected": 7.296148688273875e-05,
+              "total_corrected": 0.0011707397670281479,
+              "nested_mean_variance": 8.685151422977278e-05,
+              "equal_pair_count_independent_projection": 7.317123543925924e-05,
+              "across_fixed_state_mean_variance": 0.00018777924286977367,
+              "across_fixed_states_corrected": 0.00010092772864000089,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.9376791589919705,
+              "nested_over_independent_variance_projection": 1.1869625230240888,
+              "largest_state_share_of_nested_variance": 0.4216338883506068,
+              "half_means": {
+                "window": [
+                  -0.004659647813444453,
+                  0.006126812181054289
+                ],
+                "suffix": [
+                  0.0012868833036762117,
+                  0.00018028106393362547
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.018528932958382996,
+              "within_window": 0.0010977782801454058,
+              "between_window_corrected": 8.287067061127688e-05,
+              "total_corrected": 0.0011806489507566827,
+              "nested_mean_variance": 8.93288101619071e-05,
+              "equal_pair_count_independent_projection": 7.379055942229267e-05,
+              "across_fixed_state_mean_variance": 5.6981711607037404e-05,
+              "across_fixed_states_corrected": -3.234709855486969e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.929809220125792,
+              "nested_over_independent_variance_projection": 1.210572339622624,
+              "largest_state_share_of_nested_variance": 0.4056950515563155,
+              "half_means": {
+                "window": [
+                  0.013026296090413619,
+                  0.024031569826352375
+                ],
+                "suffix": [
+                  0.019082234078254195,
+                  0.017975631838511797
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 4.673731684331689e-06
+        }
+      ]
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "summary": {
+        "states": 24,
+        "prefixes": 8,
+        "targets": {
+          "W": {
+            "mean": -0.003772958717933216,
+            "within_window": 0.0,
+            "between_window_corrected": 2.260493782448369e-06,
+            "total_corrected": 2.260493782448369e-06,
+            "nested_mean_variance": 5.651234456120924e-07,
+            "equal_pair_count_independent_projection": 1.4128086140302307e-07,
+            "across_fixed_state_mean_variance": 0.00019357590788882792,
+            "across_fixed_states_corrected": 0.00019301078444321584,
+            "negative_between_window_estimates": 0,
+            "window_half_sign_agreement": 24,
+            "suffix_half_sign_agreement": 24,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.0,
+            "nested_over_independent_variance_projection": 4.000000000000001,
+            "largest_state_share_of_nested_variance": 0.5989361063115874,
+            "half_means": {
+              "window": [
+                -0.003820366681837902,
+                -0.0037255507540285295
+              ],
+              "suffix": [
+                -0.0037729587179332166,
+                -0.0037729587179332166
+              ]
+            }
+          },
+          "tail": {
+            "mean": 0.0050877115872800666,
+            "within_window": 0.03511190369093413,
+            "between_window_corrected": 0.005274592583848228,
+            "total_corrected": 0.04038649627478236,
+            "nested_mean_variance": 0.0035131421266454406,
+            "equal_pair_count_independent_projection": 0.0025241560171738973,
+            "across_fixed_state_mean_variance": 0.01050433390247112,
+            "across_fixed_states_corrected": 0.006991191775825679,
+            "negative_between_window_estimates": 11,
+            "window_half_sign_agreement": 14,
+            "suffix_half_sign_agreement": 15,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.8693971235345384,
+            "nested_over_independent_variance_projection": 1.3918086293963852,
+            "largest_state_share_of_nested_variance": 0.4436826846437847,
+            "half_means": {
+              "window": [
+                0.007888756399230678,
+                0.002286666775329463
+              ],
+              "suffix": [
+                -0.004978332035022006,
+                0.015153755209582143
+              ]
+            }
+          },
+          "G": {
+            "mean": 0.001314752869347129,
+            "within_window": 0.035111903690934206,
+            "between_window_corrected": 0.005241535379414654,
+            "total_corrected": 0.04035343907034886,
+            "nested_mean_variance": 0.0035048778255370515,
+            "equal_pair_count_independent_projection": 0.0025220899418968035,
+            "across_fixed_state_mean_variance": 0.011553021219648234,
+            "across_fixed_states_corrected": 0.008048143394111182,
+            "negative_between_window_estimates": 10,
+            "window_half_sign_agreement": 19,
+            "suffix_half_sign_agreement": 19,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.8701093264869695,
+            "nested_over_independent_variance_projection": 1.3896720205390918,
+            "largest_state_share_of_nested_variance": 0.44296361925282157,
+            "half_means": {
+              "window": [
+                0.004068389717392966,
+                -0.001438883978698705
+              ],
+              "suffix": [
+                -0.008751290752955098,
+                0.011380796491649357
+              ]
+            }
+          }
+        },
+        "mean_between_window_W_tail_covariance": -1.7658849108145743e-05
+      },
+      "prefix_reports": [
+        {
+          "seed": 1972275000,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.0006295732828003215,
+              "within_window": 0.0,
+              "between_window_corrected": 2.768991485578425e-07,
+              "total_corrected": 2.768991485578425e-07,
+              "nested_mean_variance": 6.922478713946063e-08,
+              "equal_pair_count_independent_projection": 1.7306196784865155e-08,
+              "across_fixed_state_mean_variance": 5.850483787653532e-06,
+              "across_fixed_states_corrected": 5.7812590005140714e-06,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.000000000000001,
+              "largest_state_share_of_nested_variance": 0.5299062557111999,
+              "half_means": {
+                "window": [
+                  0.0004529567779076593,
+                  0.0008061897876929838
+                ],
+                "suffix": [
+                  0.0006295732828003215,
+                  0.0006295732828003215
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.000543685218578611,
+              "within_window": 7.090973122311494e-05,
+              "between_window_corrected": 3.1106722840992184e-05,
+              "total_corrected": 0.00010201645406410712,
+              "nested_mean_variance": 1.2208538911692731e-05,
+              "equal_pair_count_independent_projection": 6.376028379006695e-06,
+              "across_fixed_state_mean_variance": 9.740762500915576e-06,
+              "across_fixed_states_corrected": -2.4677764107771554e-06,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6950813167702857,
+              "nested_over_independent_variance_projection": 1.9147560496891431,
+              "largest_state_share_of_nested_variance": 0.9138788722431651,
+              "half_means": {
+                "window": [
+                  0.0019073089729925348,
+                  -0.0029946794101497567
+                ],
+                "suffix": [
+                  0.0002024747766484758,
+                  -0.0012898452138056977
+                ]
+              }
+            },
+            "G": {
+              "mean": 8.588806422225408e-05,
+              "within_window": 7.090973122312988e-05,
+              "between_window_corrected": 3.1461143566662e-05,
+              "total_corrected": 0.00010237087478979189,
+              "nested_mean_variance": 1.2297144093111115e-05,
+              "equal_pair_count_independent_projection": 6.398179674361993e-06,
+              "across_fixed_state_mean_variance": 2.7418574192409495e-05,
+              "across_fixed_states_corrected": 1.512143009929838e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6926748586327484,
+              "nested_over_independent_variance_projection": 1.9219754241017541,
+              "largest_state_share_of_nested_variance": 0.8916880868979955,
+              "half_means": {
+                "window": [
+                  0.0023602657509009437,
+                  -0.0021884896224564354
+                ],
+                "suffix": [
+                  0.0008320480594483833,
+                  -0.0006602719310038752
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 3.876078854919502e-08
+        },
+        {
+          "seed": 1972275001,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.0017361784566102222,
+              "within_window": 0.0,
+              "between_window_corrected": 9.987899008440887e-07,
+              "total_corrected": 9.987899008440887e-07,
+              "nested_mean_variance": 2.496974752110222e-07,
+              "equal_pair_count_independent_projection": 6.242436880275555e-08,
+              "across_fixed_state_mean_variance": 5.561975343469419e-05,
+              "across_fixed_states_corrected": 5.537005595948317e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8499147702443459,
+              "half_means": {
+                "window": [
+                  -0.0018527235787441272,
+                  -0.001619633334476317
+                ],
+                "suffix": [
+                  -0.0017361784566102222,
+                  -0.0017361784566102222
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.005647022675115174,
+              "within_window": 6.144211216485263e-05,
+              "between_window_corrected": 0.0001035778492292478,
+              "total_corrected": 0.00016501996139410045,
+              "nested_mean_variance": 2.9734594317615243e-05,
+              "equal_pair_count_independent_projection": 1.0313747587131278e-05,
+              "across_fixed_state_mean_variance": 6.913942210512595e-05,
+              "across_fixed_states_corrected": 3.94048277875107e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.37233139340104837,
+              "nested_over_independent_variance_projection": 2.8830058197968547,
+              "largest_state_share_of_nested_variance": 0.91095367513897,
+              "half_means": {
+                "window": [
+                  -0.0058006774436683145,
+                  -0.005493367906562033
+                ],
+                "suffix": [
+                  -0.005353423015710383,
+                  -0.005940622334519964
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.007383201131723814,
+              "within_window": 6.144211216484669e-05,
+              "between_window_corrected": 0.000105294458406188,
+              "total_corrected": 0.00016673657057103468,
+              "nested_mean_variance": 3.0163746611849912e-05,
+              "equal_pair_count_independent_projection": 1.0421035660689668e-05,
+              "across_fixed_state_mean_variance": 7.053339821102456e-05,
+              "across_fixed_states_corrected": 4.036965159917465e-05,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.3684981162466128,
+              "nested_over_independent_variance_projection": 2.8945056512601615,
+              "largest_state_share_of_nested_variance": 0.9205972561918924,
+              "half_means": {
+                "window": [
+                  -0.007653401022410411,
+                  -0.007113001241037216
+                ],
+                "suffix": [
+                  -0.007089601472318278,
+                  -0.00767680079112935
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 3.589096380424333e-07
+        },
+        {
+          "seed": 1972275002,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.023267686394359628,
+              "within_window": 0.0,
+              "between_window_corrected": 6.152123228922057e-07,
+              "total_corrected": 6.152123228922057e-07,
+              "nested_mean_variance": 1.5380308072305143e-07,
+              "equal_pair_count_independent_projection": 3.845077018076286e-08,
+              "across_fixed_state_mean_variance": 0.0008451509466888129,
+              "across_fixed_states_corrected": 0.0008449971436080898,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.6070016105245738,
+              "half_means": {
+                "window": [
+                  -0.02365890389476531,
+                  -0.02287646889395395
+                ],
+                "suffix": [
+                  -0.023267686394359628,
+                  -0.023267686394359628
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.009351230743214912,
+              "within_window": 0.007710789469733806,
+              "between_window_corrected": -0.0006221471907973779,
+              "total_corrected": 0.007088642278936426,
+              "nested_mean_variance": 0.0003263875441590184,
+              "equal_pair_count_independent_projection": 0.00044304014243352663,
+              "across_fixed_state_mean_variance": 0.0005931628776976247,
+              "across_fixed_states_corrected": 0.0002667753335386063,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0877667635516128,
+              "nested_over_independent_variance_projection": 0.7366997093451624,
+              "largest_state_share_of_nested_variance": 0.7750452080849541,
+              "half_means": {
+                "window": [
+                  -0.004404702549016211,
+                  -0.014297758937413613
+                ],
+                "suffix": [
+                  -0.01111532747194985,
+                  -0.0075871340144799725
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.03261891713757601,
+              "within_window": 0.007710789469733658,
+              "between_window_corrected": -0.0006326540150262408,
+              "total_corrected": 0.007078135454707418,
+              "nested_mean_variance": 0.0003237608381017934,
+              "equal_pair_count_independent_projection": 0.0004423834659192136,
+              "across_fixed_state_mean_variance": 0.002729810507264434,
+              "across_fixed_states_corrected": 0.0024060496691626406,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.089381450676461,
+              "nested_over_independent_variance_projection": 0.7318556479706169,
+              "largest_state_share_of_nested_variance": 0.7831058350638701,
+              "half_means": {
+                "window": [
+                  -0.02806360644378462,
+                  -0.0371742278313674
+                ],
+                "suffix": [
+                  -0.034383013866310895,
+                  -0.030854820408841133
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -5.5610182759594004e-06
+        },
+        {
+          "seed": 1972275003,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.006757666284168032,
+              "within_window": 0.0,
+              "between_window_corrected": 1.1494961174753241e-06,
+              "total_corrected": 1.1494961174753241e-06,
+              "nested_mean_variance": 2.8737402936883104e-07,
+              "equal_pair_count_independent_projection": 7.184350734220776e-08,
+              "across_fixed_state_mean_variance": 9.220046793372708e-05,
+              "across_fixed_states_corrected": 9.191309390435825e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.9804658670471922,
+              "half_means": {
+                "window": [
+                  -0.007288154243080075,
+                  -0.006227178325255989
+                ],
+                "suffix": [
+                  -0.006757666284168032,
+                  -0.006757666284168032
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.11345288321161996,
+              "within_window": 0.06809341523428336,
+              "between_window_corrected": 0.047562433768471996,
+              "total_corrected": 0.11565584900275534,
+              "nested_mean_variance": 0.016146446894260712,
+              "equal_pair_count_independent_projection": 0.007228490562672209,
+              "across_fixed_state_mean_variance": 0.04741303205850403,
+              "across_fixed_states_corrected": 0.03126658516424331,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.5887589414752481,
+              "nested_over_independent_variance_projection": 2.233723175574257,
+              "largest_state_share_of_nested_variance": 0.7722914350100266,
+              "half_means": {
+                "window": [
+                  0.2202318674734143,
+                  0.006673898949825628
+                ],
+                "suffix": [
+                  0.09863095614794355,
+                  0.12827481027529639
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.1066952169274527,
+              "within_window": 0.06809341523428417,
+              "between_window_corrected": 0.047354211109033435,
+              "total_corrected": 0.11544762634331761,
+              "nested_mean_variance": 0.01609439122940112,
+              "equal_pair_count_independent_projection": 0.0072154766464573505,
+              "across_fixed_state_mean_variance": 0.0489899235215127,
+              "across_fixed_states_corrected": 0.032895532292111576,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.5898208338367069,
+              "nested_over_independent_variance_projection": 2.230537498489879,
+              "largest_state_share_of_nested_variance": 0.7717139937807375,
+              "half_means": {
+                "window": [
+                  0.2129437132303357,
+                  0.0004467206245696668
+                ],
+                "suffix": [
+                  0.09187328986377685,
+                  0.12151714399112852
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -0.00010468607777872707
+        },
+        {
+          "seed": 1972275004,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.007087176763001101,
+              "within_window": 0.0,
+              "between_window_corrected": 1.995823716449547e-06,
+              "total_corrected": 1.995823716449547e-06,
+              "nested_mean_variance": 4.989559291123868e-07,
+              "equal_pair_count_independent_projection": 1.247389822780967e-07,
+              "across_fixed_state_mean_variance": 9.89545961523145e-06,
+              "across_fixed_states_corrected": 9.396503686119063e-06,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.6221152576482315,
+              "half_means": {
+                "window": [
+                  -0.007275503314040155,
+                  -0.0068988502119620475
+                ],
+                "suffix": [
+                  -0.007087176763001101,
+                  -0.007087176763001101
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.020694144564553447,
+              "within_window": 0.0003898626616278983,
+              "between_window_corrected": 4.9314814519158564e-05,
+              "total_corrected": 0.00043917747614705675,
+              "nested_mean_variance": 3.669511998153329e-05,
+              "equal_pair_count_independent_projection": 2.7448592259191047e-05,
+              "across_fixed_state_mean_variance": 0.0008950318072025699,
+              "across_fixed_states_corrected": 0.0008583366872210366,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8877109660727556,
+              "nested_over_independent_variance_projection": 1.3368671017817346,
+              "largest_state_share_of_nested_variance": 0.655315224976931,
+              "half_means": {
+                "window": [
+                  -0.018767714804200527,
+                  -0.022620574324906367
+                ],
+                "suffix": [
+                  -0.023004028997843443,
+                  -0.018384260131263448
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.027781321327554315,
+              "within_window": 0.00038986266162784706,
+              "between_window_corrected": 4.373646899803556e-05,
+              "total_corrected": 0.00043359913062588257,
+              "nested_mean_variance": 3.530053360124933e-05,
+              "equal_pair_count_independent_projection": 2.709994566411766e-05,
+              "across_fixed_state_mean_variance": 0.001080738792269016,
+              "across_fixed_states_corrected": 0.0010454382586677666,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8991315574482271,
+              "nested_over_independent_variance_projection": 1.3026053276553191,
+              "largest_state_share_of_nested_variance": 0.6863798990604454,
+              "half_means": {
+                "window": [
+                  -0.026043218118241434,
+                  -0.029519424536867196
+                ],
+                "suffix": [
+                  -0.03009120576084427,
+                  -0.02547143689426436
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -3.7870846187876577e-06
+        },
+        {
+          "seed": 1972275005,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.005322416957740662,
+              "within_window": 0.0,
+              "between_window_corrected": 1.0837894846139141e-05,
+              "total_corrected": 1.0837894846139141e-05,
+              "nested_mean_variance": 2.7094737115347858e-06,
+              "equal_pair_count_independent_projection": 6.773684278836963e-07,
+              "across_fixed_state_mean_variance": 0.00016639920942669605,
+              "across_fixed_states_corrected": 0.00016368973571516128,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.000000000000001,
+              "largest_state_share_of_nested_variance": 0.9993758851672084,
+              "half_means": {
+                "window": [
+                  -0.0038536017445259135,
+                  -0.006791232170955411
+                ],
+                "suffix": [
+                  -0.005322416957740662,
+                  -0.005322416957740662
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.10348082098182569,
+              "within_window": 0.011937727438266205,
+              "between_window_corrected": 0.007303992273179786,
+              "total_corrected": 0.019241719711445993,
+              "nested_mean_variance": 0.0025721060331865843,
+              "equal_pair_count_independent_projection": 0.0012026074819653746,
+              "across_fixed_state_mean_variance": 0.02678190259582456,
+              "across_fixed_states_corrected": 0.024209796562637977,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6204085506538697,
+              "nested_over_independent_variance_projection": 2.1387743480383903,
+              "largest_state_share_of_nested_variance": 0.9259315432571,
+              "half_means": {
+                "window": [
+                  -0.1058047400923028,
+                  -0.10115690187134857
+                ],
+                "suffix": [
+                  -0.13500102498288155,
+                  -0.07196061698076982
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.10880323793956605,
+              "within_window": 0.01193772743826626,
+              "between_window_corrected": 0.006975531679818536,
+              "total_corrected": 0.018913259118084797,
+              "nested_mean_variance": 0.002489990884846275,
+              "equal_pair_count_independent_projection": 0.0011820786948802998,
+              "across_fixed_state_mean_variance": 0.030986956806805452,
+              "across_fixed_states_corrected": 0.028496965921959178,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.6311829898661645,
+              "nested_over_independent_variance_projection": 2.106451030401506,
+              "largest_state_share_of_nested_variance": 0.9235144104642086,
+              "half_means": {
+                "window": [
+                  -0.10965834183682839,
+                  -0.1079481340423037
+                ],
+                "suffix": [
+                  -0.14032344194062238,
+                  -0.07728303393850972
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -0.00016964924410371748
+        },
+        {
+          "seed": 1972275006,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.007308622894343384,
+              "within_window": 0.0,
+              "between_window_corrected": 7.872668442802283e-07,
+              "total_corrected": 7.872668442802283e-07,
+              "nested_mean_variance": 1.9681671107005705e-07,
+              "equal_pair_count_independent_projection": 4.920417776751427e-08,
+              "across_fixed_state_mean_variance": 4.1437412089982455e-05,
+              "across_fixed_states_corrected": 4.1240595378912395e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.9999999999999996,
+              "largest_state_share_of_nested_variance": 0.9064816797132683,
+              "half_means": {
+                "window": [
+                  0.007139654013398032,
+                  0.007477591775288735
+                ],
+                "suffix": [
+                  0.007308622894343384,
+                  0.007308622894343384
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.040885977012213824,
+              "within_window": 0.06351599227209795,
+              "between_window_corrected": -0.003936638704265578,
+              "total_corrected": 0.059579353567832366,
+              "nested_mean_variance": 0.0029855898409397274,
+              "equal_pair_count_independent_projection": 0.003723709597989523,
+              "across_fixed_state_mean_variance": 0.004770611167788456,
+              "across_fixed_states_corrected": 0.0017850213268487286,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0660738740608127,
+              "nested_over_independent_variance_projection": 0.8017783778175624,
+              "largest_state_share_of_nested_variance": 0.8495676008525307,
+              "half_means": {
+                "window": [
+                  0.0025637330942456563,
+                  0.07920822093018198
+                ],
+                "suffix": [
+                  0.08054253429946064,
+                  0.001229419724967008
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.04819459990655805,
+              "within_window": 0.06351599227209791,
+              "between_window_corrected": -0.0038865704232021736,
+              "total_corrected": 0.05962942184889574,
+              "nested_mean_variance": 0.0029981069112055767,
+              "equal_pair_count_independent_projection": 0.0037268388655559838,
+              "across_fixed_state_mean_variance": 0.005692373843088361,
+              "across_fixed_states_corrected": 0.0026942669318827843,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.065178737319489,
+              "nested_over_independent_variance_projection": 0.8044637880415331,
+              "largest_state_share_of_nested_variance": 0.8455620332890259,
+              "half_means": {
+                "window": [
+                  0.009703387107644198,
+                  0.08668581270547189
+                ],
+                "suffix": [
+                  0.0878511571938043,
+                  0.008538042619311792
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 2.464050710943139e-05
+        },
+        {
+          "seed": 1972275007,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.006049258935270214,
+              "within_window": 0.0,
+              "between_window_corrected": 1.4225673629485756e-06,
+              "total_corrected": 1.4225673629485756e-06,
+              "nested_mean_variance": 3.556418407371439e-07,
+              "equal_pair_count_independent_projection": 8.891046018428597e-08,
+              "across_fixed_state_mean_variance": 4.185032620276619e-05,
+              "across_fixed_states_corrected": 4.149468436202904e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.9845306134617864,
+              "half_means": {
+                "window": [
+                  0.005773342529146667,
+                  0.00632517534139376
+                ],
+                "suffix": [
+                  0.006049258935270214,
+                  0.006049258935270214
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.026079736657694596,
+              "within_window": 0.12911509060807583,
+              "between_window_corrected": -0.00829489886239239,
+              "total_corrected": 0.12082019174568344,
+              "nested_mean_variance": 0.005995968447406641,
+              "equal_pair_count_independent_projection": 0.007551261984105215,
+              "across_fixed_state_mean_variance": 0.0008585413048460823,
+              "across_fixed_states_corrected": -0.005137427142560559,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0686549056291226,
+              "nested_over_independent_variance_projection": 0.7940352831126322,
+              "largest_state_share_of_nested_variance": 0.5916243175710976,
+              "half_means": {
+                "window": [
+                  -0.02681502345761926,
+                  0.07897449677300844
+                ],
+                "suffix": [
+                  -0.04472881703584349,
+                  0.09688829035123268
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.032128995592964234,
+              "within_window": 0.12911509060807583,
+              "between_window_corrected": -0.008058727386277225,
+              "total_corrected": 0.12105636322179862,
+              "nested_mean_variance": 0.006055011316435433,
+              "equal_pair_count_independent_projection": 0.007566022701362414,
+              "across_fixed_state_mean_variance": 0.0006017509964909601,
+              "across_fixed_states_corrected": -0.005453260319944473,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0665700436705838,
+              "nested_over_independent_variance_projection": 0.8002898689882476,
+              "largest_state_share_of_nested_variance": 0.5861569345575717,
+              "half_means": {
+                "window": [
+                  -0.02104168092847229,
+                  0.08529967211440076
+                ],
+                "suffix": [
+                  -0.038679558100574496,
+                  0.10293754928650296
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00011737445437600261
+        }
+      ]
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "summary": {
+        "states": 24,
+        "prefixes": 8,
+        "targets": {
+          "W": {
+            "mean": -0.012469182562436098,
+            "within_window": 0.0,
+            "between_window_corrected": 7.726157759596614e-05,
+            "total_corrected": 7.726157759596614e-05,
+            "nested_mean_variance": 1.931539439899153e-05,
+            "equal_pair_count_independent_projection": 4.8288485997478836e-06,
+            "across_fixed_state_mean_variance": 0.0008854508430778636,
+            "across_fixed_states_corrected": 0.000866135448678872,
+            "negative_between_window_estimates": 0,
+            "window_half_sign_agreement": 24,
+            "suffix_half_sign_agreement": 24,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.0,
+            "nested_over_independent_variance_projection": 3.999999999999999,
+            "largest_state_share_of_nested_variance": 0.5048880094915389,
+            "half_means": {
+              "window": [
+                -0.01188967654802211,
+                -0.013048688576850077
+              ],
+              "suffix": [
+                -0.012469182562436098,
+                -0.012469182562436098
+              ]
+            }
+          },
+          "tail": {
+            "mean": -0.005957540083039834,
+            "within_window": 0.0815303594783294,
+            "between_window_corrected": 0.024260133369743947,
+            "total_corrected": 0.10579049284807336,
+            "nested_mean_variance": 0.011160680809831576,
+            "equal_pair_count_independent_projection": 0.006611905803004585,
+            "across_fixed_state_mean_variance": 0.00856164622132817,
+            "across_fixed_states_corrected": -0.002599034588503406,
+            "negative_between_window_estimates": 9,
+            "window_half_sign_agreement": 14,
+            "suffix_half_sign_agreement": 17,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.7706775654728809,
+            "nested_over_independent_variance_projection": 1.687967303581357,
+            "largest_state_share_of_nested_variance": 0.7224957247217854,
+            "half_means": {
+              "window": [
+                0.028773150237049367,
+                -0.040688230403129036
+              ],
+              "suffix": [
+                -0.03314627863956245,
+                0.021231198473482777
+              ]
+            }
+          },
+          "G": {
+            "mean": -0.018426722645476314,
+            "within_window": 0.08153035947832916,
+            "between_window_corrected": 0.024803102538230076,
+            "total_corrected": 0.10633346201655924,
+            "nested_mean_variance": 0.011296423101953092,
+            "equal_pair_count_independent_projection": 0.006645841376034953,
+            "across_fixed_state_mean_variance": 0.008000327873916701,
+            "across_fixed_states_corrected": -0.0032960952280363907,
+            "negative_between_window_estimates": 10,
+            "window_half_sign_agreement": 12,
+            "suffix_half_sign_agreement": 16,
+            "window_half_both_zero": 0,
+            "suffix_half_both_zero": 0,
+            "suffix_fraction_of_total_corrected": 0.7667422646845872,
+            "nested_over_independent_variance_projection": 1.6997732059462383,
+            "largest_state_share_of_nested_variance": 0.7225079468865581,
+            "half_means": {
+              "window": [
+                0.01688347368902717,
+                -0.053736918979979786
+              ],
+              "suffix": [
+                -0.04561546120199864,
+                0.008762015911046037
+              ]
+            }
+          }
+        },
+        "mean_between_window_W_tail_covariance": 0.00023285379544495945
+      },
+      "prefix_reports": [
+        {
+          "seed": 1972285000,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.00275327228440799,
+              "within_window": 0.0,
+              "between_window_corrected": 2.2142132325972925e-05,
+              "total_corrected": 2.2142132325972925e-05,
+              "nested_mean_variance": 5.5355330814932305e-06,
+              "equal_pair_count_independent_projection": 1.3838832703733078e-06,
+              "across_fixed_state_mean_variance": 0.00012329294103887483,
+              "across_fixed_states_corrected": 0.0001177574079573816,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.9999999999999996,
+              "largest_state_share_of_nested_variance": 0.9920497675094733,
+              "half_means": {
+                "window": [
+                  -0.0011810351381911475,
+                  -0.004325509430624833
+                ],
+                "suffix": [
+                  -0.00275327228440799,
+                  -0.00275327228440799
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.01930108872658702,
+              "within_window": 0.02706792233392051,
+              "between_window_corrected": -0.0021138103896229804,
+              "total_corrected": 0.02495411194429753,
+              "nested_mean_variance": 0.0011632925484642868,
+              "equal_pair_count_independent_projection": 0.0015596319965185956,
+              "across_fixed_state_mean_variance": 0.0027927756826111707,
+              "across_fixed_states_corrected": 0.0016294831341468839,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0847078988160916,
+              "nested_over_independent_variance_projection": 0.745876303551725,
+              "largest_state_share_of_nested_variance": 0.8254054871029406,
+              "half_means": {
+                "window": [
+                  0.007105799475385592,
+                  -0.045707976928559636
+                ],
+                "suffix": [
+                  -0.04898659743756323,
+                  0.010384419984389187
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.02205436101099545,
+              "within_window": 0.027067922333920552,
+              "between_window_corrected": -0.002071508192033958,
+              "total_corrected": 0.024996414141886598,
+              "nested_mean_variance": 0.0011738680978615455,
+              "equal_pair_count_independent_projection": 0.0015622758838679124,
+              "across_fixed_state_mean_variance": 0.00248950052853183,
+              "across_fixed_states_corrected": 0.0013156324306702843,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0828722144014538,
+              "nested_over_independent_variance_projection": 0.7513833567956387,
+              "largest_state_share_of_nested_variance": 0.8285865750903202,
+              "half_means": {
+                "window": [
+                  0.005924764337193578,
+                  -0.050033486359184476
+                ],
+                "suffix": [
+                  -0.0517398697219717,
+                  0.0076311476999808
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 1.008003263152713e-05
+        },
+        {
+          "seed": 1972285001,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.0006756438442372057,
+              "within_window": 0.0,
+              "between_window_corrected": 9.502171392757267e-08,
+              "total_corrected": 9.502171392757267e-08,
+              "nested_mean_variance": 2.375542848189316e-08,
+              "equal_pair_count_independent_projection": 5.938857120473292e-09,
+              "across_fixed_state_mean_variance": 7.441236951982632e-05,
+              "across_fixed_states_corrected": 7.438861409134443e-05,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.9999999999999987,
+              "largest_state_share_of_nested_variance": 0.5967329677292271,
+              "half_means": {
+                "window": [
+                  -0.0007855097660293848,
+                  -0.0005657779224450266
+                ],
+                "suffix": [
+                  -0.0006756438442372057,
+                  -0.0006756438442372057
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.08006378151666838,
+              "within_window": 0.13642806443698674,
+              "between_window_corrected": -0.0017801556567598631,
+              "total_corrected": 0.1346479087802269,
+              "nested_mean_variance": 0.008081715113121706,
+              "equal_pair_count_independent_projection": 0.00841549429876418,
+              "across_fixed_state_mean_variance": 0.0026768620887718947,
+              "across_fixed_states_corrected": -0.0054048530243498115,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0132208191934524,
+              "nested_over_independent_variance_projection": 0.9603375424196425,
+              "largest_state_share_of_nested_variance": 0.5267839612971843,
+              "half_means": {
+                "window": [
+                  -0.04677928476369456,
+                  -0.11334827826964218
+                ],
+                "suffix": [
+                  -0.16083109866935044,
+                  0.0007035356360137098
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.08073942536090527,
+              "within_window": 0.13642806443698652,
+              "between_window_corrected": -0.0018038979428788577,
+              "total_corrected": 0.13462416649410766,
+              "nested_mean_variance": 0.008075779541591943,
+              "equal_pair_count_independent_projection": 0.008414010405881729,
+              "across_fixed_state_mean_variance": 0.0035643200696288363,
+              "across_fixed_states_corrected": -0.004511459471963106,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0133995105771578,
+              "nested_over_independent_variance_projection": 0.9598014682685264,
+              "largest_state_share_of_nested_variance": 0.5260439816067425,
+              "half_means": {
+                "window": [
+                  -0.04756479452972399,
+                  -0.11391405619208655
+                ],
+                "suffix": [
+                  -0.16150674251358663,
+                  2.7891791776072743e-05
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -1.1918653916675998e-05
+        },
+        {
+          "seed": 1972285002,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.01772141410253773,
+              "within_window": 0.0,
+              "between_window_corrected": 3.128469133558045e-05,
+              "total_corrected": 3.128469133558045e-05,
+              "nested_mean_variance": 7.821172833895111e-06,
+              "equal_pair_count_independent_projection": 1.9552932084737782e-06,
+              "across_fixed_state_mean_variance": 0.0026241348929042347,
+              "across_fixed_states_corrected": 0.0026163137200703396,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.999999999999999,
+              "largest_state_share_of_nested_variance": 0.9991564562141493,
+              "half_means": {
+                "window": [
+                  -0.019413003445567706,
+                  -0.016029824759507757
+                ],
+                "suffix": [
+                  -0.01772141410253773,
+                  -0.01772141410253773
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.031031706034631956,
+              "within_window": 0.027835235651998493,
+              "between_window_corrected": -8.116626104609807e-05,
+              "total_corrected": 0.027754069390952398,
+              "nested_mean_variance": 0.0017194106629883808,
+              "equal_pair_count_independent_projection": 0.0017346293369345249,
+              "across_fixed_state_mean_variance": 0.001136692164607238,
+              "across_fixed_states_corrected": -0.0005827184983811429,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0029244814482072,
+              "nested_over_independent_variance_projection": 0.9912265556553778,
+              "largest_state_share_of_nested_variance": 0.8207887378587304,
+              "half_means": {
+                "window": [
+                  0.047281096890958905,
+                  0.014782315178305014
+                ],
+                "suffix": [
+                  0.016529081366553195,
+                  0.045534330702710714
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.013310291932094273,
+              "within_window": 0.027835235651998327,
+              "between_window_corrected": 0.00029736158900231497,
+              "total_corrected": 0.028132597241000635,
+              "nested_mean_variance": 0.0018140426255004742,
+              "equal_pair_count_independent_projection": 0.0017582873275625397,
+              "across_fixed_state_mean_variance": 0.005556349352100825,
+              "across_fixed_states_corrected": 0.003742306726600351,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.989429998714483,
+              "nested_over_independent_variance_projection": 1.0317100038565519,
+              "largest_state_share_of_nested_variance": 0.8297674309236813,
+              "half_means": {
+                "window": [
+                  0.02786809344539078,
+                  -0.001247509581202233
+                ],
+                "suffix": [
+                  -0.001192332735983533,
+                  0.027812916600172082
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00017362157935634293
+        },
+        {
+          "seed": 1972285003,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.03265554867913761,
+              "within_window": 0.0,
+              "between_window_corrected": 0.0003121401707128565,
+              "total_corrected": 0.0003121401707128565,
+              "nested_mean_variance": 7.803504267821412e-05,
+              "equal_pair_count_independent_projection": 1.950876066955353e-05,
+              "across_fixed_state_mean_variance": 0.0026787039238045673,
+              "across_fixed_states_corrected": 0.0026006688811263533,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.9997673553779914,
+              "half_means": {
+                "window": [
+                  -0.030197903376344825,
+                  -0.03511319398193039
+                ],
+                "suffix": [
+                  -0.03265554867913761,
+                  -0.03265554867913761
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.05466789790339625,
+              "within_window": 0.28681244383581866,
+              "between_window_corrected": 0.2063445688026653,
+              "total_corrected": 0.49315701263848405,
+              "nested_mean_variance": 0.069511919940405,
+              "equal_pair_count_independent_projection": 0.030822313289905253,
+              "across_fixed_state_mean_variance": 0.045283774538551855,
+              "across_fixed_states_corrected": -0.02422814540185314,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.5815844375837168,
+              "nested_over_independent_variance_projection": 2.255246687248849,
+              "largest_state_share_of_nested_variance": 0.9280185817915483,
+              "half_means": {
+                "window": [
+                  0.2050511636857517,
+                  -0.09571536787895918
+                ],
+                "suffix": [
+                  0.038777311265745656,
+                  0.07055848454104686
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.022012349224255896,
+              "within_window": 0.2868124438358181,
+              "between_window_corrected": 0.2094973760609693,
+              "total_corrected": 0.4963098198967874,
+              "nested_mean_variance": 0.07030012175498095,
+              "equal_pair_count_independent_projection": 0.031019363743549213,
+              "across_fixed_state_mean_variance": 0.030056414944648613,
+              "across_fixed_states_corrected": -0.04024370681033233,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.5778899234664824,
+              "nested_over_independent_variance_projection": 2.2663302296005527,
+              "largest_state_share_of_nested_variance": 0.9287899091839887,
+              "half_means": {
+                "window": [
+                  0.17485326030940615,
+                  -0.13082856186089434
+                ],
+                "suffix": [
+                  0.006121762586604647,
+                  0.03790293586190715
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.0014203335437948954
+        },
+        {
+          "seed": 1972285004,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.014732853245728482,
+              "within_window": 0.0,
+              "between_window_corrected": 8.625835587822112e-05,
+              "total_corrected": 8.625835587822112e-05,
+              "nested_mean_variance": 2.1564588969555278e-05,
+              "equal_pair_count_independent_projection": 5.39114724238882e-06,
+              "across_fixed_state_mean_variance": 0.001636367493553161,
+              "across_fixed_states_corrected": 0.0016148029045836055,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.9999999999999996,
+              "largest_state_share_of_nested_variance": 0.9544208552616623,
+              "half_means": {
+                "window": [
+                  -0.011551586832560636,
+                  -0.01791411965889633
+                ],
+                "suffix": [
+                  -0.014732853245728482,
+                  -0.014732853245728482
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.04346455006289429,
+              "within_window": 0.009593863086865608,
+              "between_window_corrected": 0.0011032830563578219,
+              "total_corrected": 0.010697146143223429,
+              "nested_mean_variance": 0.0008754372070185558,
+              "equal_pair_count_independent_projection": 0.0006685716339514643,
+              "across_fixed_state_mean_variance": 0.0034390822602517472,
+              "across_fixed_states_corrected": 0.0025636450532331915,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8968619254531973,
+              "nested_over_independent_variance_projection": 1.3094142236404083,
+              "largest_state_share_of_nested_variance": 0.9378437381819421,
+              "half_means": {
+                "window": [
+                  -0.0318538804685427,
+                  -0.055075219657245884
+                ],
+                "suffix": [
+                  -0.04700723640024695,
+                  -0.03992186372554164
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.05819740330862238,
+              "within_window": 0.009593863086865627,
+              "between_window_corrected": 0.00189371442819381,
+              "total_corrected": 0.011487577515059437,
+              "nested_mean_variance": 0.0010730450499775541,
+              "equal_pair_count_independent_projection": 0.0007179735946912148,
+              "across_fixed_state_mean_variance": 0.009743970733725496,
+              "across_fixed_states_corrected": 0.008670925683747943,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.8351511077325677,
+              "nested_over_independent_variance_projection": 1.4945466768022966,
+              "largest_state_share_of_nested_variance": 0.9505413295897777,
+              "half_means": {
+                "window": [
+                  -0.04340546730110304,
+                  -0.07298933931614171
+                ],
+                "suffix": [
+                  -0.06174008964597425,
+                  -0.0546547169712705
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 0.00035208650797893907
+        },
+        {
+          "seed": 1972285005,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": 0.0013678206709146692,
+              "within_window": 0.0,
+              "between_window_corrected": 1.6826879608039053e-07,
+              "total_corrected": 1.6826879608039053e-07,
+              "nested_mean_variance": 4.206719902009762e-08,
+              "equal_pair_count_independent_projection": 1.0516799755024408e-08,
+              "across_fixed_state_mean_variance": 6.172687674440918e-06,
+              "across_fixed_states_corrected": 6.1306204754208204e-06,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 3.9999999999999987,
+              "largest_state_share_of_nested_variance": 0.9345158309024655,
+              "half_means": {
+                "window": [
+                  0.0013911080434750103,
+                  0.0013445332983543282
+                ],
+                "suffix": [
+                  0.0013678206709146692,
+                  0.0013678206709146692
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.007870035558628733,
+              "within_window": 0.07372542079060733,
+              "between_window_corrected": -0.00026683267396967444,
+              "total_corrected": 0.07345858811663765,
+              "nested_mean_variance": 0.004541130630920539,
+              "equal_pair_count_independent_projection": 0.004591161757289853,
+              "across_fixed_state_mean_variance": 0.0072209603461289,
+              "across_fixed_states_corrected": 0.002679829715208361,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.0036324231218003,
+              "nested_over_independent_variance_projection": 0.9891027306345993,
+              "largest_state_share_of_nested_variance": 0.6637419735753464,
+              "half_means": {
+                "window": [
+                  0.029888495458095982,
+                  -0.014148424340838517
+                ],
+                "suffix": [
+                  0.002712172992618417,
+                  0.01302789812463905
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.009237856229543364,
+              "within_window": 0.07372542079060652,
+              "between_window_corrected": -0.0003265895721725869,
+              "total_corrected": 0.07339883121843395,
+              "nested_mean_variance": 0.004526191406369762,
+              "equal_pair_count_independent_projection": 0.004587426951152122,
+              "across_fixed_state_mean_variance": 0.006849878464914026,
+              "across_fixed_states_corrected": 0.0023236870585442637,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 2,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.004449520063891,
+              "nested_over_independent_variance_projection": 0.9866514398083265,
+              "largest_state_share_of_nested_variance": 0.6659360783296076,
+              "half_means": {
+                "window": [
+                  0.03127960350157024,
+                  -0.01280389104248351
+                ],
+                "suffix": [
+                  0.004079993663533048,
+                  0.01439571879555368
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -2.9962583499463413e-05
+        },
+        {
+          "seed": 1972285006,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.0034442607491960917,
+              "within_window": 0.0,
+              "between_window_corrected": 3.330267593283855e-05,
+              "total_corrected": 3.330267593283855e-05,
+              "nested_mean_variance": 8.32566898320964e-06,
+              "equal_pair_count_independent_projection": 2.0814172458024094e-06,
+              "across_fixed_state_mean_variance": 0.00015285647667664462,
+              "across_fixed_states_corrected": 0.00014453080769343498,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.000000000000001,
+              "largest_state_share_of_nested_variance": 0.8005541278731834,
+              "half_means": {
+                "window": [
+                  -0.0031553660970147315,
+                  -0.003733155401377452
+                ],
+                "suffix": [
+                  -0.0034442607491960917,
+                  -0.0034442607491960917
+                ]
+              }
+            },
+            "tail": {
+              "mean": 0.03608948693211835,
+              "within_window": 0.018561934648233584,
+              "between_window_corrected": 0.005592039672521479,
+              "total_corrected": 0.024153974320755056,
+              "nested_mean_variance": 0.0025581308336449678,
+              "equal_pair_count_independent_projection": 0.001509623395047191,
+              "across_fixed_state_mean_variance": 0.0005608185905372513,
+              "across_fixed_states_corrected": -0.0019973122431077165,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.768483662429154,
+              "nested_over_independent_variance_projection": 1.6945490127125384,
+              "largest_state_share_of_nested_variance": 0.5530582388603733,
+              "half_means": {
+                "window": [
+                  0.022459032746096886,
+                  0.04971994111813982
+                ],
+                "suffix": [
+                  0.04346763589680349,
+                  0.02871133796743322
+                ]
+              }
+            },
+            "G": {
+              "mean": 0.03264522618292143,
+              "within_window": 0.018561934648233618,
+              "between_window_corrected": 0.0054669139838536525,
+              "total_corrected": 0.024028848632087273,
+              "nested_mean_variance": 0.0025268494114780147,
+              "equal_pair_count_independent_projection": 0.0015018030395054546,
+              "across_fixed_state_mean_variance": 0.0001722180989436082,
+              "across_fixed_states_corrected": -0.0023546313125344066,
+              "negative_between_window_estimates": 1,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.7724853958856217,
+              "nested_over_independent_variance_projection": 1.6825438123431347,
+              "largest_state_share_of_nested_variance": 0.5188904842247569,
+              "half_means": {
+                "window": [
+                  0.019303666649083267,
+                  0.04598678571675959
+                ],
+                "suffix": [
+                  0.040023375147606455,
+                  0.0252670772182364
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": -7.921418230043391e-05
+        },
+        {
+          "seed": 1972285007,
+          "states": 3,
+          "prefixes": 1,
+          "targets": {
+            "W": {
+              "mean": -0.029138288265158328,
+              "within_window": 0.0,
+              "between_window_corrected": 0.00013270130407225166,
+              "total_corrected": 0.00013270130407225166,
+              "nested_mean_variance": 3.3175326018062915e-05,
+              "equal_pair_count_independent_projection": 8.293831504515729e-06,
+              "across_fixed_state_mean_variance": 0.001050058495299959,
+              "across_fixed_states_corrected": 0.0010168831692818961,
+              "negative_between_window_estimates": 0,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 3,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 0.0,
+              "nested_over_independent_variance_projection": 4.0,
+              "largest_state_share_of_nested_variance": 0.8019915102956783,
+              "half_means": {
+                "window": [
+                  -0.030224115771943474,
+                  -0.02805246075837319
+                ],
+                "suffix": [
+                  -0.029138288265158335,
+                  -0.029138288265158335
+                ]
+              }
+            },
+            "tail": {
+              "mean": -0.034490026786944294,
+              "within_window": 0.07221799104220426,
+              "between_window_corrected": -0.01471685959219439,
+              "total_corrected": 0.057501131450009874,
+              "nested_mean_variance": 0.0008344095420891687,
+              "equal_pair_count_independent_projection": 0.003593820715625617,
+              "across_fixed_state_mean_variance": 0.013007766433864271,
+              "across_fixed_states_corrected": 0.012173356891775103,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 3,
+              "suffix_half_sign_agreement": 2,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.2559403479736548,
+              "nested_over_independent_variance_projection": 0.2321789560790357,
+              "largest_state_share_of_nested_variance": 0.6244541690918238,
+              "half_means": {
+                "window": [
+                  -0.0029672211276568447,
+                  -0.06601283244623175
+                ],
+                "suffix": [
+                  -0.10983149813105975,
+                  0.040851444557171136
+                ]
+              }
+            },
+            "G": {
+              "mean": -0.06362831505210234,
+              "within_window": 0.07221799104220417,
+              "between_window_corrected": -0.014528550049093076,
+              "total_corrected": 0.057689440993111095,
+              "nested_mean_variance": 0.0008814869278644912,
+              "equal_pair_count_independent_projection": 0.0036055900620694434,
+              "across_fixed_state_mean_variance": 0.013265388578905734,
+              "across_fixed_states_corrected": 0.012383901651041243,
+              "negative_between_window_estimates": 2,
+              "window_half_sign_agreement": 1,
+              "suffix_half_sign_agreement": 1,
+              "window_half_both_zero": 0,
+              "suffix_half_both_zero": 0,
+              "suffix_fraction_of_total_corrected": 1.2518407146782369,
+              "nested_over_independent_variance_projection": 0.2444778559652891,
+              "largest_state_share_of_nested_variance": 0.6670163168429921,
+              "half_means": {
+                "window": [
+                  -0.03319133689959958,
+                  -0.0940652932046051
+                ],
+                "suffix": [
+                  -0.1389697863962173,
+                  0.01171315629201262
+                ]
+              }
+            }
+          },
+          "mean_between_window_W_tail_covariance": 2.7804119514544535e-05
+        }
+      ]
+    }
+  ],
+  "measured_counts": {
+    "environment_opens": 3296,
+    "environment_resets": 3296,
+    "planner_calls": 79104,
+    "lower_calls": 3955200,
+    "environment_step_attempts": 3955200,
+    "environment_steps": 3955200,
+    "history_updates": 3955200,
+    "feature_vector_builds": 301948,
+    "trigger_score_checks": 300588
+  },
+  "acquisition_cpu_seconds": 3425.5941300340005,
+  "max_shard_wall_seconds": 468.9147515697405,
+  "peak_process_rss_mb": 488.96484375,
+  "new_analysis_environment_steps": 0,
+  "new_model_fits": 0,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "scope": "descriptive_fixed_state_moments_not_policy_effects_or_learnability",
+  "projection_scope": "analytical_equal_full_replay_pair_count_not_sampled_control_or_total_CPU",
+  "credit_sign": "positive_favors_now_over_wait_one_check_not_improvement_over_C0",
+  "retrieved_public_bytes": 153051
+}

@@ -359,3 +359,8 @@ The user-authorized release submits t214559-t214566 after 26 focused tests.
 The [variance launch receipt](../results/plan_validity_boundary_variance_20261111/release.json)
 preserves exact budget, rosters and live status. No training or validation stage
 follows automatically from this descriptive acquisition.
+All eight variance shards completed with exact roster and native-step closure.
+The linked readout separates window and suffix uncertainty; G suffix variance
+shares are 71.7%-87.0%, with no cross-root stable sign claim. Only compact
+moments were retrieved. The next proposed cache-only boundary-tail probe is
+not released by these results; original confirmation remains on HOLD.
