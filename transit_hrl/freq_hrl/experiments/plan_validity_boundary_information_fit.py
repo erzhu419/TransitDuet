@@ -115,12 +115,17 @@ def assemble(cell, design, cached_rows, new_rows, method):
         "label_counts": sizes, "window_keys": keys, "prefixes": sorted({s for s, _, _ in keys})}
 
 
-def training_readout(data, models):
-    predictions = {"zero": np.zeros(len(data["training_mean"])),
-        "constant": np.full(len(data["training_mean"]), models["constant"]["value"]),
+def frozen_predictions(data, models):
+    predictions = {"zero": np.zeros(len(data["now"])),
+        "constant": np.full(len(data["now"]), models["constant"]["value"]),
         "causal_t": predict(models["causal_t"], data["causal_t"])}
     for name in ("base", "dense", "wide"):
         predictions[name] = predict_parent(models[name], data["now"], data["wait_one_check"])
+    return predictions
+
+
+def training_readout(data, models):
+    predictions = frozen_predictions(data, models)
     return {"prefixes": len(data["prefixes"]), "windows": len(data["training_mean"]),
         "A_pairs": sum(data["label_counts"]), "A_count_histogram": dict(Counter(data["label_counts"])),
         "empirical_A_mean_noise_variance": float(data["A_mean_noise_estimate"].mean()),

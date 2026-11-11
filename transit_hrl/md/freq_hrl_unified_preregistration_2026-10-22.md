@@ -418,3 +418,11 @@ eight DF-3 models froze, zero baseline refits and zero native steps. Own-bank
 training changes are mixed and do not select Dense versus Wide. The linked
 result and receipt preserve closure; the reserved fresh-prefix E stage remains
 unreleased, with original confirmation and performance claims still on HOLD.
+The subsequent user authorization releases only the reserved
+[boundary information E readout](freq_hrl_boundary_information_readout_2026-11-11.md):
+all frozen controls plus Dense/Wide, eight new prefixes/root and E20-27, eight
+single-core shards, 7,411,200 native steps including factual replays. All models
+must pass the global freeze gate before any E access; no fitting, threshold
+revision or root-specific version selection is admitted. Preserve paired losses,
+conditional suffix MC SE, prefix dispersion and both declared half partitions.
+This boundary-prediction release does not release original policy confirmation.
