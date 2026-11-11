@@ -1,0 +1,75 @@
+{
+  "run_name": "plan_validity_boundary_wide_transfer_20261111",
+  "snapshot_at_utc": "2026-11-11T05:40:32.074119+00:00",
+  "implementation_commit": "b7fbfa38e9",
+  "manifest": "protocols/plan_validity_boundary_wide_transfer_2026-11-11.json",
+  "source_run_name": "plan_validity_boundary_information_20261111",
+  "phase": "matched31_Wide_A_replica_and_prefix_transfer_development_diagnostic",
+  "worker_status": "complete",
+  "worker_stage": "boundary_Wide_A_transfer_complete",
+  "completed_roots": 4,
+  "new_ridge_fits": 256,
+  "new_environment_steps": 0,
+  "baseline_refits": 0,
+  "evaluation_prefixes_accessed": false,
+  "frozen_models_modified": false,
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 1.8899464140000002,
+    "wall_seconds": 1.6465351516380906,
+    "counts": {
+      "frozen_model_window_predictions": 1536,
+      "ridge_fit_calls": 256,
+      "diagnostic_model_window_predictions": 98304
+    },
+    "phases": {
+      "boundary_Wide_A_transfer": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.31515265300000017,
+        "wall_seconds": 0.049731263890862465,
+        "counts": {}
+      },
+      "boundary_Wide_A_transfer/assemble_only_Wide_A_and_reproduce_frozen_losses": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.34016757799999997,
+        "wall_seconds": 0.3515136018395424,
+        "counts": {
+          "frozen_model_window_predictions": 1536
+        }
+      },
+      "boundary_Wide_A_transfer/fixed_DF_matched_size_future_and_prefix_crossfit": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 1.234626183,
+        "wall_seconds": 1.2452902859076858,
+        "counts": {
+          "ridge_fit_calls": 256,
+          "diagnostic_model_window_predictions": 98304
+        }
+      }
+    }
+  },
+  "public_summary": "summary.json",
+  "retrieved_compact_public_bytes": 20757,
+  "remote_complete_public_bytes": 158154,
+  "retrieval_scope": "compact_public_root_strata_halves_and_prefix_sign_counts_no_private_rows_or_models",
+  "focused_tests_passed": 15,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "scheduler_snapshot": [
+    {
+      "id": "t214719",
+      "signature": "Freq-HRL/boundary-wide-transfer/plan_validity_boundary_wide_transfer_20261111",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "allow_cpu_training": true,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214719.log"
+    }
+  ]
+}

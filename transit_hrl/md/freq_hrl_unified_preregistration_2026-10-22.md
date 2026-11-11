@@ -440,6 +440,12 @@ The next user authorization releases the
 two reciprocal A views, 32 whole-prefix folds/view/root, exactly 256 DF-3 fits.
 Both included and excluded probes use 31-prefix fits; included controls average
 individual model losses from existing folds, not ensemble predictions. No B/E
-access, native simulation, Dense expansion or frozen-model replacement. All
+targets, native simulation, Dense expansion or frozen-model replacement. All
 four source Wide rosters/losses must reproduce before fitting; report both views,
 cached/new strata and prefixes without selecting a new deployment model.
+The A-only diagnostic t214719 completed at the exact 256-fit budget and zero
+native steps. Reacher1 improves on matched independent A futures but loses
+after whole-prefix exclusion in both views, strata and window halves. Reacher2
+already lacks a matched-future gain and its held views conflict; do not explain
+both roots as the same transfer failure or infer that higher capacity is needed.
+Keep E frozen and all original models unchanged. No further budget is released.
