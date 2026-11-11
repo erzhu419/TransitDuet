@@ -397,3 +397,7 @@ freezes dense/wide at 1,411,200 incremental native steps/root each, including
 wide factual overhead; labels are 780/768, CPU is measured rather than assumed
 equal. Only four 22,800-step mechanical prechecks are released now. Formal
 sampling, eight potential fits and reserved new-prefix E readout remain gated.
+All four information prechecks passed at exactly 91,200 steps and zero fits.
+Cached/fresh invariants hold; no reserved training/evaluation role was accessed.
+Next phase is 32 training-acquisition shards, not model fitting or E readout;
+that formal release has not occurred.

@@ -32,6 +32,8 @@ steps; total 91,200, zero fits. Precheck factual C0 replay, causal-prefix equali
 cached/fixed boundary contexts and W+tail=G. Raw banks/models stay server-side.
 All new roles exclude historical, reserved and effective controller-training seeds.
 Formal sampling/fitting/readout needs a separate next-stage release.
+Dense allocation's `state_index` means ascending opportunity step within each
+prefix; `window_index` is the saved 0-3 window order.
 
 ## Limits
 
@@ -40,3 +42,15 @@ Boundary prediction is label-side, not a deployable earlier-time policy or an
 episode-level HRL claim. CPU is measured, not assumed matched; lifecycle costs
 remain incomplete. Planned formal cost is 18,700,800 steps, or 18,792,000 with
 prechecks; none of that formal budget is released now. HOLD remains.
+
+## Precheck Result
+
+Code `d9cc7c66b7`; 12 focused tests passed. Tasks t214612-t214615 completed
+on node004/node005, all four native paths passed. Exact total: 91,200 steps,
+zero fits and 84.158 measured CPU seconds. Only 8,829 public bytes returned.
+Cached contexts/costs, fresh factual replay, causal-prefix equality and W+tail
+reconstruction passed; reserved training/readout prefixes remain untouched.
+See [summary](../results/plan_validity_boundary_information_20261111/precheck_summary.json)
+and [receipt](../results/plan_validity_boundary_information_20261111/precheck_release.json).
+Next release is training acquisition only: two Dense plus six Wide shards/root,
+32 jobs/11,289,600 steps total. No fitting or E readout follows automatically.
