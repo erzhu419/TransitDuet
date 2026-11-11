@@ -2,8 +2,10 @@ from copy import deepcopy
 from types import SimpleNamespace
 import unittest
 
+import numpy as np
 import torch
 
+from scripts.analyze_reacher_stage9_tail_decisions import top_at_equal_counts
 from scripts.run_stage9_strong_timing import ISE, METHODS, panels, readout, same_controller
 
 
@@ -55,3 +57,9 @@ class Stage9StrongTimingTest(unittest.TestCase):
         self.assertTrue(same_controller(model, other))
         copy["upper_actor"]["bias"][0] += 1
         self.assertFalse(same_controller(model, other))
+
+    def test_rank_diagnostic_cannot_increase_the_renewal_rate_or_move_it_to_a_new_clock(self):
+        factual = np.array([True, False, True, False, False])
+        clocks = np.array([0, 0, 5, 5, 10])
+        selected = top_at_equal_counts(np.array([0., 1., 0., 2., 100.]), factual, clocks)
+        np.testing.assert_array_equal(selected, [False, True, False, True, False])

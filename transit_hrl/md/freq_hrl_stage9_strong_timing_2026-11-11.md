@@ -19,3 +19,15 @@ both pooled path halves. No replacement, recalibration or seed extension.
 Eight fresh optimizer roots with 128 paired paths each are reserved, not
 released until the development gate passes. This is an in-distribution timing
 study under shared controller weights, not the original two-task C1/C2 study.
+
+## Reacher branch decision
+
+The [cached readout](../results/pointmaze_stage9_strong_timing_20261111/reacher_tail_decisions.json)
+uses eight original development prefixes and 24 C0-visited checks per root.
+Rank W or G on two windows, score on the other two and reverse. Fix the
+number of renewals at each clock to C0's count. Incremental G gain of G ranking
+over W ranking: root1 -0.01478/0.00000, root2 +0.00791/+0.00115. Root1's
+reverse ranking changes no check; both root2 intervals cross zero and its
+G-versus-C0 gain changes sign. No stable evidence to reopen the critic branch.
+These are finite-sample label-information contrasts, not deployable policies.
+Zero fitting/simulation, only 5,341 derived summary bytes retrieved.
