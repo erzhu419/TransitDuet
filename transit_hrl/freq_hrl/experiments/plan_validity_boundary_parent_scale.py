@@ -26,12 +26,16 @@ def predict_parent(model, now, wait):
 
 
 def fit_parent(data, train, *, total_df):
+    return fit_parent_targets(data["now"], data["wait_one_check"], data["tail"][:, :2].mean(axis=1), train, total_df=total_df)
+
+
+def fit_parent_targets(now, wait, training_mean, train, *, total_df):
     count_work("ridge_fit_calls")
-    arms = np.r_[data["now"][train, :39], data["wait_one_check"][train, :39]]
+    arms = np.r_[now[train, :39], wait[train, :39]]
     mean, scale = arms.mean(axis=0), arms.std(axis=0)
     scale = np.where(scale > 1e-8, scale, 1.)
-    x = scaled_basis(data["wait_one_check"][train], mean, scale) - scaled_basis(data["now"][train], mean, scale)
-    y = data["tail"][train, :2].mean(axis=1)
+    x = scaled_basis(wait[train], mean, scale) - scaled_basis(now[train], mean, scale)
+    y = training_mean[train]
     u, s, vt = np.linalg.svd(x, full_matrices=False)
     eigenvalues = s ** 2
     rank = int(np.sum(eigenvalues > max(1., eigenvalues[0]) * 1e-12))
@@ -50,7 +54,7 @@ def fit_parent(data, train, *, total_df):
     model = {"parent_mean": mean.tolist(), "parent_scale": scale.tolist(), "weights": weights.tolist(),
         "alpha": upper, "intercept": 0., "total_effective_df": df, "effective_df_slopes": df,
         "geometry": "training_arm_parent_scale_before_products_and_difference_no_contrast_scaling"}
-    return predict_parent(model, data["now"], data["wait_one_check"]), model
+    return predict_parent(model, now, wait), model
 
 
 def verify_prior(data, previous, public):

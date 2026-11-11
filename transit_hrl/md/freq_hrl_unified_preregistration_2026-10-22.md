@@ -408,3 +408,8 @@ No automatic fitting, E readout or policy promotion follows acquisition.
 The 32 acquisition tasks have launched with actual native progress; the linked
 snapshot retains task identities, CPU permissions, costs and partial completion.
 No model fitting or E-prefix access is released while acquisition is pending.
+All 32 tasks have now completed at the exact 11,289,600-step acquisition budget.
+The next [audit-and-fit release](freq_hrl_boundary_information_fit_2026-11-11.md)
+audits every private bank before fitting eight DF-3 potentials, zero native
+steps and zero baseline refits. Full A means include Dense's eight/nine labels.
+All models freeze before training metrics; E readout is still not released.
