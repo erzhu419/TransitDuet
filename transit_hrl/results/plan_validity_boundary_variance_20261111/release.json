@@ -1,0 +1,163 @@
+{
+  "run_name": "plan_validity_boundary_variance_20261111",
+  "stage": "nested_variance_acquisition_only",
+  "authorized_local_date": "2026-11-11",
+  "snapshot_at_utc": "2026-11-11T01:26:14.144776+00:00",
+  "source_manifest": "protocols/plan_validity_boundary_variance_2026-11-11.json",
+  "frozen_implementation_commit": "a19d97c8e505669ebcc86aeed0e7a04223ef028f",
+  "precheck_manifest": "protocols/plan_validity_boundary_credit_precheck_2026-11-11.json",
+  "released_environment_steps": 3955200,
+  "per_job_environment_steps": 494400,
+  "unique_prefixes": 32,
+  "unique_states": 96,
+  "window_draws": 4,
+  "suffix_draws_per_window": 4,
+  "paired_conditional_futures": 1536,
+  "rosters": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "development_prefix_seeds": [
+        1972175000,
+        1972175001,
+        1972175002,
+        1972175003,
+        1972175004,
+        1972175005,
+        1972175006,
+        1972175007
+      ]
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "development_prefix_seeds": [
+        1972185000,
+        1972185001,
+        1972185002,
+        1972185003,
+        1972185004,
+        1972185005,
+        1972185006,
+        1972185007
+      ]
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "development_prefix_seeds": [
+        1972275000,
+        1972275001,
+        1972275002,
+        1972275003,
+        1972275004,
+        1972275005,
+        1972275006,
+        1972275007
+      ]
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "development_prefix_seeds": [
+        1972285000,
+        1972285001,
+        1972285002,
+        1972285003,
+        1972285004,
+        1972285005,
+        1972285006,
+        1972285007
+      ]
+    }
+  ],
+  "scheduler_snapshot": [
+    {
+      "id": "t214559",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard0",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214559.log"
+    },
+    {
+      "id": "t214560",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard1",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214560.log"
+    },
+    {
+      "id": "t214561",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard0",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214561.log"
+    },
+    {
+      "id": "t214562",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214562.log"
+    },
+    {
+      "id": "t214563",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard0",
+      "status": "running",
+      "node": "node006",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214563.log"
+    },
+    {
+      "id": "t214564",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard1",
+      "status": "running",
+      "node": "node004",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214564.log"
+    },
+    {
+      "id": "t214565",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard0",
+      "status": "running",
+      "node": "node003",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214565.log"
+    },
+    {
+      "id": "t214566",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard1",
+      "status": "running",
+      "node": "node005",
+      "exit_code": null,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214566.log"
+    }
+  ],
+  "permitted_model_fits": 0,
+  "permitted_cut_updates": 0,
+  "permitted_policy_evaluation_jobs": 0,
+  "local_raw_bank_or_model_downloads": 0,
+  "initial_native_progress_observed": {
+    "shards_with_at_least_two_complete_states": 8,
+    "reported_errors": 0,
+    "source": "compact_server_public_progress_only"
+  },
+  "readout_status": "sampling_in_progress_no_variance_conclusion",
+  "next_step": "after_all_shards_complete_merge_compact_state_moments_by_root_and_prefix_before_any_boundary_value_training",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false
+}

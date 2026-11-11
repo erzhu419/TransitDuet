@@ -355,3 +355,7 @@ uses 32 separate development prefixes, 96 states and 4x4 nested draws/state.
 All complete replays count toward 3,955,200 steps across eight single-core jobs.
 The release covers variance acquisition/readout only; no fitting, cut search,
 E8 reuse or policy validation is admitted.
+The user-authorized release submits t214559-t214566 after 26 focused tests.
+The [variance launch receipt](../results/plan_validity_boundary_variance_20261111/release.json)
+preserves exact budget, rosters and live status. No training or validation stage
+follows automatically from this descriptive acquisition.

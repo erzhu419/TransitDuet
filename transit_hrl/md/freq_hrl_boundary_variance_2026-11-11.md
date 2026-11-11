@@ -37,3 +37,14 @@ not all uncertainty from observable history. Four windows give noisy component
 estimates. Suffix siblings, overlapping checks and two roots/task are not new
 independent fitted policies. Corrected heterogeneity/sign agreement alone cannot
 establish learnability, causal-state sufficiency or a performance gain.
+
+## Release
+
+Frozen implementation `a19d97c8e5`; 26 focused tests passed. Eight jobs
+t214559-t214566 release only the declared 3,955,200-step variance diagnostic.
+The [launch receipt](../results/plan_validity_boundary_variance_20261111/release.json)
+records actual placement/progress separately from completed results. Original
+C0 models/rules remain fixed and E8 stays outside this acquisition.
+All eight jobs started on node003-node006. Initial public progress confirms
+at least two complete states/shard without errors. Sampling remains in progress;
+no raw boundary data, trajectories or models were downloaded.
