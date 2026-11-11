@@ -428,3 +428,10 @@ conditional suffix MC SE, prefix dispersion and both declared half partitions.
 This boundary-prediction release does not release original policy confirmation.
 Tasks t214699-t214706 are running with actual E sampling after the global freeze
 gate; the linked launch receipt records 624,000 initial steps, not final results.
+All eight E tasks now exited 0 at exactly 7,411,200 steps, 3,072 paired futures
+and zero fits. Public-moment aggregation adds no scoring or native work. Wide
+beats zero on all four roots and both half partitions, but beats frozen base on
+only three roots; influential-prefix dependence remains. Dense training gains
+do not transfer consistently. Preserve the full E result, stop Dense expansion,
+and keep E out of subsequent fitting/tuning. No further tasks or original policy
+confirmation are released; Wide remains a candidate rather than a proven replacement.

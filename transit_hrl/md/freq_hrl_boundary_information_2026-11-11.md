@@ -73,3 +73,11 @@ the existing tasks before native work; no duplicate jobs or budget extension.
 Fourteen focused tests passed, with the CPU-permission assertion covered by a
 five-test sampling-module rerun. Reconcile all 32 final rosters and costs before
 any fitting; the launch snapshot is not final budget closure.
+
+## Completed Information Comparison
+
+Acquisition, eight fixed-DF fits and the reserved E readout are now complete.
+The [fresh-prefix result](freq_hrl_boundary_information_readout_2026-11-11.md#completed-e-result)
+preserves Wide's four-root gains versus zero and mixed gains versus frozen base;
+Dense's extra same-prefix futures do not provide consistent transfer gains.
+No further fit, native budget or original policy confirmation is released.

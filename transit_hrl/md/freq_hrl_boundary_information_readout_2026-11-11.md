@@ -30,6 +30,36 @@ term cancels. Report conditional suffix MC SE, individual prefix contrasts and
 descriptive prefix dispersion separately. Check E20-23/E24-27 and windows
 0-1/2-3 halves. Prefixes/windows are not independent fitted-policy seeds.
 
+## Completed E Result
+
+All eight tasks exited 0: 32 prefixes, 96 states, 384 windows and 3,072 paired
+E futures, exactly 7,411,200 steps and zero fits. Evaluation used 6,392.922 CPU
+seconds. Seven focused tests passed, including equivalence to direct all-prefix
+merging; aggregation added zero scoring/fitting/native work. Returned JSON:
+102,922 bytes. See [result](../results/plan_validity_boundary_information_20261111/readout_summary.json)
+and [completion receipt](../results/plan_validity_boundary_information_20261111/readout_completion.json).
+
+MSE percentage change on the common fresh E bank, negative is better:
+
+| Root | Dense vs base | Wide vs base | Wide vs zero |
+| --- | ---: | ---: | ---: |
+| PointMaze 1972110000 | +1.85% | -5.26% | -9.04% |
+| PointMaze 1972120000 | -0.25% | -3.04% | -5.85% |
+| Reacher 1972210000 | +0.06% | +4.57% | -15.42% |
+| Reacher 1972220000 | +15.74% | -4.20% | -5.91% |
+
+Wide beats zero in both suffix and window halves on every root, with 8/7/5/7
+improving prefixes. Its base contrasts keep the pooled sign in all four half
+readouts: three improvements, one loss. Wide/base MC SEs are 1.814e-5, 1.679e-5,
+1.016e-4 and 3.913e-4; these condition on the sampled prefixes/windows.
+Prefix influence matters: remove 1972178006 and PointMaze1 Wide/base flips from
+-7.211e-5 to +3.249e-5; remove 1972278005 and Reacher1 Wide/zero flips from
+-1.456e-3 to +7.262e-5. In contrast, PointMaze2 and Reacher2 Wide/base gains
+survive each single-prefix readout deletion. These are descriptive, no-refit checks.
+Dense Reacher2 improves its own A error by 18.15% yet loses 15.74% on E versus
+base. More same-prefix futures did not resolve transfer; broader coverage is
+more promising here, but did not consistently surpass the frozen old model.
+
 ## Limits And Next Step
 
 The [release manifest](../protocols/plan_validity_boundary_information_readout_2026-11-11.json)
@@ -41,3 +71,8 @@ Stop for failed provenance or budget closure and retain partial paid rows. Read
 all four roots before another decision. This evaluates boundary information at b,
 not deployable earlier-t credit, timing-policy gains or complete-episode Freq-HRL.
 Original confirmation and performance claims remain on HOLD.
+E is now exposed readout evidence, never training or tuning data. Stop Dense
+future expansion. Retain Wide as a candidate, not an automatically selected
+replacement. Before another fit, diagnose its consequential prefix errors using
+the training A bank to distinguish fit limitations from missing coverage; keep E
+as fixed reporting only. No additional tasks or budget are released by this result.
