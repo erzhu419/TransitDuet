@@ -456,3 +456,10 @@ geometry on training A. Budget: 32 geometry SVDs, 24,576 saved-fold scores,
 384 frozen-source checks, zero fits/native steps. Preserve all saved models;
 label allocations are not causal deletion effects, and geometry association is
 not an alternative-normalization experiment. No B/E targets or policy release.
+The fixed-fold attribution completed with exact zero-fit/native accounting.
+One high-leverage prefix contributes 72.88% of the net transfer gap; it is not
+a repeat of the earlier near-zero normalization explosion. Alignment loss and
+own-prefix label dependence dominate the fixed-model allocations. Retain all
+prefixes and both views; these associations are not causal deletion/geometry
+effects. Next consider fixed-capacity conditioning/coverage on training A only;
+no further training, native sampling or policy confirmation is released.

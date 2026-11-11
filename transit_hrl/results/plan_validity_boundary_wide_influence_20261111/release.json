@@ -1,0 +1,76 @@
+{
+  "run_name": "plan_validity_boundary_wide_influence_20261111",
+  "snapshot_at_utc": "2026-11-11T06:13:29.485806+00:00",
+  "implementation_commit": "bc01a43564",
+  "manifest": "protocols/plan_validity_boundary_wide_influence_2026-11-11.json",
+  "worker_status": "complete",
+  "worker_stage": "boundary_Wide_fixed_influence_complete",
+  "task": "reacher_tracking",
+  "optimizer_seed": 1972210000,
+  "new_fits": 0,
+  "new_environment_steps": 0,
+  "evaluation_prefixes_accessed": false,
+  "frozen_models_modified": false,
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 0.6048092570000003,
+    "wall_seconds": 0.385605831630528,
+    "counts": {
+      "frozen_model_window_predictions": 384,
+      "saved_fold_window_predictions": 24576,
+      "geometry_svd_calls": 32
+    },
+    "phases": {
+      "boundary_Wide_fixed_influence": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.27380643900000035,
+        "wall_seconds": 0.05030213948339224,
+        "counts": {}
+      },
+      "boundary_Wide_fixed_influence/load_only_target_A_and_saved_folds": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.09872863100000018,
+        "wall_seconds": 0.10247310250997543,
+        "counts": {
+          "frozen_model_window_predictions": 384
+        }
+      },
+      "boundary_Wide_fixed_influence/fixed_model_coordinates_label_response_and_support": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.2322741869999998,
+        "wall_seconds": 0.2328305896371603,
+        "counts": {
+          "saved_fold_window_predictions": 24576,
+          "geometry_svd_calls": 32
+        }
+      }
+    }
+  },
+  "public_summary": "summary.json",
+  "public_prefix_view_extract": "source_prefix_views.json",
+  "derived_diagnosis": "diagnosis.json",
+  "retrieved_public_result_bytes": 33329,
+  "retrieved_prefix_view_bytes": 10183,
+  "retrieved_public_total_bytes": 43512,
+  "retrieved": "public metrics only; no raw A rows, fold coefficients, kernel responses or checkpoints",
+  "focused_tests_passed": 14,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "scheduler_snapshot": [
+    {
+      "id": "t214741",
+      "signature": "Freq-HRL/boundary-wide-influence/plan_validity_boundary_wide_influence_20261111",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "allow_cpu_training": true,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214741.log"
+    }
+  ]
+}
