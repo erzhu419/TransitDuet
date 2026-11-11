@@ -85,3 +85,47 @@ def collect_boundary_pair(controller, rule, observation, step, *, spec, args, wi
         "feature_names": list(original[0]["feature_names"]), "causal_features": original[0]["features"].tolist(),
         "windows": output, "variance_components": {target: variance_components(
             [[r[target] for r in w["suffix_draws"]] for w in output]) for target in ("W", "tail", "G")}}
+
+
+def boundary_state_report(row):
+    """Compact moments only; boundary features and individual draws stay private."""
+    arrays = {target: np.asarray([[r[target] for r in w["suffix_draws"]] for w in row["windows"]])
+        for target in ("W", "tail", "G")}
+    windows, suffixes = arrays["G"].shape
+    if min(windows, suffixes) < 2 or windows % 2 or suffixes % 2:
+        raise ValueError("the diagnostic needs even window and suffix half-groups")
+    metrics = {}
+    for target, x in arrays.items():
+        v = variance_components(x)
+        metrics[target] = {**v, "nested_mean_variance": v["nested_mean_mc_se"] ** 2,
+            "equal_pair_count_independent_projection": v["total_corrected"] / (windows * suffixes),
+            "window_half_means": [float(z.mean()) for z in np.split(x, 2, axis=0)],
+            "suffix_half_means": [float(z.mean()) for z in np.split(x, 2, axis=1)]}
+    covariance = float(np.cov(arrays["W"].mean(axis=1), arrays["tail"].mean(axis=1), ddof=1)[0, 1])
+    reconstructed = metrics["W"]["between_window_corrected"] + metrics["tail"]["between_window_corrected"] + 2 * covariance
+    if not np.isclose(reconstructed, metrics["G"]["between_window_corrected"], rtol=1e-8, atol=1e-10):
+        raise RuntimeError("W/tail covariance does not reconstruct between-window G variance")
+    return {"seed": row["seed"], "opportunity_step": row["opportunity_step"],
+        "boundary_step": row["boundary_step"], "windows": windows, "suffixes": suffixes,
+        "between_window_W_tail_covariance": covariance, "targets": metrics}
+
+
+def summarize_boundary_reports(reports):
+    """Descriptive fixed-state summaries, not independent-prefix confidence bounds."""
+    result = {"states": len(reports), "prefixes": len({r["seed"] for r in reports}), "targets": {}}
+    fields = ("mean", "within_window", "between_window_corrected", "total_corrected",
+              "nested_mean_variance", "equal_pair_count_independent_projection")
+    for target in ("W", "tail", "G"):
+        rows = [r["targets"][target] for r in reports]
+        average = {key: float(np.mean([r[key] for r in rows])) for key in fields}
+        observed = float(np.var([r["mean"] for r in rows], ddof=1))
+        average.update(across_fixed_state_mean_variance=observed,
+            across_fixed_states_corrected=observed - average["nested_mean_variance"],
+            negative_between_window_estimates=sum(r["between_window_corrected"] < 0 for r in rows),
+            window_half_sign_agreement=sum(np.sign(r["window_half_means"][0]) == np.sign(r["window_half_means"][1]) for r in rows),
+            suffix_half_sign_agreement=sum(np.sign(r["suffix_half_means"][0]) == np.sign(r["suffix_half_means"][1]) for r in rows),
+            window_half_both_zero=sum(r["window_half_means"] == [0, 0] for r in rows),
+            suffix_half_both_zero=sum(r["suffix_half_means"] == [0, 0] for r in rows))
+        result["targets"][target] = average
+    result["mean_between_window_W_tail_covariance"] = float(np.mean([r["between_window_W_tail_covariance"] for r in reports]))
+    return result

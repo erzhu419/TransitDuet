@@ -350,3 +350,8 @@ All four prechecks passed at the exact replay-only budget. This establishes the
 boundary-label acquisition path; it does not qualify a continuation critic.
 The next decision is a cost-accounted variance diagnostic on separate
 development prefixes, not a new threshold or deployment trial.
+The next [frozen variance diagnostic](freq_hrl_boundary_variance_2026-11-11.md)
+uses 32 separate development prefixes, 96 states and 4x4 nested draws/state.
+All complete replays count toward 3,955,200 steps across eight single-core jobs.
+The release covers variance acquisition/readout only; no fitting, cut search,
+E8 reuse or policy validation is admitted.

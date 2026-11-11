@@ -1,0 +1,431 @@
+{
+  "protocol_version": "cost_accounted_nested_credit_variance_v1",
+  "run_name": "plan_validity_boundary_variance_20261111",
+  "source_manifest": "protocols/plan_validity_independent_calibration_2026-11-11.json",
+  "precheck_manifest": "protocols/plan_validity_boundary_credit_precheck_2026-11-11.json",
+  "horizon": 1200,
+  "window_steps": 50,
+  "probes_per_prefix": 3,
+  "prefixes_per_root": 8,
+  "prefixes_per_shard": 4,
+  "shards_per_root": 2,
+  "window_draws": 4,
+  "suffix_draws_per_window": 4,
+  "sampling_recipe": "unchanged_C0_observe_617_bins_839_optional_phase_three_checks_no_outcome_selection",
+  "window_seed_recipe": "SeedSequence([root,prefix,step,window,11401])",
+  "suffix_seed_recipe": "SeedSequence([root,prefix,step,window,suffix,11402])",
+  "development_seed_recipe": "root+65000...+65007_checked_against_literal_registered_effective_training_seeds",
+  "per_prefix_environment_steps": 123600,
+  "per_job_environment_steps": 494400,
+  "total_environment_steps": 3955200,
+  "unique_prefixes": 32,
+  "unique_states": 96,
+  "window_realizations": 384,
+  "paired_conditional_futures": 1536,
+  "episodes_per_prefix": 103,
+  "cost_identity": "1200*(1_factual+3_checks*(2_original_arms+2_arms*4_windows*4_suffixes))",
+  "current_scope": "variance_diagnostic_only_no_fit_or_policy_evaluation",
+  "statistics": {
+    "variance_within": "mean_j sample_var_k(credit[j,k])",
+    "variance_between_corrected": "sample_var_j(mean_k credit[j,k])-within/4",
+    "nested_mean_variance": "sample_var_j(mean_k credit[j,k])/4",
+    "equal_full_replay_pair_count_projection": "(between_corrected+within)/16_not_an_empirical_control",
+    "W_tail_covariance": "retain_between_window_covariance_when_reconstructing_G_variance",
+    "fixed_state_variance_corrected": "sample_var_of_state_means-mean_nested_mean_variance_descriptive_only",
+    "half_groups": "first2_vs_last2_windows_and_first2_vs_last2_suffixes_separately_no_pseudo_seed_inference",
+    "negative_estimates": "retain_without_clipping",
+    "confidence_scope": "descriptive_fixed_states_report_roots_and_prefixes_separately_no_policy_claim"
+  },
+  "new_model_fits": 0,
+  "new_controller_updates": 0,
+  "E8_reused_for_training": false,
+  "followup": "none_freeze_variance_readout_before_any_boundary_critic_or_new_validation_design",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "cells": [
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972110000,
+      "development_prefix_seeds": [
+        1972175000,
+        1972175001,
+        1972175002,
+        1972175003,
+        1972175004,
+        1972175005,
+        1972175006,
+        1972175007
+      ],
+      "output_directory": "results/plan_validity_boundary_variance_20261111/pointmaze/1972110000"
+    },
+    {
+      "task": "pointmaze",
+      "optimizer_seed": 1972120000,
+      "development_prefix_seeds": [
+        1972185000,
+        1972185001,
+        1972185002,
+        1972185003,
+        1972185004,
+        1972185005,
+        1972185006,
+        1972185007
+      ],
+      "output_directory": "results/plan_validity_boundary_variance_20261111/pointmaze/1972120000"
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972210000,
+      "development_prefix_seeds": [
+        1972275000,
+        1972275001,
+        1972275002,
+        1972275003,
+        1972275004,
+        1972275005,
+        1972275006,
+        1972275007
+      ],
+      "output_directory": "results/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000"
+    },
+    {
+      "task": "reacher_tracking",
+      "optimizer_seed": 1972220000,
+      "development_prefix_seeds": [
+        1972285000,
+        1972285001,
+        1972285002,
+        1972285003,
+        1972285004,
+        1972285005,
+        1972285006,
+        1972285007
+      ],
+      "output_directory": "results/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000"
+    }
+  ],
+  "jobs": [
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance pointmaze 1972110000 shard0",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard0",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 0 --shard-index 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard0/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard0/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance pointmaze 1972110000 shard1",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard1",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 0 --shard-index 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard1/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972110000/shard1/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance pointmaze 1972120000 shard0",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard0",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 1 --shard-index 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard0/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard0/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance pointmaze 1972120000 shard1",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard1",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 1 --shard-index 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard1/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/pointmaze/1972120000/shard1/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance reacher_tracking 1972210000 shard0",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard0",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 2 --shard-index 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard0/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard0/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance reacher_tracking 1972210000 shard1",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard1",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 2 --shard-index 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard1/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972210000/shard1/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance reacher_tracking 1972220000 shard0",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard0",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 3 --shard-index 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard0/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard0/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    },
+    {
+      "project": "Freq-HRL-BoundaryVariance",
+      "description": "Nested credit variance reacher_tracking 1972220000 shard1",
+      "signature": "Freq-HRL/boundary-variance/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard1",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_plan_validity_boundary_variance.py --manifest protocols/plan_validity_boundary_variance_2026-11-11.json --cell-index 3 --shard-index 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard1/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_variance_20261111/reacher_tracking/1972220000/shard1/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_variance_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    }
+  ]
+}
