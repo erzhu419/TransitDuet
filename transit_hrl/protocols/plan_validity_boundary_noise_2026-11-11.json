@@ -1,0 +1,68 @@
+{
+  "protocol_version": "fixed_prediction_paired_suffix_noise_v1",
+  "run_name": "plan_validity_boundary_noise_20261111",
+  "source_manifest": "protocols/plan_validity_boundary_parent_scale_2026-11-11.json",
+  "output_directory": "results/plan_validity_boundary_noise_20261111",
+  "new_model_fits": 0,
+  "new_environment_steps": 0,
+  "E8_reused": false,
+  "comparisons": [
+    "boundary_delta-minus-zero",
+    "boundary_delta-minus-constant",
+    "boundary_delta-minus-causal_t"
+  ],
+  "panels": [
+    "training",
+    "prefix_oof"
+  ],
+  "suffix_se": "paired_linear_loss_contrast_B_only_conditioned_on_all_A_fits_and_realized_windows",
+  "prefix_effect": "readout_deletion_no_refitting_corrected_dispersion_retains_negatives",
+  "confidence_scope": "SE_only_no_CI_or_AB_gap_significance_test_no_independent_seed_claim",
+  "followup": "none_no_fitting_simulation_new_data_or_policy_release",
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "jobs": [
+    {
+      "project": "Freq-HRL-BoundaryNoise",
+      "description": "Read-only fixed predictor suffix noise and prefix influence",
+      "signature": "Freq-HRL/boundary-noise-attribution/plan_validity_boundary_noise_20261111",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/analyze_plan_validity_boundary_noise.py --manifest protocols/plan_validity_boundary_noise_2026-11-11.json",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_noise_20261111/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/plan_validity_boundary_noise_20261111/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_boundary_noise_2026-11-11.json"
+      ],
+      "allow_duplicate": false
+    }
+  ]
+}

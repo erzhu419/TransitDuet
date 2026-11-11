@@ -383,3 +383,7 @@ The 36-fit repair completed with exact baseline reproduction and zero native
 steps. PointMaze scale amplification is removed; three roots pass the declared
 B rule, not the all-root rule. A/B disagreement and Reacher root2 remain.
 Keep v1 and repaired results; no root-specific version choice or further fitting.
+The next [fixed-prediction noise attribution](freq_hrl_boundary_noise_attribution_2026-11-11.md)
+is a single read-only scheduler job: paired-loss suffix-B MC SE, prefix readout
+deletion and noise-corrected fixed-prefix dispersion, no fit or native step.
+No A/B-gap test, confidence interval, additional sampling or policy release.
