@@ -1,0 +1,14 @@
+{
+  "protocol_id": "v406_hourly_prior_unit_repair",
+  "regimes": {"nominal": {}, "heavy": {"demand_scale": 1.2}},
+  "days": {"nominal": [2460001, 2460002], "heavy": [2460201, 2460202]},
+  "arms": ["simple_cap", "cap_10", "single", "transfer", "coordinated"],
+  "collected_arms": ["single", "transfer", "coordinated"],
+  "reused_arms": ["simple_cap", "cap_10"],
+  "physical_start_cap": 12,
+  "automatic_retry": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "repair": "Only convert the censored-state historical OD rate from hourly to per-second units: /60 -> /3600. Preserve source01/run01 and all paid results. Reuse eight unaffected controls; replay only twelve candidate paths. Same consumed development days, not independent confirmation. No other policy or threshold changes.",
+  "screen": "Against both fixed simple_cap and legacy cap_10, every day must be nonworse on actual CV2, public delay and readiness; mean journey must improve within each regime. Compare transfer with single and coordinated with transfer independently. No gate relaxation or tuning on these days."
+}

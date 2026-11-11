@@ -1,0 +1,11 @@
+{
+  "protocol_id": "v405_causal_coordination",
+  "regimes": {"nominal": {}, "heavy": {"demand_scale": 1.2}},
+  "days": {"nominal": [2450001, 2450002], "heavy": [2450201, 2450202]},
+  "arms": ["fixed_bilateral", "fixed_model", "cap_10", "hold_transfer", "coordinated"],
+  "physical_start_cap": 20,
+  "automatic_retry": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "screen": "Against frozen cap_10, every day must be nonworse on actual CV2, public delay and readiness; mean journey must improve within each regime. Joint publication value is a separate comparison against hold_transfer. Four development days do not establish confirmation or frequency-learning superiority."
+}

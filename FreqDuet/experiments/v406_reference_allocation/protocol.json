@@ -1,0 +1,11 @@
+{
+  "protocol_id": "v406_reference_allocation",
+  "regimes": {"nominal": {}, "heavy": {"demand_scale": 1.2}},
+  "days": {"nominal": [2460001, 2460002], "heavy": [2460201, 2460202]},
+  "arms": ["simple_cap", "cap_10", "single", "transfer", "coordinated"],
+  "physical_start_cap": 20,
+  "automatic_retry": false,
+  "training_updates": 0,
+  "main_policy_changed": false,
+  "screen": "Against both fixed simple_cap and legacy cap_10, every day must be nonworse on actual CV2, public delay and readiness; mean journey must improve within each regime. Compare transfer with single and coordinated with transfer independently. No gate relaxation or tuning on these days."
+}
