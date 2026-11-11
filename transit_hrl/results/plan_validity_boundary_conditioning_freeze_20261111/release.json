@@ -1,0 +1,115 @@
+{
+  "run_name": "plan_validity_boundary_conditioning_freeze_20261111",
+  "snapshot_at_utc": "2026-11-11T07:13:08.625335+00:00",
+  "implementation_commit": "1c05b2ee11",
+  "manifest": "protocols/plan_validity_boundary_conditioning_freeze_2026-11-11.json",
+  "worker_status": "complete",
+  "worker_stage": "boundary_conditioning_full_A_freeze_complete",
+  "all_models_frozen": true,
+  "new_ridge_fits": 8,
+  "baseline_refits": 0,
+  "new_environment_steps": 0,
+  "training_metric_selection_performed": false,
+  "evaluation_prefixes_accessed": false,
+  "original_models_modified": false,
+  "measured_cost": {
+    "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+    "cpu_seconds": 0.7048431910000001,
+    "wall_seconds": 0.5252585140988231,
+    "counts": {
+      "frozen_model_window_predictions": 1536,
+      "ridge_fit_calls": 8,
+      "full_A_gate_window_predictions": 3072
+    },
+    "phases": {
+      "boundary_conditioning_full_A_freeze": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.2269469230000003,
+        "wall_seconds": 0.03448721393942833,
+        "counts": {}
+      },
+      "boundary_conditioning_full_A_freeze/verify_all_training_A_and_unchanged_controls": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.34622592799999996,
+        "wall_seconds": 0.35743164643645287,
+        "counts": {
+          "frozen_model_window_predictions": 1536
+        }
+      },
+      "boundary_conditioning_full_A_freeze/eight_full_A_mean_fits_and_global_freeze": {
+        "calls": 1,
+        "failures": 0,
+        "cpu_seconds": 0.13167033999999989,
+        "wall_seconds": 0.13333965372294188,
+        "counts": {
+          "ridge_fit_calls": 8,
+          "full_A_gate_window_predictions": 3072
+        }
+      }
+    }
+  },
+  "bundle_check": {
+    "all_eight_models_present": true,
+    "all_old_controls_preserved": true,
+    "roots": [
+      {
+        "task": "pointmaze",
+        "optimizer_seed": 1972110000,
+        "new_models": 2,
+        "old_controls_preserved": true,
+        "training_windows": 384,
+        "A_labels": 768
+      },
+      {
+        "task": "pointmaze",
+        "optimizer_seed": 1972120000,
+        "new_models": 2,
+        "old_controls_preserved": true,
+        "training_windows": 384,
+        "A_labels": 768
+      },
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972210000,
+        "new_models": 2,
+        "old_controls_preserved": true,
+        "training_windows": 384,
+        "A_labels": 768
+      },
+      {
+        "task": "reacher_tracking",
+        "optimizer_seed": 1972220000,
+        "new_models": 2,
+        "old_controls_preserved": true,
+        "training_windows": 384,
+        "A_labels": 768
+      }
+    ]
+  },
+  "public_summary": "summary.json",
+  "retrieved_public_metadata_bytes": 4190,
+  "retrieved": "public result and server-side bundle-check metadata only; no coefficients, raw rows or checkpoints",
+  "confirmation_plan": "protocols/plan_validity_boundary_conditioning_confirmation_2026-11-11.json",
+  "proposed_confirmation_steps": 14822400,
+  "native_sampling_released": false,
+  "confirmation_jobs_created": 0,
+  "focused_tests_passed": 16,
+  "candidate_recipe_decision": "PILOT_RECIPE_HOLD",
+  "confirmation_released": false,
+  "performance_claim_supported": false,
+  "lifecycle_costs_complete": false,
+  "scheduler_snapshot": [
+    {
+      "id": "t214748",
+      "signature": "Freq-HRL/boundary-conditioning-freeze/plan_validity_boundary_conditioning_freeze_20261111",
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "allow_cpu_training": true,
+      "protect_from_auto_eviction": true,
+      "log_path": "/tmp/sched_t214748.log"
+    }
+  ]
+}

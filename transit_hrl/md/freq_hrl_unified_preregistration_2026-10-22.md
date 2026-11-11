@@ -486,3 +486,7 @@ or native work. Old eight-prefix base and uniform Wide are copied unchanged.
 A separate confirmation plan reserves 16 fresh prefixes/root and suffixes 40-47,
 excluding registered/effective training roles. Its 14,822,400-step budget is
 proposed, not released: no native jobs or fresh-prefix access in this stage.
+The full-A freeze completed: eight models and all unchanged controls verified
+server-side, exact eight fits and zero native work; no training-metric selection.
+The reserved confirmation plan is ready, but has no jobs and no sampling release.
+Do not reinterpret model readiness as fresh-prefix or episode-level evidence.

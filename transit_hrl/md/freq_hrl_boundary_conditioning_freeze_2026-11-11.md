@@ -21,3 +21,10 @@ use whole-prefix bootstrap bounds and fixed suffix/window/prefix halves. Keep
 conditional MC uncertainty separate, without noise subtraction or double addition.
 This tests frozen boundary predictors, not episode control or training-seed
 uncertainty. Exposed E remains reporting-only; original confirmation stays on HOLD.
+
+Completed: t214748 on node004, exact eight fits, zero native steps/baseline
+refits, 0.705 measured CPU seconds. Server-side bundle checks confirm all eight
+240-column/DF3 models and unchanged old controls; only 4,190 metadata bytes
+returned. [Summary](../results/plan_validity_boundary_conditioning_freeze_20261111/summary.json)
+and [receipt](../results/plan_validity_boundary_conditioning_freeze_20261111/release.json).
+Fresh confirmation remains planned only: zero native jobs submitted.
