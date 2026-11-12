@@ -72,6 +72,23 @@ evaluates the same two frozen rules on 32 new development paths per root,
 and a 2% pooled improvement floor guide further development only; the original
 confirmation decision and its reserved paths stay unchanged.
 
+## Distance diagnostic result
+
+[Result](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json).
+t214816-t214823 completed 512 episodes on 256 paired paths at exactly 614,400
+native steps and 559.85 CPU seconds, no fits. Mean ISE was 1.010906 versus
+1.090286 (7.28% lower); paired root-mean advantage 0.07938, nominal 95% t
+interval [0.03008, 0.12868]. All eight root means favor Stage9, ranging from
+0.09% to 14.26%; the two path halves improve 7.14% and 7.42%. All 256 schedules
+differ. Neither rule recorded a sustained failure at the existing threshold.
+Peak root p99 latency was 1.73ms versus 1.25ms, with no 10ms deadline misses.
+Only 17,986 final summary bytes returned; no checkpoints or traces.
+
+This supports incremental value over current distance in the tested task and
+controller setting. It does not isolate the effect of history from other
+features, certify tail risk or establish superiority over learned termination.
+The original HOLD remains.
+
 ## Reacher branch decision
 
 The [cached readout](../results/pointmaze_stage9_strong_timing_20261111/reacher_tail_decisions.json)

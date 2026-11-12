@@ -286,6 +286,18 @@ The earlier eight-root development result also passed, with ISE advantage
 [21.111415, 40.429899] against fixed timing. These are supporting development
 observations, not another eight roots added to the confirmation interval.
 
+**Comparison with a selected distance threshold.** In a separately registered
+development diagnostic after the strong-comparator build gate stopped formal
+evaluation, all eight completed controller builds were retained. The Stage9
+rule and the per-root selected distance threshold ran on the same 32 new
+paths per root, with 24 upper calls each. Mean episode ISE was 1.01091 versus
+1.09029 (7.28% lower). The paired optimizer-root advantage was 0.07938
+(nominal 95% t interval [0.03008, 0.12868]); all eight root means and both
+path halves favored Stage9. One learned termination rule had failed the
+best-clock competence gate before test access, so this result addresses the
+distance threshold only and is separate from the original confirmation.
+[Diagnostic source](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json).
+
 ### 5.2 Historical learned-upper gains are real but method-specific
 
 Later PointMaze studies established additional learned-upper effects under
@@ -417,11 +429,11 @@ paper a coherent timing contribution without discarding the earlier findings.
 **Task and baseline coverage.** The confirmed timing mechanism has one
 hidden-regime PointMaze task family and eight fresh optimizer seeds. The
 170-feature current-only comparator is not a capacity-matched history ablation.
-A later learned-termination development baseline mostly collapsed to the
-deadline and did not outperform fixed timing; it is not evidence of beating
-a competent learned-termination method. Event/error/age heuristics and strong
-adaptive-timing methods remain necessary comparisons for an algorithmic
-superiority claim. Sharing jitter-trained controller weights isolates the
+The distance comparison uses a threshold selected from error, age, change
+and force candidates, but does not isolate the benefit of history from the
+rest of the multivariate trigger. Later learned termination was active but
+one new root failed best-clock competence, so the registered formal
+strong-baseline evaluation was not run. Sharing jitter-trained controller weights isolates the
 effect of timing, but does not compare timing methods with controllers trained
 under each method's own schedule.
 

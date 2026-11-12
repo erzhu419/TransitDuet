@@ -1,0 +1,783 @@
+{
+  "roots": [
+    {
+      "optimizer_seed": 1981400000,
+      "mean_ise": {
+        "history": 0.9968624268680615,
+        "threshold": 1.1056667035784464
+      },
+      "relative_gain": 0.09840603534342143,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6825731165624892,
+          "wall_p50_seconds": 0.000509604811668396,
+          "wall_p95_seconds": 0.0009622317273169752,
+          "wall_p99_seconds": 0.0014836089126765736,
+          "wall_max_seconds": 0.00776149146258831,
+          "episode_first_wall_max_seconds": 0.00297533068805933,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.626719353843759,
+          "wall_p50_seconds": 0.000503642950206995,
+          "wall_p95_seconds": 0.0005598057527095077,
+          "wall_p99_seconds": 0.0010314248409122237,
+          "wall_max_seconds": 0.009596968069672585,
+          "episode_first_wall_max_seconds": 0.0026304861530661583,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 69.02034867,
+        "wall_seconds": 69.28879833314568,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2898,
+          "trigger_score_checks": 6312
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 35.640287986,
+            "wall_seconds": 35.82181467395276,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2898,
+              "trigger_score_checks": 2898
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 33.380060684,
+            "wall_seconds": 33.46698365919292,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3414
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981410000,
+      "mean_ise": {
+        "history": 1.0310587434516192,
+        "threshold": 1.0687725427077692
+      },
+      "relative_gain": 0.03528702109113037,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6805646491875142,
+          "wall_p50_seconds": 0.0005100397393107414,
+          "wall_p95_seconds": 0.0009619600139558315,
+          "wall_p99_seconds": 0.00148478239774704,
+          "wall_max_seconds": 0.007890935055911541,
+          "episode_first_wall_max_seconds": 0.0028313780203461647,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.635317505781277,
+          "wall_p50_seconds": 0.0005063987337052822,
+          "wall_p95_seconds": 0.0006184216123074293,
+          "wall_p99_seconds": 0.001030201204121113,
+          "wall_max_seconds": 0.008356435224413872,
+          "episode_first_wall_max_seconds": 0.0025511542335152626,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 69.073485324,
+        "wall_seconds": 69.31339866574854,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2653,
+          "trigger_score_checks": 6158
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 35.515670149,
+            "wall_seconds": 35.668154161423445,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2653,
+              "trigger_score_checks": 2653
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 33.557815175,
+            "wall_seconds": 33.64524450432509,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3505
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981420000,
+      "mean_ise": {
+        "history": 0.9374772916335172,
+        "threshold": 1.0629016821780524
+      },
+      "relative_gain": 0.1180018741597256,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6737746643125067,
+          "wall_p50_seconds": 0.0005066543817520142,
+          "wall_p95_seconds": 0.0009552600793540477,
+          "wall_p99_seconds": 0.0014747895020991602,
+          "wall_max_seconds": 0.008446823805570602,
+          "episode_first_wall_max_seconds": 0.003005990758538246,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6248840964062368,
+          "wall_p50_seconds": 0.000501787755638361,
+          "wall_p95_seconds": 0.0005688652396202087,
+          "wall_p99_seconds": 0.0010183151904493571,
+          "wall_max_seconds": 0.008122903294861317,
+          "episode_first_wall_max_seconds": 0.002563352696597576,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 68.37543921600002,
+        "wall_seconds": 68.68159758951515,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2522,
+          "trigger_score_checks": 5661
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 35.211013861000005,
+            "wall_seconds": 35.43125146906823,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2522,
+              "trigger_score_checks": 2522
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 33.164425355000006,
+            "wall_seconds": 33.25034612044692,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3139
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981430000,
+      "mean_ise": {
+        "history": 1.0562249941553898,
+        "threshold": 1.0947447184023145
+      },
+      "relative_gain": 0.03518603341895165,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6604349685312303,
+          "wall_p50_seconds": 0.0005000163801014423,
+          "wall_p95_seconds": 0.0009240388870239251,
+          "wall_p99_seconds": 0.0014280583523213872,
+          "wall_max_seconds": 0.009036832489073277,
+          "episode_first_wall_max_seconds": 0.002629299648106098,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6504576831562501,
+          "wall_p50_seconds": 0.000528242439031601,
+          "wall_p95_seconds": 0.0006018788553774357,
+          "wall_p99_seconds": 0.0011089358199387793,
+          "wall_max_seconds": 0.00779555831104517,
+          "episode_first_wall_max_seconds": 0.0026863254606723785,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 69.167902153,
+        "wall_seconds": 69.44074099138379,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2824,
+          "trigger_score_checks": 6545
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 34.560687909,
+            "wall_seconds": 34.74241793435067,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2824,
+              "trigger_score_checks": 2824
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 34.607214244,
+            "wall_seconds": 34.69832305703312,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3721
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981440000,
+      "mean_ise": {
+        "history": 0.9677863705358911,
+        "threshold": 0.9686376328627307
+      },
+      "relative_gain": 0.0008788243383892327,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.665731605281271,
+          "wall_p50_seconds": 0.0005045291036367416,
+          "wall_p95_seconds": 0.000944807659834623,
+          "wall_p99_seconds": 0.0014733622223138815,
+          "wall_max_seconds": 0.008563624694943428,
+          "episode_first_wall_max_seconds": 0.003415352664887905,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6243172409999402,
+          "wall_p50_seconds": 0.0005026631988584995,
+          "wall_p95_seconds": 0.0005618934985250233,
+          "wall_p99_seconds": 0.0010148015152662998,
+          "wall_max_seconds": 0.008973662741482258,
+          "episode_first_wall_max_seconds": 0.002512083388864994,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 68.357620283,
+        "wall_seconds": 68.67871073167771,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2201,
+          "trigger_score_checks": 5412
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 35.022910662,
+            "wall_seconds": 35.25606903061271,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2201,
+              "trigger_score_checks": 2201
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 33.334709621,
+            "wall_seconds": 33.422641701065004,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3211
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981450000,
+      "mean_ise": {
+        "history": 1.0341733892955722,
+        "threshold": 1.152530680329718
+      },
+      "relative_gain": 0.10269339728143786,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6783146102812306,
+          "wall_p50_seconds": 0.0005254126153886318,
+          "wall_p95_seconds": 0.0009362187702208752,
+          "wall_p99_seconds": 0.0015445266477763662,
+          "wall_max_seconds": 0.008508088067173958,
+          "episode_first_wall_max_seconds": 0.0029145395383238792,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6251421428125445,
+          "wall_p50_seconds": 0.0004991944879293442,
+          "wall_p95_seconds": 0.0005705081392079591,
+          "wall_p99_seconds": 0.0010252905730158096,
+          "wall_max_seconds": 0.008020536974072456,
+          "episode_first_wall_max_seconds": 0.002673165872693062,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 68.861052543,
+        "wall_seconds": 69.19926193449646,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2546,
+          "trigger_score_checks": 5504
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 35.594959464,
+            "wall_seconds": 35.83063244540244,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2546,
+              "trigger_score_checks": 2546
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 33.26609307900001,
+            "wall_seconds": 33.36862948909402,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 2958
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981460000,
+      "mean_ise": {
+        "history": 1.0246560201959434,
+        "threshold": 1.1950821473326656
+      },
+      "relative_gain": 0.1426062028598626,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.7582021357499795,
+          "wall_p50_seconds": 0.0006191572174429893,
+          "wall_p95_seconds": 0.00107463258318603,
+          "wall_p99_seconds": 0.0017327954433858398,
+          "wall_max_seconds": 0.00652081985026598,
+          "episode_first_wall_max_seconds": 0.002685808576643467,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.7444051000312333,
+          "wall_p50_seconds": 0.0006217239424586296,
+          "wall_p95_seconds": 0.0006499310955405235,
+          "wall_p99_seconds": 0.0012493739649653438,
+          "wall_max_seconds": 0.00595292542129755,
+          "episode_first_wall_max_seconds": 0.002522949129343033,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 78.65719446599999,
+        "wall_seconds": 79.05221271328628,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2659,
+          "trigger_score_checks": 5897
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 39.471003452,
+            "wall_seconds": 39.763797274790704,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2659,
+              "trigger_score_checks": 2659
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 39.186191013999995,
+            "wall_seconds": 39.288415438495576,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3238
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1981470000,
+      "mean_ise": {
+        "history": 1.0390076119921718,
+        "threshold": 1.0739533426731898
+      },
+      "relative_gain": 0.0325393378766662,
+      "differing_schedules": 32,
+      "sustained_failure_counts": {
+        "history": 0,
+        "threshold": 0
+      },
+      "latency": {
+        "history": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6804336119374921,
+          "wall_p50_seconds": 0.0005060397088527679,
+          "wall_p95_seconds": 0.0009423553012311456,
+          "wall_p99_seconds": 0.0014655468519777066,
+          "wall_max_seconds": 0.008584600873291492,
+          "episode_first_wall_max_seconds": 0.002655981108546257,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        },
+        "threshold": {
+          "scope": "observation_history_update_through_actuator_action_excluding_simulator",
+          "decisions": 38400,
+          "episodes": 32,
+          "cpu_seconds_per_episode": 0.6173718113124775,
+          "wall_p50_seconds": 0.0004977802745997906,
+          "wall_p95_seconds": 0.0005684471223503351,
+          "wall_p99_seconds": 0.0009929632209241391,
+          "wall_max_seconds": 0.00794286746531725,
+          "episode_first_wall_max_seconds": 0.002627311274409294,
+          "deadline_seconds": 0.01,
+          "deadline_misses": 0,
+          "process_cold_start_measured": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 68.33570765900001,
+        "wall_seconds": 68.71098691690713,
+        "counts": {
+          "environment_opens": 64,
+          "environment_resets": 64,
+          "planner_calls": 1536,
+          "lower_calls": 76800,
+          "environment_step_attempts": 76800,
+          "environment_steps": 76800,
+          "history_updates": 76800,
+          "feature_vector_builds": 2599,
+          "trigger_score_checks": 6077
+        },
+        "phases": {
+          "history": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 35.484862103,
+            "wall_seconds": 35.77265285514295,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "feature_vector_builds": 2599,
+              "trigger_score_checks": 2599
+            }
+          },
+          "threshold": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 32.850845556,
+            "wall_seconds": 32.93833406176418,
+            "counts": {
+              "environment_opens": 32,
+              "environment_resets": 32,
+              "planner_calls": 768,
+              "lower_calls": 38400,
+              "environment_step_attempts": 38400,
+              "environment_steps": 38400,
+              "history_updates": 38400,
+              "trigger_score_checks": 3478
+            }
+          }
+        }
+      }
+    }
+  ],
+  "paired_ise_gain": {
+    "n": 8,
+    "mean": 0.07938032524209003,
+    "interval": [
+      0.03008110770236129,
+      0.12867954278181876
+    ]
+  },
+  "relative_gain": 0.07280687089924492,
+  "relative_gain_halves": [
+    0.07143576876719371,
+    0.07419370069624398
+  ],
+  "development_signal": true,
+  "original_confirmation_released": false,
+  "scope": "post_hold_development_only_all_eight_roots_no_original_test_access",
+  "retrieved_summary_bytes": 17986,
+  "task_ids": [
+    "t214816",
+    "t214817",
+    "t214818",
+    "t214819",
+    "t214820",
+    "t214821",
+    "t214822",
+    "t214823"
+  ]
+}

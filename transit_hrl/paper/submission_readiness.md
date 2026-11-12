@@ -75,6 +75,24 @@ all measured caps satisfied. This releases only the new PointMaze confirmation,
 with its global freeze; it does not release the original two-task protocol.
 The cached Reacher timing audit does not support reopening the tail critic.
 
+**Fresh PointMaze builds: HOLD before evaluation.** All eight builds completed
+and all method budgets passed. The frozen learned termination at root
+1981440000 missed the best-clock competence requirement despite noncollapsed,
+state-conditional behavior. No reserved test path was accessed and no root
+was dropped. See the [build outcome](../md/freq_hrl_stage9_strong_timing_2026-11-11.md#build-outcome).
+The [separate distance diagnostic](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json)
+retains all eight frozen roots and supports a 7.28% ISE improvement on new
+development paths, with all root means favorable. It does not replace the
+withheld comparison with learned termination.
+
+**Next comparator study.** Keep Stage9 and the threshold fixed. Before
+accessing a new test cohort, register a strong comparator that chooses between
+learned termination and the best clock on its own selection paths, and charge
+both searches. Evaluate this composite comparator on every root and report
+how often the learned policy is selected. Beating the composite would not
+establish a learned-only claim where the clock is selected. Preserve the
+original all-learned HOLD and leave its reserved paths untouched.
+
 ## Competent timing baselines and mechanism isolation
 
 The strongest unresolved comparator is a learned termination/timing policy that
