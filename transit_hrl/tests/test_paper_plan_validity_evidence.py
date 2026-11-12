@@ -4,6 +4,7 @@ import importlib.util
 import json
 from pathlib import Path
 import re
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -90,6 +91,31 @@ class PaperEvidenceTests(unittest.TestCase):
             contrasts = row["contrasts"]
             gains = [contrasts[key]["relative_gain"] for key in ("waypoint_total", "event_vs_best", "event_vs_rotated")]
             self.assertIn("| " + " | ".join([label, *(f"{value:+.2%}" for value in gains)]) + " |", paper)
+
+    def test_portfolio_table_matches_frozen_comparison(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        summary = ROOT / "results/pointmaze_stage9_timing_portfolio_20261112/summary.json"
+        result = json.loads(summary.read_text())
+        self.assertTrue(result["joint_gate_passed"])
+        self.assertFalse(result["original_confirmation_released"])
+        self.assertIn(f"Stage9: {result['mean_ise']['history']:.5f}", paper)
+        for name in ("threshold", "portfolio"):
+            row = result["comparisons"][name]
+            gain = row["paired_ise_gain"]
+            low, high = gain["interval"]
+            self.assertIn(
+                f"{result['mean_ise'][name]:.5f} | {gain['mean']:.5f} [{low:.5f}, {high:.5f}] | {row['relative_gain']:.2%}",
+                paper,
+            )
+
+    def test_review_pdf_contains_all_captions_and_references(self):
+        pdf = subprocess.check_output(["pdftotext", str(ROOT / "paper/submission.pdf"), "-"], text=True)
+        for label, count in (("Table", 5), ("Figure", 3)):
+            self.assertEqual(re.findall(rf"^\s*{label} (\d+):", pdf, re.MULTILINE),
+                             [str(n) for n in range(1, count + 1)])
+        self.assertIn("References", pdf)
+        self.assertIn("0.505541", pdf)
+        self.assertNotIn("schulman2017ppo", pdf)
 
     def test_active_link_files_and_citations_resolve(self):
         paper = ROOT / "paper"

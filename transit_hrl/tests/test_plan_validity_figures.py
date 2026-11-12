@@ -53,6 +53,11 @@ class FigureEvidenceTests(unittest.TestCase):
         example = pm["example_schedule"]
         self.assertEqual(example["root"], min(map(int, pm["root_effects"])))
         rows = self.rows(STEMS[0])
+        self.assertEqual({row["source"] for row in rows}, {"../" + example["source"]})
+        saved = json.loads((PAPER.parent / example["source"]).read_text())
+        self.assertEqual(saved["trigger_eval_seeds"][0], example["path_seed"])
+        self.assertEqual({row["mode"]: row["decision_steps"] for row in saved["trigger_evaluation_rows"]
+                          if row["seed"] == example["path_seed"]}, example["decision_steps"])
         for mode, steps in example["decision_steps"].items():
             shown = [int(row["value_raw"]) for row in rows
                      if row["kind"] == "observed_call" and row["comparison"] == mode]

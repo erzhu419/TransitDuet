@@ -50,9 +50,11 @@ Close the draft around fixed-budget renewal timing on PointMaze. Present the
 two task screens as applicability evidence and Transit as a separate test of
 local-to-episode reliability. Freq-HRL targets hierarchies with useful slow
 plans and fast execution; it does not compete with PPO or SAC as a learning
-backend. The [source map](evidence_map.md) and [figure audit](figure_evidence_audit.md)
-identify the compact sources for the main claims. The remaining package work
-is venue formatting, an artifact manifest, and a reproducible code/data release.
+backend. The [author-neutral review PDF](submission.pdf) and
+[reproduction package instructions](README.md) are available. The
+[source map](evidence_map.md) and [figure audit](figure_evidence_audit.md)
+identify the compact sources for the main claims. Once a venue is selected,
+adapt its template, page limits and anonymity rules before upload.
 
 A stronger conference claim would need a prospectively qualified second task
 using the same renewal target, fit and call contract, plus a competent timing

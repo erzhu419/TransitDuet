@@ -11,9 +11,8 @@ tasks, remote pulls, training or simulation. Renderer: Python/matplotlib.
 | 2 | All five independent PointMaze confirmation gates and call/score accounting | [PNG](figures/fig2_pointmaze_confirmation.png), [PDF](figures/fig2_pointmaze_confirmation.pdf), [SVG](figures/fig2_pointmaze_confirmation.svg), [CSV](figures/fig2_pointmaze_confirmation_source.csv) |
 | 3 | Transit single-intervention gains versus failed two-decision criterion | [PNG](figures/fig3_transit_boundary.png), [PDF](figures/fig3_transit_boundary.pdf), [SVG](figures/fig3_transit_boundary.svg), [CSV](figures/fig3_transit_boundary_source.csv) |
 
-Rebuild from `transit_hrl/`: `python3 paper/build_plan_validity_evidence.py`,
-then `python3 paper/render_plan_validity_figures.py`. The numerical artifact
-links each study to its qualified report or original cell summaries. CSV rows
+Rebuild from `transit_hrl/`: `make -C paper figures`. The numerical artifact
+links each study to its qualified report or compact episode inputs. CSV rows
 retain raw values, interval endpoints, display scales, n and statistical unit;
 source paths are relative to `paper/`, with JSON pointers where applicable.
 
@@ -40,14 +39,17 @@ All exports are 183mm wide, with 124/139/190mm heights. Canvas-bound checks and
 nonblank-pixel checks accompany rendering; the three PNGs were visually inspected
 for clipping and overlap. SVG text remains editable; PDF text extraction checks
 that labels are preserved. PNGs are 300dpi previews; PDF/SVG are vector sources.
-Nine focused checks pass for original-result/artifact equality, table/CSV
-values, timeline provenance, interval types and units, active links and vector text.
+The focused checks compare rebuilt evidence, manuscript table and CSV values,
+timeline provenance, interval types and units, active links and vector text.
+The [review PDF](submission.pdf) embeds the three vector figures, with Figure 3
+scaled to fit its full caption on the same page.
 
 ## Evidence Still Missing
 
-The figures do not supply competent noncollapsed learned-timing baselines or
-representation/capacity-matched history ablations. Shared jitter-trained actors
-also do not rank full methods trained under their own timing schedules.
+Figure 2 reports the original confirmation. The later timing portfolio and
+capacity-matched history ablation are reported separately in the manuscript.
+Shared jitter-trained actors do not rank full methods trained under their own
+timing schedules.
 
 Planner-call equality is not matched total computation or deployment latency;
 the score checks, simulator branch acquisition and event-stratified query

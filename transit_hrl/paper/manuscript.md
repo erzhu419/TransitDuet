@@ -329,6 +329,9 @@ best constant clock had lower ISE on that root's old timing-selection paths
 clock. Both searches were charged. The same eight controllers and all paths
 were paired across methods; every episode used 24 calls.
 
+**Table 2. PointMaze timing portfolio and distance threshold.** Positive gains
+favor the Stage9 timing rule.
+
 | Comparator | Episode ISE (Stage9: 0.99934) | Paired root ISE gain [nominal 95% CI] | Relative gain |
 | --- | ---: | --- | ---: |
 | Selected distance threshold | 1.06097 | 0.06163 [0.01980, 0.10345] | 5.81% |
@@ -374,10 +377,10 @@ retained in the supplementary source map.
 Two separate 400-prefix cohorts reproduced negative total-cost and waiting
 contrasts for the frozen joint selector against raw control. The second also
 evaluated a service-only selector, which improved both endpoints under both
-interval types and in both evaluation halves. Table 2 reports their scope
+interval types and in both evaluation halves. Table 3 reports their scope
 without pooling cohorts or treating fixed historical profiles as training seeds.
 
-**Table 2. Native Transit single-intervention outcomes.** Negative favors the
+**Table 3. Native Transit single-intervention outcomes.** Negative favors the
 first controller; cost and waiting/minute values are multiplied by 1e6.
 
 | Study / contrast / endpoint | Mean | Prefix CI95 | Conditional MC CI95 |
@@ -402,11 +405,11 @@ All 1,280 controller evaluations completed successfully across 320 paired
 scenes. Including inner sampling and identity replays, 219,520 native episodes
 passed the execution ledger. The service-only-versus-raw primary did not pass:
 total cost increased at the point estimate, waiting had a crossing normal
-interval, and the two half-cohort cost effects had opposite signs (Table 3).
+interval, and the two half-cohort cost effects had opposite signs (Table 4).
 
-**Table 3. Complete-episode Transit boundary.** Negative favors the first
-controller. Values use the same 1e6 scaling as Table 2. Both intervals here
-measure complete-episode sampling, not the two uncertainty sources in Table 2.
+**Table 4. Complete-episode Transit boundary.** Negative favors the first
+controller. Values use the same 1e6 scaling as Table 3. Both intervals here
+measure complete-episode sampling, not the two uncertainty sources in Table 3.
 
 | Contrast / endpoint | Mean | Episode bootstrap CI95 | Paired normal CI95 |
 | --- | ---: | --- | --- |
@@ -446,7 +449,7 @@ CI95. Both intervals now measure complete-episode sampling. (e) Descriptive mean
 fleet, service and total-cost components; inference for total cost is in c.
 Three increased peaks and one decreased peak dominate the fleet difference.
 Joint and service-only outcomes coincide in 315/320 scenes, and the additional
-joint cost benefit is unconfirmed (Table 3). (f) Paired wait margin
+joint cost benefit is unconfirmed (Table 4). (f) Paired wait margin
 `delta_wait_service - 0.5 delta_wait_base`; retaining at least half of base's
 benefit requires negative upper bounds under both CIs in the pooled cohort and
 both halves. This criterion did not pass. Negative favors the first controller.
@@ -457,7 +460,7 @@ different from the PointMaze trigger; no cross-panel pooling is performed.
 
 ### 5.5 Useful waypoints and useful timing are distinct
 
-**Table 4. Applicability screens.** Positive entries are relative reductions
+**Table 5. Applicability screens.** Positive entries are relative reductions
 in whole-episode ISE versus the comparator. Path-paired contrasts are computed
 within each row; rows are not pooled.
 
@@ -564,18 +567,21 @@ definitions in `pointmaze_compact_plan_validity.py` and
 `pointmaze_plan_validity_branching.py`, and the registered constants in
 `scripts/pointmaze_budgeted_trigger_stage9_spec.py`.
 
-The confirmation source is
-`results/pointmaze_budgeted_trigger_stage9_v2_confirmation_20260926_r1/`.
-The paper's compact [evidence artifact](plan_validity_evidence.json) is
-reconstructed from completed local results by
-`python3 paper/build_plan_validity_evidence.py`, run from `transit_hrl/`.
-This reads saved episode summaries and qualified Transit reports; it performs
-no training, simulation or remote access. The [evidence map](evidence_map.md)
-records the different algorithms and units. Raw server caches and checkpoints
-are separate from the small manuscript sources; the code/data release package
-remains unfinished. The three core figures and source CSVs accompany this draft;
-venue-specific typesetting is separate submission work.
-[Figure exports and checks](figure_evidence_audit.md) record their traceability.
+The [reproduction instructions](README.md) and [source map](evidence_map.md)
+identify the executable code, registrations, compact per-episode PointMaze
+outcomes and saved Transit reports. From these inputs, the artifact recomputes
+PointMaze root effects and intervals, reproduces the reported Transit contrasts
+from the qualified summaries, and rebuilds the three figures and the manuscript
+PDF. Figure data are also available as CSV. This workflow uses no simulator,
+training, network connection or scheduler. The [figure audit](figure_evidence_audit.md)
+records the data and statistical units behind each figure.
+
+**Data and code availability.** The accompanying artifact includes the inputs
+for the reported analyses, the manuscript and figure generators, and the
+frozen run specifications. The full repository contains the experiment
+implementations. Raw trajectories, server caches and checkpoints are not part
+of the artifact, so it does not independently rerun policy training or native
+simulations.
 
 ## 9. Conclusion
 

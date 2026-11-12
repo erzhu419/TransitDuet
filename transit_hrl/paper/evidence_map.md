@@ -19,17 +19,17 @@ negative repeated-decision boundary. None is same-algorithm domain transfer.
 | Method / Table1 | Stage9 independent confirmation | Eight fresh optimizer roots, each 16 held-out paths; shared controller, history trigger versus fixed/random-offset/current-only timing | All five frozen gates pass; central positive result |
 | Results5.1 | Stage9 development | Eight development roots, distinct from confirmation | Supporting design result; not pooled with confirmation |
 | Results5.2 | Stages88/89/95/100/129/131/135 | Their own teacher/root and frozen-upper contracts | Genuine learned-upper effects, not replications of the Stage9 trigger |
-| Table2 | Stage298 and301 independent E32 | Two separate 400-prefix cohorts; paired single-intervention outcomes, fixed profiles averaged within prefixes | Raw-relative cost/wait gains; learned fleet increment is not established |
-| Table3 / Results5.4 | Stage304 | 320 complete scenes, four paired controllers, one fixed profile, two upper decisions | Registered dual-win and statistical half-base retention fail; no extra joint cost benefit |
+| Table3 | Stage298 and301 independent E32 | Two separate 400-prefix cohorts; paired single-intervention outcomes, fixed profiles averaged within prefixes | Raw-relative cost/wait gains; learned fleet increment is not established |
+| Table4 / Results5.4 | Stage304 | 320 complete scenes, four paired controllers, one fixed profile, two upper decisions | Registered dual-win and statistical half-base retention fail; no extra joint cost benefit |
 | Limitations | Stage10 learned termination | Revealed Stage9 confirmation paths; mostly deadline-only deployment | Failed development baseline, not competitive learned-termination superiority |
 | Follow-up boundary | [Frozen pilot episode diagnostic](../md/freq_hrl_local_episode_result_2026-11-10.md) | Two existing optimizer roots/task, 16 held-out development paths/root; selected threshold and learned termination | PointMaze directional support; mixed Reacher and failed best-clock eligibility on one root; no independent strong-baseline claim |
 | Follow-up boundary | [Fresh-prefix conditioning](../md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md) | 16 fresh prefixes/root, four frozen roots; boundary tail at `t + 50`, zero fits | No conditioning upgrade; Wide beats zero on three roots, not an episode-policy result |
 | Strong timing follow-up | [Stage9 development and build gates](../md/freq_hrl_stage9_strong_timing_2026-11-11.md#build-outcome) | Two pilot roots, then eight fresh controller builds | Development passes; formal evaluation held before test access because one learned termination misses best-clock competence |
 | Results5.1 follow-up | [Distance diagnostic](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json) | All eight frozen builds, 32 new paired paths/root, 24 upper calls per episode | 7.28% lower mean ISE versus the selected distance threshold; not learned-termination confirmation |
-| Results5.1 follow-up | [Frozen timing portfolio](../results/pointmaze_stage9_timing_portfolio_20261112/summary.json) | Same eight builds, 64 further paired paths/root, 24 calls and shared CPU/steps/latency caps | 5.81% lower ISE than distance; 21.56% lower than the selection-based portfolio; original learned-only HOLD retained |
+| Table2 | [Frozen timing portfolio](../results/pointmaze_stage9_timing_portfolio_20261112/summary.json) | Same eight builds, 64 further paired paths/root, 24 calls and shared CPU/steps/latency caps | 5.81% lower ISE than distance; 21.56% lower than the selection-based portfolio; original learned-only HOLD retained |
 | Results5.1 mechanism ablation | [Matched timing features](../md/freq_hrl_stage9_scale_ablation_2026-11-12.md#completed-result) | Same eight controllers, three equal-capacity heads on cached labels, 64 further paired paths/root | Short history improves ISE 6.44%; the 500ms/100ms substitution worsens ISE 5.85% versus 100ms/100ms; no general multiscale attribution |
-| Table4 | [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result) | Two frozen roots, 24 paired paths/root, matched call counts | Waypoint authority supported; all four privileged timing intervals cross zero; formal transfer remains on hold |
-| Table4 | [Native cart-pole precheck](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result) | Two fixed LQR configurations, 24 paired paths each, no policy fits | Visible timing signal passes, waypoint contrast reverses, joint qualification fails; not a Stage9 result |
+| Table5 | [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result) | Two frozen roots, 24 paired paths/root, matched call counts | Waypoint authority supported; all four privileged timing intervals cross zero; formal transfer remains on hold |
+| Table5 | [Native cart-pole precheck](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result) | Two fixed LQR configurations, 24 paired paths each, no policy fits | Visible timing signal passes, waypoint contrast reverses, joint qualification fails; not a Stage9 result |
 | Results5.5 | [Cart-pole waypoint factorial](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result) | Two LQR weights and two clocks crossed on the same 32 paths | Timely-waypoint gain reverses by weight at both offsets; the prior qualification remains failed |
 
 The current-only and history predictors have different feature maps and sizes
@@ -50,7 +50,7 @@ to all representation-matched or separately trained timing baselines.
 - Stage304: [qualified report](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/report/result.json), [completion receipt](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/evaluation_completion_receipt.json), [descriptive event audit](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/report/descriptive_audit.json).
 
 `build_plan_validity_evidence.py` reproduces Stage9 root effects and Student-t
-intervals from the eight existing cell summaries and selects unchanged Transit
+intervals from eight compact episode files in `paper/data/stage9/` and selects unchanged Transit
 report contrasts. It does not refit predictors, resample outcomes, change gates
 or contact servers. The old analyzer's ISE key contains `candidate_minus_fixed`,
 but its executable subtraction is fixed minus candidate; the manuscript and
@@ -58,7 +58,7 @@ compact artifact name the arithmetic explicitly. No historical sign is changed.
 The artifact also includes the first registered confirmation path's saved
 call schedule, score-check counts by mode and the existing Stage304 descriptive
 event audit. These additions supply figures, not new performance experiments.
-Table 4 uses the linked applicability reports and their compact summaries
+Table 5 uses the linked applicability reports and their compact summaries
 directly; its comparisons use different rules and are not included in Figure 2.
 
 ## Historical positive results and their place

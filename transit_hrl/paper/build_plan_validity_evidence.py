@@ -1,5 +1,6 @@
 """Build compact manuscript evidence from completed local results; no rollouts."""
 
+import argparse
 import json
 from math import sqrt
 from pathlib import Path
@@ -22,6 +23,44 @@ def read(path):
     return json.loads(path.read_text())
 
 
+def stage9_input(root):
+    return PAPER / "data" / "stage9" / f"replicate_{root}.json"
+
+
+def extract_stage9_inputs():
+    """Keep only episode outcomes, saved call times and fit accounting."""
+    trigger_fields = ("seed", "mode", "tracking_squared_error_integral", "episode_return",
+                      "upper_decision_count", "protocol_valid", "trigger_score_checks",
+                      "trigger_early_calls", "decision_steps")
+    outcome_fields = ("seed", "tracking_squared_error_integral")
+    for root in ROOTS:
+        source = Path("results") / STAGE9 / "cells/hrl_regime_history" / f"replicate_{root}/result.json"
+        payload = read(ROOT / source)
+        cell = payload["cells"][0]
+        assert payload["status"] == "complete" and cell["optimizer_seed"] == root
+        compact = {
+            "original_source": source.as_posix(),
+            **{key: cell[key] for key in ("optimizer_seed", "trigger_eval_seeds", "branch_fit_primitive_steps_replayed")},
+            "trigger_evaluation_rows": [
+                {key: row[key] for key in trigger_fields} for row in cell["trigger_evaluation_rows"]
+            ],
+            **{field: [{key: row[key] for key in outcome_fields} for row in cell[field]]
+               for field in ("canonical_evaluation_rows", "untrained_evaluation_rows")},
+            "policy_contract": {
+                "bin_steps": cell["time_scale"]["upper_period_steps"],
+                "max_offset_steps": cell["trigger_max_offset_steps"],
+                "check_stride_steps": cell["trigger_check_stride_steps"],
+                "branch_horizon_steps": round(cell["branch_window_seconds"] / cell["time_scale"]["env_dt_seconds"]),
+                "candidate_features": len(cell["trigger_predictors"][MODES[-1]]["feature_names"]),
+                "threshold_quantile": cell["trigger_threshold_quantile"],
+                "fit_queries_per_root": len(cell["branch_fit_rows"]),
+            },
+        }
+        path = stage9_input(root)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(compact, indent=2) + "\n")
+
+
 def stage9():
     effects = {name: [] for name in (*PAIRS, "controller_learning_ise")}
     means = {mode: [] for mode in MODES}
@@ -29,10 +68,9 @@ def stage9():
     mode_checks = {mode: [] for mode in MODES}
     example, policy_contract = None, None
     for root in ROOTS:
-        path = ROOT / "results" / STAGE9 / "cells/hrl_regime_history" / f"replicate_{root}/result.json"
-        payload = read(path)
-        cell = payload["cells"][0]
-        assert payload["status"] == "complete" and cell["optimizer_seed"] == root
+        path = stage9_input(root)
+        cell = read(path)
+        assert cell["optimizer_seed"] == root
         seeds = cell["trigger_eval_seeds"]
         rows = cell["trigger_evaluation_rows"]
         indexed = {(r["seed"], r["mode"]): r for r in rows}
@@ -51,13 +89,7 @@ def stage9():
             example = {"root": root, "path_seed": seeds[0],
                 "source": str(path.relative_to(ROOT)),
                 "decision_steps": {mode: indexed[seeds[0], mode]["decision_steps"] for mode in MODES}}
-            policy_contract = {"bin_steps": cell["time_scale"]["upper_period_steps"],
-                "max_offset_steps": cell["trigger_max_offset_steps"],
-                "check_stride_steps": cell["trigger_check_stride_steps"],
-                "branch_horizon_steps": round(cell["branch_window_seconds"] / cell["time_scale"]["env_dt_seconds"]),
-                "candidate_features": len(cell["trigger_predictors"][MODES[-1]]["feature_names"]),
-                "threshold_quantile": cell["trigger_threshold_quantile"],
-                "fit_queries_per_root": len(cell["branch_fit_rows"])}
+            policy_contract = cell["policy_contract"]
         candidate = [indexed[s, MODES[-1]] for s in seeds]
         checks.extend(r["trigger_score_checks"] for r in candidate)
         early.extend(r["trigger_early_calls"] for r in candidate)
@@ -123,6 +155,11 @@ def build():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--extract-stage9", action="store_true",
+                        help="refresh compact inputs from the original eight local result files")
+    if parser.parse_args().extract_stage9:
+        extract_stage9_inputs()
     evidence = build()
     output = PAPER / "plan_validity_evidence.json"
     output.write_text(json.dumps(evidence, indent=2) + "\n")
