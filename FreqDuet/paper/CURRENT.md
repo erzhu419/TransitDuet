@@ -15,6 +15,12 @@ the prespecified whole-day cap mixture. The pure-cap contrasts retain
 tradeoffs. This follow-up is not part of the archived V400--V404 PDFs and
 does not establish a learned-supervisor, timetable or frequency advantage.
 
+[V409](../experiments/v409_holding_dose/RESULTS.md) shows a joint benefit on
+independent demand days with a shared 10 s ceiling and comparable
+mean commanded holding against a frozen daily mixture. The unrestricted
+candidate did not pass holding equivalence. Both findings are supplemental;
+neither changes the archived paper mainline or promotes a policy.
+
 The earlier dated T-ITS drafts and Protocol-V6/TR-C packages remain historical
 snapshots. Their abstract, active-controller names and submission status must
 not be substituted for the current evidence.
