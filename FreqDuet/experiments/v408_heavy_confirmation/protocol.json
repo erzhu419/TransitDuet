@@ -1,0 +1,10 @@
+{
+  "protocol_id": "v408_heavy_confirmation",
+  "regimes": {"heavy": {"demand_scale": 1.2}},
+  "days": {"heavy": [2480201, 2480202, 2480203, 2480204, 2480205, 2480206, 2480207, 2480208, 2480209, 2480210, 2480211, 2480212, 2480213, 2480214, 2480215, 2480216]},
+  "arms": ["fixed_cap_10", "fixed_cap_15", "v406_single"],
+  "reference_weights": {"fixed_cap_10": 0.6, "fixed_cap_15": 0.4},
+  "bootstrap": {"seed": 40801, "draws": 20000},
+  "physical_start_cap": 48,
+  "max_concurrent_days": 16
+}
