@@ -1,6 +1,6 @@
 # Plan-Validity-Driven Replanning Under a Fixed Planning Budget
 
-Working manuscript, 2026-10-22. Evidence and source map: [evidence_map.md](evidence_map.md).
+Working manuscript, 2026-11-12. Evidence and source map: [evidence_map.md](evidence_map.md).
 
 ## Abstract
 
@@ -18,14 +18,15 @@ the trigger reduced episode tracking-error integral by 0.506 (95% CI
 planning, with 24 planner calls in every episode. A separate 512-path PointMaze
 evaluation on eight existing trained roots found 5.81% lower mean tracking
 error integral than a selected distance threshold and 21.56% lower than a
-selection-based timing portfolio under shared compute caps. Separate Transit studies
-reproduced single-intervention service and cost gains, but a subsequent
-320-scene two-decision evaluation did not confirm joint cost/wait improvement
-or added fleet-critic value. The evidence establishes fixed-call-budget timing
-utility within the PointMaze task family and identifies a boundary between
-local decision value and repeated-decision performance. The results identify
-a task-bounded role for supervised renewal value and expose the cost-risk
-barrier to extending local decision gains to repeated control.
+selection-based timing portfolio under shared compute caps. Two applicability
+screens separate the usefulness of fresh waypoints from the usefulness of
+changing their timing: Reacher benefited from fresh waypoints without a
+reliable gain from the tested event schedule, while a cart-pole tracking task
+showed timing gains but controller-dependent benefits of waypoint freshness.
+Separate Transit studies reproduced single-intervention gains, but a
+320-scene two-decision evaluation did not confirm joint cost and waiting
+improvement. The positive timing result is confined to the PointMaze task
+family.
 
 ## 1. Introduction
 
@@ -61,11 +62,12 @@ resulting decisions change the states subsequently visited.
 The study makes three contributions. First, it specifies a reproducible
 branch-supervised timing rule with an exact planner-call constraint. Second,
 it reports a frozen independent-seed PointMaze confirmation against periodic,
-random-offset and current-only timing controls. Third, it separates this result
-from a native Transit extension in which single-intervention improvements did
-not satisfy the registered repeated-decision criterion. The historical
-frequency-based research motivated the question; the tested advance is the
-use of plan-dependent renewal value to choose decision times.
+random-offset and current-only timing controls, and a separate comparison with
+stronger timing controls on fresh paths. Third, it tests two conditions for
+applicability: whether updating the plan helps at a matched clock, and whether
+changing call timing helps at a matched budget. These tests distinguish two
+failure modes. A separate Transit extension tests whether benefits measured
+for one intervention also appear under repeated control.
 
 ## 2. Related Work
 
@@ -237,6 +239,25 @@ scenes, with four paired controllers, at upper callbacks 8 and 9. Each
 controller rebuilds its second state and P8/S8 menus after its own executed
 first action. Both its stratified bootstrap and paired normal intervals use
 complete scene/episode units; neither is a conditional-future MC interval.
+
+### 4.3 Applicability screens
+
+We test two operational questions separately. At the same fixed clock, does
+executing the current waypoint rather than the previous call's waypoint reduce
+ISE? With the same 24 calls, does an event schedule reduce ISE relative to a
+fixed clock selected on separate paths and a rotation of the event schedule's
+offsets? Rotation preserves the number of calls and the offset histogram while
+breaking alignment with events. The first contrast tests waypoint freshness
+under a fixed lower controller; the second tests a specified source of timing
+opportunity, not all possible schedules.
+
+Reacher reuses two frozen moving-target pilot controllers and aligns calls
+to hidden regime events as a privileged probe. The derived cart-pole task
+tracks a visible position command using native plant dynamics and fixed LQR;
+it calls on command changes. Each screen uses 24 paired development paths
+per root or configuration. Neither fits or evaluates a new Stage9 predictor.
+The cart-pole follow-up crosses both prespecified LQR position weights with
+both fixed offsets on the same 32 fresh paths to separate the two changes.
 
 ## 5. Results
 
@@ -434,6 +455,35 @@ seconds. These studies use different cohorts and an action-selection method
 different from the PointMaze trigger; no cross-panel pooling is performed.
 [Source data](figures/fig3_transit_boundary_source.csv).
 
+### 5.5 Useful waypoints and useful timing are distinct
+
+**Table 4. Applicability screens.** Positive entries are relative reductions
+in whole-episode ISE versus the comparator. Path-paired contrasts are computed
+within each row; rows are not pooled.
+
+| Frozen root or configuration | Current vs previous waypoint | Event vs selected clock | Event vs rotated offsets |
+| --- | ---: | ---: | ---: |
+| Reacher 1972210000 | +12.30% | -0.22% | +0.30% |
+| Reacher 1972220000 | +6.02% | +1.99% | +1.41% |
+| Cart-pole, LQR position weight 10 | -8.30% | +5.13% | +5.03% |
+| Cart-pole, LQR position weight 30 | +4.41% | +10.03% | +9.77% |
+
+In [Reacher](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result),
+waypoint gains persisted in the latter halves of options, but all four event
+timing intervals crossed zero. In the [cart-pole screen](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result),
+the visible trigger passed both timing comparisons in both configurations,
+but the waypoint effect reversed, failing the joint qualification.
+
+The [cart-pole follow-up](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result)
+reproduced the reversal at both fixed offsets. Relative ISE gains from current
+waypoints were -2.68% and -2.63% at weight 10, versus +7.08% and +7.41%
+at weight 30. The absolute freshness contrast increased by 0.02458 (nominal
+paired 95% CI [0.02299, 0.02618]) when changing the LQR weight; both the offset
+and interaction intervals crossed zero. Weight 30 nonetheless had higher
+absolute ISE at both offsets. The follow-up identifies a dependence on the
+execution policy; it does not identify a better controller or reverse the
+qualification decision.
+
 ## 6. Discussion
 
 The main positive result concerns decision timing with a fixed learned
@@ -442,6 +492,13 @@ number of upper calls on fresh PointMaze optimizer seeds. The current-only
 control shows that this result was not explained by its particular current
 state/plan representation alone; it does not isolate history information from
 all feature-design or regularization effects.
+
+The applicability screens explain why slow plans and fast execution are not
+enough on their own. A plan update can be useful without the tested timing
+signal improving its allocation. Conversely, useful timing can coexist with
+a lower controller that tracks better when given a lagged waypoint. The
+planner, lower controller and timing signal therefore need to be evaluated
+together. These screens are development evidence for that distinction.
 
 The Transit extension distinguishes information value from a reliable risk
 decision. Its service-aware single-intervention gains survived independent
@@ -479,12 +536,12 @@ branch simulation and policy-training cost. The portfolio study adds common
 caps with measured costs, not equal realized cost. Performance across
 different compute budgets remains untested.
 
-**Transfer and horizon.** A [two-root Reacher development screen](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result)
-separates plan content from timing: fresh waypoints beat one-call-old waypoints,
-but privileged event alignment does not consistently beat fixed timing or
-rotated call offsets. This is not a second-task confirmation.
-Transit uses a different action-search mechanism, two historical lower
-roots and, in the two-decision study, one fixed profile.
+**Transfer and horizon.** Neither applicability screen confirms the same
+learned timing rule on a second task. The Reacher probe does not rule out
+other timing signals, and the cart-pole result covers two fixed feedback
+configurations on a derived tracking task, not the stock benchmark. Transit
+uses a different action-search mechanism, two historical lower roots and,
+in the two-decision study, one fixed profile.
 Only two of 44 upper callbacks use the tested selector. Its comparison with
 the single-intervention cohorts changes profile composition, decision positions,
 on-policy states and scenes, so failure cannot be attributed uniquely to
@@ -523,10 +580,11 @@ venue-specific typesetting is separate submission work.
 ## 9. Conclusion
 
 Plan-validity-driven timing improved PointMaze closed-loop tracking and return
-without increasing planner calls in a frozen independent-seed study. Historical
-learned-upper effects and Transit single-intervention benefits remain useful
-supporting evidence, while the Transit two-decision result bounds their
-interpretation. The supported conclusion is that supervised renewal value can
-guide a fixed call budget within the evaluated task family. Establishing a
-competitive general algorithm requires competent adaptive-timing baselines,
-matched total computation and same-algorithm confirmation beyond that family.
+without increasing planner calls in a frozen independent-seed study. It also
+improved tracking against a distance threshold and a timing portfolio on
+fresh paths under shared compute caps. Reacher and cart-pole show why waypoint
+freshness and timing opportunity should be measured separately before
+transferring the method. The Transit result shows why local improvements
+need separate episode-level confirmation. The supported contribution is a
+timing rule for the evaluated planning and execution hierarchy, not a
+replacement for its learning backend.

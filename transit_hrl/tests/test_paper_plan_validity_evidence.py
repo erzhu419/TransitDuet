@@ -1,6 +1,7 @@
 """Checks for source-derived paper tables; no environment imports or rollouts."""
 
 import importlib.util
+import json
 from pathlib import Path
 import re
 import unittest
@@ -17,7 +18,6 @@ class PaperEvidenceTests(unittest.TestCase):
         cls.evidence = REPORT.build()
 
     def test_saved_artifact_matches_original_result_sources(self):
-        import json
         saved = json.loads((ROOT / "paper/plan_validity_evidence.json").read_text())
         self.assertEqual(saved, self.evidence)
 
@@ -74,13 +74,30 @@ class PaperEvidenceTests(unittest.TestCase):
             m, low, high, low2, high2 = (v*1e6 for v in values)
             self.assertIn(f"{m:.3f} | [{low:.3f}, {high:.3f}] | [{low2:.3f}, {high2:.3f}]", text)
 
-    def test_active_links_and_citations_resolve(self):
+    def test_applicability_table_matches_saved_summaries(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        results = ROOT / "results"
+        reacher = json.loads((results / "reacher_timing_applicability_20261112/summary.json").read_text())
+        cartpole = json.loads((results / "cartpole_timing_applicability_20261112/summary.json").read_text())
+        self.assertFalse(reacher["development_gate_passed"])
+        self.assertFalse(cartpole["qualification_passed"])
+        cases = [(f"Reacher {row['optimizer_seed']}", row) for row in reacher["roots"]]
+        cases += [
+            (f"Cart-pole, LQR position weight {weight}", row)
+            for weight, row in zip((10, 30), cartpole["configurations"], strict=True)
+        ]
+        for label, row in cases:
+            contrasts = row["contrasts"]
+            gains = [contrasts[key]["relative_gain"] for key in ("waypoint_total", "event_vs_best", "event_vs_rotated")]
+            self.assertIn("| " + " | ".join([label, *(f"{value:+.2%}" for value in gains)]) + " |", paper)
+
+    def test_active_link_files_and_citations_resolve(self):
         paper = ROOT / "paper"
         for name in ("manuscript.md", "evidence_map.md", "submission_readiness.md"):
             text = (paper / name).read_text()
             for target in re.findall(r"\]\(([^)]+)\)", text):
                 if not target.startswith(("https://", "http://", "#")):
-                    self.assertTrue((paper / target).is_file(), (name, target))
+                    self.assertTrue((paper / target.partition("#")[0]).is_file(), (name, target))
         cited = set(re.findall(r"@([A-Za-z0-9_]+)", (paper / "manuscript.md").read_text()))
         defined = set(re.findall(r"@\w+\{([^,]+),", (paper / "references.bib").read_text()))
         self.assertFalse(cited-defined)

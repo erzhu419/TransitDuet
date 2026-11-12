@@ -1,6 +1,6 @@
 # Active Manuscript Evidence Map
 
-Date: 2026-10-22. Main manuscript: [manuscript.md](manuscript.md).
+Date: 2026-11-12. Main manuscript: [manuscript.md](manuscript.md).
 Compact numerical source: [plan_validity_evidence.json](plan_validity_evidence.json).
 Core figures and traceability: [figure evidence audit](figure_evidence_audit.md).
 
@@ -8,8 +8,9 @@ Core figures and traceability: [figure evidence audit](figure_evidence_audit.md)
 
 Supervised renewal value can guide a fixed planner-call budget and improve
 PointMaze closed-loop control. The independent-seed claim is confined to that
-task family. Transit supplies separate positive local-control evidence and
-a negative repeated-decision boundary, not same-algorithm domain transfer.
+task family. Reacher and cart-pole separate waypoint freshness from timing
+opportunity. Transit supplies separate positive local-control evidence and a
+negative repeated-decision boundary. None is same-algorithm domain transfer.
 
 ## Main evidence and comparators
 
@@ -27,9 +28,9 @@ a negative repeated-decision boundary, not same-algorithm domain transfer.
 | Results5.1 follow-up | [Distance diagnostic](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json) | All eight frozen builds, 32 new paired paths/root, 24 upper calls per episode | 7.28% lower mean ISE versus the selected distance threshold; not learned-termination confirmation |
 | Results5.1 follow-up | [Frozen timing portfolio](../results/pointmaze_stage9_timing_portfolio_20261112/summary.json) | Same eight builds, 64 further paired paths/root, 24 calls and shared CPU/steps/latency caps | 5.81% lower ISE than distance; 21.56% lower than the selection-based portfolio; original learned-only HOLD retained |
 | Results5.1 mechanism ablation | [Matched timing features](../md/freq_hrl_stage9_scale_ablation_2026-11-12.md#completed-result) | Same eight controllers, three equal-capacity heads on cached labels, 64 further paired paths/root | Short history improves ISE 6.44%; the 500ms/100ms substitution worsens ISE 5.85% versus 100ms/100ms; no general multiscale attribution |
-| Transfer limitation | [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result) | Two frozen roots, 24 paired paths/root, matched call counts | Waypoint authority supported; privileged event timing does not beat both clock and rotated offsets; formal transfer remains on hold |
-| Task qualification | [Native cart-pole precheck](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result) | Two fixed LQR configurations, 24 paired paths each, no policy fits | Visible timing signal passes, waypoint contrast reverses, joint qualification fails; not a Stage9 result |
-| Task qualification follow-up | [Cart-pole waypoint factorial](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result) | Two LQR weights and two clocks crossed on the same 32 paths | Timely-waypoint gain reverses by weight at both offsets; the prior qualification remains failed |
+| Table4 | [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result) | Two frozen roots, 24 paired paths/root, matched call counts | Waypoint authority supported; all four privileged timing intervals cross zero; formal transfer remains on hold |
+| Table4 | [Native cart-pole precheck](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result) | Two fixed LQR configurations, 24 paired paths each, no policy fits | Visible timing signal passes, waypoint contrast reverses, joint qualification fails; not a Stage9 result |
+| Results5.5 | [Cart-pole waypoint factorial](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result) | Two LQR weights and two clocks crossed on the same 32 paths | Timely-waypoint gain reverses by weight at both offsets; the prior qualification remains failed |
 
 The current-only and history predictors have different feature maps and sizes
 (170 versus 39). Timing controls share jitter-trained actor weights. These
@@ -57,6 +58,8 @@ compact artifact name the arithmetic explicitly. No historical sign is changed.
 The artifact also includes the first registered confirmation path's saved
 call schedule, score-check counts by mode and the existing Stage304 descriptive
 event audit. These additions supply figures, not new performance experiments.
+Table 4 uses the linked applicability reports and their compact summaries
+directly; its comparisons use different rules and are not included in Figure 2.
 
 ## Historical positive results and their place
 
