@@ -1,0 +1,9 @@
+{
+  "protocol_id": "v411_demand_transfer",
+  "regimes": {"nominal": {"demand_scale": 1.0}, "stress": {"demand_scale": 1.35}},
+  "days": {"nominal": [2510001, 2510002, 2510003, 2510004, 2510005, 2510006, 2510007, 2510008],
+           "stress": [2510201, 2510202, 2510203, 2510204, 2510205, 2510206, 2510207, 2510208]},
+  "arms": ["fixed_cap_10", "transition", "v406_cap_10"],
+  "bootstrap_seed": 41101,
+  "physical_start_cap": 48
+}

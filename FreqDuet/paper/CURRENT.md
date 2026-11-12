@@ -28,6 +28,11 @@ actual CV2 and circulation at matched mean commanded holding and 0/5/10
 s shares. The result concerns the tested state-dependent fast controller
 and remains separate from the archived V400--V404 manuscript.
 
+[V411](../experiments/v411_demand_transfer/RESULTS.md) transfers the frozen
+V410 comparison to 1.35x demand with all matching and outcome gates passed.
+At nominal demand all outcome gates pass but holding equivalence does not.
+These are single-corridor results; they do not change the manuscript or policy.
+
 The earlier dated T-ITS drafts and Protocol-V6/TR-C packages remain historical
 snapshots. Their abstract, active-controller names and submission status must
 not be substituted for the current evidence.
