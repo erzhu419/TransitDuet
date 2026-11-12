@@ -27,3 +27,32 @@ An incomplete or fallen episode prevents qualification. The two fixed gains
 are not trained seeds. A pass qualifies this designed task for a separately
 registered Stage9 transfer experiment; it is not cross-task algorithm evidence.
 Reacher and all existing HOLD decisions are unchanged.
+
+## Completed Result
+
+[Result](../results/cartpole_timing_applicability_20261112/summary.json) and
+[exit records](../results/cartpole_timing_applicability_20261112/completion.json).
+t214883-t214884 both exited 0: 345,600 rollout steps, 6,912 planner calls,
+20 linearization steps, zero policy fits and 43.05 CPU seconds. Only 5,690
+summary bytes were retrieved.
+
+| ISE gain (positive is better) | LQR position weight 10 | LQR position weight 30 |
+| --- | ---: | ---: |
+| Current vs lagged waypoint, complete episode | -8.30% | +4.41% |
+| Current vs lagged waypoint, latter option halves | -8.12% | +4.81% |
+| Visible command change vs selection-best clock | +5.13% | +10.03% |
+| Visible command change vs rotated offsets | +5.03% | +9.77% |
+
+The event rule passes both timing contrasts in both configurations, including
+both path halves. The matched-clock waypoint comparison reverses: its total
+gain has nominal paired 95% intervals [-0.02355, -0.00999] and
+[0.00139, 0.01989]. In configuration 0 the lagged clock also has lower
+episode ISE than the visible rule (0.20192 vs 0.20747) as a descriptive
+comparison, not a registered gate. The joint task qualification fails.
+
+Retain both configurations. The gain, selected clock (20 vs 5 steps), and
+development path bank vary together; this does not identify why lag helps.
+If investigating further, cross both fixed LQR gains with both offsets on one
+shared fresh path bank, pairing timely/lagged waypoints. That separates the
+gain/offset effects without fitting a trigger or choosing the favorable
+configuration. No Stage9 transfer or extra jobs were released here.

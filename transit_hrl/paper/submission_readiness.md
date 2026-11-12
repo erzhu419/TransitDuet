@@ -151,6 +151,12 @@ plausible persistent plan and a distinct reason to expect useful renewal
 timing, then qualify it before training the trigger. Do not tune this test
 cohort or revise the existing HOLD.
 
+The [native cart-pole qualification](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result)
+finds a causal timing gain over fixed and rotated clocks in both prespecified
+LQR configurations, but waypoint authority reverses and the joint gate
+fails. This is a task screen, not Stage9 transfer. Cross gain and fixed offset
+on matched fresh paths before attributing the reversal or revising the task.
+
 Stage304 is a completed negative boundary, not a broken run to resubmit.
 Its changed profile mix, callback positions and state distribution prevent
 identifying repeated decisions alone as the cause. Any later Transit repair
