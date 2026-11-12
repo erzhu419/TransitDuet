@@ -71,26 +71,37 @@ def pipeline():
     print(shared.submit('pipeline', tasks), flush=True)
 
 
-def circulation():
+def readout(label, files):
     assert shared.read(HERE / 'review/aggregate/results.json')['complete']
-    path = shared.ROOT.parent / 'analysis01/circulation.py'
-    if not (HERE / 'submission_circulation.json').exists():
-        source = (HERE / 'circulation.py').read_bytes()
-        compile(source, 'circulation.py', 'exec')
-        payload = base64.b64encode(source).decode()
-        code = ('import base64\nfrom pathlib import Path\n'
-                f'p=Path({str(path)!r});p.parent.mkdir(exist_ok=True)\n'
-                f'with p.open("xb") as f: f.write(base64.b64decode({payload!r}))\n')
+    folder = shared.ROOT.parent / ('analysis01' if label == 'circulation' else 'analysis02')
+    path = folder / (label + '.py')
+    if not (HERE / f'submission_{label}.json').exists():
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode='w:gz') as archive:
+            for name in files:
+                src = HERE / name
+                compile(src.read_bytes(), name, 'exec')
+                archive.add(src, arcname=name)
+        payload = base64.b64encode(buf.getvalue()).decode()
+        code = ('import base64,io,tarfile\nfrom pathlib import Path\n'
+                f'p=Path({str(folder)!r});p.mkdir(exist_ok=False)\n'
+                f'tarfile.open(fileobj=io.BytesIO(base64.b64decode({payload!r}))).extractall(p)\n')
         rc, out, err = shared.scheduler.run_on('node004', shlex.join([
             shared.deployment()['python'], '-c', code]), timeout=30, check=False)
         assert rc == 0, (out, err[-1500:])
-    spec = job('circulation', 'aggregate', 'circulation')
+    spec = job(label, 'aggregate', label)
     spec['cmd'] = shlex.join([shared.deployment()['python'], '-B', '-I', '-u',
                              str(path), str(shared.ROOT)])
-    shared.wait(shared.submit('circulation', [spec]))
+    shared.wait(shared.submit(label, [spec]))
 
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
-    p.add_argument('phase', nargs='?', choices=('pipeline', 'circulation'), default='pipeline')
-    globals()[p.parse_args().phase]()
+    p.add_argument('phase', nargs='?', choices=('pipeline', 'circulation', 'supply_forecast'),
+                   default='pipeline')
+    phase = p.parse_args().phase
+    if phase == 'pipeline':
+        pipeline()
+    else:
+        files = ('circulation.py',) if phase == 'circulation' else ('circulation.py', 'supply_forecast.py')
+        readout(phase, files)

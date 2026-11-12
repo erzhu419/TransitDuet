@@ -26,10 +26,9 @@ labels (227 versus 225), so its source cannot be split by the common-trip
 identity. On 249 and 260 the prior trip holds 150 and 160 s less; inherited
 lateness persists, and 260 adds 235 s of non-holding cycle time.
 
-**Next.** Keep the capped controller and gate unchanged. The useful follow-up
-is to trace the first supply reassignment on 2520208 and compare the
-controller's recorded return/launch forecasts to realized service, on all
-slow days with the two smaller loss days as checks. Do not infer that simply
-removing more holding would fix this propagation.
+**Follow-up.** The [supply and forecast audit](SUPPLY_FORECAST.md) reconstructs
+the FIFO reassignment on 2520208 and compares archived resource clocks against
+realized clocks across all eight slow days. The capped controller and gate are
+unchanged.
 
 [Small circulation summary](review/circulation/results.json)
