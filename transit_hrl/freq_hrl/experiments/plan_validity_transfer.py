@@ -66,7 +66,7 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                 rule=None, sample=False, branch_step=None, renew=False,
                 intervention_step=None, arm=None, feature_steps=(), latency_recorder=None,
                 risk_spec=None, continuation_seed=None, continuation_rule=None,
-                boundary_future_seed=None):
+                boundary_future_seed=None, waypoint_audit=None):
     """One execution loop: scheduled training, adaptive timing, or paired keep/renew."""
     period = time_scale.upper_period_steps
     mode_name = rule.name if rule is not None else "scheduled"
@@ -81,6 +81,9 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         raise ValueError("shared renewal execution requires the 10ms/50/25/5 contract")
     if (schedule is None) == (rule is None) or (sample and schedule is None):
         raise ValueError("choose one scheduled or adaptive execution mode")
+    if waypoint_audit is not None and (waypoint_audit not in ("current", "lag_one_bin")
+            or schedule is None or sample or branch_step is not None or intervention_step is not None):
+        raise ValueError("waypoint audit requires a deterministic full scheduled episode")
     if schedule is not None and (len(schedule) != args.horizon // period
         or [s // period for s in schedule] != list(range(args.horizon // period))
         or schedule[0] != 0 or any(s % period > args.max_offset_steps for s in schedule)):
@@ -117,6 +120,7 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
         builder = HierarchicalRolloutBuilder(gamma=float(controller.config.gamma)) if sample else None
         decision_set = set(schedule or ())
         subgoal = observation.achieved_goal.copy()
+        previous_proposal = None
         decisions, errors, rewards, queries = [], [], [], []
         risk_distances, clipped_steps = [], []
         feature_rows = []
@@ -187,7 +191,10 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                 count_work("planner_calls")
                 planner_seconds += time.perf_counter() - started
                 raw_goal = np.asarray(output["action"], dtype=np.float32)
-                subgoal = adapter.decode(raw_goal, observation.achieved_goal)
+                proposal = adapter.decode(raw_goal, observation.achieved_goal)
+                subgoal = (previous_proposal if waypoint_audit == "lag_one_bin" and previous_proposal is not None
+                           else proposal)
+                previous_proposal = proposal
                 decisions.append(step)
                 last_plan_step = step
                 if builder is not None:
@@ -251,6 +258,9 @@ def run_episode(controller: Any, *, task_spec, seed, args, time_scale, schedule=
                "planner_wall_seconds": planner_seconds, "lower_wall_seconds": lower_seconds,
                "trigger_score_wall_seconds": score_seconds, "protocol_valid": True,
                **(captured or {})}
+        if waypoint_audit is not None:
+            ends = [*decisions[1:], end_step]
+            row["late_option_ise"] = float(sum(sum(errors[(a + b) // 2:b]) for a, b in zip(decisions, ends)))
         if branch_step is not None:
             row["branch_ise"] = float(sum(errors[branch_step:]))
         if intervention_step is not None:
