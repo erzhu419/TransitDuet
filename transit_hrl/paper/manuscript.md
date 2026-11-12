@@ -319,6 +319,17 @@ met the 10,000 CPU-second lifecycle, 6.5-million offline-step and 10ms control
 p99 caps. These are fresh paths, not another independent training cohort.
 [Portfolio result and accounting](../md/freq_hrl_stage9_timing_portfolio_2026-11-12.md#result).
 
+**Matched timing features.** Three heads shared 12 inputs, 91 quadratic
+coefficients including the intercept, slope effective DF 8, and identical
+branch labels and OOF calibration. On 512 further paired paths, the 100ms
+target-velocity/force-history head reduced ISE by 6.44% versus the current-only
+view (root gain 0.07906, nominal 95% CI [0.01870, 0.13942]). Changing only
+the target-velocity horizon to 500ms worsened ISE by 5.85% versus the 100ms
+head, with both path halves worse. The original Stage9 rule remains the
+best observed anchor on these paths, but differs in features and fitting.
+The ablation supports short-history utility, not a multiscale attribution
+of the original advantage. [Ablation report](../md/freq_hrl_stage9_scale_ablation_2026-11-12.md#completed-result).
+
 ### 5.2 Historical learned-upper gains are real but method-specific
 
 Later PointMaze studies established additional learned-upper effects under
@@ -450,9 +461,9 @@ paper a coherent timing contribution without discarding the earlier findings.
 **Task and baseline coverage.** The confirmed timing mechanism has one
 hidden-regime PointMaze task family and eight fresh optimizer seeds. The
 170-feature current-only comparator is not a capacity-matched history ablation.
-The distance comparison uses a threshold selected from error, age, change
-and force candidates, but does not isolate the benefit of history from the
-rest of the multivariate trigger. Later learned termination was active but
+The matched-head study identifies a useful short-history view, but does not
+isolate the original Stage9 gain or establish a general benefit from
+mixing horizons. Later learned termination was active but
 one new root failed best-clock competence, so the learned-only evaluation was
 not run. The portfolio result compares against a selector, not every learned
 termination rule. Sharing jitter-trained controller weights isolates the effect

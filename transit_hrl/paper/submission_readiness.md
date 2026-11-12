@@ -93,6 +93,12 @@ supports fixed-budget timing utility on this PointMaze family; it does not
 replace the original all-learned HOLD, a second-task success, a named timing
 baseline reproduction or an own-schedule training comparison.
 
+**Capacity-matched mechanism ablation completed.** The [matched study](../md/freq_hrl_stage9_scale_ablation_2026-11-12.md#completed-result)
+supports the short-history view but rejects the tested mixed-horizon upgrade.
+Keep the timing-utility claim and do not attribute Stage9's full benefit to
+frequency separation. A separate second-task development precheck is now
+more informative than further window search on the exposed PointMaze paths.
+
 ## Competent timing baselines and mechanism isolation
 
 The strongest unresolved comparator is a learned termination/timing policy that
