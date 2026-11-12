@@ -1,0 +1,183 @@
+{
+  "run_name": "cartpole_waypoint_factorial_20261112",
+  "source_plan": "protocols/plan_validity_cartpole_timing_applicability_2026-11-12.json",
+  "config": {
+    "horizon": 1200,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.5,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5
+  },
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "cells": [
+    {
+      "configuration": 0,
+      "position_weight": 10.0,
+      "public": "results/cartpole_waypoint_factorial_20261112/gain0/public"
+    },
+    {
+      "configuration": 1,
+      "position_weight": 30.0,
+      "public": "results/cartpole_waypoint_factorial_20261112/gain1/public"
+    }
+  ],
+  "offsets": [
+    5,
+    20
+  ],
+  "development_seeds": [
+    1981730200,
+    1981730201,
+    1981730202,
+    1981730203,
+    1981730204,
+    1981730205,
+    1981730206,
+    1981730207,
+    1981730208,
+    1981730209,
+    1981730210,
+    1981730211,
+    1981730212,
+    1981730213,
+    1981730214,
+    1981730215,
+    1981730216,
+    1981730217,
+    1981730218,
+    1981730219,
+    1981730220,
+    1981730221,
+    1981730222,
+    1981730223,
+    1981730224,
+    1981730225,
+    1981730226,
+    1981730227,
+    1981730228,
+    1981730229,
+    1981730230,
+    1981730231
+  ],
+  "steps_per_gain": 153600,
+  "calls_per_episode": 24,
+  "linearization_steps_per_gain": 10,
+  "new_policy_fits": 0,
+  "jobs": [
+    {
+      "project": "Freq-HRL-Stage9-StrongTiming",
+      "description": "Cart-pole waypoint factorial LQR weight 10",
+      "signature": "Freq-HRL/cartpole-waypoint-factorial/cartpole_waypoint_factorial_20261112/0",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_cartpole_waypoint_factorial.py run --cell 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_waypoint_factorial_20261112/gain0/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_waypoint_factorial_20261112/gain0/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_cartpole_waypoint_factorial_2026-11-12.json"
+      ],
+      "allow_duplicate": false,
+      "allow_cpu_training": true
+    },
+    {
+      "project": "Freq-HRL-Stage9-StrongTiming",
+      "description": "Cart-pole waypoint factorial LQR weight 30",
+      "signature": "Freq-HRL/cartpole-waypoint-factorial/cartpole_waypoint_factorial_20261112/1",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_cartpole_waypoint_factorial.py run --cell 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_waypoint_factorial_20261112/gain1/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_waypoint_factorial_20261112/gain1/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_cartpole_waypoint_factorial_2026-11-12.json"
+      ],
+      "allow_duplicate": false,
+      "allow_cpu_training": true
+    }
+  ],
+  "inference": "whole_path_paired_nominal_t95_gain_and_offset_marginal_contrasts_and_interaction",
+  "scope": "diagnostic_only_no_qualification_or_transfer_release",
+  "parent_qualification_passed": false,
+  "original_confirmation_released": false
+}
