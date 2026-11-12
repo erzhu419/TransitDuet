@@ -37,3 +37,5 @@ query-time return order and the gap to the next eligible departure identify
 fragile supply before it changes; realized supplying IDs are labels only.
 
 [Small audit summary](review/supply_forecast/results.json)
+
+[Follow-up return-order and public-slot pressure screen](SUPPLY_ORDER.md)

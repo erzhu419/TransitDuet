@@ -73,7 +73,8 @@ def pipeline():
 
 def readout(label, files):
     assert shared.read(HERE / 'review/aggregate/results.json')['complete']
-    folder = shared.ROOT.parent / ('analysis01' if label == 'circulation' else 'analysis02')
+    folder = shared.ROOT.parent / dict(circulation='analysis01',
+        supply_forecast='analysis02', supply_order='analysis03')[label]
     path = folder / (label + '.py')
     if not (HERE / f'submission_{label}.json').exists():
         buf = io.BytesIO()
@@ -97,11 +98,15 @@ def readout(label, files):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
-    p.add_argument('phase', nargs='?', choices=('pipeline', 'circulation', 'supply_forecast'),
+    p.add_argument('phase', nargs='?', choices=('pipeline', 'circulation', 'supply_forecast', 'supply_order'),
                    default='pipeline')
     phase = p.parse_args().phase
     if phase == 'pipeline':
         pipeline()
     else:
-        files = ('circulation.py',) if phase == 'circulation' else ('circulation.py', 'supply_forecast.py')
+        files = ['circulation.py']
+        if phase != 'circulation':
+            files.append('supply_forecast.py')
+        if phase == 'supply_order':
+            files.append('supply_order.py')
         readout(phase, files)
