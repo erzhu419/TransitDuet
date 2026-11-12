@@ -54,6 +54,24 @@ node003/004/006. [Release receipt](../results/pointmaze_stage9_strong_timing_202
 The running coordinator will save the final decision in
 `results/pointmaze_stage9_strong_timing_20261111/confirmation_decision.json`.
 
+## Build outcome
+
+All eight builds exited 0 and all 32 method budgets passed. The
+[original decision](../results/pointmaze_stage9_strong_timing_20261111/confirmation_decision.json)
+is nevertheless BUILD_GATE_HOLD: root 1981440000's learned termination is
+noncollapsed and state conditional but trails its best fixed clock by
+0.01718 selection ISE (1.37472 versus 1.35755). All original evaluation paths
+remain unused. No root or comparator was replaced.
+
+All eight selected thresholds use current tracking distance. Stage9 beats
+these thresholds on five of eight selection means (3.87% pooled gain), but
+selection paths are not independent evidence. The separate
+[distance diagnostic](../protocols/plan_validity_stage9_distance_diagnostic_2026-11-12.json)
+evaluates the same two frozen rules on 32 new development paths per root,
+614,400 native steps, no fits. Root-level nominal 95% bounds, both path halves
+and a 2% pooled improvement floor guide further development only; the original
+confirmation decision and its reserved paths stay unchanged.
+
 ## Reacher branch decision
 
 The [cached readout](../results/pointmaze_stage9_strong_timing_20261111/reacher_tail_decisions.json)
