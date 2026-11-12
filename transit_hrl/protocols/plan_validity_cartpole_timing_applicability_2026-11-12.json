@@ -1,0 +1,215 @@
+{
+  "run_name": "cartpole_timing_applicability_20261112",
+  "cells": [
+    {
+      "configuration": 0,
+      "position_weight": 10.0,
+      "clock_selection_seeds": [
+        1981700100,
+        1981700101,
+        1981700102,
+        1981700103,
+        1981700104,
+        1981700105,
+        1981700106,
+        1981700107
+      ],
+      "development_seeds": [
+        1981700200,
+        1981700201,
+        1981700202,
+        1981700203,
+        1981700204,
+        1981700205,
+        1981700206,
+        1981700207,
+        1981700208,
+        1981700209,
+        1981700210,
+        1981700211,
+        1981700212,
+        1981700213,
+        1981700214,
+        1981700215,
+        1981700216,
+        1981700217,
+        1981700218,
+        1981700219,
+        1981700220,
+        1981700221,
+        1981700222,
+        1981700223
+      ],
+      "public": "results/cartpole_timing_applicability_20261112/config0/public"
+    },
+    {
+      "configuration": 1,
+      "position_weight": 30.0,
+      "clock_selection_seeds": [
+        1981710100,
+        1981710101,
+        1981710102,
+        1981710103,
+        1981710104,
+        1981710105,
+        1981710106,
+        1981710107
+      ],
+      "development_seeds": [
+        1981710200,
+        1981710201,
+        1981710202,
+        1981710203,
+        1981710204,
+        1981710205,
+        1981710206,
+        1981710207,
+        1981710208,
+        1981710209,
+        1981710210,
+        1981710211,
+        1981710212,
+        1981710213,
+        1981710214,
+        1981710215,
+        1981710216,
+        1981710217,
+        1981710218,
+        1981710219,
+        1981710220,
+        1981710221,
+        1981710222,
+        1981710223
+      ],
+      "public": "results/cartpole_timing_applicability_20261112/config1/public"
+    }
+  ],
+  "jobs": [
+    {
+      "project": "Freq-HRL-Stage9-StrongTiming",
+      "description": "Cart-pole timing qualification config0",
+      "signature": "Freq-HRL/cartpole-timing-applicability/cartpole_timing_applicability_20261112/config0",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_cartpole_timing_applicability.py run --cell 0",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_timing_applicability_20261112/config0/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_timing_applicability_20261112/config0/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_cartpole_timing_applicability_2026-11-12.json"
+      ],
+      "allow_duplicate": false,
+      "allow_cpu_training": true
+    },
+    {
+      "project": "Freq-HRL-Stage9-StrongTiming",
+      "description": "Cart-pole timing qualification config1",
+      "signature": "Freq-HRL/cartpole-timing-applicability/cartpole_timing_applicability_20261112/config1",
+      "cmd": "PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_cartpole_timing_applicability.py run --cell 1",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "cpu": 1,
+      "vram": 0,
+      "ram_mb": 2048,
+      "priority": "high",
+      "protect_from_auto_eviction": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "require_node": null,
+      "preferred_node": null,
+      "no_auto_requeue": true,
+      "reroute_on_node_down": false,
+      "skip_resume_scan": true,
+      "skip_launch_staging": false,
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [],
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_timing_applicability_20261112/config1/public",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/cartpole_timing_applicability_20261112/config1/public",
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/protocols/plan_validity_cartpole_timing_applicability_2026-11-12.json"
+      ],
+      "allow_duplicate": false,
+      "allow_cpu_training": true
+    }
+  ],
+  "hardware_profile": {
+    "cpu_model": "Intel(R) Xeon(R) Platinum 9242 CPU @ 2.30GHz",
+    "machine": "x86_64",
+    "python": "3.10.14",
+    "numpy": "2.1.3",
+    "torch": "2.5.1+cu121",
+    "torch_threads": 1,
+    "gymnasium": "1.2.0",
+    "mujoco": "3.2.7",
+    "threadpoolctl": "3.6.0",
+    "blas": [
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openblas",
+        "0.3.27",
+        1
+      ],
+      [
+        "openmp",
+        null,
+        1
+      ]
+    ]
+  },
+  "config": {
+    "horizon": 1200,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.5,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5
+  },
+  "steps_per_config": 172800,
+  "linearization_steps_per_config": 10,
+  "minimum_gain": 0.02,
+  "new_policy_fits": 0,
+  "scope": "designed_native_cartpole_setpoint_task_two_fixed_LQR_configs_not_policy_transfer",
+  "gate": "both_waypoint_contrasts_and_both_event_contrasts_pass_in_each_configuration",
+  "original_confirmation_released": false
+}
