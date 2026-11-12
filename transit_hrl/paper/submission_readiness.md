@@ -85,13 +85,13 @@ retains all eight frozen roots and supports a 7.28% ISE improvement on new
 development paths, with all root means favorable. It does not replace the
 withheld comparison with learned termination.
 
-**Next comparator study.** Keep Stage9 and the threshold fixed. Before
-accessing a new test cohort, register a strong comparator that chooses between
-learned termination and the best clock on its own selection paths, and charge
-both searches. Evaluate this composite comparator on every root and report
-how often the learned policy is selected. Beating the composite would not
-establish a learned-only claim where the clock is selected. Preserve the
-original all-learned HOLD and leave its reserved paths untouched.
+**Portfolio comparison completed.** The [frozen study](../md/freq_hrl_stage9_timing_portfolio_2026-11-12.md#result)
+passes against both the distance threshold and a comparator selected between
+learned termination and the best clock (seven and one roots respectively).
+Both searches are charged and all methods meet the shared caps. The evidence
+supports fixed-budget timing utility on this PointMaze family; it does not
+replace the original all-learned HOLD, a second-task success, a named timing
+baseline reproduction or an own-schedule training comparison.
 
 ## Competent timing baselines and mechanism isolation
 

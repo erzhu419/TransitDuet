@@ -15,7 +15,10 @@ bin, with a deadline that preserves exactly one call per bin. In a frozen
 PointMaze hidden-regime confirmation with eight independent optimizer seeds,
 the trigger reduced episode tracking-error integral by 0.506 (95% CI
 0.408-0.603) and increased return by 40.66 (31.55-49.78) relative to periodic
-planning, with 24 planner calls in every episode. Separate Transit studies
+planning, with 24 planner calls in every episode. A separate 512-path PointMaze
+evaluation on eight existing trained roots found 5.81% lower mean tracking
+error integral than a selected distance threshold and 21.56% lower than a
+selection-based timing portfolio under shared compute caps. Separate Transit studies
 reproduced single-intervention service and cost gains, but a subsequent
 320-scene two-decision evaluation did not confirm joint cost/wait improvement
 or added fleet-critic value. The evidence establishes fixed-call-budget timing
@@ -298,6 +301,24 @@ best-clock competence gate before test access, so this result addresses the
 distance threshold only and is separate from the original confirmation.
 [Diagnostic source](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json).
 
+**Comparison with a timing portfolio.** Before accessing 64 further paths per
+root, the comparator was frozen to whichever of learned termination and
+best constant clock had lower ISE on that root's old timing-selection paths
+(ties to the clock). Seven roots selected termination and one selected the
+clock. Both searches were charged. The same eight controllers and all paths
+were paired across methods; every episode used 24 calls.
+
+| Comparator | Episode ISE (Stage9: 0.99934) | Paired root ISE gain [nominal 95% CI] | Relative gain |
+| --- | ---: | --- | ---: |
+| Selected distance threshold | 1.06097 | 0.06163 [0.01980, 0.10345] | 5.81% |
+| Selected termination or clock | 1.27402 | 0.27467 [0.19309, 0.35625] | 21.56% |
+
+Both path halves and the joint registered gate passed. Stage9 beat the
+portfolio on all eight roots and the distance threshold on seven. All methods
+met the 10,000 CPU-second lifecycle, 6.5-million offline-step and 10ms control
+p99 caps. These are fresh paths, not another independent training cohort.
+[Portfolio result and accounting](../md/freq_hrl_stage9_timing_portfolio_2026-11-12.md#result).
+
 ### 5.2 Historical learned-upper gains are real but method-specific
 
 Later PointMaze studies established additional learned-upper effects under
@@ -432,9 +453,10 @@ hidden-regime PointMaze task family and eight fresh optimizer seeds. The
 The distance comparison uses a threshold selected from error, age, change
 and force candidates, but does not isolate the benefit of history from the
 rest of the multivariate trigger. Later learned termination was active but
-one new root failed best-clock competence, so the registered formal
-strong-baseline evaluation was not run. Sharing jitter-trained controller weights isolates the
-effect of timing, but does not compare timing methods with controllers trained
+one new root failed best-clock competence, so the learned-only evaluation was
+not run. The portfolio result compares against a selector, not every learned
+termination rule. Sharing jitter-trained controller weights isolates the effect
+of timing, but does not compare timing methods with controllers trained
 under each method's own schedule.
 
 **Supervision and cost.** Training uses simulator branch access and
@@ -442,8 +464,9 @@ event-stratified query acquisition, including privileged information for
 query sampling. Deployment does not use future observations or event labels.
 The procedure remains unvalidated with label-free or unstratified data
 acquisition. Planner-call parity excludes score checks, feature updates,
-branch simulation and policy-training cost; complete compute/latency-matched
-performance and budget-response curves are not yet established.
+branch simulation and policy-training cost. The portfolio study adds common
+caps with measured costs, not equal realized cost. Performance across
+different compute budgets remains untested.
 
 **Transfer and horizon.** Transit uses a different action-search mechanism,
 two historical lower roots and, in the two-decision study, one fixed profile.

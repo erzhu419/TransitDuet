@@ -25,6 +25,7 @@ a negative repeated-decision boundary, not same-algorithm domain transfer.
 | Follow-up boundary | [Fresh-prefix conditioning](../md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md) | 16 fresh prefixes/root, four frozen roots; boundary tail at `t + 50`, zero fits | No conditioning upgrade; Wide beats zero on three roots, not an episode-policy result |
 | Strong timing follow-up | [Stage9 development and build gates](../md/freq_hrl_stage9_strong_timing_2026-11-11.md#build-outcome) | Two pilot roots, then eight fresh controller builds | Development passes; formal evaluation held before test access because one learned termination misses best-clock competence |
 | Results5.1 follow-up | [Distance diagnostic](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json) | All eight frozen builds, 32 new paired paths/root, 24 upper calls per episode | 7.28% lower mean ISE versus the selected distance threshold; not learned-termination confirmation |
+| Results5.1 follow-up | [Frozen timing portfolio](../results/pointmaze_stage9_timing_portfolio_20261112/summary.json) | Same eight builds, 64 further paired paths/root, 24 calls and shared CPU/steps/latency caps | 5.81% lower ISE than distance; 21.56% lower than the selection-based portfolio; original learned-only HOLD retained |
 
 The current-only and history predictors have different feature maps and sizes
 (170 versus 39). Timing controls share jitter-trained actor weights. These
