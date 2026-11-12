@@ -1,0 +1,10 @@
+{
+  "protocol_id": "v412_running_speed_transfer",
+  "regimes": {"normal": {"demand_scale": 1.2}, "slow": {"demand_scale": 1.2}},
+  "days": {"normal": [2520201, 2520202, 2520203, 2520204, 2520205, 2520206, 2520207, 2520208],
+           "slow": [2520201, 2520202, 2520203, 2520204, 2520205, 2520206, 2520207, 2520208]},
+  "road_profile_shift_mps": {"normal": 0.0, "slow": -0.5},
+  "arms": ["fixed_cap_10", "transition", "v406_cap_10"],
+  "bootstrap_seed": 41201,
+  "physical_start_cap": 48
+}

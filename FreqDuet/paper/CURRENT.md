@@ -33,6 +33,11 @@ V410 comparison to 1.35x demand with all matching and outcome gates passed.
 At nominal demand all outcome gates pass but holding equivalence does not.
 These are single-corridor results; they do not change the manuscript or policy.
 
+[V412](../experiments/v412_running_speed_transfer/RESULTS.md) reproduces the
+joint matched-dose result at normal speed on new days. Under slower running,
+matching, journey and actual CV2 pass, but circulation nonharm does not.
+This is evidence for a bounded service benefit, not a joint robustness claim.
+
 The earlier dated T-ITS drafts and Protocol-V6/TR-C packages remain historical
 snapshots. Their abstract, active-controller names and submission status must
 not be substituted for the current evidence.
