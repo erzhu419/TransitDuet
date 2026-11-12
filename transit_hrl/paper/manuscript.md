@@ -479,8 +479,12 @@ branch simulation and policy-training cost. The portfolio study adds common
 caps with measured costs, not equal realized cost. Performance across
 different compute budgets remains untested.
 
-**Transfer and horizon.** Transit uses a different action-search mechanism,
-two historical lower roots and, in the two-decision study, one fixed profile.
+**Transfer and horizon.** A [two-root Reacher development screen](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result)
+separates plan content from timing: fresh waypoints beat one-call-old waypoints,
+but privileged event alignment does not consistently beat fixed timing or
+rotated call offsets. This is not a second-task confirmation.
+Transit uses a different action-search mechanism, two historical lower
+roots and, in the two-decision study, one fixed profile.
 Only two of 44 upper callbacks use the tested selector. Its comparison with
 the single-intervention cohorts changes profile composition, decision positions,
 on-policy states and scenes, so failure cannot be attributed uniquely to

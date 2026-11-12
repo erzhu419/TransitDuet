@@ -1,0 +1,316 @@
+{
+  "roots": [
+    {
+      "optimizer_seed": 1972210000,
+      "best_offset": 15,
+      "worst_offset": 25,
+      "mean_ise": {
+        "best_clock": 4.356512150120188,
+        "worst_clock": 4.390246468524423,
+        "lagged_waypoint": 4.9674125994116425,
+        "event_aligned": 4.365993459085965,
+        "rotated_event": 4.378932169405531
+      },
+      "mean_changed_calls": {
+        "aligned_changes_from_clock": 4.041666666666667,
+        "aligned_changes_from_rotated": 7.041666666666667
+      },
+      "contrasts": {
+        "waypoint_total": {
+          "relative_gain": 0.12298162012227688,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.6109004492914546,
+            "interval": [
+              0.3439125943999571,
+              0.8778883041829522
+            ]
+          },
+          "half_gains": [
+            0.0847631589269948,
+            0.15584076297602112
+          ],
+          "passed": true
+        },
+        "waypoint_late": {
+          "relative_gain": 0.10882058616575291,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.264542611562016,
+            "interval": [
+              0.1285105565496054,
+              0.40057466657442653
+            ]
+          },
+          "half_gains": [
+            0.0791743892159618,
+            0.13421413088684242
+          ],
+          "passed": true
+        },
+        "event_vs_best": {
+          "relative_gain": -0.0021763531557043225,
+          "absolute_gain": {
+            "n": 24,
+            "mean": -0.009481308965778293,
+            "interval": [
+              -0.07613589724322478,
+              0.05717327931166819
+            ]
+          },
+          "half_gains": [
+            -0.0008446112000875026,
+            -0.003417754559487055
+          ],
+          "passed": false
+        },
+        "event_vs_rotated": {
+          "relative_gain": 0.002954763814330079,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.012938710319565375,
+            "interval": [
+              -0.06654519881925891,
+              0.09242261945838967
+            ]
+          },
+          "half_gains": [
+            0.0036707723158967928,
+            0.0022881144364063468
+          ],
+          "passed": false
+        },
+        "clock_sensitivity": {
+          "relative_gain": 0.007683923589732743,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.033734318404235686,
+            "interval": [
+              -0.14562342436725864,
+              0.21309206117573
+            ]
+          },
+          "half_gains": [
+            0.0015678437808401427,
+            0.013318015569106535
+          ],
+          "passed": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 148.556760749,
+        "wall_seconds": 149.24869128037244,
+        "counts": {
+          "environment_opens": 168,
+          "environment_resets": 168,
+          "planner_calls": 4032,
+          "lower_calls": 201600,
+          "environment_step_attempts": 201600,
+          "environment_steps": 201600,
+          "history_updates": 201600
+        },
+        "phases": {
+          "applicability": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.1363411209999867,
+            "wall_seconds": 1.352520614862442,
+            "counts": {}
+          },
+          "applicability/reproduce_old_clock_selection": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 42.126307555000004,
+            "wall_seconds": 42.32212646026164,
+            "counts": {
+              "environment_opens": 48,
+              "environment_resets": 48,
+              "planner_calls": 1152,
+              "lower_calls": 57600,
+              "environment_step_attempts": 57600,
+              "environment_steps": 57600,
+              "history_updates": 57600
+            }
+          },
+          "applicability/paired_development_paths": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 105.29411207300001,
+            "wall_seconds": 105.57404420524836,
+            "counts": {
+              "environment_opens": 120,
+              "environment_resets": 120,
+              "planner_calls": 2880,
+              "lower_calls": 144000,
+              "environment_step_attempts": 144000,
+              "environment_steps": 144000,
+              "history_updates": 144000
+            }
+          }
+        }
+      }
+    },
+    {
+      "optimizer_seed": 1972220000,
+      "best_offset": 15,
+      "worst_offset": 5,
+      "mean_ise": {
+        "best_clock": 4.717052384580339,
+        "worst_clock": 4.614237945102661,
+        "lagged_waypoint": 5.0194000158046395,
+        "event_aligned": 4.623338731824304,
+        "rotated_event": 4.689319455368455
+      },
+      "mean_changed_calls": {
+        "aligned_changes_from_clock": 4.125,
+        "aligned_changes_from_rotated": 7.625
+      },
+      "contrasts": {
+        "waypoint_total": {
+          "relative_gain": 0.060235811107362515,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.3023476312243007,
+            "interval": [
+              0.0916313897958646,
+              0.5130638726527368
+            ]
+          },
+          "half_gains": [
+            0.08403728981717418,
+            0.03711645856790918
+          ],
+          "passed": true
+        },
+        "waypoint_late": {
+          "relative_gain": 0.04847626090894771,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.1196847623804873,
+            "interval": [
+              0.017735230561188683,
+              0.22163429419978592
+            ]
+          },
+          "half_gains": [
+            0.06957759499718992,
+            0.02795988097059013
+          ],
+          "passed": true
+        },
+        "event_vs_best": {
+          "relative_gain": 0.019866994282780923,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.09371365275603571,
+            "interval": [
+              -0.1251544273159136,
+              0.31258173282798507
+            ]
+          },
+          "half_gains": [
+            -0.018955741982319675,
+            0.0557395154000858
+          ],
+          "passed": false
+        },
+        "event_vs_rotated": {
+          "relative_gain": 0.014070426246737303,
+          "absolute_gain": {
+            "n": 24,
+            "mean": 0.06598072354415219,
+            "interval": [
+              -0.0988572365336588,
+              0.23081868362196317
+            ]
+          },
+          "half_gains": [
+            0.003853290606457168,
+            0.024051380657291465
+          ],
+          "passed": false
+        },
+        "clock_sensitivity": {
+          "relative_gain": -0.02228199774283419,
+          "absolute_gain": {
+            "n": 24,
+            "mean": -0.10281443947767738,
+            "interval": [
+              -0.38860948050638766,
+              0.1829806015510329
+            ]
+          },
+          "half_gains": [
+            0.037629035662495106,
+            -0.08467557992077815
+          ],
+          "passed": false
+        }
+      },
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 149.36212075599997,
+        "wall_seconds": 150.00366020854563,
+        "counts": {
+          "environment_opens": 168,
+          "environment_resets": 168,
+          "planner_calls": 4032,
+          "lower_calls": 201600,
+          "environment_step_attempts": 201600,
+          "environment_steps": 201600,
+          "history_updates": 201600
+        },
+        "phases": {
+          "applicability": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 1.2035929839999824,
+            "wall_seconds": 1.3983319653198123,
+            "counts": {}
+          },
+          "applicability/reproduce_old_clock_selection": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 43.5405703,
+            "wall_seconds": 43.71042735315859,
+            "counts": {
+              "environment_opens": 48,
+              "environment_resets": 48,
+              "planner_calls": 1152,
+              "lower_calls": 57600,
+              "environment_step_attempts": 57600,
+              "environment_steps": 57600,
+              "history_updates": 57600
+            }
+          },
+          "applicability/paired_development_paths": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 104.617957472,
+            "wall_seconds": 104.89490089006722,
+            "counts": {
+              "environment_opens": 120,
+              "environment_resets": 120,
+              "planner_calls": 2880,
+              "lower_calls": 144000,
+              "environment_step_attempts": 144000,
+              "environment_steps": 144000,
+              "history_updates": 144000
+            }
+          }
+        }
+      }
+    }
+  ],
+  "waypoint_authority_passed": true,
+  "event_timing_passed": false,
+  "development_gate_passed": false,
+  "original_confirmation_released": false,
+  "scope": "two_frozen_Reacher_roots_development_only_privileged_timing_probe_not_policy_transfer",
+  "retrieved_summary_bytes": 5496,
+  "task_ids": [
+    "t214879",
+    "t214880"
+  ]
+}

@@ -27,3 +27,34 @@ Fixed cost: 403,200 steps, 336 full episodes and 8,064 calls, including old
 clock reproduction. No fits, controller changes, critic work, or original
 confirmation access. This is a two-root development screen, not transfer
 confirmation or a cross-root significance test.
+
+## Completed Result
+
+[Root summaries](../results/reacher_timing_applicability_20261112/summary.json)
+and [exit records](../results/reacher_timing_applicability_20261112/completion.json).
+Both t214879-t214880 exited 0. Old selection ISEs reproduced, selecting
+offset 15 on both roots. The complete budget was 403,200 steps, 8,064 calls,
+297.92 CPU seconds and zero fits. Only 5,496 final summary bytes returned.
+
+| ISE improvement (positive is better) | Root 1972210000 | Root 1972220000 |
+| --- | ---: | ---: |
+| Current vs lagged waypoint, whole episode | +12.30% | +6.02% |
+| Current vs lagged waypoint, latter halves of options | +10.88% | +4.85% |
+| Event aligned vs selected best fixed offset | -0.22% | +1.99% |
+| Event aligned vs rotated offsets | +0.30% | +1.41% |
+| Selection-best vs selection-worst fixed offset | +0.77% | -2.23% |
+
+Both waypoint contrasts pass on both roots. For whole-episode waypoint gain,
+the within-root nominal 95% intervals are [0.34391, 0.87789] and
+[0.09163, 0.51306] in normalized ISE units. No timing contrast passes;
+each timing interval crosses zero. On the second root, the old selection
+worst clock has lower new-path ISE than the selection best at the point
+estimate. Event alignment moves about four calls per episode versus the
+clock and seven to eight versus the rotation, so the schedules are not
+identical.
+
+The frozen lower controllers benefit from useful, timely waypoints throughout
+an option. The tested event-alignment rule does not demonstrate reliable
+extra full-episode timing value. Keep Reacher as a reported transfer boundary:
+no critic restart, no formal transfer, and no change to either prior HOLD.
+This does not show that all adaptive timing rules lack value.

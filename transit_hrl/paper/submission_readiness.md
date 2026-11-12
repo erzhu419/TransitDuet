@@ -141,6 +141,16 @@ without changing the 50-step keep/renew target, ridge recipe or one-call/bin rul
 The native pilot and frozen Reacher episodes have since run. They do not show a
 stable advantage over threshold on this second task.
 
+The [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result)
+separates waypoint authority from timing opportunity. Both frozen roots
+benefit from current rather than one-call-old waypoints, including late in
+each option. Privileged event alignment does not reliably beat the old
+selection-best clock or a same-offset-count rotation. Keep Reacher as a
+transfer boundary. To pursue a second task, first register a plant with a
+plausible persistent plan and a distinct reason to expect useful renewal
+timing, then qualify it before training the trigger. Do not tune this test
+cohort or revise the existing HOLD.
+
 Stage304 is a completed negative boundary, not a broken run to resubmit.
 Its changed profile mix, callback positions and state distribution prevent
 identifying repeated decisions alone as the cause. Any later Transit repair
