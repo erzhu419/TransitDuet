@@ -33,13 +33,7 @@ PLAN = Path("protocols/plan_validity_stage9_distance_diagnostic_2026-11-12.json"
 METHODS = ("history", "threshold")
 
 
-def prepare():
-    old = json.loads((ROOT / MANIFEST).read_text())
-    folder = ROOT / "results" / old["run_name"]
-    builds = json.loads((folder / "confirmation_builds.json").read_text())["roots"]
-    decision = json.loads((folder / "confirmation_decision.json").read_text())
-    if decision["status"] != "BUILD_GATE_HOLD" or decision["evaluation_task_ids"]:
-        raise ValueError("this is a separate diagnostic after the original HOLD")
+def historical_path_seeds(old):
     protocols = ROOT / "protocols"
     used = historical_seeds(protocols, load_plan(protocols / "plan_validity_preregistration_2026-10-22.json"))
     for root in (*stage9.OPTIMIZER_SEEDS, *stage9.CONFIRMATION_OPTIMIZER_SEEDS, *stage9.PREFLIGHT_OPTIMIZER_SEEDS):
@@ -48,6 +42,17 @@ def prepare():
         used.update(training_seeds(root, roles["train"], stage9.ITERATIONS))
     for c in old["confirmation_reservation"]:
         used.update(training_seeds(c["optimizer_seed"], c["train_seeds"], stage9.ITERATIONS))
+    return used
+
+
+def prepare():
+    old = json.loads((ROOT / MANIFEST).read_text())
+    folder = ROOT / "results" / old["run_name"]
+    builds = json.loads((folder / "confirmation_builds.json").read_text())["roots"]
+    decision = json.loads((folder / "confirmation_decision.json").read_text())
+    if decision["status"] != "BUILD_GATE_HOLD" or decision["evaluation_task_ids"]:
+        raise ValueError("this is a separate diagnostic after the original HOLD")
+    used = historical_path_seeds(old)
     historical_count = len(used)
     cells, jobs = [], []
     for i, c in enumerate(old["confirmation_reservation"]):

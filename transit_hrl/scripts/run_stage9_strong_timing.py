@@ -100,15 +100,15 @@ def preflight(cell, controller, args, source, rules, evaluate):
             "selection_roster": list(args.timing_selection_seeds), "audit_accessed": False}
 
 
-def panels(rows):
-    size = len(rows[METHODS[0]])
-    seed_sets = [[r["seed"] for r in rows[m]] for m in METHODS]
+def panels(rows, *, methods=METHODS):
+    size = len(rows[methods[0]])
+    seed_sets = [[r["seed"] for r in rows[m]] for m in methods]
     if size < 2 or size % 2 or len(set(seed_sets[0])) != size or any(s != seed_sets[0] for s in seed_sets):
         raise ValueError("evaluation panels need the same unique ordered paired paths")
     output = {}
     for label, indices in (("all", slice(None)), ("first", slice(size // 2)), ("last", slice(size // 2, None))):
         output[label] = {}
-        for method in METHODS:
+        for method in methods:
             sample = rows[method][indices]
             ise = np.array([row[ISE] for row in sample])
             tail = np.sort(ise)[-max(1, int(np.ceil(.10 * len(ise)))):]
