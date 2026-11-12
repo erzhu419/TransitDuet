@@ -38,4 +38,20 @@ case directories or 25 protocol manifests checked.
 
 **Parity launch.** `t214975` used the single path allowance on `node004`,
 scheduler high and manual, with no automatic retry. The existing V412 archive
-is the reference. No confirmation path has started.
+is the reference. [Parity result](review/parity/results.json).
+
+**Parity acceptance.** `t214975` passed exact actions, timing, physical
+execution and endpoints. Read-only verification `t214981` matched all 12
+archived streams and all 5,200 random events, ignoring only wall-clock
+`graph_queries.total_s`. The 300 s and 0 s slots matched the public roster
+exactly: 260 and 262 snapshots, with complete inbound forecasts on 242 and
+243 respectively. Two advance snapshots precede simulation time zero;
+unsupported in-range snapshots remain in the record.
+[Verification result](review/verify/results.json).
+
+**Confirmation release.** `t214982`--`t214989` are the eight reserved days
+`2530001`--`2530008`, one unchanged slow capped path per day, scheduler high
+and manual. All eight wrote a physical-start receipt on nodes 002, 003, 004,
+and 006. Only the passive sidecar is new. No automatic retry, no policy change,
+and no release beyond these eight paths.
+[Submission receipt](submission_confirmation.json).
