@@ -29,6 +29,7 @@ a negative repeated-decision boundary, not same-algorithm domain transfer.
 | Results5.1 mechanism ablation | [Matched timing features](../md/freq_hrl_stage9_scale_ablation_2026-11-12.md#completed-result) | Same eight controllers, three equal-capacity heads on cached labels, 64 further paired paths/root | Short history improves ISE 6.44%; the 500ms/100ms substitution worsens ISE 5.85% versus 100ms/100ms; no general multiscale attribution |
 | Transfer limitation | [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result) | Two frozen roots, 24 paired paths/root, matched call counts | Waypoint authority supported; privileged event timing does not beat both clock and rotated offsets; formal transfer remains on hold |
 | Task qualification | [Native cart-pole precheck](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result) | Two fixed LQR configurations, 24 paired paths each, no policy fits | Visible timing signal passes, waypoint contrast reverses, joint qualification fails; not a Stage9 result |
+| Task qualification follow-up | [Cart-pole waypoint factorial](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result) | Two LQR weights and two clocks crossed on the same 32 paths | Timely-waypoint gain reverses by weight at both offsets; the prior qualification remains failed |
 
 The current-only and history predictors have different feature maps and sizes
 (170 versus 39). Timing controls share jitter-trained actor weights. These

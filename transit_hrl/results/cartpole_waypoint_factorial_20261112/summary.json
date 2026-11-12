@@ -1,0 +1,487 @@
+{
+  "metrics": {
+    "episode_ise": {
+      "cells": [
+        {
+          "position_weight": 10.0,
+          "offset": 5,
+          "mean_current": 0.21946391096558154,
+          "mean_lagged": 0.21374092872695982,
+          "relative_gain": -0.026775322221662273,
+          "absolute_gain": {
+            "n": 32,
+            "mean": -0.005722982238621699,
+            "interval": [
+              -0.010977555032929808,
+              -0.0004684094443135906
+            ],
+            "half_means": [
+              -0.004384279270587285,
+              -0.007061685206656114
+            ]
+          }
+        },
+        {
+          "position_weight": 10.0,
+          "offset": 20,
+          "mean_current": 0.22073073768032442,
+          "mean_lagged": 0.2150769224495266,
+          "relative_gain": -0.026287409948060152,
+          "absolute_gain": {
+            "n": 32,
+            "mean": -0.005653815230797847,
+            "interval": [
+              -0.01096995849244926,
+              -0.00033767196914643444
+            ],
+            "half_means": [
+              -0.008854411336887665,
+              -0.00245321912470803
+            ]
+          }
+        },
+        {
+          "position_weight": 30.0,
+          "offset": 5,
+          "mean_current": 0.2410505588168519,
+          "mean_lagged": 0.25943022195871457,
+          "relative_gain": 0.07084626842275753,
+          "absolute_gain": {
+            "n": 32,
+            "mean": 0.018379663141862658,
+            "interval": [
+              0.011728076123739686,
+              0.02503125015998563
+            ],
+            "half_means": [
+              0.020323537888847228,
+              0.016435788394878095
+            ]
+          }
+        },
+        {
+          "position_weight": 30.0,
+          "offset": 20,
+          "mean_current": 0.2425184284541997,
+          "mean_lagged": 0.2619279557316462,
+          "relative_gain": 0.07410254175897202,
+          "absolute_gain": {
+            "n": 32,
+            "mean": 0.019409527277446485,
+            "interval": [
+              0.01252764342099572,
+              0.026291411133897248
+            ],
+            "half_means": [
+              0.015401386174901803,
+              0.023417668379991163
+            ]
+          }
+        }
+      ],
+      "gain_30_minus_10": {
+        "n": 32,
+        "mean": 0.024582993944364345,
+        "interval": [
+          0.022985767161230422,
+          0.026180220727498267
+        ],
+        "half_means": [
+          0.02448180733561199,
+          0.024684180553116702
+        ]
+      },
+      "offset_20_minus_5": {
+        "n": 32,
+        "mean": 0.0005495155717038375,
+        "interval": [
+          -0.00478866234449456,
+          0.0058876934879022345
+        ],
+        "half_means": [
+          -0.004696141890122902,
+          0.005795173033530577
+        ]
+      },
+      "interaction": {
+        "n": 32,
+        "mean": 0.0009606971277599709,
+        "interval": [
+          -0.00091880490758637,
+          0.002840199163106312
+        ],
+        "half_means": [
+          -0.0004520196476450432,
+          0.002373413903164985
+        ]
+      },
+      "gain_effect_by_offset": [
+        {
+          "n": 32,
+          "mean": 0.02410264538048436,
+          "interval": [
+            0.022330700046994636,
+            0.025874590713974088
+          ],
+          "half_means": [
+            0.02470781715943451,
+            0.02349747360153421
+          ]
+        },
+        {
+          "n": 32,
+          "mean": 0.02506334250824433,
+          "interval": [
+            0.02313234782179898,
+            0.02699433719468968
+          ],
+          "half_means": [
+            0.024255797511789468,
+            0.025870887504699194
+          ]
+        }
+      ],
+      "offset_effect_by_gain": [
+        {
+          "n": 32,
+          "mean": 6.9167007823852e-05,
+          "interval": [
+            -0.0044803719224677015,
+            0.0046187059381154055
+          ],
+          "half_means": [
+            -0.00447013206630038,
+            0.004608466081948084
+          ]
+        },
+        {
+          "n": 32,
+          "mean": 0.001029864135583823,
+          "interval": [
+            -0.005139434560554468,
+            0.007199162831722114
+          ],
+          "half_means": [
+            -0.004922151713945423,
+            0.006981879985113069
+          ]
+        }
+      ]
+    },
+    "late_ise": {
+      "cells": [
+        {
+          "position_weight": 10.0,
+          "offset": 5,
+          "mean_current": 0.10937432416694723,
+          "mean_lagged": 0.10610572466860158,
+          "relative_gain": -0.030805119220045942,
+          "absolute_gain": {
+            "n": 32,
+            "mean": -0.0032685994983456413,
+            "interval": [
+              -0.006000515002945201,
+              -0.0005366839937460811
+            ],
+            "half_means": [
+              -0.0030195786342713466,
+              -0.003517620362419936
+            ]
+          }
+        },
+        {
+          "position_weight": 10.0,
+          "offset": 20,
+          "mean_current": 0.10993596097923183,
+          "mean_lagged": 0.10758611233760927,
+          "relative_gain": -0.02184156105807279,
+          "absolute_gain": {
+            "n": 32,
+            "mean": -0.002349848641622571,
+            "interval": [
+              -0.005115846493299717,
+              0.0004161492100545755
+            ],
+            "half_means": [
+              -0.004333331524622956,
+              -0.0003663657586221855
+            ]
+          }
+        },
+        {
+          "position_weight": 30.0,
+          "offset": 5,
+          "mean_current": 0.1190134226200287,
+          "mean_lagged": 0.1276959962380049,
+          "relative_gain": 0.06799409436293732,
+          "absolute_gain": {
+            "n": 32,
+            "mean": 0.008682573617976195,
+            "interval": [
+              0.005190648455864238,
+              0.012174498780088153
+            ],
+            "half_means": [
+              0.008923772411932332,
+              0.008441374824020059
+            ]
+          }
+        },
+        {
+          "position_weight": 30.0,
+          "offset": 20,
+          "mean_current": 0.11928315657919347,
+          "mean_lagged": 0.12990112728053893,
+          "relative_gain": 0.0817388649631541,
+          "absolute_gain": {
+            "n": 32,
+            "mean": 0.010617970701345465,
+            "interval": [
+              0.006996369242347715,
+              0.014239572160343215
+            ],
+            "half_means": [
+              0.007990198672899618,
+              0.013245742729791314
+            ]
+          }
+        }
+      ],
+      "gain_30_minus_10": {
+        "n": 32,
+        "mean": 0.012459496229644935,
+        "interval": [
+          0.011593709807198227,
+          0.013325282652091644
+        ],
+        "half_means": [
+          0.012133440621863126,
+          0.012785551837426747
+        ]
+      },
+      "offset_20_minus_5": {
+        "n": 32,
+        "mean": 0.0014270739700461706,
+        "interval": [
+          -0.001640734808719087,
+          0.004494882748811428
+        ],
+        "half_means": [
+          -0.0011236633146921617,
+          0.003977811254784503
+        ]
+      },
+      "interaction": {
+        "n": 32,
+        "mean": 0.0010166462266462005,
+        "interval": [
+          -0.00011176578311189781,
+          0.002145058236404299
+        ],
+        "half_means": [
+          0.00038017915131889624,
+          0.0016531133019735047
+        ]
+      },
+      "gain_effect_by_offset": [
+        {
+          "n": 32,
+          "mean": 0.011951173116321837,
+          "interval": [
+            0.010956218011655876,
+            0.012946128220987797
+          ],
+          "half_means": [
+            0.011943351046203678,
+            0.011958995186439995
+          ]
+        },
+        {
+          "n": 32,
+          "mean": 0.012967819342968036,
+          "interval": [
+            0.011897355223920394,
+            0.014038283462015678
+          ],
+          "half_means": [
+            0.012323530197522574,
+            0.013612108488413498
+          ]
+        }
+      ],
+      "offset_effect_by_gain": [
+        {
+          "n": 32,
+          "mean": 0.0009187508567230704,
+          "interval": [
+            -0.0017030984374292466,
+            0.0035406001508753874
+          ],
+          "half_means": [
+            -0.0013137528903516098,
+            0.0031512546037977505
+          ]
+        },
+        {
+          "n": 32,
+          "mean": 0.0019353970833692708,
+          "interval": [
+            -0.0016122027414100849,
+            0.005482996908148626
+          ],
+          "half_means": [
+            -0.0009335737390327135,
+            0.004804367905771255
+          ]
+        }
+      ]
+    }
+  },
+  "paired_paths": 32,
+  "workers": [
+    {
+      "configuration": 0,
+      "lqr_spectral_radius": 0.9868347377499143,
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 18.555962066999996,
+        "wall_seconds": 18.709097678773105,
+        "counts": {
+          "environment_opens": 129,
+          "linearization_native_steps": 10,
+          "environment_resets": 128,
+          "planner_calls": 3072,
+          "lower_calls": 153600,
+          "environment_step_attempts": 153600,
+          "environment_steps": 153600,
+          "history_updates": 153600
+        },
+        "phases": {
+          "waypoint_factorial": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.0006700749999986044,
+            "wall_seconds": 0.0006871670484542847,
+            "counts": {}
+          },
+          "waypoint_factorial/same_lqr_design": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.1433246490000002,
+            "wall_seconds": 0.2232317579910159,
+            "counts": {
+              "environment_opens": 1,
+              "linearization_native_steps": 10
+            }
+          },
+          "waypoint_factorial/offset_5": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 9.192628549,
+            "wall_seconds": 9.230158371850848,
+            "counts": {
+              "environment_opens": 64,
+              "environment_resets": 64,
+              "planner_calls": 1536,
+              "lower_calls": 76800,
+              "environment_step_attempts": 76800,
+              "environment_steps": 76800,
+              "history_updates": 76800
+            }
+          },
+          "waypoint_factorial/offset_20": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 9.219338793999999,
+            "wall_seconds": 9.255020381882787,
+            "counts": {
+              "environment_opens": 64,
+              "environment_resets": 64,
+              "planner_calls": 1536,
+              "lower_calls": 76800,
+              "environment_step_attempts": 76800,
+              "environment_steps": 76800,
+              "history_updates": 76800
+            }
+          }
+        }
+      }
+    },
+    {
+      "configuration": 1,
+      "lqr_spectral_radius": 0.9822463694972613,
+      "measured_cost": {
+        "timing_basis": "exclusive_nested_process_cpu_and_elapsed_wall",
+        "cpu_seconds": 18.6191714,
+        "wall_seconds": 18.767822575755417,
+        "counts": {
+          "environment_opens": 129,
+          "linearization_native_steps": 10,
+          "environment_resets": 128,
+          "planner_calls": 3072,
+          "lower_calls": 153600,
+          "environment_step_attempts": 153600,
+          "environment_steps": 153600,
+          "history_updates": 153600
+        },
+        "phases": {
+          "waypoint_factorial": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.0007083039999997709,
+            "wall_seconds": 0.0007281340658664703,
+            "counts": {}
+          },
+          "waypoint_factorial/same_lqr_design": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 0.148759509,
+            "wall_seconds": 0.22570755705237389,
+            "counts": {
+              "environment_opens": 1,
+              "linearization_native_steps": 10
+            }
+          },
+          "waypoint_factorial/offset_5": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 9.255213133,
+            "wall_seconds": 9.290028179064393,
+            "counts": {
+              "environment_opens": 64,
+              "environment_resets": 64,
+              "planner_calls": 1536,
+              "lower_calls": 76800,
+              "environment_step_attempts": 76800,
+              "environment_steps": 76800,
+              "history_updates": 76800
+            }
+          },
+          "waypoint_factorial/offset_20": {
+            "calls": 1,
+            "failures": 0,
+            "cpu_seconds": 9.214490454000002,
+            "wall_seconds": 9.251358705572784,
+            "counts": {
+              "environment_opens": 64,
+              "environment_resets": 64,
+              "planner_calls": 1536,
+              "lower_calls": 76800,
+              "environment_step_attempts": 76800,
+              "environment_steps": 76800,
+              "history_updates": 76800
+            }
+          }
+        }
+      }
+    }
+  ],
+  "scope": "diagnostic_only_no_qualification_or_transfer_release",
+  "parent_qualification_passed": false,
+  "original_confirmation_released": false,
+  "retrieved_summary_bytes": 7748,
+  "task_ids": [
+    "t214885",
+    "t214886"
+  ]
+}

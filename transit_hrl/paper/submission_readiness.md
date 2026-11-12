@@ -154,8 +154,11 @@ cohort or revise the existing HOLD.
 The [native cart-pole qualification](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result)
 finds a causal timing gain over fixed and rotated clocks in both prespecified
 LQR configurations, but waypoint authority reverses and the joint gate
-fails. This is a task screen, not Stage9 transfer. Cross gain and fixed offset
-on matched fresh paths before attributing the reversal or revising the task.
+fails. The [paired factorial](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result)
+reproduces the reversal at both fixed offsets on a common fresh bank:
+the feedback configuration shifts waypoint value, while the tested offset and
+interaction intervals cross zero. Keep this task as a timing diagnostic,
+not a selected successful controller or a Stage9 transfer result.
 
 Stage304 is a completed negative boundary, not a broken run to resubmit.
 Its changed profile mix, callback positions and state distribution prevent
