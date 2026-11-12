@@ -1,0 +1,14 @@
+{
+  "protocol_id": "v410_within_day_control",
+  "regimes": {"heavy": {"demand_scale": 1.2}},
+  "development_days": [2470201, 2470202],
+  "days": {"heavy": [2500201, 2500202, 2500203, 2500204, 2500205, 2500206, 2500207, 2500208, 2500209, 2500210, 2500211, 2500212, 2500213, 2500214, 2500215, 2500216]},
+  "arms": ["fixed_cap_10", "transition", "v406_cap_10"],
+  "tilts": {"down": -0.5, "original": 0, "up": 0.5},
+  "dose_margin_s_per_trip": 3,
+  "bin_share_margin": 0.02,
+  "policy_seed": 410207,
+  "bootstrap_seed": 41001,
+  "bootstrap_draws": 20000,
+  "physical_start_cap": 54
+}

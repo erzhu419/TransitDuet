@@ -21,6 +21,13 @@ mean commanded holding against a frozen daily mixture. The unrestricted
 candidate did not pass holding equivalence. Both findings are supplemental;
 neither changes the archived paper mainline or promotes a policy.
 
+[V410](../experiments/v410_within_day_control/RESULTS.md) repeats the
+high-demand fast-holding comparison with a within-day randomized rule
+instead of a whole-day mixture. The capped controller improves journey,
+actual CV2 and circulation at matched mean commanded holding and 0/5/10
+s shares. The result concerns the tested state-dependent fast controller
+and remains separate from the archived V400--V404 manuscript.
+
 The earlier dated T-ITS drafts and Protocol-V6/TR-C packages remain historical
 snapshots. Their abstract, active-controller names and submission status must
 not be substituted for the current evidence.
