@@ -63,6 +63,12 @@ class TimingRule:
             model = self.model["model"]
             z = (x - model["feature_mean"]) / model["feature_scale"]
             return float(model["weights"][0] + z @ np.asarray(model["weights"][1:]))
+        if self.kind == "named_ridge":
+            names_in = self.model["input_names"]
+            base = _select_named_features(names, np.asarray(values)[None, :], names_in)
+            x, _ = _quadratic_features(base, names_in)
+            z = (x[0] - self.model["feature_mean"]) / self.model["feature_scale"]
+            return float(self.model["weights"][0] + z @ self.model["weights"][1:])
         row = {"feature_names": names, "causal_features": values,
                "offset_fraction": offset_fraction, "remaining_fraction": remaining_fraction}
         x, _ = feature_view([row], self.view, quadratic=self.kind == "ridge")
@@ -117,30 +123,34 @@ def _ridge_at_df(x: np.ndarray, y: np.ndarray, eval_x: np.ndarray,
     return prediction, model
 
 
+def fit_grouped_ridge(x, names, y, groups, *, effective_df, threshold_quantile):
+    if not 0 < threshold_quantile < 1:
+        raise ValueError("threshold quantile must be inside (0, 1)")
+    if len(np.unique(groups)) < 3:
+        raise ValueError("capacity controls require three fitting paths")
+    oof = np.empty(len(y))
+    for group in np.unique(groups):
+        train = groups != group
+        oof[~train], _ = _ridge_at_df(x[train], y[train], x[~train], effective_df)
+    _, model = _ridge_at_df(x, y, x, effective_df)
+    model.update(feature_names=list(names), threshold_source="fit_path_oof",
+                 fit_path_count=len(np.unique(groups)), oof_mse=float(np.mean((oof - y) ** 2)))
+    return model, float(np.quantile(oof, threshold_quantile))
+
+
 def fit_capacity_controls(fit_rows: list[dict], *, effective_df: float = 8.0,
                           threshold_quantile: float = 0.75,
                           views=tuple(VIEWS)) -> list[TimingRule]:
     """Same branch labels, 171 coefficients and fixed effective DF in both views."""
-    if not 0 < threshold_quantile < 1:
-        raise ValueError("threshold quantile must be inside (0, 1)")
     y = np.asarray([r["renew_ise_advantage"] for r in fit_rows])
     groups = np.asarray([r["seed"] for r in fit_rows])
-    if len(np.unique(groups)) < 3:
-        raise ValueError("capacity controls require three fitting paths")
     rules = []
     for view in views:
         x, names = feature_view(fit_rows, view, quadratic=True)
-        oof = np.empty(len(y))
-        for group in np.unique(groups):
-            train = groups != group
-            oof[~train], _ = _ridge_at_df(x[train], y[train], x[~train], effective_df)
-        _, model = _ridge_at_df(x, y, x, effective_df)
-        model.update(feature_names=list(names), threshold_source="fit_path_oof",
-                     fit_path_count=len(np.unique(groups)),
-                     oof_mse=float(np.mean((oof - y) ** 2)))
+        model, cut = fit_grouped_ridge(x, names, y, groups, effective_df=effective_df,
+                                       threshold_quantile=threshold_quantile)
         rules.append(TimingRule(f"matched_ridge_{view}", "ridge", view=view,
-                                threshold=float(np.quantile(oof, threshold_quantile)),
-                                model=model))
+                                threshold=cut, model=model))
     return rules
 
 
