@@ -1,5 +1,6 @@
-"""Only the zero-traffic preflight can be submitted from this stage."""
+"""Submit the zero-traffic preflight or one frozen V412 parity path."""
 
+import argparse
 import base64
 import importlib.util
 import io
@@ -14,7 +15,7 @@ spec.loader.exec_module(shared)
 shared.HERE = HERE
 shared.ROOT = Path('/home/zhengliang01/scheduleurm_work/FreqDuet-v413-public-slot-observer/run01')
 shared.SOURCE = shared.ROOT.parent / 'source02'
-LABEL = 'preflight02'
+PREFLIGHT = 'preflight02'
 
 
 def stage():
@@ -33,12 +34,26 @@ def stage():
     assert rc == 0, (out, err[-1500:])
 
 
-if __name__ == '__main__':
-    if not (HERE / f'submission_{LABEL}.json').exists():
-        stage()
-    item = shared.spec(LABEL, 'run.py', [], result=shared.ROOT / 'preflight/summary')
-    item.update(description='FreqDuet V413 public-slot preflight', signature=f'FreqDuet/v413/{LABEL}')
+def job(label, phase):
+    item = shared.spec(label, 'run.py', [], result=shared.ROOT / phase / 'summary')
+    item.update(description=f'FreqDuet V413 public-slot {phase}', signature=f'FreqDuet/v413/{label}')
     item['env'].pop('PYTHONPATH', None)
     item['cmd'] = shlex.join([shared.deployment()['python'], '-B', '-I', '-u',
-                             str(shared.SOURCE / 'run.py'), 'preflight', '--root', str(shared.ROOT)])
-    shared.wait(shared.submit(LABEL, [item]))
+                             str(shared.SOURCE / 'run.py'), phase, '--root', str(shared.ROOT)])
+    return item
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity'), default='preflight')
+    if parser.parse_args().phase == 'preflight':
+        if not (HERE / f'submission_{PREFLIGHT}.json').exists():
+            stage()
+        shared.wait(shared.submit(PREFLIGHT, [job(PREFLIGHT, 'preflight')]))
+    else:
+        protocol = shared.read(HERE / 'protocol.json')
+        gate = shared.read(HERE / 'review' / PREFLIGHT / 'results.json')
+        assert gate['passed'] and gate['physical_starts'] == 0
+        assert gate['parity_day'] == protocol['engineering_day']
+        assert protocol['planned_parity_paths'] == 1 and not protocol['automatic_retry']
+        print(shared.submit('parity', [job('parity', 'parity')]), flush=True)

@@ -23,9 +23,9 @@ second as sensitivity, and separate all results by lead and demand day. Do not
 pool repeated snapshots as independent observations or choose a new threshold.
 Observed return rank is not a counterfactual or a future action label.
 
-Physical launch hold: this stage permits only zero-traffic checks. Proposed
-next budget is one passive parity path on `2520208`, reusing the existing
-capped reference; no fresh days until exact actions, physical clocks, CRN,
+The preflight stage permitted only zero-traffic checks. The parity stage has
+one passive path on `2520208`, reusing the existing capped reference. No fresh
+days until exact actions, physical clocks, CRN,
 endpoints and old resource records match. Then eight reserved independent
 slow days, one path each, subject to release. Failed paths consume slots.
 Scheduler high/manual on CPU nodes only; sync only small summaries.
@@ -33,5 +33,9 @@ Scheduler high/manual on CPU nodes only; sync only small summaries.
 **Preflight.** `t214972` caught a skipped intermediate slot in the synthetic
 clock fixture. After fixing the fixture to visit every tick, `t214974` passed
 the four zero-traffic checks and found no reserved-day collision in the
-case directories or 25 protocol manifests checked. No parity or confirmation
-path has started. [Small preflight result](review/preflight02/results.json).
+case directories or 25 protocol manifests checked.
+[Small preflight result](review/preflight02/results.json).
+
+**Parity launch.** `t214975` used the single path allowance on `node004`,
+scheduler high and manual, with no automatic retry. The existing V412 archive
+is the reference. No confirmation path has started.
