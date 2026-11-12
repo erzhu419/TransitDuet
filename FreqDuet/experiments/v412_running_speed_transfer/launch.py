@@ -1,5 +1,6 @@
 """Stage the frozen road-speed study and submit its dependent jobs."""
 
+import argparse
 import base64
 import importlib.util
 import io
@@ -48,7 +49,7 @@ def job(label, phase, result, *, case=None, waits=()):
     return item
 
 
-def main():
+def pipeline():
     if not (HERE / 'submission_preflight02.json').exists():
         stage()
     shared.wait(shared.submit('preflight02', [job('preflight02', 'preflight', 'preflight')]))
@@ -70,5 +71,26 @@ def main():
     print(shared.submit('pipeline', tasks), flush=True)
 
 
+def circulation():
+    assert shared.read(HERE / 'review/aggregate/results.json')['complete']
+    path = shared.ROOT.parent / 'analysis01/circulation.py'
+    if not (HERE / 'submission_circulation.json').exists():
+        source = (HERE / 'circulation.py').read_bytes()
+        compile(source, 'circulation.py', 'exec')
+        payload = base64.b64encode(source).decode()
+        code = ('import base64\nfrom pathlib import Path\n'
+                f'p=Path({str(path)!r});p.parent.mkdir(exist_ok=True)\n'
+                f'with p.open("xb") as f: f.write(base64.b64decode({payload!r}))\n')
+        rc, out, err = shared.scheduler.run_on('node004', shlex.join([
+            shared.deployment()['python'], '-c', code]), timeout=30, check=False)
+        assert rc == 0, (out, err[-1500:])
+    spec = job('circulation', 'aggregate', 'circulation')
+    spec['cmd'] = shlex.join([shared.deployment()['python'], '-B', '-I', '-u',
+                             str(path), str(shared.ROOT)])
+    shared.wait(shared.submit('circulation', [spec]))
+
+
 if __name__ == '__main__':
-    main()
+    p = argparse.ArgumentParser()
+    p.add_argument('phase', nargs='?', choices=('pipeline', 'circulation'), default='pipeline')
+    globals()[p.parse_args().phase]()

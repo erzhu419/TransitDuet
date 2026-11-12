@@ -46,4 +46,5 @@ eight common days, and a shift to the simulated input speed means bound the
 claim. The controller and comparison were not recalibrated.
 
 [Frozen protocol](PROTOCOL.md) | [Small aggregate](review/aggregate/results.json) |
-[Paired interaction](review/aggregate/interaction.json)
+[Paired interaction](review/aggregate/interaction.json) |
+[Read-only circulation audit](CIRCULATION.md)
