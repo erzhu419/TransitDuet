@@ -20,6 +20,8 @@ CONFIRMATION = shared.ROOT.parent / 'confirmation01'
 READOUT = shared.ROOT.parent / 'readout01'
 ERROR_AUDIT = shared.ROOT.parent / 'error_analysis02'
 ERROR_LABEL = 'error_audit02'
+COMPONENTS = shared.ROOT.parent / 'components02'
+COMPONENT_LABEL = 'component_audit02'
 
 
 def stage(source, files):
@@ -40,7 +42,8 @@ def stage(source, files):
 
 def job(label, phase, day=None):
     confirming = phase in ('verify', 'case')
-    source, script = ((ERROR_AUDIT, 'error_audit.py') if phase == 'error_audit' else
+    source, script = ((COMPONENTS, 'component_audit.py') if phase == 'component_audit' else
+                      (ERROR_AUDIT, 'error_audit.py') if phase == 'error_audit' else
                       (READOUT, 'readout.py') if phase == 'readout' else
                       (CONFIRMATION, 'confirmation.py') if confirming else (shared.SOURCE, 'run.py'))
     result = shared.ROOT / ('confirmation/' + str(day) if day is not None else phase) / 'summary'
@@ -49,7 +52,7 @@ def job(label, phase, day=None):
     item['cwd'] = str(source)
     item['env'].pop('PYTHONPATH', None)
     cmd = [shared.deployment()['python'], '-B', '-I', '-u', str(source / script)]
-    if phase not in ('readout', 'error_audit'):
+    if phase not in ('readout', 'error_audit', 'component_audit'):
         cmd += [phase]
     cmd += ['--root', str(shared.ROOT)]
     if day is not None:
@@ -60,7 +63,7 @@ def job(label, phase, day=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit'),
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit'),
                         default='preflight')
     phase = parser.parse_args().phase
     if phase == 'preflight':
@@ -100,9 +103,15 @@ if __name__ == '__main__':
         if not (HERE / 'submission_readout.json').exists():
             stage(READOUT, ('readout.py',))
         shared.wait(shared.submit('readout', [job('readout', 'readout')]))
-    else:
+    elif phase == 'error_audit':
         report = shared.read(HERE / 'review/readout/results.json')
         assert report['complete'] and report['paid_confirmation_paths'] == 8
         if not (HERE / f'submission_{ERROR_LABEL}.json').exists():
             stage(ERROR_AUDIT, ('error_audit.py',))
         shared.wait(shared.submit(ERROR_LABEL, [job(ERROR_LABEL, 'error_audit')]))
+    else:
+        report = shared.read(HERE / f'review/{ERROR_LABEL}/results.json')
+        assert report['complete'] and report['physical_starts'] == 0
+        if not (HERE / f'submission_{COMPONENT_LABEL}.json').exists():
+            stage(COMPONENTS, ('components.py','component_audit.py'))
+        shared.wait(shared.submit(COMPONENT_LABEL, [job(COMPONENT_LABEL, 'component_audit')]))

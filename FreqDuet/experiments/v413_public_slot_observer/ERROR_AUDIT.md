@@ -29,3 +29,5 @@ not another rank/queue guard or a uniform ETA adjustment on consumed days.
 Synthetic fixture failure `t215000` is retained; corrected task `t215001`
 produced this result. All 81 detailed cases remain server-side.
 [Summary](review/error_audit02/results.json)
+
+[Actual components and passive recorder checks](COMPONENTS.md)
