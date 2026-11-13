@@ -55,3 +55,7 @@ and manual. All eight wrote a physical-start receipt on nodes 002, 003, 004,
 and 006. Only the passive sidecar is new. No automatic retry, no policy change,
 and no release beyond these eight paths.
 [Submission receipt](submission_confirmation.json).
+
+**Completion.** All eight confirmation tasks finished without retry. Read-only
+task `t214999` applied the frozen lead/scenario/queue strata and preserved the
+eight day-level results. [Results and next step](RESULTS.md).

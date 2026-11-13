@@ -17,6 +17,7 @@ shared.ROOT = Path('/home/zhengliang01/scheduleurm_work/FreqDuet-v413-public-slo
 shared.SOURCE = shared.ROOT.parent / 'source02'
 PREFLIGHT = 'preflight02'
 CONFIRMATION = shared.ROOT.parent / 'confirmation01'
+READOUT = shared.ROOT.parent / 'readout01'
 
 
 def stage(source, files):
@@ -37,14 +38,17 @@ def stage(source, files):
 
 def job(label, phase, day=None):
     confirming = phase in ('verify', 'case')
-    source, script = (CONFIRMATION, 'confirmation.py') if confirming else (shared.SOURCE, 'run.py')
+    source, script = ((READOUT, 'readout.py') if phase == 'readout' else
+                      (CONFIRMATION, 'confirmation.py') if confirming else (shared.SOURCE, 'run.py'))
     result = shared.ROOT / ('confirmation/' + str(day) if day is not None else phase) / 'summary'
     item = shared.spec(label, script, [], result=result)
     item.update(description=f'FreqDuet V413 public-slot {label}', signature=f'FreqDuet/v413/{label}')
     item['cwd'] = str(source)
     item['env'].pop('PYTHONPATH', None)
-    cmd = [shared.deployment()['python'], '-B', '-I', '-u',
-           str(source / script), phase, '--root', str(shared.ROOT)]
+    cmd = [shared.deployment()['python'], '-B', '-I', '-u', str(source / script)]
+    if phase != 'readout':
+        cmd += [phase]
+    cmd += ['--root', str(shared.ROOT)]
     if day is not None:
         cmd += ['--day', str(day)]
     item['cmd'] = shlex.join(cmd)
@@ -53,7 +57,7 @@ def job(label, phase, day=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation'),
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout'),
                         default='preflight')
     phase = parser.parse_args().phase
     if phase == 'preflight':
@@ -73,7 +77,7 @@ if __name__ == '__main__':
         if not (HERE / 'submission_verify.json').exists():
             stage(CONFIRMATION, ('confirmation.py',))
         shared.wait(shared.submit('verify', [job('verify', 'verify')]))
-    else:
+    elif phase == 'confirmation':
         protocol = shared.read(HERE / 'protocol.json')
         gate = shared.read(HERE / 'review/verify/results.json')
         days = protocol['confirmation_days']
@@ -85,3 +89,11 @@ if __name__ == '__main__':
             assert not any(t.get('signature') in signatures for t in shared.scheduler.load_state()['tasks'])
         tasks = [job(f'confirmation_{day}', 'case', day) for day in days]
         print(shared.submit('confirmation', tasks), flush=True)
+    else:
+        protocol = shared.read(HERE / 'protocol.json')
+        for day in protocol['confirmation_days']:
+            row = shared.read(HERE / f'review/confirmation_{day}/results.json')
+            assert row['completed'] and row['day'] == day and row['slots']['schedule_exact']
+        if not (HERE / 'submission_readout.json').exists():
+            stage(READOUT, ('readout.py',))
+        shared.wait(shared.submit('readout', [job('readout', 'readout')]))
