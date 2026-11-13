@@ -33,6 +33,9 @@ or policy changes. [Frozen allowance](component_parity_protocol.json).
 old public-slot equality during clock progression and nine closed component
 records. The single real-path allowance is charged to `t215008`, manually
 dispatched high on `node004` and confirmed progressing through 400 queries.
-Full-path equivalence is pending. No second path or new-day collection is
-released. [Entry check](review/component_checks/results.json),
+Full-path equivalence subsequently passed: the 12 old streams, endpoints and
+public slots are exact, and all 5,818 component records close. No second path
+or new-day collection is released. [Entry check](review/component_checks/results.json),
 [launch receipt](submission_component_parity.json).
+
+[Accepted observer and old-day component findings](COMPONENT_READOUT.md)
