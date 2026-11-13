@@ -33,3 +33,5 @@ No additional paths, new days, training or policy changes were released.
 
 [Parity receipt](review/component_parity/results.json),
 [small component readout](review/component_readout/results.json).
+
+[Follow-up full/partial running split and holding substitutions](CONTINUATION_AUDIT.md).

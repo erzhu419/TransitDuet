@@ -24,6 +24,7 @@ COMPONENTS = shared.ROOT.parent / 'components02'
 COMPONENT_LABEL = 'component_audit02'
 COMPONENT_ENTRY = shared.ROOT.parent / 'component_entry01'
 COMPONENT_READOUT = shared.ROOT.parent / 'component_readout01'
+CONTINUATION_AUDIT = shared.ROOT.parent / 'continuation_audit01'
 
 
 def stage(source, files):
@@ -44,7 +45,8 @@ def stage(source, files):
 
 def job(label, phase, day=None):
     confirming = phase in ('verify', 'case')
-    source, script = ((COMPONENT_READOUT, 'component_readout.py') if phase == 'component_readout' else
+    source, script = ((CONTINUATION_AUDIT, 'continuation_audit.py') if phase == 'continuation_audit' else
+                      (COMPONENT_READOUT, 'component_readout.py') if phase == 'component_readout' else
                       (COMPONENT_ENTRY, 'component_entry.py') if phase in ('component_checks','component_parity') else
                       (COMPONENTS, 'component_audit.py') if phase == 'component_audit' else
                       (ERROR_AUDIT, 'error_audit.py') if phase == 'error_audit' else
@@ -58,7 +60,7 @@ def job(label, phase, day=None):
     cmd = [shared.deployment()['python'], '-B', '-I', '-u', str(source / script)]
     if phase in ('component_checks','component_parity'):
         cmd += [phase.removeprefix('component_')]
-    elif phase not in ('readout', 'error_audit', 'component_audit', 'component_readout'):
+    elif phase not in ('readout', 'error_audit', 'component_audit', 'component_readout', 'continuation_audit'):
         cmd += [phase]
     cmd += ['--root', str(shared.ROOT)]
     if day is not None:
@@ -69,7 +71,7 @@ def job(label, phase, day=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity', 'component_readout'),
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity', 'component_readout', 'continuation_audit'),
                         default='preflight')
     phase = parser.parse_args().phase
     if phase == 'preflight':
@@ -134,9 +136,15 @@ if __name__ == '__main__':
             assert not any(t.get('signature') == 'FreqDuet/v413/component_parity'
                            for t in shared.scheduler.load_state()['tasks'])
         print(shared.submit(phase,[job(phase,phase)]),flush=True)
-    else:
+    elif phase == 'component_readout':
         gate = shared.read(HERE/'review/component_parity/results.json')
         assert gate['passed'] and gate['exact_public_slots'] and gate['exact_endpoints']
         if not (HERE/'submission_component_readout.json').exists():
             stage(COMPONENT_READOUT,('component_readout.py',))
+        shared.wait(shared.submit(phase,[job(phase,phase)]))
+    else:
+        report = shared.read(HERE/'review/component_readout/results.json')
+        assert report['complete'] and report['physical_starts'] == 0
+        if not (HERE/'submission_continuation_audit.json').exists():
+            stage(CONTINUATION_AUDIT,('continuation_audit.py',))
         shared.wait(shared.submit(phase,[job(phase,phase)]))
