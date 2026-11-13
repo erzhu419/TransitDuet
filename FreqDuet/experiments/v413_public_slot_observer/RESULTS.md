@@ -35,3 +35,5 @@ queued obligations from return/launch timing error, before proposing a control
 change. Do not tune the 30 s threshold or expand training on these days.
 
 [Small server readout](review/readout/results.json)
+
+[Completed 81-case error accounting](ERROR_AUDIT.md)
