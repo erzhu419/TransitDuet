@@ -22,6 +22,7 @@ ERROR_AUDIT = shared.ROOT.parent / 'error_analysis02'
 ERROR_LABEL = 'error_audit02'
 COMPONENTS = shared.ROOT.parent / 'components02'
 COMPONENT_LABEL = 'component_audit02'
+COMPONENT_ENTRY = shared.ROOT.parent / 'component_entry01'
 
 
 def stage(source, files):
@@ -42,7 +43,8 @@ def stage(source, files):
 
 def job(label, phase, day=None):
     confirming = phase in ('verify', 'case')
-    source, script = ((COMPONENTS, 'component_audit.py') if phase == 'component_audit' else
+    source, script = ((COMPONENT_ENTRY, 'component_entry.py') if phase in ('component_checks','component_parity') else
+                      (COMPONENTS, 'component_audit.py') if phase == 'component_audit' else
                       (ERROR_AUDIT, 'error_audit.py') if phase == 'error_audit' else
                       (READOUT, 'readout.py') if phase == 'readout' else
                       (CONFIRMATION, 'confirmation.py') if confirming else (shared.SOURCE, 'run.py'))
@@ -52,7 +54,9 @@ def job(label, phase, day=None):
     item['cwd'] = str(source)
     item['env'].pop('PYTHONPATH', None)
     cmd = [shared.deployment()['python'], '-B', '-I', '-u', str(source / script)]
-    if phase not in ('readout', 'error_audit', 'component_audit'):
+    if phase in ('component_checks','component_parity'):
+        cmd += [phase.removeprefix('component_')]
+    elif phase not in ('readout', 'error_audit', 'component_audit'):
         cmd += [phase]
     cmd += ['--root', str(shared.ROOT)]
     if day is not None:
@@ -63,7 +67,7 @@ def job(label, phase, day=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit'),
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity'),
                         default='preflight')
     phase = parser.parse_args().phase
     if phase == 'preflight':
@@ -109,9 +113,22 @@ if __name__ == '__main__':
         if not (HERE / f'submission_{ERROR_LABEL}.json').exists():
             stage(ERROR_AUDIT, ('error_audit.py',))
         shared.wait(shared.submit(ERROR_LABEL, [job(ERROR_LABEL, 'error_audit')]))
-    else:
+    elif phase == 'component_audit':
         report = shared.read(HERE / f'review/{ERROR_LABEL}/results.json')
         assert report['complete'] and report['physical_starts'] == 0
         if not (HERE / f'submission_{COMPONENT_LABEL}.json').exists():
             stage(COMPONENTS, ('components.py','component_audit.py'))
         shared.wait(shared.submit(COMPONENT_LABEL, [job(COMPONENT_LABEL, 'component_audit')]))
+    elif phase == 'component_checks':
+        report = shared.read(HERE/f'review/{COMPONENT_LABEL}/results.json')
+        assert report['complete'] and report['physical_starts'] == 0
+        if not (HERE/'submission_component_checks.json').exists():
+            stage(COMPONENT_ENTRY,('component_entry.py','component_parity_protocol.json'))
+        shared.wait(shared.submit(phase,[job(phase,phase)]))
+    else:
+        gate = shared.read(HERE/'review/component_checks/results.json')
+        assert gate['passed'] and gate['physical_starts'] == 0 and gate['physical_start_cap'] == 1
+        if not (HERE/'submission_component_parity.json').exists():
+            assert not any(t.get('signature') == 'FreqDuet/v413/component_parity'
+                           for t in shared.scheduler.load_state()['tasks'])
+        print(shared.submit(phase,[job(phase,phase)]),flush=True)

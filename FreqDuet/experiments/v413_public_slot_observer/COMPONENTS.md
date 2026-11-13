@@ -19,11 +19,20 @@ closure and restoration after unsupported input. It reads the frozen model's
 event output; neither the model kernel nor the live controller was edited.
 The first import-only failure `t215004` is retained.
 
-**Remaining step.** Prediction components were not saved in the original
-archives. Actual component sizes alone cannot attribute the return error.
-Wire this recorder as an additional sidecar and propose one extra passive
-path on old day `2520208`, requiring exact old streams, endpoints and public
-slot records plus component closure. Real-path integration/equivalence is
-not yet complete; no such path, new day, fitting or policy change was started.
+**Passive integration.** One additional old-day path on `2520208` is released
+only after the server's zero-traffic entry checks. Reuse the existing V413
+parity archive: require all 12 old streams, endpoints and both public-slot
+records to match exactly, excluding only query wall time. New components must
+match old return clocks and close for each vehicle/scenario. Failure consumes
+the one allowance, with no automatic retry or expansion. No new days, fitting
+or policy changes. [Frozen allowance](component_parity_protocol.json).
 
 [Small server result](review/component_audit02/results.json)
+
+**Entry and launch.** `t215007` passed the zero-traffic entry checks, including
+old public-slot equality during clock progression and nine closed component
+records. The single real-path allowance is charged to `t215008`, manually
+dispatched high on `node004` and confirmed progressing through 400 queries.
+Full-path equivalence is pending. No second path or new-day collection is
+released. [Entry check](review/component_checks/results.json),
+[launch receipt](submission_component_parity.json).
