@@ -45,3 +45,33 @@ clock checks also passed; no claim about actual dispatch behavior is made yet.
 
 [Server preflight summary](review/preflight/results.json) |
 [Scheduler receipt](submission_preflight.json)
+
+**Bounded traffic release.** Freeze old day 2550001 for one guard-disabled
+equivalence path; fresh days 2560001--2560004 for the three arms. The budget
+is 13 starts. Before release, check unused day metadata and the pinned
+runtime. Fresh jobs depend on exact old-day equivalence; aggregation depends
+on all four day receipts. Keep 5,200 common random-event keys and draws per
+day and the same fleet, roster and legal commands. All tasks use high priority
+and manual scheduler dispatch, with no automatic retry.
+
+**Development screen.** Relative to hourly V415, require lower mean actual
+dispatch CV2, improvement on at least three days, and no increase in mean
+positive gap excess over the public interval. Relative to pooled V406,
+require lower mean readiness delay and no increase in public launch delay.
+Journey and actual arrival CV2 must not worsen in mean versus either
+comparator. Report equal-day paired differences and descriptive 95% intervals
+from all 256 day bootstrap draws. This four-day screen is not confirmation
+or evidence of statistical noninferiority; passing only justifies a separate
+fresh confirmation. Report activation and veto counts without widening scope.
+
+[Frozen traffic manifest](traffic_protocol.json)
+
+**Dispatch.** Zero-traffic task `t215048` passed on node004 after checking
+28 manifests. The server confirmed one start for `t215049`, the old-day
+engineering comparison. Jobs `t215050`--`t215053` each own one fresh day
+and wait for the engineering receipt; `t215054` waits for all four summaries.
+The engineering run reuses the V415 runtime identity in its raw case receipt.
+No fresh traffic path had started at dispatch verification.
+
+[Traffic preflight receipt](review/traffic_preflight/results.json) |
+[Traffic submission](submission_traffic.json)
