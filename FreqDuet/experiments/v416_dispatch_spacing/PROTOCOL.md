@@ -75,3 +75,44 @@ No fresh traffic path had started at dispatch verification.
 
 [Traffic preflight receipt](review/traffic_preflight/results.json) |
 [Traffic submission](submission_traffic.json)
+
+**Completion.** Tasks `t215049`--`t215054` finished without retry on node004.
+The guard-disabled engineering path matched the 12 archived V415 streams,
+endpoints and predictor counts. The aggregate accounts for all 13 starts,
+including 5,200 paired random events on each of the four development days.
+No training or change to the main policy.
+
+| V416 minus comparator, equal-day mean [descriptive 95% interval] | Hourly V415 | Pooled V406 |
+| --- | ---: | ---: |
+| Actual dispatch CV2 | -0.00405 [-0.00669, -0.00043] | +0.00148 [-0.00288, +0.00449] |
+| Positive gap excess (s per dispatch gap) | -0.635 [-1.688, +0.419] | -0.302 [-1.392, +0.675] |
+| Readiness delay (s/trip) | -4.886 [-12.779, +1.171] | -8.974 [-14.780, -4.706] |
+| Public launch delay (s/day) | -1280.25 [-3348.0, +306.75] | -2351.25 [-3872.25, -1233.0] |
+| Journey (s/person) | -5.154 [-11.356, -1.976] | -3.955 [-11.344, +1.230] |
+| Actual arrival CV2 | -0.00417 [-0.00695, -0.00140] | +0.00110 [-0.00440, +0.00508] |
+
+Five of six development checks pass. Compared with hourly V415, journey and
+arrival CV2 improve on all four days, while dispatch CV2 improves on three.
+The journey gain mostly comes from waiting (-4.94 s/person), with almost
+unchanged mean holding (+0.076 s/trip). Compared with pooled V406, readiness
+improves on all four days, but arrival CV2 worsens on three. The maximum
+actual dispatch gap is also larger on all four days (+24 s on average).
+Public delay and readiness express the same lateness here because eligible
+and public times coincide.
+
+The guard was active on 7,384 of 20,800 queries and rejected at least one
+otherwise admissible option on 62 queries (84 scenario vetoes). These are
+not counts of root actions changed by the guard. The two hourly paths
+ultimately differed at 644 actual dispatch clocks and 2,679 common
+bus/trip/stop holding commands, with no schedule edits. Median elapsed time
+was 29.1 min/path versus 28.5 min for V415.
+
+**Decision.** Retain the positive incremental effect of the guard relative
+to hourly V415 in this four-day screen; do not promote V416 or claim joint
+improvement over pooled V406. If continuing, the missing comparison is
+pooled plus the same frozen guard, which would separate spacing protection
+from the benefit of hourly forecasts when both controllers are protected.
+No new paths are released by this readout.
+
+[Engineering acceptance](review/engineering/results.json) |
+[Frozen aggregate and daily contrasts](review/aggregate/results.json)
