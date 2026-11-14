@@ -31,3 +31,43 @@ is available at release.
 
 [Preflight result](review/preflight/results.json) |
 [Factorial submission](submission_factorial.json)
+
+**Result.** `t215056`--`t215060` finished on node004 without retries.
+Four new paths completed the factorial with the 12 paid V416 paths. All
+four day receipts passed the roster, population, and 5,200-event pairing
+checks. Lower is better; entries are equal-day means.
+
+| Metric | Guard under pooled | Guard under hourly | Hourly minus pooled, both guarded | Interaction |
+| --- | ---: | ---: | ---: | ---: |
+| Journey (s/person) | +0.381 | -5.154 | -4.336 | -5.534 |
+| Readiness delay (s/trip) | -0.416 | -4.886 | -8.558 | -4.470 |
+| Public launch delay (s/day) | -109.0 | -1280.25 | -2242.25 | -1171.25 |
+| Actual arrival CV2 | -0.00386 | -0.00417 | +0.00496 | -0.00032 |
+| Actual dispatch CV2 | -0.00426 | -0.00405 | +0.00574 | +0.00021 |
+| Mean positive gap excess (s/gap) | -0.943 | -0.635 | +0.641 | +0.309 |
+| Holding (s/trip) | -0.057 | +0.076 | -0.568 | +0.134 |
+
+The guard points toward better regularity with either clock, but both
+pooled-guard CV2 intervals cross zero. The journey interaction is negative
+on all four days, with a descriptive interval of [-11.63, -1.84] s/person.
+It mainly comes from waiting, not a uniform change in holding. With both
+arms guarded, hourly readiness improves on all four days (interval
+[-14.99, -4.16] s/trip), but arrival CV2 worsens on three and the maximum
+dispatch gap is longer on all four (+21.75 s on average). The guarded
+journey comparison improves on two days and its interval crosses zero
+([-11.16, +1.01] s/person). Public delay and readiness measure the same
+lateness on different scales in this fixed-roster comparison.
+
+The pooled guard was active on 7,585 of 20,800 queries; 65 queries had at
+least one veto. These are not counts of selected actions changed by the
+guard. All days remain in the analysis.
+
+**Decision.** Retain the conditional journey signal and the readiness
+versus regularity trade-off. Do not treat the two guarded arms as
+interchangeable or promote either: V416's failed arrival-CV2 gate stands.
+Stop tuning the current ETA and guard family on these four development
+days. Any independent study should either predefine an operationally
+justified trade-off or test a distinct dispatch-spacing mechanism, not
+retroactively change the original nonharm criterion.
+
+[Four-day contrasts and intervals](review/aggregate/results.json)
