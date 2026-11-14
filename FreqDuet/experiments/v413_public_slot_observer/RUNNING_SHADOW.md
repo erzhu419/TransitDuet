@@ -59,3 +59,45 @@ receipt. The accepted shadow and live runtime are reused unchanged; no retry,
 new policy, or additional path is released. Forecast accuracy is pending.
 [Release check](review/running_shadow_release_checks/results.json),
 [submission receipt](submission_running_shadow_confirmation.json).
+
+**Independent result.** All eight paths finished once with exit code 0 and
+5,200 random-event records each. The read-only scheduler task `t215033`
+checked the saved slot and component associations and applied the frozen
+gate. Only the small summary was retrieved. The paths took 20.0--39.3 min.
+
+| Advance 300 s, first scenario | V413 pooled running | V414 entry-hour running |
+| --- | ---: | ---: |
+| Supported, paired slots | 1,929 / 2,080 | 1,929 / 2,080 |
+| Launch-clock MAE, equal weight per day (s) | 76.28 | 61.75 |
+| Missed late launches | 39 | 27 |
+| False alarms | 62 | 32 |
+| First-return rank errors, no ready bus or earlier slot | 0 / 368 | 0 / 368 |
+
+All eight day-level MAE differences favor V414 (range -18.27 to -11.72 s;
+mean -14.54 s, or -19.1%). No supported launch or rank score needed V413
+fallback. The running-time lookup itself used the pooled fallback in 83.8%
+of simulated full-link calls; this is a different denominator. Slot-weighted
+MAE fell both with earlier slots queued (90.32 to 73.64 s, 1,489 slots) and
+without (28.77 to 21.47 s, 440 slots). The second scenario agrees in direction
+on its 1,697 supported pairs (76.67 to 61.84 s, misses 31 to 20, false alarms
+51 to 28). At the public clock both forecasts classify all 1,944 supported
+first-scenario slots correctly; their equal-day MAEs are 53.62 and 42.55 s.
+
+On 1,850 advance slots where both forecasts and the actual launch use the
+same inbound cycle, mean return-clock absolute error fell from 84.48 to
+68.17 s. Mean signed travel error fell from +12.98 to +2.26 s; service error
+changed from +1.71 to +1.60 s and hold residence error from -1.85 to -0.25 s.
+These paired component differences do not attribute a control effect.
+
+**Decision.** All four advance forecast conditions pass. Retain V414 as the
+frozen forecast candidate for a bounded closed-loop comparison against the
+same controller with pooled running forecasts. Keep the fleet, caps, action
+space and service endpoints fixed; use fresh paired days and test against the
+existing slow-speed readiness and public-delay criteria as well as journey
+and actual CV2. The present eight days are consumed; there is no new path
+release or main-policy change. This is evidence of more accurate forecasts on
+one slow-speed setting, not yet of better control, transferred circulation,
+or better rank discrimination (only one advance near-tie).
+
+[Small server readout](review/running_shadow_readout/results.json) |
+[Readout task receipt](submission_running_shadow_readout.json)
