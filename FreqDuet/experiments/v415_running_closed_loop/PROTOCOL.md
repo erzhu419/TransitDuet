@@ -44,3 +44,40 @@ automatic requeue disabled. No new-day control result exists yet.
 
 [Preflight receipt](review/preflight/results.json) |
 [Pipeline submission](submission_pipeline.json)
+
+**Completion.** Engineering, all eight paired days, and aggregate `t215044`
+finished with exit code 0 and no retries. The engineering path matched 12
+archived streams and the endpoints; only callback wall time was excluded.
+All 17 starts are accounted for, with 5,200 matched event keys and uniforms
+per new day. No training or main-policy change.
+
+| Hourly minus pooled, eight equal-weight days | Mean | Paired 95% interval | Days improved |
+| --- | ---: | ---: | ---: |
+| Readiness delay (s/trip) | -2.189 | [-7.311, +1.455] | 4/8 |
+| Public launch delay (s/day) | -573.5 | [-1915.4, +381.3] | 4/8 |
+| Journey (s/person) | +1.272 | [-1.251, +5.029] | 4/8 |
+| Actual arrival CV2 | +0.006608 | [-0.003764, +0.024028] | 3/8 |
+
+All four frozen gates fail. Day 2550004 accounts for most of the apparent
+readiness benefit (-17.813 s/trip and -4667 s/day public delay), while journey
+and CV2 worsen (+13.051 s/person, +0.064519). For influence assessment only,
+the other seven days average +0.043 s/trip readiness, +11.3 s/day public delay,
+-0.411 s/person journey and -0.001665 CV2. The gate retains all eight days.
+
+Holding changed by -0.448 s/trip [-0.804, -0.093], but increased mean
+waiting (+1.347 s/person) outweighed the small onboard reduction (-0.075).
+The two paths differ in 5,501 of 38,560 common same-bus/trip/stop commands and
+in 1,456 actual launch clocks out of 2,096, with no schedule edits. These are
+closed-loop path differences, not same-state action effects. Hourly means
+were used in 16.2% of full-link calls. Median runtime across days rose from
+34.7 to 37.4 min per path and median daily callback p95 from 0.79 to 0.92 s.
+
+**Decision.** Keep V414 as a validated forecast and stop V415 promotion.
+Better factual launch-clock prediction did not establish better control.
+If pursuing the mechanism, first read the existing paired paths for the
+day-2550004 divergence in actual launch intervals, holding and downstream
+headways. Those archives can localize the difference, but cannot identify
+unexecuted actions' effects. No retuning or additional traffic is released.
+
+[Engineering receipt](review/engineering/results.json) |
+[Frozen aggregate](review/aggregate/results.json)
