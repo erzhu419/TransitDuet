@@ -25,6 +25,7 @@ COMPONENT_LABEL = 'component_audit02'
 COMPONENT_ENTRY = shared.ROOT.parent / 'component_entry01'
 COMPONENT_READOUT = shared.ROOT.parent / 'component_readout01'
 CONTINUATION_AUDIT = shared.ROOT.parent / 'continuation_audit01'
+RUNNING_SHADOW = shared.ROOT.parent / 'running_shadow01'
 
 
 def stage(source, files):
@@ -45,7 +46,8 @@ def stage(source, files):
 
 def job(label, phase, day=None):
     confirming = phase in ('verify', 'case')
-    source, script = ((CONTINUATION_AUDIT, 'continuation_audit.py') if phase == 'continuation_audit' else
+    source, script = ((RUNNING_SHADOW, 'running_shadow_checks.py') if phase == 'running_shadow_checks' else
+                      (CONTINUATION_AUDIT, 'continuation_audit.py') if phase == 'continuation_audit' else
                       (COMPONENT_READOUT, 'component_readout.py') if phase == 'component_readout' else
                       (COMPONENT_ENTRY, 'component_entry.py') if phase in ('component_checks','component_parity') else
                       (COMPONENTS, 'component_audit.py') if phase == 'component_audit' else
@@ -60,9 +62,12 @@ def job(label, phase, day=None):
     cmd = [shared.deployment()['python'], '-B', '-I', '-u', str(source / script)]
     if phase in ('component_checks','component_parity'):
         cmd += [phase.removeprefix('component_')]
-    elif phase not in ('readout', 'error_audit', 'component_audit', 'component_readout', 'continuation_audit'):
+    elif phase not in ('readout', 'error_audit', 'component_audit', 'component_readout', 'continuation_audit',
+                       'running_shadow_checks'):
         cmd += [phase]
     cmd += ['--root', str(shared.ROOT)]
+    if phase == 'running_shadow_checks':
+        cmd += ['--parent', str(shared.ROOT)]
     if day is not None:
         cmd += ['--day', str(day)]
     item['cmd'] = shlex.join(cmd)
@@ -71,7 +76,7 @@ def job(label, phase, day=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity', 'component_readout', 'continuation_audit'),
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity', 'component_readout', 'continuation_audit', 'running_shadow_checks'),
                         default='preflight')
     phase = parser.parse_args().phase
     if phase == 'preflight':
@@ -142,9 +147,15 @@ if __name__ == '__main__':
         if not (HERE/'submission_component_readout.json').exists():
             stage(COMPONENT_READOUT,('component_readout.py',))
         shared.wait(shared.submit(phase,[job(phase,phase)]))
-    else:
+    elif phase == 'continuation_audit':
         report = shared.read(HERE/'review/component_readout/results.json')
         assert report['complete'] and report['physical_starts'] == 0
         if not (HERE/'submission_continuation_audit.json').exists():
             stage(CONTINUATION_AUDIT,('continuation_audit.py',))
         shared.wait(shared.submit(phase,[job(phase,phase)]))
+    else:
+        report = shared.read(HERE/'review/continuation_audit/results.json')
+        assert report['complete'] and report['physical_starts'] == 0
+        if not (HERE/'submission_running_shadow_checks.json').exists():
+            stage(RUNNING_SHADOW, ('running_shadow.py', 'running_shadow_checks.py', 'running_shadow_protocol.json'))
+        shared.wait(shared.submit(phase, [job(phase, phase)]))

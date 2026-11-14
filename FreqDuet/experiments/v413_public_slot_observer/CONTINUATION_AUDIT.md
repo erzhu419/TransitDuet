@@ -33,3 +33,5 @@ controller change. Treat the slot 225 holding result as a separate mechanism,
 not evidence for a global rank or holding gate. This is one consumed day.
 
 [Small server result](review/continuation_audit/results.json)
+
+[Detached V414 predictor and independent-screen protocol](RUNNING_SHADOW.md)
