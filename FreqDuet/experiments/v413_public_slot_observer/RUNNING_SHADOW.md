@@ -33,5 +33,11 @@ control effect. Do not tune on V413 or the reserved days.
 
 **Zero-traffic check.** `t215015` passed six checks on `node004`. No reserved
 day conflict was found in checked case directories and 25 protocol manifests.
-No old-day or confirmation path started.
 [Small server receipt](review/running_shadow_checks/results.json)
+
+**Engineering release.** The subsequent release is only the old-day path
+`2520208`. Task `t215018` was manually dispatched high on `node004`; one
+physical start was confirmed. Acceptance requires exact V413 live streams,
+endpoints, public slots and baseline components, plus shadow component closure.
+No retry or confirmation day is released.
+[Submission receipt](submission_running_shadow_parity.json)
