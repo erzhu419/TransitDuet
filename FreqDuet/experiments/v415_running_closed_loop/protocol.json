@@ -1,0 +1,12 @@
+{
+  "protocol_id": "v415_running_closed_loop",
+  "regimes": {"slow": {"demand_scale": 1.2}},
+  "road_profile_shift_mps": -0.5,
+  "engineering_day": 2520208,
+  "days": {"slow": [2550001, 2550002, 2550003, 2550004, 2550005, 2550006, 2550007, 2550008]},
+  "arms": ["v406_cap_10", "v406_cap_10_hourly"],
+  "physical_start_cap": 17,
+  "max_concurrent_days": 8,
+  "bootstrap": {"draws": 10000, "seed": 41501},
+  "automatic_retry": false
+}
