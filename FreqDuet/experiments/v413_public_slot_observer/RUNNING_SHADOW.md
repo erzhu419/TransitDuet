@@ -41,3 +41,13 @@ physical start was confirmed. Acceptance requires exact V413 live streams,
 endpoints, public slots and baseline components, plus shadow component closure.
 No retry or confirmation day is released.
 [Submission receipt](submission_running_shadow_parity.json)
+
+**Engineering acceptance.** `t215018` finished successfully. All 12 frozen
+streams, 5,200 random events, 522 public-slot records, endpoints and baseline
+components matched. All 492 shadow scenarios completed and all 5,818 shadow
+vehicle component records closed. Of 321,548 full-link lookups across the
+shadow continuations, 50,370 (15.7%) used the entry-hour mean and 271,178
+(84.3%) used the pooled fallback. These are simulated link calls, not the
+coverage of target public slots. Engineering parity passes; forecast accuracy
+still requires the reserved-day comparison. No new day has been released.
+[Small parity result](review/running_shadow_parity/results.json)
