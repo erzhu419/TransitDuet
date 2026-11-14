@@ -2,7 +2,9 @@
 
 The current evidence-aligned draft is
 [the turnover-coordination manuscript](tits_turnover_submission_20261110/README.md).
-It incorporates V400--V404 and preserves the original positive and failed gates.
+It incorporates V400--V404 and the separate V412--V417 follow-up in the
+Discussion and supporting information, preserving the original positive and
+failed gates.
 The new factorial, operating-condition, passenger-distribution and vehicle-chain
 evidence is assembled with the main/SI PDFs, editable figures and source package.
 It is a bounded operating-tradeoff draft, not a validated learned/frequency
@@ -37,6 +39,16 @@ These are single-corridor results; they do not change the manuscript or policy.
 joint matched-dose result at normal speed on new days. Under slower running,
 matching, journey and actual CV2 pass, but circulation nonharm does not.
 This is evidence for a bounded service benefit, not a joint robustness claim.
+
+[V414](../experiments/v413_public_slot_observer/RUNNING_SHADOW.md) improves
+five-minute-ahead actual departure-time predictions on eight new slow days.
+[V415](../experiments/v415_running_closed_loop/PROTOCOL.md) fails the separate
+closed-loop screen. [V416](../experiments/v416_dispatch_spacing/PROTOCOL.md)
+improves journey and arrival regularity relative to unprotected hourly
+prediction, but misses the pooled arrival-CV2 criterion.
+[V417](../experiments/v417_pooled_spacing/PROTOCOL.md) completes the same-day
+factorial, retaining the circulation--regularity trade-off. None promotes a
+controller or changes the V400--V404 primary claims.
 
 The earlier dated T-ITS drafts and Protocol-V6/TR-C packages remain historical
 snapshots. Their abstract, active-controller names and submission status must

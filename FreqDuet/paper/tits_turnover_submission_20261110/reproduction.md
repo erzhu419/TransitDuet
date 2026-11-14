@@ -9,6 +9,13 @@ and factorial supplement, with four independent demand days in each condition.
 `evidence_manifest.json` records the numerical fields and source-data locations.
 No local simulation or bootstrap is needed for a manuscript rebuild.
 
+The V412--V417 follow-up tables use compact copies of separate server summaries.
+`forecast_tables.py` formats their estimates and derives the two daily-average
+MAEs from stored sums and counts. The V414 forecast and V415 control days are
+distinct; V417 reuses the V416 factorial days. The offline ZIP reproduces these
+tables, not their traffic runs. The portable V404 runtime below does not
+include the later follow-up launch chain.
+
 ## Traffic runtime
 
 The V404 server-side release builder copies the actually imported first-party

@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Forecast-by-spacing development comparison. All contrasts use the same four days. Units match Table~\ref{tab:running-transfer}; Dep. is departure. Intervals are descriptive.}
+\label{tab:forecast-spacing}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+Comparison & Journey & Readiness & Public delay & Arrival CV$^2$ & Dep. CV$^2$ \\ \midrule
+Hourly, no guard & \shortstack[r]{$+1.20$\\{\scriptsize $[-0.92, +3.40]$}} & \shortstack[r]{$-4.09$\\{\scriptsize $[-6.22, -1.95]$}} & \shortstack[r]{$-1071.0$\\{\scriptsize $[-1630.5, -511.5]$}} & \shortstack[r]{$+0.00527$\\{\scriptsize $[+0.00148, +0.00948]$}} & \shortstack[r]{$+0.00553$\\{\scriptsize $[+0.00173, +0.00989]$}} \\[3pt]
+Guard with pooled & \shortstack[r]{$+0.38$\\{\scriptsize $[-0.39, +1.15]$}} & \shortstack[r]{$-0.42$\\{\scriptsize $[-1.31, +0.39]$}} & \shortstack[r]{$-109.0$\\{\scriptsize $[-343.8, +101.5]$}} & \shortstack[r]{$-0.00386$\\{\scriptsize $[-0.00822, +0.00050]$}} & \shortstack[r]{$-0.00426$\\{\scriptsize $[-0.00985, +0.00132]$}} \\[3pt]
+Guard with hourly & \shortstack[r]{$-5.15$\\{\scriptsize $[-11.36, -1.98]$}} & \shortstack[r]{$-4.89$\\{\scriptsize $[-12.78, +1.17]$}} & \shortstack[r]{$-1280.2$\\{\scriptsize $[-3348.0, +306.8]$}} & \shortstack[r]{$-0.00417$\\{\scriptsize $[-0.00695, -0.00140]$}} & \shortstack[r]{$-0.00405$\\{\scriptsize $[-0.00669, -0.00043]$}} \\[3pt]
+Hourly, both guarded & \shortstack[r]{$-4.34$\\{\scriptsize $[-11.16, +1.01]$}} & \shortstack[r]{$-8.56$\\{\scriptsize $[-14.99, -4.16]$}} & \shortstack[r]{$-2242.2$\\{\scriptsize $[-3927.0, -1089.2]$}} & \shortstack[r]{$+0.00496$\\{\scriptsize $[-0.00338, +0.01330]$}} & \shortstack[r]{$+0.00574$\\{\scriptsize $[-0.00188, +0.01336]$}} \\[3pt]
+Interaction & \shortstack[r]{$-5.53$\\{\scriptsize $[-11.63, -1.84]$}} & \shortstack[r]{$-4.47$\\{\scriptsize $[-12.39, +0.81]$}} & \shortstack[r]{$-1171.2$\\{\scriptsize $[-3246.8, +213.0]$}} & \shortstack[r]{$-0.00032$\\{\scriptsize $[-0.00573, +0.00580]$}} & \shortstack[r]{$+0.00021$\\{\scriptsize $[-0.00394, +0.00403]$}} \\[3pt]
+V416 vs. pooled & \shortstack[r]{$-3.96$\\{\scriptsize $[-11.34, +1.23]$}} & \shortstack[r]{$-8.97$\\{\scriptsize $[-14.78, -4.71]$}} & \shortstack[r]{$-2351.2$\\{\scriptsize $[-3872.2, -1233.0]$}} & \shortstack[r]{$+0.00110$\\{\scriptsize $[-0.00440, +0.00508]$}} & \shortstack[r]{$+0.00148$\\{\scriptsize $[-0.00288, +0.00449]$}} \\[3pt]
+\bottomrule\end{tabular}
+\end{table}

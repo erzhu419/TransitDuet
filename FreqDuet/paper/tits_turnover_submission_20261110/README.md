@@ -1,6 +1,6 @@
 # FreqDuet: Evidence-Aligned Submission Materials
 
-Updated 2026-11-11. This separate manuscript preserves all earlier drafts,
+Updated 2026-11-14. This separate manuscript preserves all earlier drafts,
 experiments and the main policy. Study A--D retain V400--V403's original gates;
 Study E adds V404's frozen factorial and operating-condition supplement.
 
@@ -16,12 +16,14 @@ unestablished. No failed historical gate is relabeled.
 
 - Main text: five figures and six tables; supporting information retains the
   development grids, complete factorial/component comparisons, tails, earliness,
-  passenger cohorts and detailed interface properties.
+  passenger cohorts, detailed interface properties, and a separate V412--V417
+  running-speed, forecast and closed-loop follow-up.
 - V404: 144 formal paths on 16 new days across four conditions; 146 charged
   starts including engineering. Zero new training. All traffic, resampling and
   plot generation used scheduler high on Linux CPU servers.
-- `evidence_manifest.json`: original 37 estimates plus 224 distinct supplemental
-  mean/interval records, figure source data and runtime inventory.
+- `evidence_manifest.json`: original 37 estimates, 224 supplemental
+  mean/interval records, 42 follow-up mean/interval records, figure source data
+  and runtime inventory.
 - `analysis_sources/`: server readout/plot scripts. Ordinary manuscript rebuilds
   only format already computed results; no local simulation or bootstrap.
 - Separate `FreqDuet/runtime_release/v404`: standalone source. Full frozen inputs

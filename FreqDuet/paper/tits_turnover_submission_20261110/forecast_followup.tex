@@ -1,0 +1,59 @@
+\section{Running-Speed Transfer, Forecast Accuracy, and Closed-Loop Control}
+The follow-up uses a fixed public timetable, a 12-vehicle pool and a
+0/5/10-s holding menu. It is separate from the budget and supervisor studies.
+V412 pairs the capped model-based controller with a frozen within-day
+randomized holding rule on the same eight demand days at normal speed and
+with the road-speed input reduced by 0.5 m/s. Mean holding and bin shares
+pass the registered matching checks in both settings. All four outcome
+criteria pass at normal speed. At the slower setting, journey and arrival
+CV$^2$ pass while readiness and public-delay nonharm fail
+(Table~\ref{tab:running-transfer}).
+
+V414 attempts to forecast actual departure times five minutes before
+public release. It replaces the pooled full-link running mean
+with the mean at the simulated entry hour when at least three visits at
+that hour are strictly completed and available, falling back to the pooled
+mean otherwise. Partial links and committed actions do not change.
+The two forecasts observe the same capped path. On eight new slow days,
+the primary scenario scores \ForecastSlotPairs\ paired supported slots.
+The equal-day absolute error falls from \ForecastPooledMAE\ to
+\ForecastHourlyMAE\ s, improving on all eight days. Late departures missed
+fall from \ForecastPooledMisses\ to \ForecastHourlyMisses, and false alarms
+from \ForecastPooledAlarms\ to \ForecastHourlyAlarms. This passes the
+forecast screen, not a control test.
+
+V415 executes the hourly and pooled model-based controllers on a different
+set of eight slow days. All four registered control tests fail. On one
+consumed day examined to explain that failure, two successive launches
+advanced by different amounts, widening the interval from 184 to 1,088 s.
+Partitioning each actual downstream gap into the difference in dispatch
+clocks, accumulated holding and other elapsed time assigns
+\FocalLaunchComponent\ of the increase in arrival CV$^2$ to the dispatch
+component. Waiting increases by \FocalWaitingLoss\ s/person on that day.
+This is covariance accounting on two realized paths, not an estimate of
+the causal effect of an individual holding command. All eight days remain
+in the closed-loop comparison.
+\input{tables/running_transfer}
+
+V416 also rejects an otherwise admissible holding action if it enlarges a
+predicted long departure gap within or at the boundary of a queue of at
+least two due trips in one direction. For each modeled pair, the protected
+upper bound is the greater of the public headway and the same-state
+reference gap, in each existing demand scenario. No release clock or
+legal action is added. The comparator is the unprotected hourly controller.
+The rule is a local model constraint, not a guarantee on realized gaps.
+
+V417 adds the pooled-plus-guard arm to the same four V416 development days,
+reusing the other three arms. Table~\ref{tab:forecast-spacing} reports the
+paired differences; the interaction is the hourly guard effect minus the
+pooled guard effect. The guard reduces journey on all four days under
+hourly prediction, but on only one day under pooled prediction. Both settings
+show lower mean actual arrival CV$^2$ with the guard. With both settings
+guarded, hourly readiness is lower on all four days, but arrival CV$^2$ is
+higher on three and the maximum actual departure gap is longer on all
+four. Under this fixed timetable, readiness and public delay summarize the
+same lateness at different scales. The arrival-regularity criterion
+against unprotected pooled V406 remains the failed V416 development check.
+The four-arm comparison is not independent confirmation and does not
+justify a policy replacement.
+\input{tables/forecast_spacing}
