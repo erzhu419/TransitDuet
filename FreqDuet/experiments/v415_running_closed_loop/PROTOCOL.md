@@ -81,3 +81,32 @@ unexecuted actions' effects. No retuning or additional traffic is released.
 
 [Engineering receipt](review/engineering/results.json) |
 [Frozen aggregate](review/aggregate/results.json)
+
+**Focal-day readout.** Read-only task `t215046` reproduced dispatch CV2
+(0.48168 to 0.53747, 260 gaps) and arrival CV2 (0.57257 to 0.63708,
+5,200 gaps) from day 2550004. The +0.06452 arrival CV2 difference separates
+into +0.06071 for the actual launch-time gap component, -0.00029 for
+cumulative holding and +0.00410 for other elapsed time. These are additive
+covariances with the observed gap, normalized within each path; they do
+not estimate intervention effects. The observed predecessor changed on
+296 of the 5,200 matched station/trip gaps.
+
+Trip 229 launched 920 s earlier, while the next same-direction trip 231
+advanced only 16 s. Their gap grew from 184 to 1,088 s, even though both
+launched earlier. Trip 229's supplying bus spent 200 s more holding on its
+incoming trip, but that trip launched 405 s earlier and took 690 s less
+overall. Lower total launch delay therefore need not imply more even service.
+Arrival hours 9--11 account for a net +0.06451 CV2 contribution. Passengers
+appearing in hours 9--12 accumulated +567,113 person-s of waiting, partially
+offset elsewhere to +305,068 person-s (+12.09 s/person). Hours are elapsed
+simulation hours; appearance and service clocks are distinct.
+
+The first different request was trip 19, stop 10, at 4,455 s: pooled chose
+0 s and hourly chose 5 s. The archives do not identify that single action's
+long-run effect. Retain V414 as a prediction result only. The mechanism
+worth testing in future is protection of actual dispatch spacing when
+multiple departures are waiting for supply, not further tuning the ETA
+on this day. No new rollout, training, or policy change.
+
+[Focal-day summary](review/divergence/results.json) |
+[Scheduler receipt](submission_divergence.json)

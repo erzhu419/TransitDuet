@@ -1,5 +1,6 @@
-"""Stage V415 and submit the frozen engineering and paired release."""
+"""Submit the frozen V415 comparison or its read-only divergence audit."""
 
+import argparse
 import importlib.util
 from pathlib import Path
 import shlex
@@ -48,5 +49,21 @@ def main():
     print(shared.submit('pipeline', requests), flush=True)
 
 
+def divergence():
+    result = shared.read(HERE / 'review/aggregate/results.json')
+    assert result['complete'] and not result['passed'] and result['physical_starts'] == 17
+    label = 'divergence'
+    source = shared.ROOT.parent / 'divergence01'
+    if not (HERE / f'submission_{label}.json').exists():
+        prior.stage(source, ('divergence.py',))
+    item = job(label, label, label)
+    item['cwd'] = str(source)
+    item['cmd'] = shlex.join([shared.deployment()['python'], '-B', '-I', '-u',
+                             str(source / 'divergence.py'), '--root', str(shared.ROOT)])
+    shared.wait(shared.submit(label, [item]))
+
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('phase', nargs='?', choices=('pipeline', 'divergence'), default='pipeline')
+    {'pipeline': main, 'divergence': divergence}[parser.parse_args().phase]()
