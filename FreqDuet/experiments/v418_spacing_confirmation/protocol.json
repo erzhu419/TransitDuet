@@ -1,0 +1,19 @@
+{
+  "protocol_id": "v418_spacing_confirmation",
+  "regime": "slow",
+  "demand_scale": 1.2,
+  "road_profile_shift_mps": -0.5,
+  "confirmation_days": [2570001, 2570002, 2570003, 2570004, 2570005, 2570006, 2570007, 2570008, 2570009, 2570010, 2570011, 2570012, 2570013, 2570014, 2570015, 2570016],
+  "arms": ["v406_cap_10", "v406_cap_10_pooled_spacing", "v406_cap_10_hourly_spacing"],
+  "candidate": "v406_cap_10_hourly_spacing",
+  "readiness_superiority": "readiness_s_per_trip",
+  "nonharm_upper_limits": {
+    "cv_squared": 0.0,
+    "journey_s_per_passenger": 0.0,
+    "public_delay_s_per_day": 0.0
+  },
+  "bootstrap": {"seed": 41801, "draws": 20000},
+  "physical_start_cap": 48,
+  "max_concurrent_days": 16,
+  "automatic_retry": false
+}
