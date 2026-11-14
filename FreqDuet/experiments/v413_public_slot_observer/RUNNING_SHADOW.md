@@ -51,3 +51,11 @@ shadow continuations, 50,370 (15.7%) used the entry-hour mean and 271,178
 coverage of target public slots. Engineering parity passes; forecast accuracy
 still requires the reserved-day comparison. No new day has been released.
 [Small parity result](review/running_shadow_parity/results.json)
+
+**Independent release.** Zero-traffic entry check `t215022` passed. The eight
+reserved days `2540001`--`2540008` are running as `t215023`--`t215030`, high and
+manually dispatched to nodes 002, 003 and 004. Each wrote one physical-start
+receipt. The accepted shadow and live runtime are reused unchanged; no retry,
+new policy, or additional path is released. Forecast accuracy is pending.
+[Release check](review/running_shadow_release_checks/results.json),
+[submission receipt](submission_running_shadow_confirmation.json).

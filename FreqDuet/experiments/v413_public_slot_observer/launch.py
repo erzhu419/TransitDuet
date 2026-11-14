@@ -27,6 +27,7 @@ COMPONENT_READOUT = shared.ROOT.parent / 'component_readout01'
 CONTINUATION_AUDIT = shared.ROOT.parent / 'continuation_audit01'
 RUNNING_SHADOW = shared.ROOT.parent / 'running_shadow01'
 RUNNING_PARITY = shared.ROOT.parent / 'running_parity01'
+RUNNING_CONFIRM = shared.ROOT.parent / 'running_confirmation01'
 
 
 def stage(source, files):
@@ -47,7 +48,9 @@ def stage(source, files):
 
 def job(label, phase, day=None):
     confirming = phase in ('verify', 'case')
-    source, script = ((RUNNING_PARITY, 'running_shadow_parity.py') if phase == 'running_shadow_parity' else
+    source, script = ((RUNNING_CONFIRM, 'running_shadow_confirmation.py')
+                      if phase in ('running_shadow_release_checks', 'running_shadow_confirmation') else
+                      (RUNNING_PARITY, 'running_shadow_parity.py') if phase == 'running_shadow_parity' else
                       (RUNNING_SHADOW, 'running_shadow_checks.py') if phase == 'running_shadow_checks' else
                       (CONTINUATION_AUDIT, 'continuation_audit.py') if phase == 'continuation_audit' else
                       (COMPONENT_READOUT, 'component_readout.py') if phase == 'component_readout' else
@@ -56,7 +59,8 @@ def job(label, phase, day=None):
                       (ERROR_AUDIT, 'error_audit.py') if phase == 'error_audit' else
                       (READOUT, 'readout.py') if phase == 'readout' else
                       (CONFIRMATION, 'confirmation.py') if confirming else (shared.SOURCE, 'run.py'))
-    result = shared.ROOT / ('confirmation/' + str(day) if day is not None else phase) / 'summary'
+    folder = phase if day is None else f'{phase}/{day}' if phase == 'running_shadow_confirmation' else f'confirmation/{day}'
+    result = shared.ROOT / folder / 'summary'
     item = shared.spec(label, script, [], result=result)
     item.update(description=f'FreqDuet V413 public-slot {label}', signature=f'FreqDuet/v413/{label}')
     item['cwd'] = str(source)
@@ -64,6 +68,8 @@ def job(label, phase, day=None):
     cmd = [shared.deployment()['python'], '-B', '-I', '-u', str(source / script)]
     if phase in ('component_checks','component_parity'):
         cmd += [phase.removeprefix('component_')]
+    elif phase in ('running_shadow_release_checks', 'running_shadow_confirmation'):
+        cmd += ['checks' if day is None else 'case']
     elif phase not in ('readout', 'error_audit', 'component_audit', 'component_readout', 'continuation_audit',
                        'running_shadow_checks', 'running_shadow_parity'):
         cmd += [phase]
@@ -78,7 +84,7 @@ def job(label, phase, day=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity', 'component_readout', 'continuation_audit', 'running_shadow_checks', 'running_shadow_parity'),
+    parser.add_argument('phase', nargs='?', choices=('preflight', 'parity', 'verify', 'confirmation', 'readout', 'error_audit', 'component_audit', 'component_checks', 'component_parity', 'component_readout', 'continuation_audit', 'running_shadow_checks', 'running_shadow_parity', 'running_shadow_release_checks', 'running_shadow_confirmation'),
                         default='preflight')
     phase = parser.parse_args().phase
     if phase == 'preflight':
@@ -161,7 +167,7 @@ if __name__ == '__main__':
         if not (HERE/'submission_running_shadow_checks.json').exists():
             stage(RUNNING_SHADOW, ('running_shadow.py', 'running_shadow_checks.py', 'running_shadow_protocol.json'))
         shared.wait(shared.submit(phase, [job(phase, phase)]))
-    else:
+    elif phase == 'running_shadow_parity':
         gate = shared.read(HERE / 'review/running_shadow_checks/results.json')
         protocol = shared.read(HERE / 'running_shadow_protocol.json')
         assert gate['passed'] and gate['physical_starts'] == 0 and not gate['confirmation_started']
@@ -172,3 +178,20 @@ if __name__ == '__main__':
                            for t in shared.scheduler.load_state()['tasks'])
             stage(RUNNING_PARITY, ('running_shadow_parity.py',))
         print(shared.submit(phase, [job(phase, phase)]), flush=True)
+    elif phase == 'running_shadow_release_checks':
+        gate = shared.read(HERE / 'review/running_shadow_parity/results.json')
+        assert gate['passed'] and gate['exact_baseline_components'] and not gate['confirmation_started']
+        if not (HERE / f'submission_{phase}.json').exists():
+            stage(RUNNING_CONFIRM, ('running_shadow_confirmation.py',))
+        shared.wait(shared.submit(phase, [job(phase, phase)]))
+    else:
+        gate = shared.read(HERE / 'review/running_shadow_release_checks/results.json')
+        protocol = shared.read(HERE / 'running_shadow_protocol.json')
+        days = protocol['confirmation_days']
+        assert gate['passed'] and gate['physical_starts'] == 0 and gate['confirmation_days'] == days
+        assert len(set(days)) == len(days) == protocol['proposed_confirmation_paths'] == 8
+        assert not protocol['automatic_retry']
+        if not (HERE / f'submission_{phase}.json').exists():
+            signatures = {f'FreqDuet/v413/{phase}_{day}' for day in days}
+            assert not any(t.get('signature') in signatures for t in shared.scheduler.load_state()['tasks'])
+        print(shared.submit(phase, [job(f'{phase}_{day}', phase, day) for day in days]), flush=True)
