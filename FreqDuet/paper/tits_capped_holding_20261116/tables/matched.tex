@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\caption{Capped controller minus the within-day transition rule. Entries are paired means and 95\% intervals. The joint result requires both matching and outcome criteria; otherwise the failed component is shown. The normal and slow rows use the same eight demand days.}
+\label{tab:matched}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lr rrrr l@{}}
+\toprule
+Operating condition & Days & \shortstack[r]{Holding\\(s/trip)}
+& \shortstack[r]{Journey\\(s/person)} & \shortstack[r]{Actual\\CV$^2$}
+& \shortstack[r]{Readiness\\(s/trip)} & \shortstack[l]{Joint\\result} \\
+\midrule
+\input{tables/matched_rows.tex}
+\end{tabular}
+\end{table*}

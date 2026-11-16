@@ -1,0 +1,85 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+\title{State-Dependent Bus Holding with Matched Holding Exposure under a Fixed Fleet}
+\author{Anonymous Authors}
+\maketitle
+
+\begin{abstract}
+Bus holding can improve spacing but also delays onboard passengers and consumes time needed to operate later trips. We ask whether a controller can use approximately the same holding allowance more effectively by deciding where and when to hold. With a fixed timetable and physical fleet, our controller evaluates the currently legal 0, 5, and 10~s actions, then simulates a capped bilateral rule for subsequent decisions. It overrides that rule only when predicted passenger exposure improves without worsening predicted regularity or circulation in either of two demand scenarios. On 16 held-out high-demand simulation days, a within-day randomized comparator matched both mean commanded holding and the three action shares within prespecified margins. The controller reduced waiting plus onboard exposure by 4.568~s per generated passenger (paired 95\% interval: $[-5.096,-3.989]$), actual arrival headway CV$^2$ by 0.009567, and mean vehicle-readiness delay by 3.224~s per trip. The joint result repeated at higher demand and on a separate set of normal-speed days. At nominal demand, holding equivalence was not established; under slower running, circulation noninferiority was not established. The evidence supports state-dependent action placement under the tested conditions, not an advantage from changing the timetable or fleet.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Bus holding, headway regularity, passenger exposure, vehicle circulation, simulation.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Two services can impose the same total holding while delivering different passenger outcomes. Holding a loaded bus carries an immediate cost; the same intervention can protect downstream spacing, change boarding opportunities on the next bus, and delay the held bus's next scheduled trip. A comparison between controllers that impose different amounts of holding cannot tell whether a benefit comes from using less holding or from placing it differently.
+
+Holding research has long examined the trade-off between the control of headway variation and passenger and vehicle delay \cite{daganzo2009headway}. Comparisons on real routes have shown that the choice of rule and reliance on predictions matter \cite{berrebi2018comparing}. Optimization-based holding already considers multiple service constraints and operational bounds \cite{gkiotsalitis2019multiconstrained}. Our contribution is narrower: a fixed-fleet controller that compares legal current actions and follows each with the same native rule, evaluated against a comparison policy designed to match the distribution of actions at the aggregate level. The evaluation asks whether the advantage survives after controlling for how much holding is commanded and the availability of higher action bins.
+
+We keep the public timetable fixed. The central comparison is with a within-day rule that uses the same native request, legal action mask, and 10~s ceiling. As checks, we compare with a simple capped bilateral rule and with a whole-day mixture in a separate experiment. Held-out demand and running-speed tests show where the result transfers and where one of the prespecified criteria is not met.
+
+\section{Controller}
+\subsection{Common Execution Rules}
+At a holding query, let $s$ denote the observable state, $\mathcal A(s)\subseteq\{0,5,10\}$ the simulator's legal bins under the common ceiling, and $b(s)$ the native bilateral request projected to that set. The native rule uses front and estimated follower spacing. The controller can replace only the current command. It cannot withdraw previously issued commands, add vehicles, amend the public timetable, or dispatch a bus before its public release time. In a simulated continuation, downstream queries use the capped native rule. This does not assume that an optimized series of future commands will be issued.
+
+\subsection{Demand and Event Continuation}
+At each query we assemble a finite-horizon forecast from the current vehicle and service state and available history. Link-running and alighting estimates use completed visits. At a stop, a block from one observed queue clearance to the next has equal arrivals and boardings (counting events after the first clearance through the second). When three such blocks are available, we divide their combined boardings by their combined duration to estimate an arrival rate. Where clearance evidence is insufficient, the base scenario uses the larger of the historical rate and the rate implied by boardings since the most recent clearance, when it exists. That boarding count is a lower bound on historical arrivals rather than a measurement of the remaining queue. At those stops a second scenario uses 1.25 times the base rate, with an alternative initial queue assumption if no clearance has been observed. Neither scenario is a confidence bound on future arrivals. Simulated boarding respects vehicle capacity. No future simulator observations are used as inputs.
+
+The continuation simulates running, boarding and alighting, holding, terminal returns, and departure with a ready vehicle. The forecast horizon is fixed across the current alternatives and both scenarios. The code constructs it from the longest modeled route traversal with a service-time allowance plus one nominal headway per vehicle. This is a look-ahead allowance, not authority to hold vehicles for that time. The arrival-regularity calculation combines observed nonterminal headway moments with predicted new arrival gaps, with no double count of arrivals already observed. Terminal returns still affect the vehicle ledger. A missing forecast or invalid reference returns control to $b(s)$.
+
+\subsection{Current-Action Selection}
+For scenario $k$, let $C_k(a)$ denote forecast waiting plus onboard person-time over a common horizon starting from $s$ under current command $a$. Let $R_k(a)$ be arrival headway CV$^2$, and let $D_k(a)$ and $L_k(a)$ denote summed readiness and public dispatch delay. Each alternative must produce the same projected departure roster as reference $b$, with no early public dispatch or missing committed command. In both scenarios it must satisfy
+\begin{equation}
+  (C_k,R_k,D_k,L_k)(a) \preceq (C_k,R_k,D_k,L_k)(b),
+\end{equation}
+where $\preceq$ means componentwise nonincrease. Among feasible alternatives the controller minimizes $\max_k[C_k(a)-C_k(b)]$. It keeps the native action unless this worst-case difference is strictly negative, allowing for numerical tolerance. The simulated checks are decision criteria; they are not guarantees on full-day realized outcomes.
+
+\section{Evaluation}
+\subsection{Comparable Action Exposure}
+\textbf{Capped bilateral (fixed10).} This comparator applies $b(s)$ directly, with the same 10~s ceiling. It does not match the controller's realized holding exposure and is reported separately.
+
+\textbf{Within-day transition rule.} From two development days, we tabulate selected controller bins conditional on the capped native request at the same query. On a test day the rule conditions on its \emph{own} current native request, excludes illegal bins, and samples from the remaining frequencies using a separate policy random stream. With no remaining mass it uses the native request. The selected rule uses the un-tilted frequencies. It retains state information through the native bilateral rule, but does not evaluate predicted consequences of each current action. Its selection on development days used holding and bin shares, not test outcomes.
+
+More precisely, if $N_{bh}$ counts development queries with native request $b$ and controller action $h$, the calibration considers probabilities proportional to $N_{bh}\exp\{\tau(h-b)/5\}$ over the legal bins for $\tau\in\{-0.5,0,0.5\}$. Each tilt is evaluated under its own continuation on the two development days. Among the feasible tilts, the protocol minimizes absolute mean holding discrepancy, then maximum action-share discrepancy, then the magnitude of the tilt. The selected $\tau=0$ is frozen through the later demand and speed tests.
+
+This design matches average commanded exposure and overall bin shares, not per-stop exposure, passenger-weighted exposure, or each realized day's total exactly. The contrast estimates the difference between two complete closed-loop policies. It does not identify the effect of moving a particular hold on an otherwise unchanged path.
+
+\subsection{Operating Conditions and Endpoints}
+We simulate one bidirectional corridor with 12 physical buses and 262 scheduled trips per day at 360~s headways per direction. Each policy on a given day receives the same exogenous demand and event random numbers. The primary comparison uses 16 new days at $1.20\times$ demand. Frozen-policy transfer tests use separate nominal and $1.35\times$ demand days, and eight further $1.20\times$ days tested with both ordinary running speeds and a $-0.5$~m/s shift.
+
+Passenger exposure is waiting and onboard person-time per generated passenger over the finite evaluation window, including accounted waiting of passengers not served by its end. Arrival CV$^2$ is calculated from actual recorded nonterminal arrival intervals. Readiness delay measures schedule delay due to unavailable vehicles, per trip; public dispatch delay sums lateness relative to published departures. These two delay measures coincide up to scaling in these comparisons with fixed releases and no extra terminal control wait.
+
+The statistical unit is the paired demand day, not a passenger, stop or control query. Each day's contrast is computed first and days are weighted equally. The primary intervals are the 2.5th and 97.5th percentiles of 20,000 resamples of paired days. For the randomized comparison, the entire intervals must lie within $\pm3$~s/trip for mean commanded holding and $\pm2$ percentage points for each bin share. The journey interval must have a negative upper endpoint and the CV$^2$, readiness, and public-delay intervals must have nonpositive upper endpoints. Matching and outcomes are assessed separately, and the joint criterion requires both. The whole-day mixture study matched only mean holding, not bin shares; the supplement documents that comparison separately.
+
+\section{Results}
+\input{tables/matched.tex}
+\input{paired_days.tex}
+
+\subsection{High-Demand Confirmation}
+In Table~\ref{tab:matched}, the controller and within-day rule differ by only $-0.254$~s of holding per trip, with all bin shares meeting the matching criterion. Restricted journey exposure fell by 4.568~s per person, comprising 3.409~s less waiting and 1.159~s less onboard time. The journey change is about 0.18\% of the comparator mean. Actual arrival CV$^2$ and mean readiness delay also fell. All 16 days improved on these three outcomes (Fig.~\ref{fig:paired}). Public delay fell by 845~s/day on average. The simpler fixed10 comparison also favored the controller on all three outcome intervals, but the controller held less, so that comparison alone cannot support the placement claim.
+
+\subsection{Transfer and Failed Criteria}
+At $1.35\times$ demand and on a new normal-speed block, the frozen controller passed both the matching and full outcome criteria. At nominal demand all outcome criteria passed, but the holding interval extended to $+3.022$~s/trip, just beyond the prespecified upper margin of $3$. We do not classify this setting as matched. With slower running, matching, journey exposure and arrival CV$^2$ passed, but readiness and public delay did not. The large slow-regime CV$^2$ difference is partly attributable to the randomized comparator performing worse than fixed10; the CV$^2$ difference against fixed10 in that regime has an interval that includes zero.
+
+\section{Discussion}
+The fleet, timetable and legal bins are fixed. The result concerns which actions are used in which states, not added authority or less holding overall. Because the randomized rule retains state dependence through the bilateral request, the contrast supports the tested closed-loop policy as a whole, not any individual feature or forecast component.
+
+\subsection{Limitations}
+The evidence covers one simulated corridor, not field operations or other fleets and routes. Equal aggregate exposure need not imply equal exposure for riders, stops or times. Paired intervals reflect variation across simulated days, not real-network model uncertainty. A guarded forecast extension failed a separate slow-running test on realized regularity. Daily simulation times were 16--34~min versus about 1--1.5~min for the simple rules, with per-day callback 95th percentiles of 0.234--0.838~s; this does not guarantee an online deadline.
+
+Earlier dynamic-timetable tests showed a separate trade-off: tighter cumulative holding budgets reduced exposure and circulation delays but worsened spacing. The supplement reports these results separately. Neither study establishes an incremental benefit from a learned slow supervisor, timetable adjustment or frequency separation.
+
+\section{Conclusion}
+Under a common holding ceiling and a fixed timetable and fleet, a controller that evaluates where and when to hold improved passenger exposure, arrival regularity, and readiness relative to a within-day comparison policy with matched aggregate holding on the high-demand test days. Transfer to higher demand and new normal-speed days was positive; nominal demand and slow-running tests delimit the joint claim. The results support the use of state-dependent holding placement in the tested setting.
+
+\section*{Data and Code Availability}
+The source package includes paired-day summaries, a map to the frozen protocols and implementations, and the table and figure generation code.
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

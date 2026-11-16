@@ -1,0 +1,123 @@
+\documentclass[10pt,journal,onecolumn]{IEEEtran}
+\usepackage{amsmath,booktabs}
+\usepackage[hidelinks]{hyperref}
+\begin{document}
+\title{Supplement to State-Dependent Bus Holding with Matched Holding Exposure under a Fixed Fleet}
+\author{Anonymous Authors}
+\maketitle
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.17}
+
+\section{Matched Holding, Bin Shares and Public Delay}
+Table~\ref{t:bins} gives the remaining prespecified endpoints of the
+within-day comparison. All estimates and intervals in this supplement come
+from archived paired-day summaries, not new bootstrap samples. Differences
+are controller minus comparator unless otherwise indicated. Smaller is
+better for outcome endpoints; holding and bin-share differences are used
+to assess equivalence, not superiority.
+
+\begin{table}[!ht]
+\centering
+\caption{Action-share differences (percentage points) and total public dispatch delay (s/day). Each share interval must lie within $[-2,2]$; the upper endpoint of the public-delay interval must not exceed zero.}
+\label{t:bins}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Operating condition & 0 s & 5 s & 10 s & Public delay \\
+\midrule
+\input{tables/bin_rows.tex}
+\end{tabular}
+\end{table}
+
+\section{Direct Comparison with the Capped Bilateral Rule}
+The three-arm design allows a comparison with the simple bilateral rule
+under the same action ceiling. This is a policy-performance comparison,
+not a matched-exposure comparison. Under slower running, the approximate
+0.0391 increase in CV$^2$ of the transition rule relative to fixed10
+accounts for most of the paired point difference between the controller
+and the transition rule. The slow-speed results do not demonstrate a
+regularity improvement over fixed10.
+
+\begin{table}[!ht]
+\centering
+\caption{Capped controller minus fixed10.}
+\label{t:fixed}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Operating condition & Holding (s/trip) & Journey (s/person) & Actual CV$^2$ & Readiness (s/trip) \\
+\midrule
+\input{tables/fixed_rows.tex}
+\end{tabular}
+\end{table}
+
+\section{Separate Whole-Day Mixture Control}
+In this experiment the comparison is against a weighted average of
+complete-day policies, with weights fixed from development days before
+evaluating 16 new high-demand days. For the capped controller the mixture
+is 3.873\% fixed0 and 96.127\% fixed10. It holds total commanded seconds
+approximately constant but does not match 0/5/10~s shares within a day.
+The capped comparison passed its planned matching and outcome criteria.
+The unrestricted controller, which can use longer actions, did not pass
+the same holding equivalence criterion against its separate fixed10/fixed15
+mixture. Its estimated outcome effects cannot be interpreted as attributable
+to placement at matched exposure.
+
+\begin{table}[!ht]
+\centering
+\caption{Controller minus its respective frozen whole-day mixture.}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Controller & Holding (s/trip) & Journey (s/person) & Actual CV$^2$ & Readiness (s/trip) \\
+\midrule
+\input{tables/mixture_rows.tex}
+\end{tabular}
+\end{table}
+
+\section{Slow-Running Forecast Follow-up}
+An independent 16-day test compared an hourly running-time forecast with
+the original pooled forecast. The hourly variant used a spacing guard;
+the pooled forecast was evaluated both without and with that guard.
+Relative to the guarded pooled variant, the guarded hourly variant met
+the journey, readiness and public-delay criteria, but did not establish
+nonincrease in actual arrival CV$^2$ under the prespecified zero-degradation
+rule. It did not meet the joint criterion against either comparison and
+was not adopted. This is a forecast-extension test, not a repeat of the
+matched holding comparison in the main text.
+
+\begin{table}[!ht]
+\centering
+\caption{Guarded hourly forecast minus each pooled comparator on new slow-running days.}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Comparator & Journey (s/person) & Actual CV$^2$ & Readiness (s/trip) & Public delay (s/day) \\
+\midrule
+\input{tables/forecast_rows.tex}
+\end{tabular}
+\end{table}
+
+\section{Earlier Timetable and Budget Experiments}
+These contrasts use a different operating design with a dynamic timetable
+and an inter-trip holding-budget mechanism. Tightening the retained budget
+from 0.50 to 0.25 reduced journey exposure and readiness delay with worse
+arrival regularity. The same-budget learned versus hand-coded supervisor
+comparison did not establish an incremental improvement in journey; a
+matched harmonic-input comparison did not meet its primary journey
+criterion. These findings concern a different mechanism and do not supply
+the evidence for the matched-placement claim.
+
+\begin{table}[!ht]
+\centering
+\caption{Earlier cumulative budget and supervisory policy contrasts on 16 independent days.}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Contrast & Journey (s/person) & Actual CV$^2$ & Readiness (s/trip) \\
+\midrule
+\input{tables/budget_rows.tex}
+\end{tabular}
+\end{table}
+
+\end{document}

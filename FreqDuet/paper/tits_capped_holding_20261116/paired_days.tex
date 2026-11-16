@@ -1,0 +1,33 @@
+\begin{figure*}[t]
+\centering
+\pgfplotsset{paired/.style={
+    width=.32\textwidth,height=3.45cm,xmin=.4,xmax=16.6,ymax=.5,
+    xtick={1,4,8,12,16},xlabel={Demand day},tick label style={font=\scriptsize},
+    label style={font=\footnotesize},axis line style={black!70},
+    grid=major,grid style={black!12},scaled y ticks=false,
+}}
+\begin{tikzpicture}
+\begin{axis}[paired,ylabel={Journey (s/person)},ymax=.5]
+\addplot[black,densely dashed,domain=.4:16.6]{0};
+\addplot[only marks,mark=*,teal!80!black] table[x=day,y=journey]
+    {tables/high_demand_days.dat};
+\end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+\begin{axis}[paired,ylabel={Arrival CV$^2$},ymax=.001,
+    ytick={-.02,-.01,0},yticklabel style={/pgf/number format/fixed}]
+\addplot[black,densely dashed,domain=.4:16.6]{0};
+\addplot[only marks,mark=*,teal!80!black] table[x=day,y=cv]
+    {tables/high_demand_days.dat};
+\end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+\begin{axis}[paired,ylabel={Readiness (s/trip)}]
+\addplot[black,densely dashed,domain=.4:16.6]{0};
+\addplot[only marks,mark=*,teal!80!black] table[x=day,y=readiness]
+    {tables/high_demand_days.dat};
+\end{axis}
+\end{tikzpicture}
+\caption{Each point is a paired difference on one of the 16 high-demand days, ordered by demand seed: capped controller minus within-day rule. The dashed line denotes no change.}
+\label{fig:paired}
+\end{figure*}
