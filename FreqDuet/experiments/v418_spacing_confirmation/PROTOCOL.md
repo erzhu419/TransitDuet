@@ -52,3 +52,45 @@ No outcome is available at dispatch.
 
 [Preflight receipt](review/preflight/results.json) |
 [Confirmation submission](submission_confirmation.json)
+
+**Completion.** All 16 day tasks and aggregate `t215083` finished with exit
+code 0 and no retries. The aggregate accounts for 48 starts on 16 distinct
+scenario tapes, with 5,200 matched random-event keys and values on each day.
+The 16 synced day summaries match the aggregate. No training or policy change.
+
+| Hourly + guard minus comparator | Pooled V406: mean [95% interval] | Pooled + same guard: mean [95% interval] |
+| --- | ---: | ---: |
+| Journey (s/person) | -1.79 [-4.98, +1.44] | -3.11 [-5.59, -0.65] |
+| Readiness delay (s/trip) | -2.42 [-6.06, +1.59] | -4.57 [-7.13, -2.07] |
+| Public launch delay (s/day) | -632.88 [-1588.46, +415.32] | -1198.25 [-1869.01, -542.54] |
+| Actual arrival CV2 | +0.00412 [-0.00067, +0.00871] | +0.00052 [-0.00503, +0.00566] |
+
+The joint gate fails: zero of four conditions pass against unguarded
+pooled V406 and three of four against pooled with the same guard. Against
+the matched guard, journey and readiness improve on 12/16 days. Mean
+waiting (-2.58 s/person) and onboard time (-0.53 s/person) both decrease;
+journey P95 changes by -20.18 s [-34.02, -7.21]. Arrival CV2 improves on
+5/16 days against either comparator; neither interval establishes
+non-worsening, and neither establishes a positive mean loss.
+
+Pooled with the guard versus unguarded pooled has mean changes of +1.32
+s/person in journey, +2.16 s/trip in readiness and +0.00360 in arrival CV2.
+Their intervals cross zero. This descriptive contrast does not reproduce
+the development-day regularity improvement seen when adding the guard to
+pooled forecasts. The new panel has no unguarded hourly arm and cannot
+independently confirm the V417 factorial interaction.
+
+The hourly guard was active on 28,947 of 83,200 queries, with at least one
+veto on 224 queries (pooled guard: 29,583 active, 194 with a veto). These
+are not counts of executed actions changed. The longest-gap and mean
+positive-excess contrasts cross zero against both comparators. Median
+single-path runtime was 38.4 min (hourly guard), 36.5 min (pooled guard)
+and 34.6 min (unguarded pooled).
+
+**Decision.** Report the independently supported journey and readiness
+benefits against the matched-guard comparator, not a joint improvement
+at preserved regularity or superiority over unguarded V406. Do not
+promote V418, relax the margin, or reuse these days to tune the guard.
+No further traffic is released by this readout.
+
+[Independent contrasts, gates and daily evidence](review/aggregate/results.json)
