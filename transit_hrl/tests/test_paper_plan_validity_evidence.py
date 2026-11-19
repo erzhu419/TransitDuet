@@ -119,6 +119,21 @@ class PaperEvidenceTests(unittest.TestCase):
                 paper,
             )
 
+    def test_cem_timing_components_keep_distinct_conclusions(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        costs = self.evidence["pointmaze_expensive_cem_planner"]["cross_budget_savings"]
+        for comparison in ("unprivileged_B20_vs_periodic_B24", "unprivileged_B24_vs_periodic_B30"):
+            row = costs[comparison]
+            self.assertGreater(row["planner_ms_saved"]["CI95"][0], 0)
+            self.assertLess(row["upper_loop_ms_saved"]["CI95"][1], 0)
+            for field in ("planner_ms_saved", "upper_loop_ms_saved", "measured_control_ms_saved"):
+                mean, (low, high) = row[field]["mean"], row[field]["CI95"]
+                self.assertIn(f"`{mean:.2f} ms`", paper)
+                self.assertIn(f"`[{low:.2f}, {high:.2f}]`", paper)
+            low, high = row["measured_control_ms_saved"]["CI95"]
+            self.assertLess(low, 0)
+            self.assertGreater(high, 0)
+
     def test_units_and_failed_closed_loop_decision_are_preserved(self):
         pm = self.evidence["pointmaze_stage9_confirmation"]
         self.assertEqual((pm["root_count"], pm["evaluation_paths"], pm["paired_mode_rollouts"]), (8, 128, 512))

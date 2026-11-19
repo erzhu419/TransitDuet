@@ -414,6 +414,7 @@ def expensive_cem_planner() -> dict:
 
     def cem_cross(cand_method: str, cand_b: str, per_b: str) -> dict:
         ise_diffs, plan_ms_diffs, upper_ms_diffs = [], [], []
+        measured_ctrl_ms_diffs = []
         by_root_plan, by_root_upper = {}, {}
         for r in roots:
             seed = str(r["optimizer_seed"])
@@ -426,6 +427,9 @@ def expensive_cem_planner() -> dict:
             )
             plan_ms_diffs.append(p_diff)
             upper_ms_diffs.append(u_diff)
+            measured_ctrl_ms_diffs.append(
+                per_m["total_control_ms_per_episode"] - cand_m["total_control_ms_per_episode"]
+            )
             by_root_plan[seed] = p_diff
             by_root_upper[seed] = u_diff
         per_ise = summary["frontier"][per_b]["mean_ise"]["periodic"]
@@ -446,6 +450,7 @@ def expensive_cem_planner() -> dict:
                 "favorable_roots": sum(x > 0 for x in upper_ms_diffs),
                 "roots": by_root_upper,
             },
+            "measured_control_ms_saved": t7_interval(measured_ctrl_ms_diffs),
         }
 
     cross_savings = {

@@ -1,11 +1,34 @@
 # Plan-Validity Paper: Submission Readiness
 
-Date: 2026-11-18. Active manuscript: [manuscript.md](manuscript.md) | Compiled PDF: [submission.pdf](submission.pdf).
+Date: 2026-11-19. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
+[Reproduction instructions](README.md).
 
-## Supported claims (Route A + Route B complete)
+## Supported claims
 
-1. **Independent-seed PointMaze confirmation (`B = 24`).** Across eight fresh PointMaze optimizer roots, branch-supervised renewal timing passes all five preregistered confirmation gates against periodic, random-offset, and current-only controls, and beats a selected tracking-distance threshold and timing portfolio under shared compute caps.
-2. **Label-free query acquisition.** Replacing privileged simulator event stratification with pure clock-grid (*unprivileged-uniform*) or observable-change (*unprivileged-observable*) branch acquisition preserves closed-loop performance on 512 fresh paired paths (`1.01228` versus `1.01512` ISE) and beats tracking-distance thresholds across all eight roots.
-3. **External adaptive-timing baselines, native-periodic HRL, and predictor inductive bias.** Across 512 fresh paired PointMaze paths, label-free relational ridge (`0.99422` ISE) outperforms independently trained native-periodic HRL (`36.65%`), TEMPLE state-change novelty gating (`33.80%`), distance thresholds (`6.91%`), budgeted deliberation Option-Critic (`4.38%`), and an unstructured 25-channel neural MLP (`21.05%`) on all eight roots, while the raw MLP itself beats native-periodic, shared-periodic, and TEMPLE schedules.
-4. **Multi-budget Pareto dominance and CEM planner compute decomposition.** Across \(B \in \{12, 15, 20, 24, 30, 40\}\) planner calls per episode, label-free plan-validity timing dominates periodic, best-clock, and per-budget recalibrated distance thresholds (16.7%--20.0% call savings). Under a 128-candidate CEM subgoal planner, 20-call and 24-call adaptive schedules beat 24-call and 30-call periodic schedules in both ISE (`15.82%`, `13.99%`) and CEM planner execution time (`18.38 ms`, `31.08 ms` saved per episode), while transparently reporting Python feature-check overhead against the analytical break-even condition.
-5. **Second physical plant confirmation and structural boundaries.** Across eight fresh unfiltered `Reacher-v5` optimizer roots on polygonal trajectory tracking, both relational ridge and raw MLP timing beat shared-periodic, random-offset, best-clock, and TEMPLE baselines, while honest boundary comparisons against unobstructed distance/value gates, smooth-ellipse Reacher, LQR cart-pole, and Appendix A transit episodes delineate exact scope conditions.
+- **Original PointMaze confirmation.** Eight independent optimizer roots pass
+  all five registered gates. At 24 calls, the timing rule reduces ISE by
+  34.94% relative to periodic planning. Follow-ups on eight separate frozen
+  builds favor the rule over distance and a timing portfolio under shared caps.
+- **Clock-grid queries.** Training without hidden event annotations beats
+  periodic, random-offset and distance timing on held-out PointMaze paths.
+  Ridge also beats two learned timing gates and the raw-input MLP at the same
+  192 paired queries. The acquisition study did not establish noninferiority
+  to event stratification; the predictor comparison did not isolate features.
+- **Second plant.** On derived polygonal Reacher, eight fresh roots support
+  a 5.00% ISE improvement against the selected fixed clock. The distance,
+  cost-difference and native-periodic comparisons are inconclusive.
+- **Compute trade-off.** Two CEM comparisons improve ISE with fewer calls
+  and less planner time, but scoring more than offsets the planner savings.
+  The measured control-time intervals do not establish a net speedup.
+- **Scope.** The smooth Reacher and cart-pole screens separate waypoint
+  freshness from timing opportunity. Transit Stage304 remains a negative
+  episode result for a different action selector.
+
+## Before submission
+
+The learned binary and cost-difference gates are budgeted adaptations, not
+reproductions of the original TEMPLE or Option-Critic algorithms. Retain the
+fixed-call timing claim on the tested planning and execution hierarchies.
+The artifact reproduces analysis and presentation from saved evidence, not
+native simulation or controller training. Apply the chosen venue's template,
+page limits and anonymity requirements before uploading.

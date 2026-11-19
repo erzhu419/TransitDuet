@@ -554,11 +554,11 @@ def figure4_route_b(evidence):
         ),
         (
             "Native periodic",
-            "TEMPLE gate",
+            "Learned binary",
             "Shared periodic",
             "Generic MLP",
             "Distance cut",
-            "Deliberation OC",
+            "Cost difference",
         ),
         rows,
         "a",
@@ -582,9 +582,9 @@ def figure4_route_b(evidence):
             "Random offset",
             "Best clock",
             "Shared periodic",
-            "TEMPLE gate",
+            "Learned binary",
             "Distance cut",
-            "Deliberation OC",
+            "Cost difference",
         ),
         rows,
         "b",
@@ -638,9 +638,9 @@ def figure4_route_b(evidence):
     time_specs = (
         ("unprivileged_B20_vs_periodic_B24", "planner_ms_saved", "20 vs Per-24 (plan)", TEAL),
         ("unprivileged_B24_vs_periodic_B30", "planner_ms_saved", "24 vs Per-30 (plan)", TEAL),
-        ("unprivileged_B20_vs_periodic_B30", "upper_loop_ms_saved", "20 vs Per-30 (net)", BLUE),
+        ("unprivileged_B20_vs_periodic_B30", "upper_loop_ms_saved", "20 vs Per-30 (upper)", BLUE),
         ("distance_B24_vs_periodic_B30", "upper_loop_ms_saved", "Dist 24 vs Per-30", BLUE),
-        ("unprivileged_B20_vs_periodic_B24", "upper_loop_ms_saved", "20 vs Per-24 (net)", ORANGE),
+        ("unprivileged_B20_vs_periodic_B24", "upper_loop_ms_saved", "20 vs Per-24 (upper)", ORANGE),
     )
     for y_idx, (c_key, sub_key, c_label, col) in enumerate(time_specs):
         item = cem["cross_budget_savings"][c_key][sub_key]
@@ -668,7 +668,7 @@ def figure4_route_b(evidence):
     fig.text(
         0.15,
         0.022,
-        "Eight independent roots per study. Panel d separates CEM planner time (plan) from planner + Python feature-check time (net).",
+        "Eight roots per study. Panel d separates planner time (plan) from planner plus scoring time (upper).",
         fontsize=6.1,
     )
     return save(fig, "fig4_route_b_baselines_reacher_cem", rows)
