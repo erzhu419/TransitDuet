@@ -1,5 +1,7 @@
 """Check figure source rows, scientific units and vector text without rollouts."""
 
+from __future__ import annotations
+
 import csv
 import json
 from pathlib import Path
@@ -8,7 +10,13 @@ import unittest
 import xml.etree.ElementTree as ET
 
 PAPER = Path(__file__).resolve().parents[1] / "paper"
-STEMS = ("fig1_budgeted_replanning", "fig2_pointmaze_confirmation", "fig3_transit_boundary")
+STEMS = (
+    "fig1_budgeted_replanning",
+    "fig2_pointmaze_confirmation",
+    "fig3_unprivileged_and_pareto",
+    "fig4_route_b_baselines_reacher_cem",
+    "fig5_transit_boundary",
+)
 
 
 class FigureEvidenceTests(unittest.TestCase):
@@ -38,8 +46,11 @@ class FigureEvidenceTests(unittest.TestCase):
                 elif kind.endswith("CI95"):
                     value, interval = source["mean"][metric], source[kind][metric]
                 elif kind == "mean_operation_count":
-                    value = (source["upper_calls_per_episode_all_modes"] if metric == "upper_calls"
-                             else source["score_checks_by_mode"][row["comparison"]])
+                    value = (
+                        source["upper_calls_per_episode_all_modes"]
+                        if metric == "upper_calls"
+                        else source["score_checks_by_mode"][row["comparison"]]
+                    )
                     interval = None
                 else:
                     value, interval = source, None
@@ -56,18 +67,23 @@ class FigureEvidenceTests(unittest.TestCase):
         self.assertEqual({row["source"] for row in rows}, {"../" + example["source"]})
         saved = json.loads((PAPER.parent / example["source"]).read_text())
         self.assertEqual(saved["trigger_eval_seeds"][0], example["path_seed"])
-        self.assertEqual({row["mode"]: row["decision_steps"] for row in saved["trigger_evaluation_rows"]
-                          if row["seed"] == example["path_seed"]}, example["decision_steps"])
+        self.assertEqual(
+            {row["mode"]: row["decision_steps"] for row in saved["trigger_evaluation_rows"] if row["seed"] == example["path_seed"]},
+            example["decision_steps"],
+        )
         for mode, steps in example["decision_steps"].items():
-            shown = [int(row["value_raw"]) for row in rows
-                     if row["kind"] == "observed_call" and row["comparison"] == mode]
+            shown = [
+                int(row["value_raw"])
+                for row in rows
+                if row["kind"] == "observed_call" and row["comparison"] == mode
+            ]
             self.assertEqual(shown, [step for step in steps if step < 300])
         for row in rows:
             if row["kind"] == "protocol":
                 self.assertEqual(float(row["value_raw"]), pm["policy_contract"][row["metric"]])
 
     def test_transit_units_halves_and_interval_types(self):
-        for row in self.rows(STEMS[2]):
+        for row in self.rows(STEMS[4]):
             if not row["kind"].endswith("CI95"):
                 continue
             self.assertEqual(float(row["display_scale"]), 60 if row["metric"] == "wait_min" else 1000)
@@ -75,19 +91,26 @@ class FigureEvidenceTests(unittest.TestCase):
                 self.assertEqual((int(row["n"]), row["statistical_unit"]), (400, "native_prefix"))
             else:
                 self.assertEqual(row["statistical_unit"], "complete_native_scene_episode")
-                self.assertEqual(int(row["n"]), 320 if row["part"] == "all32_scenes" or row["panel"] == "caption" else 160)
+                self.assertEqual(
+                    int(row["n"]),
+                    320 if row["part"] == "all32_scenes" or row["panel"] == "caption" else 160,
+                )
 
     def test_vectors_preserve_text_and_render_checks_pass(self):
         checks = json.loads((PAPER / "figures/render_checks.json").read_text())
-        self.assertEqual(len(checks), 3)
+        self.assertEqual(len(checks), 5)
         for stem, check in zip(STEMS, checks):
             self.assertEqual(check["width_mm"], 183)
             self.assertTrue(check["text_within_canvas"])
-            self.assertGreater(check["nonwhite_fraction"], .01)
+            self.assertGreater(check["nonwhite_fraction"], 0.01)
             svg = ET.parse(PAPER / "figures" / f"{stem}.svg")
             self.assertGreater(len(svg.findall(".//{http://www.w3.org/2000/svg}text")), 10)
-            extracted = subprocess.run(["pdftotext", str(PAPER / "figures" / f"{stem}.pdf"), "-"],
-                                       check=True, capture_output=True, text=True).stdout
+            extracted = subprocess.run(
+                ["pdftotext", str(PAPER / "figures" / f"{stem}.pdf"), "-"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout
             self.assertGreater(len(extracted.strip()), 100)
 
 

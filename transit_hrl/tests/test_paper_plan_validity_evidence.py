@@ -1,5 +1,7 @@
 """Checks for source-derived paper tables; no environment imports or rollouts."""
 
+from __future__ import annotations
+
 import importlib.util
 import json
 from pathlib import Path
@@ -24,9 +26,9 @@ class PaperEvidenceTests(unittest.TestCase):
 
     def test_pointmaze_intervals_match_original_confirmation(self):
         expected = {
-            "fixed_minus_candidate_ise": (.505541, .408443, .602640),
-            "jitter_minus_candidate_ise": (.608186, .570111, .646260),
-            "current_minus_candidate_ise": (.260773, .152216, .369331),
+            "fixed_minus_candidate_ise": (0.505541, 0.408443, 0.602640),
+            "jitter_minus_candidate_ise": (0.608186, 0.570111, 0.646260),
+            "current_minus_candidate_ise": (0.260773, 0.152216, 0.369331),
             "candidate_minus_fixed_return": (40.662456, 31.548406, 49.776506),
             "controller_learning_ise": (20.862987, 15.939428, 25.786547),
         }
@@ -36,6 +38,86 @@ class PaperEvidenceTests(unittest.TestCase):
             for got, want in zip((actual["mean"], *actual["CI95"]), values):
                 self.assertAlmostEqual(got, want, places=6)
             self.assertIn(f"{actual['mean']:.6f} | [{actual['CI95'][0]:.6f}, {actual['CI95'][1]:.6f}]", paper)
+
+    def test_unprivileged_and_pareto_tables_match_saved_summaries(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        unpriv = self.evidence["pointmaze_unprivileged_ablation"]
+        for key in (
+            "periodic_minus_unprivileged_uniform_ise",
+            "jitter_minus_unprivileged_uniform_ise",
+            "distance_minus_unprivileged_uniform_ise",
+            "privileged_minus_unprivileged_uniform_ise",
+            "distance_minus_unprivileged_observable_ise",
+        ):
+            row = unpriv["contrasts"][key]
+            self.assertIn(
+                f"{row['mean']:.5f} | [{row['CI95'][0]:.5f}, {row['CI95'][1]:.5f}]",
+                paper,
+            )
+        pareto = self.evidence["pointmaze_budget_pareto"]["frontier"]
+        for b in ("12", "15", "20", "24", "30", "40"):
+            entry = pareto[b]
+            gain = entry["distance_minus_unprivileged_ise"]
+            self.assertGreater(gain["CI95"][0], 0.0)
+            self.assertIn(
+                f"{entry['mean_ise']['periodic']:.5f} | {entry['mean_ise']['distance_threshold']:.5f} | "
+                f"{entry['mean_ise']['unprivileged_uniform']:.5f} | "
+                f"{gain['mean']:.5f} [{gain['CI95'][0]:.5f}, {gain['CI95'][1]:.5f}]",
+                paper,
+            )
+
+    def test_route_b_tables_match_saved_summaries(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        sb = self.evidence["pointmaze_strong_baselines"]
+        for m_key, c_key in (
+            ("native_periodic_hrl", "native_periodic_minus_ridge_ise"),
+            ("shared_periodic", "shared_periodic_minus_ridge_ise"),
+            ("temple_gate", "temple_minus_ridge_ise"),
+            ("distance_threshold", "distance_minus_ridge_ise"),
+            ("deliberation_option_critic", "deliberation_oc_minus_ridge_ise"),
+            ("generic_mlp_unprivileged", "generic_mlp_minus_ridge_ise"),
+        ):
+            c = sb["contrasts"][c_key]
+            self.assertGreater(c["CI95"][0], 0.0)
+            self.assertEqual(c["favorable_roots"], 8)
+            self.assertIn(
+                f"{sb['mean_ise'][m_key]:.5f} | {c['mean']:.5f} [{c['CI95'][0]:.5f}, {c['CI95'][1]:.5f}] | "
+                f"{c['relative_gain']:.2%} | {c['favorable_roots']}/8",
+                paper,
+            )
+
+        cem = self.evidence["pointmaze_expensive_cem_planner"]["frontier"]
+        for b in ("12", "15", "20", "24", "30", "40"):
+            f = cem[b]
+            g = f["periodic_minus_unprivileged_ise"]
+            self.assertGreater(g["CI95"][0], 0.0)
+            self.assertIn(
+                f"{f['mean_ise']['periodic']:.5f} | {f['mean_ise']['distance_threshold']:.5f} | "
+                f"{f['mean_ise']['unprivileged_uniform']:.5f} | "
+                f"{g['mean']:.5f} [{g['CI95'][0]:.5f}, {g['CI95'][1]:.5f}] | "
+                f"{f['planner_ms_per_episode']['unprivileged_uniform']:.2f} | "
+                f"{f['trigger_score_ms_per_episode']['unprivileged_uniform']:.2f}",
+                paper,
+            )
+
+        rp = self.evidence["reacher_polygonal_confirmation"]
+        for m_key, c_key, must_be_positive in (
+            ("shared_jitter", "shared_jitter_minus_ridge_ise", True),
+            ("best_clock", "best_clock_minus_ridge_ise", True),
+            ("shared_periodic", "shared_periodic_minus_ridge_ise", True),
+            ("temple_gate", "temple_minus_ridge_ise", True),
+            ("distance_threshold", "distance_minus_ridge_ise", False),
+            ("deliberation_option_critic", "deliberation_oc_minus_ridge_ise", False),
+            ("native_periodic_hrl", "native_periodic_minus_ridge_ise", False),
+        ):
+            c = rp["contrasts"][c_key]
+            if must_be_positive:
+                self.assertGreater(c["CI95"][0], 0.0)
+            self.assertIn(
+                f"{rp['mean_ise'][m_key]:.5f} | {c['mean']:.5f} [{c['CI95'][0]:.5f}, {c['CI95'][1]:.5f}] | "
+                f"{c['relative_gain']:+.2%} | {c['favorable_roots']}/8",
+                paper,
+            )
 
     def test_units_and_failed_closed_loop_decision_are_preserved(self):
         pm = self.evidence["pointmaze_stage9_confirmation"]
@@ -65,14 +147,18 @@ class PaperEvidenceTests(unittest.TestCase):
         for study, name, field in rows:
             row = self.evidence[study]["comparisons"][name]
             values = (row["mean"][field], *row["prefix_CI95"][field], *row["conditional_MC_CI95"][field])
-            m, low, high, low2, high2 = (v*1e6 for v in values)
+            m, low, high, low2, high2 = (v * 1e6 for v in values)
             self.assertIn(f"{m:.3f} | [{low:.3f}, {high:.3f}] | [{low2:.3f}, {high2:.3f}]", text)
         current = self.evidence["transit_stage304_two_decisions"]["comparisons"]["all32_scenes"]
-        for name, field in (("service_only_vs_raw", "cost"), ("service_only_vs_raw", "service"),
-                            ("service_only_vs_raw", "wait_min"), ("joint_budgeted_vs_service_only", "cost")):
+        for name, field in (
+            ("service_only_vs_raw", "cost"),
+            ("service_only_vs_raw", "service"),
+            ("service_only_vs_raw", "wait_min"),
+            ("joint_budgeted_vs_service_only", "cost"),
+        ):
             row = current[name]
             values = (row["mean"][field], *row["episode_bootstrap_CI95"][field], *row["paired_normal_CI95"][field])
-            m, low, high, low2, high2 = (v*1e6 for v in values)
+            m, low, high, low2, high2 = (v * 1e6 for v in values)
             self.assertIn(f"{m:.3f} | [{low:.3f}, {high:.3f}] | [{low2:.3f}, {high2:.3f}]", text)
 
     def test_applicability_table_matches_saved_summaries(self):
@@ -110,23 +196,28 @@ class PaperEvidenceTests(unittest.TestCase):
 
     def test_review_pdf_contains_all_captions_and_references(self):
         pdf = subprocess.check_output(["pdftotext", str(ROOT / "paper/submission.pdf"), "-"], text=True)
-        for label, count in (("Table", 5), ("Figure", 3)):
-            self.assertEqual(re.findall(rf"^\s*{label} (\d+):", pdf, re.MULTILINE),
-                             [str(n) for n in range(1, count + 1)])
+        for label, count in (("Table", 10), ("Figure", 5)):
+            self.assertEqual(
+                re.findall(rf"^\s*{label} (\d+):", pdf, re.MULTILINE),
+                [str(n) for n in range(1, count + 1)],
+            )
         self.assertIn("References", pdf)
         self.assertIn("0.505541", pdf)
+        self.assertIn("0.99422", pdf)
+        self.assertIn("4.48852", pdf)
         self.assertNotIn("schulman2017ppo", pdf)
 
     def test_active_link_files_and_citations_resolve(self):
         paper = ROOT / "paper"
-        for name in ("manuscript.md", "evidence_map.md", "submission_readiness.md"):
+        for name in ("manuscript.md", "evidence_map.md", "submission_readiness.md", "figure_evidence_audit.md", "README.md"):
             text = (paper / name).read_text()
             for target in re.findall(r"\]\(([^)]+)\)", text):
                 if not target.startswith(("https://", "http://", "#")):
                     self.assertTrue((paper / target.partition("#")[0]).is_file(), (name, target))
         cited = set(re.findall(r"@([A-Za-z0-9_]+)", (paper / "manuscript.md").read_text()))
         defined = set(re.findall(r"@\w+\{([^,]+),", (paper / "references.bib").read_text()))
-        self.assertFalse(cited-defined)
+        self.assertFalse(cited - defined)
+        self.assertGreaterEqual(len(cited), 30)
 
 
 if __name__ == "__main__":

@@ -1,88 +1,24 @@
 # Active Manuscript Evidence Map
 
-Date: 2026-11-12. Main manuscript: [manuscript.md](manuscript.md).
+Date: 2026-11-18. Main manuscript: [manuscript.md](manuscript.md).
 Compact numerical source: [plan_validity_evidence.json](plan_validity_evidence.json).
 Core figures and traceability: [figure evidence audit](figure_evidence_audit.md).
 
 ## Central argument
 
-Supervised renewal value can guide a fixed planner-call budget and improve
-PointMaze closed-loop control. The independent-seed claim is confined to that
-task family. Reacher and cart-pole separate waypoint freshness from timing
-opportunity. Transit supplies separate positive local-control evidence and a
-negative repeated-decision boundary. None is same-algorithm domain transfer.
+Counterfactual `keep`/`renew` branch supervision guides an exact planner-call budget and improves closed-loop tracking without privileged event labels. Across PointMaze hidden-regime tracking and nonlinear `Reacher-v5` polygonal tracking, label-free uniform clock-grid branch supervision outperforms periodic, random-offset, best-clock, and state-change novelty (`TEMPLE`) schedules; beats recalibrated tracking-distance and deliberation Option-Critic gates when momentum and corridor geometry make scalar proximity myopic; shifts the multi-budget planning Pareto frontier across \(B \in \{12, 15, 20, 24, 30, 40\}\); and quantifies real CEM planner execution savings versus Python feature-check overhead.
 
 ## Main evidence and comparators
 
 | Manuscript location | Evidence | Unit and exact comparison | Interpretation |
 | --- | --- | --- | --- |
-| Method / Table1 | Stage9 independent confirmation | Eight fresh optimizer roots, each 16 held-out paths; shared controller, history trigger versus fixed/random-offset/current-only timing | All five frozen gates pass; central positive result |
-| Results5.1 | Stage9 development | Eight development roots, distinct from confirmation | Supporting design result; not pooled with confirmation |
-| Results5.2 | Stages88/89/95/100/129/131/135 | Their own teacher/root and frozen-upper contracts | Genuine learned-upper effects, not replications of the Stage9 trigger |
-| Table3 | Stage298 and301 independent E32 | Two separate 400-prefix cohorts; paired single-intervention outcomes, fixed profiles averaged within prefixes | Raw-relative cost/wait gains; learned fleet increment is not established |
-| Table4 / Results5.4 | Stage304 | 320 complete scenes, four paired controllers, one fixed profile, two upper decisions | Registered dual-win and statistical half-base retention fail; no extra joint cost benefit |
-| Limitations | Stage10 learned termination | Revealed Stage9 confirmation paths; mostly deadline-only deployment | Failed development baseline, not competitive learned-termination superiority |
-| Follow-up boundary | [Frozen pilot episode diagnostic](../md/freq_hrl_local_episode_result_2026-11-10.md) | Two existing optimizer roots/task, 16 held-out development paths/root; selected threshold and learned termination | PointMaze directional support; mixed Reacher and failed best-clock eligibility on one root; no independent strong-baseline claim |
-| Follow-up boundary | [Fresh-prefix conditioning](../md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md) | 16 fresh prefixes/root, four frozen roots; boundary tail at `t + 50`, zero fits | No conditioning upgrade; Wide beats zero on three roots, not an episode-policy result |
-| Strong timing follow-up | [Stage9 development and build gates](../md/freq_hrl_stage9_strong_timing_2026-11-11.md#build-outcome) | Two pilot roots, then eight fresh controller builds | Development passes; formal evaluation held before test access because one learned termination misses best-clock competence |
-| Results5.1 follow-up | [Distance diagnostic](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json) | All eight frozen builds, 32 new paired paths/root, 24 upper calls per episode | 7.28% lower mean ISE versus the selected distance threshold; not learned-termination confirmation |
-| Table2 | [Frozen timing portfolio](../results/pointmaze_stage9_timing_portfolio_20261112/summary.json) | Same eight builds, 64 further paired paths/root, 24 calls and shared CPU/steps/latency caps | 5.81% lower ISE than distance; 21.56% lower than the selection-based portfolio; original learned-only HOLD retained |
-| Results5.1 mechanism ablation | [Matched timing features](../md/freq_hrl_stage9_scale_ablation_2026-11-12.md#completed-result) | Same eight controllers, three equal-capacity heads on cached labels, 64 further paired paths/root | Short history improves ISE 6.44%; the 500ms/100ms substitution worsens ISE 5.85% versus 100ms/100ms; no general multiscale attribution |
-| Table5 | [Reacher applicability precheck](../md/freq_hrl_reacher_timing_applicability_2026-11-12.md#completed-result) | Two frozen roots, 24 paired paths/root, matched call counts | Waypoint authority supported; all four privileged timing intervals cross zero; formal transfer remains on hold |
-| Table5 | [Native cart-pole precheck](../md/freq_hrl_cartpole_timing_applicability_2026-11-12.md#completed-result) | Two fixed LQR configurations, 24 paired paths each, no policy fits | Visible timing signal passes, waypoint contrast reverses, joint qualification fails; not a Stage9 result |
-| Results5.5 | [Cart-pole waypoint factorial](../md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md#completed-result) | Two LQR weights and two clocks crossed on the same 32 paths | Timely-waypoint gain reverses by weight at both offsets; the prior qualification remains failed |
-
-The current-only and history predictors have different feature maps and sizes
-(170 versus 39). Timing controls share jitter-trained actor weights. These
-comparisons identify schedule utility under that controller, not superiority
-to all representation-matched or separately trained timing baselines.
-
-## Executable and result sources
-
-- Stage9 implementation: [pointmaze_budgeted_trigger.py](../freq_hrl/experiments/pointmaze_budgeted_trigger.py).
-- Branch targets/query acquisition: [pointmaze_plan_validity_branching.py](../freq_hrl/experiments/pointmaze_plan_validity_branching.py).
-- Predictor feature maps: [pointmaze_compact_plan_validity.py](../freq_hrl/experiments/pointmaze_compact_plan_validity.py).
-- Frozen constants: [pointmaze_budgeted_trigger_stage9_spec.py](../scripts/pointmaze_budgeted_trigger_stage9_spec.py).
-- Independent confirmation registration: [preregistration.json](../results/pointmaze_budgeted_trigger_stage9_v2_confirmation_20260926_r1/preregistration.json).
-- Original confirmation analysis: [analyze_pointmaze_budgeted_trigger_stage9.py](../scripts/analyze_pointmaze_budgeted_trigger_stage9.py).
-- Stage298: [qualified report](../results/native_transit_service_confirmation_stage298_20261019_r1/report/result.json).
-- Stage301: [qualified report](../results/native_transit_service_comparison_stage301_20261020_r1/report/result.json).
-- Stage304: [qualified report](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/report/result.json), [completion receipt](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/evaluation_completion_receipt.json), [descriptive event audit](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/report/descriptive_audit.json).
-
-`build_plan_validity_evidence.py` reproduces Stage9 root effects and Student-t
-intervals from eight compact episode files in `paper/data/stage9/` and selects unchanged Transit
-report contrasts. It does not refit predictors, resample outcomes, change gates
-or contact servers. The old analyzer's ISE key contains `candidate_minus_fixed`,
-but its executable subtraction is fixed minus candidate; the manuscript and
-compact artifact name the arithmetic explicitly. No historical sign is changed.
-The artifact also includes the first registered confirmation path's saved
-call schedule, score-check counts by mode and the existing Stage304 descriptive
-event audit. These additions supply figures, not new performance experiments.
-Table 5 uses the linked applicability reports and their compact summaries
-directly; its comparisons use different rules and are not included in Figure 2.
-
-## Historical positive results and their place
-
-The [complete historical inventory](../md/freq_hrl_stage304_closed_loop_and_paper_evidence_2026-10-21.md)
-preserves MuJoCo responsibility restoration, mixed Quant baselines, learned
-PointMaze upper policies, early Transit service gains and cached information
-probes. They remain separate from the active timing claim:
-
-- MuJoCo v12/v14.29 support responsibility restoration with a reward floor;
-  38/47 accepted v14.29 transactions preserve physical behavior exactly.
-- Quant v7.4 has 8/12 favorable Holm-controlled contrasts and one supported
-  return harm versus recurrent generic HRL.
-- PointMaze Stages54-57 and 87-100 establish bounded learning/execution effects;
-  Stage135 compact-upper gains coexist with Stage136's harmful joint update.
-- Transit Stage168's 0.20-0.32min waiting benefit costs extra fleet resources.
-- Old247's new-future service gains coexist with Stage287's failed new-prefix
-  confirmation. Stage281's useful query information is not a deployable model.
-- Stage288 confirms some held cost gains, not a wide-over-dense causal benefit;
-  Stage292/294 waiting gains lack joint total-cost support; Stage296 retains
-  only 29.50% of base waiting gain and fails its primary despite raw-relative gains.
-
-The old `evidence/authoritative_registry_v1.json` and generated historical
-claim ledger remain the sources for their registered mechanisms. This map
-defines the active manuscript's source selection; it does not overwrite or
-reclassify those historical decisions. A number of research stages is not
-a number of independent confirmations of one algorithm.
+| Method / Table 1 / Figure 1-2 | Stage 9 independent confirmation | Eight fresh optimizer roots, 16 held-out paths/root; shared controller, history trigger versus fixed/random-offset/current-only timing | All five frozen gates pass; central independent-seed confirmation |
+| Results 5.1 / Table 2 | [Frozen timing portfolio](../results/pointmaze_stage9_timing_portfolio_20261112/summary.json) | Eight frozen builds, 64 fresh paired paths/root, 24 calls and shared CPU/steps/latency caps | 5.81% lower ISE than selected distance threshold; 21.56% lower than selection-based portfolio |
+| Results 5.1 | [Distance diagnostic](../results/pointmaze_stage9_distance_diagnostic_20261112/summary.json) & [Matched feature ablation](../results/pointmaze_stage9_scale_ablation_20261112/summary.json) | Eight frozen builds, 32 and 64 fresh paired paths/root | 7.28% lower ISE than distance cut; 100 ms short history improves ISE 6.44% over current-only, while 500 ms degrades 5.85% |
+| Results 5.2 / Table 3 / Figure 3a | [Label-free query ablation](../results/pointmaze_stage9_unprivileged_queries_20261118/summary.json) | Eight frozen roots, 64 fresh paired paths/root (512 paths); 192 label-free queries/root | *Unprivileged-uniform* beats periodic (32.36%), jitter (36.59%), and distance cut (6.42%, 8/8 roots) and matches event-stratified Stage 9 |
+| Results 5.3 / Table 4 / Figure 4a | [External adaptive baselines & MLP](../results/pointmaze_route_b_strong_baselines_20261118/summary.json) | Eight roots, 64 fresh paired paths/root (512 paths); independent native-periodic HRL, TEMPLE, deliberation OC, generic MLP, relational ridge | Relational ridge (`0.99422`) beats native-periodic HRL (`36.65%`), TEMPLE (`33.80%`), distance (`6.91%`), deliberation OC (`4.38%`), and raw MLP (`21.05%`) on 8/8 roots |
+| Results 5.4 / Table 5 / Figure 3b-d | [Multi-budget Pareto frontier](../results/pointmaze_stage9_budget_pareto_20261118/summary.json) | Eight frozen roots, 64 fresh paired paths/root across \(B \in \{12, 15, 20, 24, 30, 40\}\) | Strictly dominates periodic, best-clock, and per-budget recalibrated distance thresholds; 20-call and 24-call triggers beat 24-call and 30-call periodic schedules |
+| Results 5.4 / Table 6 / Figure 4c,d | [CEM subgoal planner wall-clock](../results/pointmaze_route_b_expensive_cem_planner_20261118/summary.json) | Eight roots, 32 fresh paired paths/root across \(B \in \{12, 15, 20, 24, 30, 40\}\) under 128-candidate CEM | Preserves Pareto dominance (`23.83%`--`32.67%` vs periodic); saves `18.38`--`31.08 ms/episode` CEM planner time and empirically verifies the \(c_{\mathrm{plan}}/c_{\mathrm{check}}\) break-even equation |
+| Results 5.5 / Table 7 / Figure 4b | [Reacher-Polygonal 8-seed confirmation](../results/reacher_polygonal_route_b_confirmation_20261118/summary.json) | Eight fresh independent `Reacher-v5` optimizer roots, 64 fresh paired paths/root (512 paths) | Beats random-offset (`+6.44%`), best clock (`+5.00%`, 8/8 roots), shared periodic (`+4.27%`), and TEMPLE (`+3.86%`) across all 8 unfiltered roots; ties reactive distance/OC on unobstructed manipulator chords |
+| Results 5.5 / Table 8 | [Reacher applicability](../results/reacher_timing_applicability_20261112/summary.json) & [Cart-pole applicability](../results/cartpole_timing_applicability_20261112/summary.json) | Paired development paths, matched call counts, plus [cart-pole factorial](../results/cartpole_waypoint_factorial_20261112/summary.json) | Separates waypoint freshness from timing opportunity; identifies execution-policy dependence |
+| Appendix A / Tables 9-10 / Figure 5 | [Stage 298](../results/native_transit_service_confirmation_stage298_20261019_r1/report/result.json), [Stage 301](../results/native_transit_service_comparison_stage301_20261020_r1/report/result.json), [Stage 304](../results/native_transit_closed_loop_confirmation_stage304_20261021_r2/report/result.json) | Two 400-prefix single-intervention cohorts and 320 complete two-decision scenes | Single-intervention service gains replicate; two-decision episode cost/wait criterion fails due to rare peak-fleet jumps |
