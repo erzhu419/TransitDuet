@@ -1,0 +1,482 @@
+{
+  "completed": true,
+  "experiment": "v501_pathb_b1_stability",
+  "by_corridor": {
+    "tidal_bimodal": {
+      "n_seeds": 6,
+      "n_val_days": 10,
+      "baselines": {
+        "A0_fixed_nohold": {
+          "passengers_generated": 15053.9,
+          "passenger_unserved_rate": 9.4e-05,
+          "restricted_journey_s_per_pax": 822.933881,
+          "restricted_wait_s_per_pax": 211.612964,
+          "restricted_in_vehicle_s_per_pax": 611.320917,
+          "ewt_s": 8.873773,
+          "plan_cv2": 0.05047,
+          "raw_cv2": 0.050596,
+          "awt_s": 188.873773,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.245802,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A1_fixed_bilateral": {
+          "passengers_generated": 15053.9,
+          "passenger_unserved_rate": 9.4e-05,
+          "restricted_journey_s_per_pax": 858.319928,
+          "restricted_wait_s_per_pax": 208.004753,
+          "restricted_in_vehicle_s_per_pax": 650.315175,
+          "ewt_s": 3.390249,
+          "plan_cv2": 0.020074,
+          "raw_cv2": 0.020124,
+          "awt_s": 183.390249,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.439695,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 113.461832,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        }
+      },
+      "b1_milestones": {
+        "ep40": {
+          "across_seed_mean": {
+            "restricted_journey_s_per_pax": 1018.103088,
+            "restricted_wait_s_per_pax": 410.117517,
+            "restricted_in_vehicle_s_per_pax": 607.985571,
+            "ewt_s": 10.185164,
+            "plan_cv2": 0.066284,
+            "raw_cv2": 0.093006,
+            "readiness_delay_s_per_trip": 4.83257,
+            "hold_s_per_trip": 0.0
+          },
+          "across_seed_std": {
+            "restricted_journey_s_per_pax": 139.71493,
+            "restricted_wait_s_per_pax": 143.886017,
+            "restricted_in_vehicle_s_per_pax": 4.278482,
+            "ewt_s": 1.029964,
+            "plan_cv2": 0.00882,
+            "raw_cv2": 0.019551,
+            "readiness_delay_s_per_trip": 2.907186,
+            "hold_s_per_trip": 0.0
+          }
+        },
+        "ep100": {
+          "across_seed_mean": {
+            "restricted_journey_s_per_pax": 954.0194,
+            "restricted_wait_s_per_pax": 343.150486,
+            "restricted_in_vehicle_s_per_pax": 610.868914,
+            "ewt_s": 8.613531,
+            "plan_cv2": 0.051212,
+            "raw_cv2": 0.075159,
+            "readiness_delay_s_per_trip": 1.697837,
+            "hold_s_per_trip": 3.016858
+          },
+          "across_seed_std": {
+            "restricted_journey_s_per_pax": 146.977591,
+            "restricted_wait_s_per_pax": 151.813725,
+            "restricted_in_vehicle_s_per_pax": 4.996066,
+            "ewt_s": 0.733381,
+            "plan_cv2": 0.007623,
+            "raw_cv2": 0.019017,
+            "readiness_delay_s_per_trip": 2.725777,
+            "hold_s_per_trip": 1.249047
+          }
+        },
+        "ep200": {
+          "across_seed_mean": {
+            "restricted_journey_s_per_pax": 1108.024013,
+            "restricted_wait_s_per_pax": 501.17491,
+            "restricted_in_vehicle_s_per_pax": 606.849103,
+            "ewt_s": 7.804296,
+            "plan_cv2": 0.048698,
+            "raw_cv2": 0.089503,
+            "readiness_delay_s_per_trip": 0.962023,
+            "hold_s_per_trip": 4.513995
+          },
+          "across_seed_std": {
+            "restricted_journey_s_per_pax": 54.727858,
+            "restricted_wait_s_per_pax": 56.896137,
+            "restricted_in_vehicle_s_per_pax": 2.382017,
+            "ewt_s": 0.652972,
+            "plan_cv2": 0.003266,
+            "raw_cv2": 0.003752,
+            "readiness_delay_s_per_trip": 0.83314,
+            "hold_s_per_trip": 1.059491
+          }
+        }
+      },
+      "paired_contrasts": {
+        "ep200_minus_A1_fixed_bilateral": {
+          "restricted_journey_s_per_pax": {
+            "mean": 249.704085,
+            "ci95": [
+              144.088007,
+              362.336481
+            ],
+            "days_improved": 1
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 293.170157,
+            "ci95": [
+              183.305824,
+              410.426458
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": 4.414047,
+            "ci95": [
+              4.044283,
+              4.772794
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.028623,
+            "ci95": [
+              0.025599,
+              0.031742
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 0.522328,
+            "ci95": [
+              -0.051788,
+              1.049688
+            ],
+            "days_improved": 3
+          }
+        },
+        "ep200_minus_A0_fixed_nohold": {
+          "restricted_journey_s_per_pax": {
+            "mean": 285.090132,
+            "ci95": [
+              179.703731,
+              397.453138
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 289.561945,
+            "ci95": [
+              180.092661,
+              406.423758
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": -1.069477,
+            "ci95": [
+              -1.561869,
+              -0.690143
+            ],
+            "days_improved": 10
+          },
+          "plan_cv2": {
+            "mean": -0.001773,
+            "ci95": [
+              -0.005514,
+              0.00155
+            ],
+            "days_improved": 6
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 0.716221,
+            "ci95": [
+              0.317848,
+              1.095803
+            ],
+            "days_improved": 2
+          }
+        },
+        "stability_ep200_minus_ep40": {
+          "restricted_journey_s_per_pax": {
+            "mean": 89.920925,
+            "ci95": [
+              53.822381,
+              125.281482
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 91.057393,
+            "ci95": [
+              53.815317,
+              127.594544
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": -2.380868,
+            "ci95": [
+              -2.731325,
+              -2.072824
+            ],
+            "days_improved": 10
+          },
+          "plan_cv2": {
+            "mean": -0.017587,
+            "ci95": [
+              -0.019778,
+              -0.01556
+            ],
+            "days_improved": 10
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": -3.870547,
+            "ci95": [
+              -4.572524,
+              -3.147387
+            ],
+            "days_improved": 10
+          }
+        }
+      }
+    },
+    "mbta_route111_wkdy": {
+      "n_seeds": 6,
+      "n_val_days": 10,
+      "baselines": {
+        "A0_fixed_nohold": {
+          "passengers_generated": 9033.6,
+          "passenger_unserved_rate": 5.5e-05,
+          "restricted_journey_s_per_pax": 1138.983802,
+          "restricted_wait_s_per_pax": 212.406097,
+          "restricted_in_vehicle_s_per_pax": 926.577705,
+          "ewt_s": 11.726904,
+          "plan_cv2": 0.065971,
+          "raw_cv2": 0.066061,
+          "awt_s": 191.726904,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.289695,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A1_fixed_bilateral": {
+          "passengers_generated": 9033.6,
+          "passenger_unserved_rate": 5.5e-05,
+          "restricted_journey_s_per_pax": 1170.10068,
+          "restricted_wait_s_per_pax": 212.570722,
+          "restricted_in_vehicle_s_per_pax": 957.529957,
+          "ewt_s": 5.779734,
+          "plan_cv2": 0.032888,
+          "raw_cv2": 0.032929,
+          "awt_s": 185.779734,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.49771,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 81.179389,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        }
+      },
+      "b1_milestones": {
+        "ep40": {
+          "across_seed_mean": {
+            "restricted_journey_s_per_pax": 1149.414708,
+            "restricted_wait_s_per_pax": 218.456544,
+            "restricted_in_vehicle_s_per_pax": 930.958165,
+            "ewt_s": 11.764453,
+            "plan_cv2": 0.067454,
+            "raw_cv2": 0.093321,
+            "readiness_delay_s_per_trip": 2.793511,
+            "hold_s_per_trip": 1.755407
+          },
+          "across_seed_std": {
+            "restricted_journey_s_per_pax": 12.827301,
+            "restricted_wait_s_per_pax": 12.786737,
+            "restricted_in_vehicle_s_per_pax": 0.731026,
+            "ewt_s": 1.002852,
+            "plan_cv2": 0.005421,
+            "raw_cv2": 0.015528,
+            "readiness_delay_s_per_trip": 2.156616,
+            "hold_s_per_trip": 2.318116
+          }
+        },
+        "ep100": {
+          "across_seed_mean": {
+            "restricted_journey_s_per_pax": 1157.467101,
+            "restricted_wait_s_per_pax": 224.269994,
+            "restricted_in_vehicle_s_per_pax": 933.197107,
+            "ewt_s": 10.600941,
+            "plan_cv2": 0.062932,
+            "raw_cv2": 0.110088,
+            "readiness_delay_s_per_trip": 2.382379,
+            "hold_s_per_trip": 3.616094
+          },
+          "across_seed_std": {
+            "restricted_journey_s_per_pax": 3.178862,
+            "restricted_wait_s_per_pax": 2.82129,
+            "restricted_in_vehicle_s_per_pax": 0.441463,
+            "ewt_s": 0.485963,
+            "plan_cv2": 0.003627,
+            "raw_cv2": 0.002102,
+            "readiness_delay_s_per_trip": 2.116136,
+            "hold_s_per_trip": 1.300551
+          }
+        },
+        "ep200": {
+          "across_seed_mean": {
+            "restricted_journey_s_per_pax": 1155.700026,
+            "restricted_wait_s_per_pax": 221.896809,
+            "restricted_in_vehicle_s_per_pax": 933.803217,
+            "ewt_s": 10.635938,
+            "plan_cv2": 0.062087,
+            "raw_cv2": 0.108328,
+            "readiness_delay_s_per_trip": 3.024809,
+            "hold_s_per_trip": 5.666667
+          },
+          "across_seed_std": {
+            "restricted_journey_s_per_pax": 4.707268,
+            "restricted_wait_s_per_pax": 4.294005,
+            "restricted_in_vehicle_s_per_pax": 0.566848,
+            "ewt_s": 0.957954,
+            "plan_cv2": 0.004782,
+            "raw_cv2": 0.003996,
+            "readiness_delay_s_per_trip": 2.650615,
+            "hold_s_per_trip": 3.443325
+          }
+        }
+      },
+      "paired_contrasts": {
+        "ep200_minus_A1_fixed_bilateral": {
+          "restricted_journey_s_per_pax": {
+            "mean": -14.400654,
+            "ci95": [
+              -37.701284,
+              6.302158
+            ],
+            "days_improved": 6
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 9.326087,
+            "ci95": [
+              -12.967268,
+              28.979839
+            ],
+            "days_improved": 3
+          },
+          "ewt_s": {
+            "mean": 4.856203,
+            "ci95": [
+              4.187401,
+              5.448006
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.029199,
+            "ci95": [
+              0.025908,
+              0.032078
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 2.527099,
+            "ci95": [
+              2.208885,
+              2.833338
+            ],
+            "days_improved": 0
+          }
+        },
+        "ep200_minus_A0_fixed_nohold": {
+          "restricted_journey_s_per_pax": {
+            "mean": 16.716224,
+            "ci95": [
+              -5.462947,
+              36.28478
+            ],
+            "days_improved": 3
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 9.490712,
+            "ci95": [
+              -11.416095,
+              28.184293
+            ],
+            "days_improved": 3
+          },
+          "ewt_s": {
+            "mean": -1.090966,
+            "ci95": [
+              -1.671947,
+              -0.619012
+            ],
+            "days_improved": 9
+          },
+          "plan_cv2": {
+            "mean": -0.003884,
+            "ci95": [
+              -0.006676,
+              -0.001629
+            ],
+            "days_improved": 9
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 2.735115,
+            "ci95": [
+              2.395662,
+              3.030153
+            ],
+            "days_improved": 0
+          }
+        },
+        "stability_ep200_minus_ep40": {
+          "restricted_journey_s_per_pax": {
+            "mean": 6.285318,
+            "ci95": [
+              -7.549113,
+              18.903979
+            ],
+            "days_improved": 3
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 3.440265,
+            "ci95": [
+              -10.217188,
+              15.78785
+            ],
+            "days_improved": 3
+          },
+          "ewt_s": {
+            "mean": -1.128515,
+            "ci95": [
+              -1.398837,
+              -0.881668
+            ],
+            "days_improved": 10
+          },
+          "plan_cv2": {
+            "mean": -0.005367,
+            "ci95": [
+              -0.006521,
+              -0.004165
+            ],
+            "days_improved": 10
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 0.231298,
+            "ci95": [
+              -0.640426,
+              0.933915
+            ],
+            "days_improved": 2
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,507 @@
+{
+  "completed": true,
+  "corridor": "mbta_route111_wkdy",
+  "day": 2600102,
+  "scenario_tape_id": "0768d62935cb4b79",
+  "passengers_generated": 9176,
+  "arms": {
+    "A0_fixed_nohold": {
+      "corridor": "mbta_route111_wkdy",
+      "day": 2600102,
+      "arm": "A0_fixed_nohold",
+      "scenario_tape_id": "0768d62935cb4b79",
+      "burst_count": 4,
+      "wall_s": 32.607,
+      "metrics": {
+        "passengers_generated": 9176,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 1349.6723588152704,
+        "restricted_wait_s_per_pax": 431.70036666182483,
+        "restricted_in_vehicle_s_per_pax": 917.9719921534438,
+        "ewt_s": 84.05027987192075,
+        "plan_cv2": 0.4615285648664271,
+        "raw_cv2": 0.4525747248857875,
+        "awt_s": 264.05027987192074,
+        "swt_s": 180.0,
+        "readiness_delay_s_per_trip": 228.68702290076337,
+        "readiness_delay_p95_s": 973.2999999999998,
+        "hold_s_per_trip": 0.0,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 10
+      },
+      "sample_replans": []
+    },
+    "A1_fixed_bilateral": {
+      "corridor": "mbta_route111_wkdy",
+      "day": 2600102,
+      "arm": "A1_fixed_bilateral",
+      "scenario_tape_id": "0768d62935cb4b79",
+      "burst_count": 4,
+      "wall_s": 33.129,
+      "metrics": {
+        "passengers_generated": 9176,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 1415.2131173157056,
+        "restricted_wait_s_per_pax": 466.3360466966984,
+        "restricted_in_vehicle_s_per_pax": 948.8770706190061,
+        "ewt_s": 22.02863639257275,
+        "plan_cv2": 0.10557393730129237,
+        "raw_cv2": 0.10129984481396843,
+        "awt_s": 202.02863639257276,
+        "swt_s": 180.0,
+        "readiness_delay_s_per_trip": 405.17175572519085,
+        "readiness_delay_p95_s": 1372.6999999999998,
+        "hold_s_per_trip": 87.93893129770993,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 10
+      },
+      "sample_replans": []
+    },
+    "A2_lf_quota_nohold": {
+      "corridor": "mbta_route111_wkdy",
+      "day": 2600102,
+      "arm": "A2_lf_quota_nohold",
+      "scenario_tape_id": "0768d62935cb4b79",
+      "burst_count": 4,
+      "wall_s": 35.331,
+      "metrics": {
+        "passengers_generated": 9176,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 1552.653505284317,
+        "restricted_wait_s_per_pax": 633.8029167926007,
+        "restricted_in_vehicle_s_per_pax": 918.8505884917175,
+        "ewt_s": 129.7751689131711,
+        "plan_cv2": 0.81451716528249,
+        "raw_cv2": 0.6518167549183327,
+        "awt_s": 322.60998282109375,
+        "swt_s": 192.8348139079226,
+        "readiness_delay_s_per_trip": 408.9389312977099,
+        "readiness_delay_p95_s": 1460.55,
+        "hold_s_per_trip": 0.0,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 10
+      },
+      "sample_replans": [
+        {
+          "time_s": 0.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 130,
+              "k_win": 6,
+              "h_des": 326.15,
+              "h_act": 326.15,
+              "h_tail": 361.64
+            },
+            "false": {
+              "mutable": 130,
+              "k_win": 5,
+              "h_des": 333.22,
+              "h_act": 333.22,
+              "h_tail": 361.07
+            }
+          }
+        },
+        {
+          "time_s": 900.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 128,
+              "k_win": 4,
+              "h_des": 489.08,
+              "h_act": 489.08,
+              "h_tail": 356.38
+            },
+            "false": {
+              "mutable": 128,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 358.17
+            }
+          }
+        },
+        {
+          "time_s": 1800.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 126,
+              "k_win": 4,
+              "h_des": 454.88,
+              "h_act": 454.88,
+              "h_tail": 355.32
+            },
+            "false": {
+              "mutable": 126,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 356.99
+            }
+          }
+        },
+        {
+          "time_s": 2700.0,
+          "h_floor": 367.1,
+          "plan": {
+            "true": {
+              "mutable": 124,
+              "k_win": 4,
+              "h_des": 445.18,
+              "h_act": 445.18,
+              "h_tail": 353.98
+            },
+            "false": {
+              "mutable": 124,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 355.77
+            }
+          }
+        },
+        {
+          "time_s": 3600.0,
+          "h_floor": 365.4,
+          "plan": {
+            "true": {
+              "mutable": 122,
+              "k_win": 4,
+              "h_des": 443.84,
+              "h_act": 443.84,
+              "h_tail": 352.47
+            },
+            "false": {
+              "mutable": 122,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 354.52
+            }
+          }
+        },
+        {
+          "time_s": 4500.0,
+          "h_floor": 371.6,
+          "plan": {
+            "true": {
+              "mutable": 120,
+              "k_win": 4,
+              "h_des": 442.73,
+              "h_act": 422.28,
+              "h_tail": 351.64
+            },
+            "false": {
+              "mutable": 120,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 353.22
+            }
+          }
+        }
+      ]
+    },
+    "A3_lf_quota_unbudgeted_hold": {
+      "corridor": "mbta_route111_wkdy",
+      "day": 2600102,
+      "arm": "A3_lf_quota_unbudgeted_hold",
+      "scenario_tape_id": "0768d62935cb4b79",
+      "burst_count": 4,
+      "wall_s": 39.508,
+      "metrics": {
+        "passengers_generated": 9176,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 1663.7183483531915,
+        "restricted_wait_s_per_pax": 696.2097389373262,
+        "restricted_in_vehicle_s_per_pax": 967.5086094158673,
+        "ewt_s": 23.01057020924492,
+        "plan_cv2": 0.10314120921152427,
+        "raw_cv2": 0.08834809964392545,
+        "awt_s": 216.966817489558,
+        "swt_s": 193.95624728031308,
+        "readiness_delay_s_per_trip": 781.4465648854962,
+        "readiness_delay_p95_s": 2239.0,
+        "hold_s_per_trip": 119.86641221374046,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 10
+      },
+      "sample_replans": [
+        {
+          "time_s": 0.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 130,
+              "k_win": 6,
+              "h_des": 326.15,
+              "h_act": 326.15,
+              "h_tail": 361.64
+            },
+            "false": {
+              "mutable": 130,
+              "k_win": 5,
+              "h_des": 333.22,
+              "h_act": 333.22,
+              "h_tail": 361.07
+            }
+          }
+        },
+        {
+          "time_s": 900.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 128,
+              "k_win": 4,
+              "h_des": 489.08,
+              "h_act": 489.08,
+              "h_tail": 356.38
+            },
+            "false": {
+              "mutable": 128,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 358.17
+            }
+          }
+        },
+        {
+          "time_s": 1800.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 126,
+              "k_win": 4,
+              "h_des": 456.57,
+              "h_act": 456.57,
+              "h_tail": 355.26
+            },
+            "false": {
+              "mutable": 126,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 356.99
+            }
+          }
+        },
+        {
+          "time_s": 2700.0,
+          "h_floor": 364.5,
+          "plan": {
+            "true": {
+              "mutable": 124,
+              "k_win": 4,
+              "h_des": 444.78,
+              "h_act": 444.78,
+              "h_tail": 353.96
+            },
+            "false": {
+              "mutable": 124,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 355.77
+            }
+          }
+        },
+        {
+          "time_s": 3600.0,
+          "h_floor": 364.5,
+          "plan": {
+            "true": {
+              "mutable": 122,
+              "k_win": 4,
+              "h_des": 450.54,
+              "h_act": 450.54,
+              "h_tail": 352.22
+            },
+            "false": {
+              "mutable": 122,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 354.52
+            }
+          }
+        },
+        {
+          "time_s": 4500.0,
+          "h_floor": 368.4,
+          "plan": {
+            "true": {
+              "mutable": 120,
+              "k_win": 4,
+              "h_des": 440.97,
+              "h_act": 440.97,
+              "h_tail": 350.85
+            },
+            "false": {
+              "mutable": 120,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 352.83
+            }
+          }
+        }
+      ]
+    },
+    "A4_lf_quota_turnaround_hf_hold": {
+      "corridor": "mbta_route111_wkdy",
+      "day": 2600102,
+      "arm": "A4_lf_quota_turnaround_hf_hold",
+      "scenario_tape_id": "0768d62935cb4b79",
+      "burst_count": 4,
+      "wall_s": 46.897,
+      "metrics": {
+        "passengers_generated": 9176,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 1528.1440240288675,
+        "restricted_wait_s_per_pax": 607.5623980480498,
+        "restricted_in_vehicle_s_per_pax": 920.5816259808196,
+        "ewt_s": 82.12220358542575,
+        "plan_cv2": 0.48368383959720496,
+        "raw_cv2": 0.4146071549898221,
+        "awt_s": 276.2140419085793,
+        "swt_s": 194.09183832315347,
+        "readiness_delay_s_per_trip": 438.32824427480915,
+        "readiness_delay_p95_s": 1460.5,
+        "hold_s_per_trip": 10.801526717557252,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 10
+      },
+      "sample_replans": [
+        {
+          "time_s": 0.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 130,
+              "k_win": 6,
+              "h_des": 326.15,
+              "h_act": 326.15,
+              "h_tail": 361.64
+            },
+            "false": {
+              "mutable": 130,
+              "k_win": 5,
+              "h_des": 333.22,
+              "h_act": 333.22,
+              "h_tail": 361.07
+            }
+          }
+        },
+        {
+          "time_s": 900.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 128,
+              "k_win": 4,
+              "h_des": 489.08,
+              "h_act": 489.08,
+              "h_tail": 356.38
+            },
+            "false": {
+              "mutable": 128,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 358.17
+            }
+          }
+        },
+        {
+          "time_s": 1800.0,
+          "h_floor": 326.1,
+          "plan": {
+            "true": {
+              "mutable": 126,
+              "k_win": 4,
+              "h_des": 456.57,
+              "h_act": 456.57,
+              "h_tail": 355.26
+            },
+            "false": {
+              "mutable": 126,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 356.99
+            }
+          }
+        },
+        {
+          "time_s": 2700.0,
+          "h_floor": 365.3,
+          "plan": {
+            "true": {
+              "mutable": 124,
+              "k_win": 4,
+              "h_des": 444.81,
+              "h_act": 444.81,
+              "h_tail": 353.96
+            },
+            "false": {
+              "mutable": 124,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 355.77
+            }
+          }
+        },
+        {
+          "time_s": 3600.0,
+          "h_floor": 364.9,
+          "plan": {
+            "true": {
+              "mutable": 122,
+              "k_win": 4,
+              "h_des": 443.89,
+              "h_act": 443.89,
+              "h_tail": 352.44
+            },
+            "false": {
+              "mutable": 122,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 354.52
+            }
+          }
+        },
+        {
+          "time_s": 4500.0,
+          "h_floor": 369.8,
+          "plan": {
+            "true": {
+              "mutable": 120,
+              "k_win": 4,
+              "h_des": 442.4,
+              "h_act": 442.4,
+              "h_tail": 350.92
+            },
+            "false": {
+              "mutable": 120,
+              "k_win": 4,
+              "h_des": 430.0,
+              "h_act": 430.0,
+              "h_tail": 353.22
+            }
+          }
+        }
+      ]
+    }
+  }
+}

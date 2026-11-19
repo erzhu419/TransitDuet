@@ -1,0 +1,336 @@
+{
+  "flat_sanity": {
+    "name": "flat_sanity",
+    "n_fleet": 12,
+    "bus_capacity": 50,
+    "trips_total": 262,
+    "description": "Legacy flat demand corridor (hourly CV < 8%) for stationary null-regime check."
+  },
+  "tidal_bimodal": {
+    "name": "tidal_bimodal",
+    "n_fleet": 14,
+    "bus_capacity": 75,
+    "trips_total": 262,
+    "daily_pax": 15660,
+    "peak_to_trough_ratio": 3.201,
+    "hourly_summary": {
+      "06:00:00": {
+        "up_pax": 579,
+        "down_pax": 258,
+        "total_pax": 837
+      },
+      "07:00:00": {
+        "up_pax": 1209,
+        "down_pax": 463,
+        "total_pax": 1672
+      },
+      "08:00:00": {
+        "up_pax": 1396,
+        "down_pax": 598,
+        "total_pax": 1994
+      },
+      "09:00:00": {
+        "up_pax": 808,
+        "down_pax": 489,
+        "total_pax": 1297
+      },
+      "10:00:00": {
+        "up_pax": 380,
+        "down_pax": 357,
+        "total_pax": 737
+      },
+      "11:00:00": {
+        "up_pax": 317,
+        "down_pax": 306,
+        "total_pax": 623
+      },
+      "12:00:00": {
+        "up_pax": 333,
+        "down_pax": 321,
+        "total_pax": 654
+      },
+      "13:00:00": {
+        "up_pax": 333,
+        "down_pax": 354,
+        "total_pax": 687
+      },
+      "14:00:00": {
+        "up_pax": 361,
+        "down_pax": 404,
+        "total_pax": 765
+      },
+      "15:00:00": {
+        "up_pax": 380,
+        "down_pax": 672,
+        "total_pax": 1052
+      },
+      "16:00:00": {
+        "up_pax": 479,
+        "down_pax": 1125,
+        "total_pax": 1604
+      },
+      "17:00:00": {
+        "up_pax": 523,
+        "down_pax": 1323,
+        "total_pax": 1846
+      },
+      "18:00:00": {
+        "up_pax": 391,
+        "down_pax": 802,
+        "total_pax": 1193
+      },
+      "19:00:00": {
+        "up_pax": 302,
+        "down_pax": 397,
+        "total_pax": 699
+      }
+    }
+  },
+  "mbta_route111_wkdy": {
+    "name": "mbta_route111_wkdy",
+    "n_fleet": 14,
+    "bus_capacity": 75,
+    "trips_total": 262,
+    "n_physical_stops": 23,
+    "one_way_length_m": 9069.6,
+    "busy_day_scale": 1.35,
+    "daily_pax": 9330,
+    "inbound_peak_to_trough": 9.91,
+    "outbound_peak_to_trough": 6.15,
+    "stop_mapping": [
+      {
+        "sim_name": "M01",
+        "GTFS stop_id": "5547",
+        "Stop Name": "ELM ST OPP HASKELL AVE",
+        "stop_lat": 42.415658,
+        "stop_lon": -71.033547
+      },
+      {
+        "sim_name": "M02",
+        "GTFS stop_id": "5587",
+        "Stop Name": "60 WOODLAWN AVE",
+        "stop_lat": 42.413224,
+        "stop_lon": -71.033033
+      },
+      {
+        "sim_name": "M03",
+        "GTFS stop_id": "5588",
+        "Stop Name": "WOODLAWN AVE @ WASHINGTON AVE",
+        "stop_lat": 42.412336,
+        "stop_lon": -71.031519
+      },
+      {
+        "sim_name": "M04",
+        "GTFS stop_id": "5589",
+        "Stop Name": "WASHINGTON AVE @ PROSPECT AVE",
+        "stop_lat": 42.411201,
+        "stop_lon": -71.0314
+      },
+      {
+        "sim_name": "M05",
+        "GTFS stop_id": "5590",
+        "Stop Name": "WASHINGTON AVE @ ANNESE RD",
+        "stop_lat": 42.409715,
+        "stop_lon": -71.0302
+      },
+      {
+        "sim_name": "M06",
+        "GTFS stop_id": "5591",
+        "Stop Name": "GARFIELD AVE @ EXETER ST",
+        "stop_lat": 42.407369,
+        "stop_lon": -71.029544
+      },
+      {
+        "sim_name": "M07",
+        "GTFS stop_id": "5592",
+        "Stop Name": "78 GARFIELD AVE OPP CLYDE ST",
+        "stop_lat": 42.406258,
+        "stop_lon": -71.029563
+      },
+      {
+        "sim_name": "M08",
+        "GTFS stop_id": "5593",
+        "Stop Name": "SAGAMORE AVE @ JONES AVE",
+        "stop_lat": 42.40531,
+        "stop_lon": -71.030581
+      },
+      {
+        "sim_name": "M09",
+        "GTFS stop_id": "5594",
+        "Stop Name": "SAGAMORE AVE @ MURRAY ST",
+        "stop_lat": 42.405015,
+        "stop_lon": -71.03309
+      },
+      {
+        "sim_name": "M10",
+        "GTFS stop_id": "5595",
+        "Stop Name": "SAGAMORE AVE @ WASHINGTON AVE",
+        "stop_lat": 42.404788,
+        "stop_lon": -71.035371
+      },
+      {
+        "sim_name": "M11",
+        "GTFS stop_id": "5596",
+        "Stop Name": "WASHINGTON AVE @ REVERE BEACH",
+        "stop_lat": 42.403957,
+        "stop_lon": -71.035993
+      },
+      {
+        "sim_name": "M12",
+        "GTFS stop_id": "5597",
+        "Stop Name": "WASHINGTON AVE @ REYNOLDS AVE",
+        "stop_lat": 42.403055,
+        "stop_lon": -71.036281
+      },
+      {
+        "sim_name": "M13",
+        "GTFS stop_id": "5598",
+        "Stop Name": "296 WASHINGTON AVE OPP JEFFERS",
+        "stop_lat": 42.402028,
+        "stop_lon": -71.035402
+      },
+      {
+        "sim_name": "M14",
+        "GTFS stop_id": "5599",
+        "Stop Name": "WASHINGTON AVE @ CARMEL ST",
+        "stop_lat": 42.400404,
+        "stop_lon": -71.033468
+      },
+      {
+        "sim_name": "M15",
+        "GTFS stop_id": "5600",
+        "Stop Name": "WASHINGTON AVE @ SPRUCE ST",
+        "stop_lat": 42.399425,
+        "stop_lon": -71.03232
+      },
+      {
+        "sim_name": "M16",
+        "GTFS stop_id": "5602",
+        "Stop Name": "WASHINGTON AVE @ BLOOMINGDALE",
+        "stop_lat": 42.397401,
+        "stop_lon": -71.031347
+      },
+      {
+        "sim_name": "M17",
+        "GTFS stop_id": "5603",
+        "Stop Name": "WASHINGTON AVE @ HEARD ST",
+        "stop_lat": 42.395264,
+        "stop_lon": -71.033126
+      },
+      {
+        "sim_name": "M18",
+        "GTFS stop_id": "5609",
+        "Stop Name": "WASHINGTON AVE @ CHESTNUT ST",
+        "stop_lat": 42.394282,
+        "stop_lon": -71.033613
+      },
+      {
+        "sim_name": "M19",
+        "GTFS stop_id": "5605",
+        "Stop Name": "WASHINGTON AVE @ BROADWAY",
+        "stop_lat": 42.392841,
+        "stop_lon": -71.034136
+      },
+      {
+        "sim_name": "M20",
+        "GTFS stop_id": "5606",
+        "Stop Name": "BROADWAY @ FOURTH ST",
+        "stop_lat": 42.391797,
+        "stop_lon": -71.035912
+      },
+      {
+        "sim_name": "M21",
+        "GTFS stop_id": "5607",
+        "Stop Name": "THIRD ST @ CHESTNUT ST",
+        "stop_lat": 42.391656,
+        "stop_lon": -71.038396
+      },
+      {
+        "sim_name": "M22",
+        "GTFS stop_id": "2829",
+        "Stop Name": "N WASHINGTON ST @ MEDFORD ST",
+        "stop_lat": 42.365749,
+        "stop_lon": -71.058505
+      },
+      {
+        "sim_name": "M23",
+        "GTFS stop_id": "8309",
+        "Stop Name": "SURFACE RD @ HANOVER ST",
+        "stop_lat": 42.362243,
+        "stop_lon": -71.056806
+      }
+    ],
+    "hourly_summary": {
+      "06:00:00": {
+        "inbound_up_pax": 713,
+        "outbound_down_pax": 135,
+        "total_pax": 848
+      },
+      "07:00:00": {
+        "inbound_up_pax": 773,
+        "outbound_down_pax": 194,
+        "total_pax": 967
+      },
+      "08:00:00": {
+        "inbound_up_pax": 476,
+        "outbound_down_pax": 143,
+        "total_pax": 619
+      },
+      "09:00:00": {
+        "inbound_up_pax": 400,
+        "outbound_down_pax": 105,
+        "total_pax": 505
+      },
+      "10:00:00": {
+        "inbound_up_pax": 257,
+        "outbound_down_pax": 134,
+        "total_pax": 391
+      },
+      "11:00:00": {
+        "inbound_up_pax": 274,
+        "outbound_down_pax": 154,
+        "total_pax": 428
+      },
+      "12:00:00": {
+        "inbound_up_pax": 245,
+        "outbound_down_pax": 210,
+        "total_pax": 455
+      },
+      "13:00:00": {
+        "inbound_up_pax": 345,
+        "outbound_down_pax": 235,
+        "total_pax": 580
+      },
+      "14:00:00": {
+        "inbound_up_pax": 458,
+        "outbound_down_pax": 520,
+        "total_pax": 978
+      },
+      "15:00:00": {
+        "inbound_up_pax": 376,
+        "outbound_down_pax": 580,
+        "total_pax": 956
+      },
+      "16:00:00": {
+        "inbound_up_pax": 301,
+        "outbound_down_pax": 646,
+        "total_pax": 947
+      },
+      "17:00:00": {
+        "inbound_up_pax": 184,
+        "outbound_down_pax": 556,
+        "total_pax": 740
+      },
+      "18:00:00": {
+        "inbound_up_pax": 115,
+        "outbound_down_pax": 415,
+        "total_pax": 530
+      },
+      "19:00:00": {
+        "inbound_up_pax": 78,
+        "outbound_down_pax": 308,
+        "total_pax": 386
+      }
+    }
+  }
+}

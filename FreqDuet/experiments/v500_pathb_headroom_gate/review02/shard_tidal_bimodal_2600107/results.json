@@ -1,0 +1,903 @@
+{
+  "completed": true,
+  "corridor": "tidal_bimodal",
+  "day": 2600107,
+  "scenario_tape_id": "0c7429f82a9e2a2f",
+  "passengers_generated": 14963,
+  "arms": {
+    "A0_fixed_nohold": {
+      "corridor": "tidal_bimodal",
+      "day": 2600107,
+      "arm": "A0_fixed_nohold",
+      "scenario_tape_id": "0c7429f82a9e2a2f",
+      "burst_count": 4,
+      "wall_s": 35.996,
+      "metrics": {
+        "passengers_generated": 14963,
+        "passenger_unserved_rate": 6.683151774376797e-05,
+        "restricted_journey_s_per_pax": 826.4674792767357,
+        "restricted_wait_s_per_pax": 207.81333238106032,
+        "restricted_in_vehicle_s_per_pax": 618.654146895676,
+        "ewt_s": 7.973461135465179,
+        "plan_cv2": 0.04586624970322887,
+        "raw_cv2": 0.04601801441481383,
+        "awt_s": 187.9734611354652,
+        "swt_s": 180.0,
+        "readiness_delay_s_per_trip": 0.27099236641221375,
+        "readiness_delay_p95_s": 0.0,
+        "hold_s_per_trip": 0.0,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 14
+      },
+      "sample_replans": []
+    },
+    "A1_fixed_bilateral": {
+      "corridor": "tidal_bimodal",
+      "day": 2600107,
+      "arm": "A1_fixed_bilateral",
+      "scenario_tape_id": "0c7429f82a9e2a2f",
+      "burst_count": 4,
+      "wall_s": 37.266,
+      "metrics": {
+        "passengers_generated": 14963,
+        "passenger_unserved_rate": 6.683151774376797e-05,
+        "restricted_journey_s_per_pax": 863.2694574896616,
+        "restricted_wait_s_per_pax": 204.60508537177074,
+        "restricted_in_vehicle_s_per_pax": 658.6643721178908,
+        "ewt_s": 3.3267898963411837,
+        "plan_cv2": 0.020129723112535615,
+        "raw_cv2": 0.02019473831311773,
+        "awt_s": 183.32678989634118,
+        "swt_s": 180.0,
+        "readiness_delay_s_per_trip": 0.5,
+        "readiness_delay_p95_s": 0.0,
+        "hold_s_per_trip": 114.77099236641222,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 14
+      },
+      "sample_replans": []
+    },
+    "A2_lf_quota_nohold": {
+      "corridor": "tidal_bimodal",
+      "day": 2600107,
+      "arm": "A2_lf_quota_nohold",
+      "scenario_tape_id": "0c7429f82a9e2a2f",
+      "burst_count": 4,
+      "wall_s": 36.817,
+      "metrics": {
+        "passengers_generated": 14963,
+        "passenger_unserved_rate": 0.007351466951814475,
+        "restricted_journey_s_per_pax": 1003.2911109014094,
+        "restricted_wait_s_per_pax": 390.52174646914426,
+        "restricted_in_vehicle_s_per_pax": 612.7693644322662,
+        "ewt_s": 15.766647127247316,
+        "plan_cv2": 0.13466237892741859,
+        "raw_cv2": 0.1406004982810296,
+        "awt_s": 205.28509073038512,
+        "swt_s": 189.51844360313783,
+        "readiness_delay_s_per_trip": 18.328244274809162,
+        "readiness_delay_p95_s": 144.29999999999984,
+        "hold_s_per_trip": 0.0,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 14
+      },
+      "sample_replans": [
+        {
+          "time_s": 0.0,
+          "h_floor": 264.4,
+          "ratio_root": 1.197,
+          "plan": {
+            "true": {
+              "mutable": 130,
+              "k_win": 4,
+              "h_des": 427.67,
+              "h_act": 427.67,
+              "h_tail": 357.85
+            },
+            "false": {
+              "mutable": 130,
+              "k_win": 4,
+              "h_des": 434.27,
+              "h_act": 434.27,
+              "h_tail": 357.64
+            }
+          }
+        },
+        {
+          "time_s": 900.0,
+          "h_floor": 264.4,
+          "ratio_root": 0.808,
+          "plan": {
+            "true": {
+              "mutable": 128,
+              "k_win": 6,
+              "h_des": 289.22,
+              "h_act": 289.22,
+              "h_tail": 362.37
+            },
+            "false": {
+              "mutable": 129,
+              "k_win": 6,
+              "h_des": 295.46,
+              "h_act": 295.46,
+              "h_tail": 362.54
+            }
+          }
+        },
+        {
+          "time_s": 1800.0,
+          "h_floor": 264.4,
+          "ratio_root": 0.694,
+          "plan": {
+            "true": {
+              "mutable": 125,
+              "k_win": 7,
+              "h_des": 264.36,
+              "h_act": 264.36,
+              "h_tail": 366.32
+            },
+            "false": {
+              "mutable": 125,
+              "k_win": 7,
+              "h_des": 264.36,
+              "h_act": 264.36,
+              "h_tail": 367.22
+            }
+          }
+        },
+        {
+          "time_s": 2700.0,
+          "h_floor": 242.3,
+          "ratio_root": 0.684,
+          "plan": {
+            "true": {
+              "mutable": 122,
+              "k_win": 7,
+              "h_des": 245.05,
+              "h_act": 245.05,
+              "h_tail": 370.14
+            },
+            "false": {
+              "mutable": 122,
+              "k_win": 7,
+              "h_des": 252.23,
+              "h_act": 252.23,
+              "h_tail": 370.64
+            }
+          }
+        },
+        {
+          "time_s": 3600.0,
+          "h_floor": 235.8,
+          "ratio_root": 0.702,
+          "plan": {
+            "true": {
+              "mutable": 118,
+              "k_win": 7,
+              "h_des": 254.12,
+              "h_act": 254.12,
+              "h_tail": 374.07
+            },
+            "false": {
+              "mutable": 119,
+              "k_win": 7,
+              "h_des": 260.7,
+              "h_act": 260.7,
+              "h_tail": 373.28
+            }
+          }
+        },
+        {
+          "time_s": 4500.0,
+          "h_floor": 235.0,
+          "ratio_root": 0.668,
+          "plan": {
+            "true": {
+              "mutable": 115,
+              "k_win": 8,
+              "h_des": 239.98,
+              "h_act": 239.98,
+              "h_tail": 379.61
+            },
+            "false": {
+              "mutable": 115,
+              "k_win": 7,
+              "h_des": 248.51,
+              "h_act": 248.51,
+              "h_tail": 378.24
+            }
+          }
+        },
+        {
+          "time_s": 5400.0,
+          "h_floor": 241.5,
+          "ratio_root": 0.637,
+          "plan": {
+            "true": {
+              "mutable": 111,
+              "k_win": 7,
+              "h_des": 241.54,
+              "h_act": 241.54,
+              "h_tail": 383.47
+            },
+            "false": {
+              "mutable": 111,
+              "k_win": 7,
+              "h_des": 242.54,
+              "h_act": 242.54,
+              "h_tail": 383.63
+            }
+          }
+        },
+        {
+          "time_s": 6300.0,
+          "h_floor": 258.6,
+          "ratio_root": 0.612,
+          "plan": {
+            "true": {
+              "mutable": 107,
+              "k_win": 7,
+              "h_des": 258.6,
+              "h_act": 258.6,
+              "h_tail": 387.96
+            },
+            "false": {
+              "mutable": 108,
+              "k_win": 7,
+              "h_des": 258.6,
+              "h_act": 258.6,
+              "h_tail": 385.04
+            }
+          }
+        },
+        {
+          "time_s": 7200.0,
+          "h_floor": 261.2,
+          "ratio_root": 0.606,
+          "plan": {
+            "true": {
+              "mutable": 104,
+              "k_win": 7,
+              "h_des": 261.18,
+              "h_act": 261.18,
+              "h_tail": 391.77
+            },
+            "false": {
+              "mutable": 105,
+              "k_win": 7,
+              "h_des": 261.18,
+              "h_act": 261.18,
+              "h_tail": 388.63
+            }
+          }
+        },
+        {
+          "time_s": 8100.0,
+          "h_floor": 263.4,
+          "ratio_root": 0.588,
+          "plan": {
+            "true": {
+              "mutable": 100,
+              "k_win": 7,
+              "h_des": 263.42,
+              "h_act": 263.42,
+              "h_tail": 396.42
+            },
+            "false": {
+              "mutable": 102,
+              "k_win": 7,
+              "h_des": 263.42,
+              "h_act": 263.42,
+              "h_tail": 391.58
+            }
+          }
+        },
+        {
+          "time_s": 9000.0,
+          "h_floor": 273.1,
+          "ratio_root": 0.566,
+          "plan": {
+            "true": {
+              "mutable": 97,
+              "k_win": 7,
+              "h_des": 273.13,
+              "h_act": 273.13,
+              "h_tail": 399.8
+            },
+            "false": {
+              "mutable": 98,
+              "k_win": 7,
+              "h_des": 273.13,
+              "h_act": 273.13,
+              "h_tail": 396.47
+            }
+          }
+        },
+        {
+          "time_s": 9900.0,
+          "h_floor": 281.7,
+          "ratio_root": 0.521,
+          "plan": {
+            "true": {
+              "mutable": 94,
+              "k_win": 6,
+              "h_des": 281.7,
+              "h_act": 281.7,
+              "h_tail": 402.1
+            },
+            "false": {
+              "mutable": 95,
+              "k_win": 6,
+              "h_des": 281.7,
+              "h_act": 281.7,
+              "h_tail": 398.65
+            }
+          }
+        }
+      ]
+    },
+    "A3_lf_quota_unbudgeted_hold": {
+      "corridor": "tidal_bimodal",
+      "day": 2600107,
+      "arm": "A3_lf_quota_unbudgeted_hold",
+      "scenario_tape_id": "0c7429f82a9e2a2f",
+      "burst_count": 4,
+      "wall_s": 38.211,
+      "metrics": {
+        "passengers_generated": 14963,
+        "passenger_unserved_rate": 0.007485129987302012,
+        "restricted_journey_s_per_pax": 1052.1899948150642,
+        "restricted_wait_s_per_pax": 374.2068363575356,
+        "restricted_in_vehicle_s_per_pax": 677.9831584575286,
+        "ewt_s": 3.523173898288544,
+        "plan_cv2": 0.025922726618472676,
+        "raw_cv2": 0.06635688099847213,
+        "awt_s": 191.91163791127846,
+        "swt_s": 188.3884640129899,
+        "readiness_delay_s_per_trip": 105.53053435114504,
+        "readiness_delay_p95_s": 459.9,
+        "hold_s_per_trip": 177.36641221374046,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 14
+      },
+      "sample_replans": [
+        {
+          "time_s": 0.0,
+          "h_floor": 264.4,
+          "ratio_root": 1.197,
+          "plan": {
+            "true": {
+              "mutable": 130,
+              "k_win": 4,
+              "h_des": 427.67,
+              "h_act": 427.67,
+              "h_tail": 357.85
+            },
+            "false": {
+              "mutable": 130,
+              "k_win": 4,
+              "h_des": 434.27,
+              "h_act": 434.27,
+              "h_tail": 357.64
+            }
+          }
+        },
+        {
+          "time_s": 900.0,
+          "h_floor": 264.4,
+          "ratio_root": 0.808,
+          "plan": {
+            "true": {
+              "mutable": 128,
+              "k_win": 6,
+              "h_des": 289.22,
+              "h_act": 289.22,
+              "h_tail": 362.37
+            },
+            "false": {
+              "mutable": 129,
+              "k_win": 6,
+              "h_des": 295.46,
+              "h_act": 295.46,
+              "h_tail": 362.54
+            }
+          }
+        },
+        {
+          "time_s": 1800.0,
+          "h_floor": 264.4,
+          "ratio_root": 0.692,
+          "plan": {
+            "true": {
+              "mutable": 125,
+              "k_win": 7,
+              "h_des": 264.36,
+              "h_act": 264.36,
+              "h_tail": 366.32
+            },
+            "false": {
+              "mutable": 125,
+              "k_win": 7,
+              "h_des": 264.36,
+              "h_act": 264.36,
+              "h_tail": 367.22
+            }
+          }
+        },
+        {
+          "time_s": 2700.0,
+          "h_floor": 241.1,
+          "ratio_root": 0.676,
+          "plan": {
+            "true": {
+              "mutable": 122,
+              "k_win": 7,
+              "h_des": 242.38,
+              "h_act": 242.38,
+              "h_tail": 370.31
+            },
+            "false": {
+              "mutable": 122,
+              "k_win": 7,
+              "h_des": 249.2,
+              "h_act": 249.2,
+              "h_tail": 370.82
+            }
+          }
+        },
+        {
+          "time_s": 3600.0,
+          "h_floor": 236.5,
+          "ratio_root": 0.697,
+          "plan": {
+            "true": {
+              "mutable": 118,
+              "k_win": 7,
+              "h_des": 252.68,
+              "h_act": 252.68,
+              "h_tail": 374.26
+            },
+            "false": {
+              "mutable": 118,
+              "k_win": 7,
+              "h_des": 259.7,
+              "h_act": 259.7,
+              "h_tail": 374.54
+            }
+          }
+        },
+        {
+          "time_s": 4500.0,
+          "h_floor": 237.3,
+          "ratio_root": 0.673,
+          "plan": {
+            "true": {
+              "mutable": 114,
+              "k_win": 7,
+              "h_des": 245.65,
+              "h_act": 245.65,
+              "h_tail": 379.27
+            },
+            "false": {
+              "mutable": 115,
+              "k_win": 7,
+              "h_des": 252.87,
+              "h_act": 252.87,
+              "h_tail": 377.13
+            }
+          }
+        },
+        {
+          "time_s": 5400.0,
+          "h_floor": 242.9,
+          "ratio_root": 0.646,
+          "plan": {
+            "true": {
+              "mutable": 111,
+              "k_win": 7,
+              "h_des": 242.9,
+              "h_act": 242.9,
+              "h_tail": 381.82
+            },
+            "false": {
+              "mutable": 112,
+              "k_win": 7,
+              "h_des": 243.94,
+              "h_act": 243.94,
+              "h_tail": 380.38
+            }
+          }
+        },
+        {
+          "time_s": 6300.0,
+          "h_floor": 259.7,
+          "ratio_root": 0.619,
+          "plan": {
+            "true": {
+              "mutable": 108,
+              "k_win": 7,
+              "h_des": 259.74,
+              "h_act": 259.74,
+              "h_tail": 383.42
+            },
+            "false": {
+              "mutable": 109,
+              "k_win": 7,
+              "h_des": 259.74,
+              "h_act": 259.74,
+              "h_tail": 381.46
+            }
+          }
+        },
+        {
+          "time_s": 7200.0,
+          "h_floor": 259.3,
+          "ratio_root": 0.596,
+          "plan": {
+            "true": {
+              "mutable": 105,
+              "k_win": 7,
+              "h_des": 259.3,
+              "h_act": 259.3,
+              "h_tail": 386.9
+            },
+            "false": {
+              "mutable": 106,
+              "k_win": 7,
+              "h_des": 259.3,
+              "h_act": 259.3,
+              "h_tail": 384.9
+            }
+          }
+        },
+        {
+          "time_s": 8100.0,
+          "h_floor": 267.5,
+          "ratio_root": 0.576,
+          "plan": {
+            "true": {
+              "mutable": 102,
+              "k_win": 7,
+              "h_des": 267.51,
+              "h_act": 267.51,
+              "h_tail": 389.69
+            },
+            "false": {
+              "mutable": 102,
+              "k_win": 7,
+              "h_des": 267.51,
+              "h_act": 267.51,
+              "h_tail": 389.58
+            }
+          }
+        },
+        {
+          "time_s": 9000.0,
+          "h_floor": 271.6,
+          "ratio_root": 0.54,
+          "plan": {
+            "true": {
+              "mutable": 98,
+              "k_win": 7,
+              "h_des": 271.55,
+              "h_act": 271.55,
+              "h_tail": 394.75
+            },
+            "false": {
+              "mutable": 99,
+              "k_win": 7,
+              "h_des": 271.55,
+              "h_act": 271.55,
+              "h_tail": 393.25
+            }
+          }
+        },
+        {
+          "time_s": 9900.0,
+          "h_floor": 278.9,
+          "ratio_root": 0.53,
+          "plan": {
+            "true": {
+              "mutable": 95,
+              "k_win": 6,
+              "h_des": 278.91,
+              "h_act": 278.91,
+              "h_tail": 397.02
+            },
+            "false": {
+              "mutable": 96,
+              "k_win": 6,
+              "h_des": 278.91,
+              "h_act": 278.91,
+              "h_tail": 395.47
+            }
+          }
+        }
+      ]
+    },
+    "A4_lf_quota_turnaround_hf_hold": {
+      "corridor": "tidal_bimodal",
+      "day": 2600107,
+      "arm": "A4_lf_quota_turnaround_hf_hold",
+      "scenario_tape_id": "0c7429f82a9e2a2f",
+      "burst_count": 4,
+      "wall_s": 46.796,
+      "metrics": {
+        "passengers_generated": 14963,
+        "passenger_unserved_rate": 0.008621265788946068,
+        "restricted_journey_s_per_pax": 1052.172952778039,
+        "restricted_wait_s_per_pax": 419.19367054854007,
+        "restricted_in_vehicle_s_per_pax": 632.9792822294994,
+        "ewt_s": 18.825125586202034,
+        "plan_cv2": 0.1736469553280458,
+        "raw_cv2": 0.1558033604135382,
+        "awt_s": 208.0305489078206,
+        "swt_s": 189.20542332161853,
+        "readiness_delay_s_per_trip": 24.713740458015266,
+        "readiness_delay_p95_s": 191.64999999999992,
+        "hold_s_per_trip": 51.85114503816794,
+        "trips_launched": 262,
+        "trips_completed": 262,
+        "physical_buses": 14
+      },
+      "sample_replans": [
+        {
+          "time_s": 0.0,
+          "h_floor": 264.4,
+          "ratio_root": 1.197,
+          "plan": {
+            "true": {
+              "mutable": 130,
+              "k_win": 4,
+              "h_des": 427.67,
+              "h_act": 427.67,
+              "h_tail": 357.85
+            },
+            "false": {
+              "mutable": 130,
+              "k_win": 4,
+              "h_des": 434.27,
+              "h_act": 434.27,
+              "h_tail": 357.64
+            }
+          }
+        },
+        {
+          "time_s": 900.0,
+          "h_floor": 264.4,
+          "ratio_root": 0.808,
+          "plan": {
+            "true": {
+              "mutable": 128,
+              "k_win": 6,
+              "h_des": 289.22,
+              "h_act": 289.22,
+              "h_tail": 362.37
+            },
+            "false": {
+              "mutable": 129,
+              "k_win": 6,
+              "h_des": 295.46,
+              "h_act": 295.46,
+              "h_tail": 362.54
+            }
+          }
+        },
+        {
+          "time_s": 1800.0,
+          "h_floor": 264.4,
+          "ratio_root": 0.693,
+          "plan": {
+            "true": {
+              "mutable": 125,
+              "k_win": 7,
+              "h_des": 264.36,
+              "h_act": 264.36,
+              "h_tail": 366.32
+            },
+            "false": {
+              "mutable": 125,
+              "k_win": 7,
+              "h_des": 264.36,
+              "h_act": 264.36,
+              "h_tail": 367.22
+            }
+          }
+        },
+        {
+          "time_s": 2700.0,
+          "h_floor": 243.1,
+          "ratio_root": 0.681,
+          "plan": {
+            "true": {
+              "mutable": 122,
+              "k_win": 7,
+              "h_des": 243.84,
+              "h_act": 243.84,
+              "h_tail": 370.22
+            },
+            "false": {
+              "mutable": 122,
+              "k_win": 7,
+              "h_des": 250.84,
+              "h_act": 250.84,
+              "h_tail": 370.72
+            }
+          }
+        },
+        {
+          "time_s": 3600.0,
+          "h_floor": 235.0,
+          "ratio_root": 0.697,
+          "plan": {
+            "true": {
+              "mutable": 118,
+              "k_win": 7,
+              "h_des": 250.21,
+              "h_act": 250.21,
+              "h_tail": 374.37
+            },
+            "false": {
+              "mutable": 118,
+              "k_win": 7,
+              "h_des": 257.45,
+              "h_act": 257.45,
+              "h_tail": 374.62
+            }
+          }
+        },
+        {
+          "time_s": 4500.0,
+          "h_floor": 236.3,
+          "ratio_root": 0.671,
+          "plan": {
+            "true": {
+              "mutable": 114,
+              "k_win": 7,
+              "h_des": 244.8,
+              "h_act": 244.8,
+              "h_tail": 379.36
+            },
+            "false": {
+              "mutable": 115,
+              "k_win": 7,
+              "h_des": 252.65,
+              "h_act": 252.65,
+              "h_tail": 378.13
+            }
+          }
+        },
+        {
+          "time_s": 5400.0,
+          "h_floor": 246.8,
+          "ratio_root": 0.643,
+          "plan": {
+            "true": {
+              "mutable": 111,
+              "k_win": 7,
+              "h_des": 246.8,
+              "h_act": 246.8,
+              "h_tail": 383.1
+            },
+            "false": {
+              "mutable": 111,
+              "k_win": 7,
+              "h_des": 246.8,
+              "h_act": 246.8,
+              "h_tail": 383.35
+            }
+          }
+        },
+        {
+          "time_s": 6300.0,
+          "h_floor": 260.9,
+          "ratio_root": 0.611,
+          "plan": {
+            "true": {
+              "mutable": 107,
+              "k_win": 7,
+              "h_des": 260.88,
+              "h_act": 260.88,
+              "h_tail": 387.57
+            },
+            "false": {
+              "mutable": 108,
+              "k_win": 7,
+              "h_des": 260.88,
+              "h_act": 260.88,
+              "h_tail": 384.94
+            }
+          }
+        },
+        {
+          "time_s": 7200.0,
+          "h_floor": 264.1,
+          "ratio_root": 0.61,
+          "plan": {
+            "true": {
+              "mutable": 104,
+              "k_win": 7,
+              "h_des": 264.12,
+              "h_act": 264.12,
+              "h_tail": 389.74
+            },
+            "false": {
+              "mutable": 105,
+              "k_win": 7,
+              "h_des": 264.12,
+              "h_act": 264.12,
+              "h_tail": 388.06
+            }
+          }
+        },
+        {
+          "time_s": 8100.0,
+          "h_floor": 262.1,
+          "ratio_root": 0.587,
+          "plan": {
+            "true": {
+              "mutable": 101,
+              "k_win": 7,
+              "h_des": 262.06,
+              "h_act": 262.06,
+              "h_tail": 393.9
+            },
+            "false": {
+              "mutable": 102,
+              "k_win": 7,
+              "h_des": 262.06,
+              "h_act": 262.06,
+              "h_tail": 392.13
+            }
+          }
+        },
+        {
+          "time_s": 9000.0,
+          "h_floor": 272.9,
+          "ratio_root": 0.542,
+          "plan": {
+            "true": {
+              "mutable": 97,
+              "k_win": 7,
+              "h_des": 272.91,
+              "h_act": 272.91,
+              "h_tail": 398.91
+            },
+            "false": {
+              "mutable": 98,
+              "k_win": 7,
+              "h_des": 272.91,
+              "h_act": 272.91,
+              "h_tail": 397.01
+            }
+          }
+        },
+        {
+          "time_s": 9900.0,
+          "h_floor": 278.9,
+          "ratio_root": 0.535,
+          "plan": {
+            "true": {
+              "mutable": 94,
+              "k_win": 6,
+              "h_des": 278.95,
+              "h_act": 278.95,
+              "h_tail": 401.36
+            },
+            "false": {
+              "mutable": 95,
+              "k_win": 6,
+              "h_des": 278.95,
+              "h_act": 278.95,
+              "h_tail": 398.8
+            }
+          }
+        }
+      ]
+    }
+  }
+}

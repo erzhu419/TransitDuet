@@ -1,0 +1,2665 @@
+{
+  "completed": true,
+  "corridor": "tidal_bimodal",
+  "method": "Abl_Swapped",
+  "seed": 104,
+  "episodes": 200,
+  "suites": {
+    "confirm_16d": {
+      "means": {
+        "passengers_generated": 15364.875,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 840.968476,
+        "restricted_wait_s_per_pax": 226.024046,
+        "restricted_in_vehicle_s_per_pax": 614.94443,
+        "ewt_s": 8.693764,
+        "plan_cv2": 0.051362,
+        "raw_cv2": 0.061002,
+        "awt_s": 191.16284,
+        "swt_s": 182.469077,
+        "readiness_delay_s_per_trip": 0.232109,
+        "readiness_delay_p95_s": 0.0,
+        "hold_s_per_trip": 1.673426,
+        "trips_launched": 262.0,
+        "trips_completed": 262.0,
+        "physical_buses": 14.0
+      },
+      "per_day": [
+        {
+          "day": 2700101,
+          "scenario_tape_id": "eca86eb5e53d1004",
+          "wall_s": 39.458,
+          "metrics": {
+            "passengers_generated": 14887,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 827.5079030809843,
+            "restricted_wait_s_per_pax": 217.0099518483625,
+            "restricted_in_vehicle_s_per_pax": 610.497951232619,
+            "ewt_s": 10.383997516084126,
+            "plan_cv2": 0.058870463100202865,
+            "raw_cv2": 0.06772712225655758,
+            "awt_s": 192.39283911077365,
+            "swt_s": 182.0088415946895,
+            "readiness_delay_s_per_trip": 2.801526717557252,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.232824427480916,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -2.119,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700102,
+          "scenario_tape_id": "aaa12517838384a6",
+          "wall_s": 38.927,
+          "metrics": {
+            "passengers_generated": 15691,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 823.7492782081929,
+            "restricted_wait_s_per_pax": 210.21725348064024,
+            "restricted_in_vehicle_s_per_pax": 613.5320247275508,
+            "ewt_s": 7.076517905376063,
+            "plan_cv2": 0.042303741478425,
+            "raw_cv2": 0.05203651930510137,
+            "awt_s": 189.58125710016373,
+            "swt_s": 182.50473919478765,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.4312977099236641,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -2.0867,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700103,
+          "scenario_tape_id": "ce6d7daf5419a2aa",
+          "wall_s": 38.46,
+          "metrics": {
+            "passengers_generated": 15650,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 847.9513321288811,
+            "restricted_wait_s_per_pax": 231.43126823111643,
+            "restricted_in_vehicle_s_per_pax": 616.5200638977636,
+            "ewt_s": 8.119438814498357,
+            "plan_cv2": 0.04739712863361926,
+            "raw_cv2": 0.05660974883572845,
+            "awt_s": 190.34347998231146,
+            "swt_s": 182.22404116781308,
+            "readiness_delay_s_per_trip": 0.04580152671755725,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.7557251908396947,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -5.1603,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700104,
+          "scenario_tape_id": "73c9501bd497fbdf",
+          "wall_s": 38.307,
+          "metrics": {
+            "passengers_generated": 14169,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 802.8538166767295,
+            "restricted_wait_s_per_pax": 195.03117569994842,
+            "restricted_in_vehicle_s_per_pax": 607.8226409767803,
+            "ewt_s": 10.022908191565952,
+            "plan_cv2": 0.059759276089147294,
+            "raw_cv2": 0.06955122824551567,
+            "awt_s": 192.7821416594079,
+            "swt_s": 182.75923346784194,
+            "readiness_delay_s_per_trip": 0.6984732824427481,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.0229007633587788,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 2.5832,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700105,
+          "scenario_tape_id": "86a144a2bf970f27",
+          "wall_s": 38.507,
+          "metrics": {
+            "passengers_generated": 16183,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 853.1044970285405,
+            "restricted_wait_s_per_pax": 232.73225455186562,
+            "restricted_in_vehicle_s_per_pax": 620.372242476673,
+            "ewt_s": 9.654112289196869,
+            "plan_cv2": 0.05619516861655089,
+            "raw_cv2": 0.0646728730958536,
+            "awt_s": 191.93823326804653,
+            "swt_s": 182.28412097884967,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.984732824427481,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -6.6091,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700106,
+          "scenario_tape_id": "744a1da414c93637",
+          "wall_s": 40.289,
+          "metrics": {
+            "passengers_generated": 14779,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 821.4078123980296,
+            "restricted_wait_s_per_pax": 212.25286280739076,
+            "restricted_in_vehicle_s_per_pax": 609.1549495906354,
+            "ewt_s": 9.618694658902779,
+            "plan_cv2": 0.05679614532319666,
+            "raw_cv2": 0.0663539071473134,
+            "awt_s": 191.99972063301985,
+            "swt_s": 182.38102597411705,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.6412213740458015,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -0.7489,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700107,
+          "scenario_tape_id": "c2b4794646e938ff",
+          "wall_s": 40.613,
+          "metrics": {
+            "passengers_generated": 16990,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 889.5333778892848,
+            "restricted_wait_s_per_pax": 261.83849854849194,
+            "restricted_in_vehicle_s_per_pax": 627.6948793407887,
+            "ewt_s": 9.92457978517465,
+            "plan_cv2": 0.060100022602839434,
+            "raw_cv2": 0.06772512625246689,
+            "awt_s": 192.32997705270645,
+            "swt_s": 182.40539726753178,
+            "readiness_delay_s_per_trip": 0.026717557251908396,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.2213740458015268,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -11.8254,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700108,
+          "scenario_tape_id": "d6f196eaff3cdb77",
+          "wall_s": 38.81,
+          "metrics": {
+            "passengers_generated": 15639,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 885.0509161074033,
+            "restricted_wait_s_per_pax": 270.05059639387184,
+            "restricted_in_vehicle_s_per_pax": 615.0003197135367,
+            "ewt_s": 9.031383930322042,
+            "plan_cv2": 0.053223827213908115,
+            "raw_cv2": 0.06441791777915581,
+            "awt_s": 191.66477824523554,
+            "swt_s": 182.63339431491352,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.6221374045801527,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -9.6385,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700109,
+          "scenario_tape_id": "80c7e3a45406a003",
+          "wall_s": 39.094,
+          "metrics": {
+            "passengers_generated": 15831,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 838.1219135493362,
+            "restricted_wait_s_per_pax": 221.5532192154316,
+            "restricted_in_vehicle_s_per_pax": 616.5686943339018,
+            "ewt_s": 7.54800757318813,
+            "plan_cv2": 0.04524387207408389,
+            "raw_cv2": 0.0551405269552474,
+            "awt_s": 189.97211858648149,
+            "swt_s": 182.42411101329336,
+            "readiness_delay_s_per_trip": 0.14122137404580154,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.5648854961832062,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -4.0333,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700110,
+          "scenario_tape_id": "4e16aa1094dce17a",
+          "wall_s": 39.581,
+          "metrics": {
+            "passengers_generated": 15766,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 885.7561501758446,
+            "restricted_wait_s_per_pax": 270.8278868243262,
+            "restricted_in_vehicle_s_per_pax": 614.928263351516,
+            "ewt_s": 7.238499723576645,
+            "plan_cv2": 0.04270552685092746,
+            "raw_cv2": 0.05350772920745366,
+            "awt_s": 189.64847260052662,
+            "swt_s": 182.40997287694998,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.8511450381679388,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -10.4349,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700111,
+          "scenario_tape_id": "4cbb87ca7219ae00",
+          "wall_s": 39.146,
+          "metrics": {
+            "passengers_generated": 14285,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 815.6247111320843,
+            "restricted_wait_s_per_pax": 204.74805729939106,
+            "restricted_in_vehicle_s_per_pax": 610.8766538326917,
+            "ewt_s": 7.852512932051811,
+            "plan_cv2": 0.04804032981212054,
+            "raw_cv2": 0.05774314060917382,
+            "awt_s": 190.45619112074306,
+            "swt_s": 182.60367818869122,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.4694656488549618,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 1.3195,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700112,
+          "scenario_tape_id": "f0643b931b1a9f37",
+          "wall_s": 39.414,
+          "metrics": {
+            "passengers_generated": 15345,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 834.4934799013263,
+            "restricted_wait_s_per_pax": 217.3935124852313,
+            "restricted_in_vehicle_s_per_pax": 617.0999674160964,
+            "ewt_s": 7.876592206532797,
+            "plan_cv2": 0.04723274729874119,
+            "raw_cv2": 0.054982933864313896,
+            "awt_s": 190.29677863803448,
+            "swt_s": 182.42018643150166,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.4312977099236641,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -2.5223,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700113,
+          "scenario_tape_id": "485c864c026da6cd",
+          "wall_s": 44.944,
+          "metrics": {
+            "passengers_generated": 14810,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 836.6480597411651,
+            "restricted_wait_s_per_pax": 222.44691186811244,
+            "restricted_in_vehicle_s_per_pax": 614.2011478730587,
+            "ewt_s": 8.659551984328175,
+            "plan_cv2": 0.05009888837330482,
+            "raw_cv2": 0.060154728887624895,
+            "awt_s": 191.05619279529608,
+            "swt_s": 182.3966408109679,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.6793893129770991,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -2.1471,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700114,
+          "scenario_tape_id": "7b5eb21a6c51d91f",
+          "wall_s": 46.321,
+          "metrics": {
+            "passengers_generated": 16017,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 852.288401706357,
+            "restricted_wait_s_per_pax": 235.77063932888515,
+            "restricted_in_vehicle_s_per_pax": 616.5177623774739,
+            "ewt_s": 8.2610180405144,
+            "plan_cv2": 0.04850303374000283,
+            "raw_cv2": 0.0561914658753916,
+            "awt_s": 190.58486822655013,
+            "swt_s": 182.3238501860357,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.3358778625954197,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -6.5331,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700115,
+          "scenario_tape_id": "49bda2aefa2a4eee",
+          "wall_s": 46.069,
+          "metrics": {
+            "passengers_generated": 14935,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 834.8792040761999,
+            "restricted_wait_s_per_pax": 219.34944177289142,
+            "restricted_in_vehicle_s_per_pax": 615.5297623033143,
+            "ewt_s": 9.359592999811472,
+            "plan_cv2": 0.054311985039090606,
+            "raw_cv2": 0.06658087337892159,
+            "awt_s": 192.26755757820968,
+            "swt_s": 182.9079645783982,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.7938931297709924,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -2.0485,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2700116,
+          "scenario_tape_id": "65bc4fca3de5377c",
+          "wall_s": 46.173,
+          "metrics": {
+            "passengers_generated": 14861,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 806.5247554204494,
+            "restricted_wait_s_per_pax": 193.7312018237906,
+            "restricted_in_vehicle_s_per_pax": 612.7935535966624,
+            "ewt_s": 8.472809376632902,
+            "plan_cv2": 0.05101093286051679,
+            "raw_cv2": 0.06264065250337454,
+            "awt_s": 191.2908411755715,
+            "swt_s": 182.8180317989386,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.7366412213740459,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 1.7117,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        }
+      ]
+    },
+    "ood_peak_shift": {
+      "means": {
+        "passengers_generated": 15233.875,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 822.340898,
+        "restricted_wait_s_per_pax": 214.694675,
+        "restricted_in_vehicle_s_per_pax": 607.646223,
+        "ewt_s": 8.751174,
+        "plan_cv2": 0.053051,
+        "raw_cv2": 0.063411,
+        "awt_s": 191.397885,
+        "swt_s": 182.646711,
+        "readiness_delay_s_per_trip": 0.152195,
+        "readiness_delay_p95_s": 0.0,
+        "hold_s_per_trip": 1.672233,
+        "trips_launched": 262.0,
+        "trips_completed": 262.0,
+        "physical_buses": 14.0
+      },
+      "per_day": [
+        {
+          "day": 2710101,
+          "scenario_tape_id": "3a3f33f0c376bf71",
+          "wall_s": 46.682,
+          "metrics": {
+            "passengers_generated": 15386,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 823.1399692969999,
+            "restricted_wait_s_per_pax": 221.32669749146413,
+            "restricted_in_vehicle_s_per_pax": 601.8132718055375,
+            "ewt_s": 10.935886220549435,
+            "plan_cv2": 0.06090440200314307,
+            "raw_cv2": 0.07359965391153389,
+            "awt_s": 193.66382516493607,
+            "swt_s": 182.7279389443866,
+            "readiness_delay_s_per_trip": 0.12595419847328243,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.0801526717557253,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -3.2995,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710102,
+          "scenario_tape_id": "f943bda0412ea3d2",
+          "wall_s": 48.165,
+          "metrics": {
+            "passengers_generated": 14972,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 805.3954476583998,
+            "restricted_wait_s_per_pax": 199.30875249408908,
+            "restricted_in_vehicle_s_per_pax": 606.0866951643067,
+            "ewt_s": 8.546991145371205,
+            "plan_cv2": 0.05054267332947761,
+            "raw_cv2": 0.06095680683047132,
+            "awt_s": 190.84512317927678,
+            "swt_s": 182.29813203390557,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.450381679389313,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 0.7371,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710103,
+          "scenario_tape_id": "c81f26c278c15637",
+          "wall_s": 47.167,
+          "metrics": {
+            "passengers_generated": 15026,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 822.8915524712912,
+            "restricted_wait_s_per_pax": 216.08268783666026,
+            "restricted_in_vehicle_s_per_pax": 606.8088646346333,
+            "ewt_s": 8.249297058672045,
+            "plan_cv2": 0.04987054052062354,
+            "raw_cv2": 0.0641497298557474,
+            "awt_s": 191.65086976912164,
+            "swt_s": 183.40157271044959,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.4885496183206106,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -1.7239,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710104,
+          "scenario_tape_id": "5ea857e6971df912",
+          "wall_s": 46.137,
+          "metrics": {
+            "passengers_generated": 15015,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 802.9557961386276,
+            "restricted_wait_s_per_pax": 199.22832361115164,
+            "restricted_in_vehicle_s_per_pax": 603.7274725274725,
+            "ewt_s": 7.91552086599539,
+            "plan_cv2": 0.04966610602789455,
+            "raw_cv2": 0.05708797613771457,
+            "awt_s": 189.95758785304028,
+            "swt_s": 182.0420669870449,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.4694656488549618,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 0.6793,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710105,
+          "scenario_tape_id": "cbbd878042797d0e",
+          "wall_s": 46.957,
+          "metrics": {
+            "passengers_generated": 16013,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 850.1973982738938,
+            "restricted_wait_s_per_pax": 241.48847427464173,
+            "restricted_in_vehicle_s_per_pax": 608.7089239992506,
+            "ewt_s": 8.911987533232931,
+            "plan_cv2": 0.0576293571340863,
+            "raw_cv2": 0.06989379405048292,
+            "awt_s": 192.514736545145,
+            "swt_s": 183.6027490119121,
+            "readiness_delay_s_per_trip": 0.7175572519083969,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.099236641221374,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -7.5368,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710106,
+          "scenario_tape_id": "409bd4874e434cea",
+          "wall_s": 47.681,
+          "metrics": {
+            "passengers_generated": 15531,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 859.4141050092107,
+            "restricted_wait_s_per_pax": 238.62658327847984,
+            "restricted_in_vehicle_s_per_pax": 620.7875217307321,
+            "ewt_s": 7.385577212023533,
+            "plan_cv2": 0.048212326548197335,
+            "raw_cv2": 0.05719273570475121,
+            "awt_s": 189.73927569899058,
+            "swt_s": 182.35369848696706,
+            "readiness_delay_s_per_trip": 0.2862595419847328,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.2519083969465647,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -5.9621,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710107,
+          "scenario_tape_id": "6f6ac15d6b301eb9",
+          "wall_s": 44.692,
+          "metrics": {
+            "passengers_generated": 14428,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 799.2225524773046,
+            "restricted_wait_s_per_pax": 195.39048982135878,
+            "restricted_in_vehicle_s_per_pax": 603.8320626559467,
+            "ewt_s": 8.944413646986732,
+            "plan_cv2": 0.05312043960605203,
+            "raw_cv2": 0.06324719495322484,
+            "awt_s": 191.65819923503588,
+            "swt_s": 182.71378558804912,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.202290076335878,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 2.2188,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710108,
+          "scenario_tape_id": "d3a13bca181e5e79",
+          "wall_s": 46.821,
+          "metrics": {
+            "passengers_generated": 15500,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 815.510358807047,
+            "restricted_wait_s_per_pax": 206.10539106510785,
+            "restricted_in_vehicle_s_per_pax": 609.4049677419355,
+            "ewt_s": 9.119716145575728,
+            "plan_cv2": 0.054463144091916785,
+            "raw_cv2": 0.06116014906541353,
+            "awt_s": 191.1534634869221,
+            "swt_s": 182.03374734134638,
+            "readiness_delay_s_per_trip": 0.08778625954198473,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.3358778625954197,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -1.2912,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        }
+      ]
+    },
+    "ood_hf_surge": {
+      "means": {
+        "passengers_generated": 15759.875,
+        "passenger_unserved_rate": 0.000102,
+        "restricted_journey_s_per_pax": 855.197063,
+        "restricted_wait_s_per_pax": 238.665454,
+        "restricted_in_vehicle_s_per_pax": 616.531609,
+        "ewt_s": 9.464404,
+        "plan_cv2": 0.056648,
+        "raw_cv2": 0.065721,
+        "awt_s": 191.944843,
+        "swt_s": 182.48044,
+        "readiness_delay_s_per_trip": 0.743321,
+        "readiness_delay_p95_s": 0.0,
+        "hold_s_per_trip": 1.972805,
+        "trips_launched": 262.0,
+        "trips_completed": 262.0,
+        "physical_buses": 14.0
+      },
+      "per_day": [
+        {
+          "day": 2710101,
+          "scenario_tape_id": "3a3f33f0c376bf71",
+          "wall_s": 47.521,
+          "metrics": {
+            "passengers_generated": 15824,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 815.9765038383513,
+            "restricted_wait_s_per_pax": 204.81971667960684,
+            "restricted_in_vehicle_s_per_pax": 611.1567871587462,
+            "ewt_s": 10.053928703224384,
+            "plan_cv2": 0.05930476316561932,
+            "raw_cv2": 0.06565796782483427,
+            "awt_s": 192.0622415017266,
+            "swt_s": 182.00831279850223,
+            "readiness_delay_s_per_trip": 3.3396946564885495,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.099236641221374,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -2.2257,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710102,
+          "scenario_tape_id": "f943bda0412ea3d2",
+          "wall_s": 46.995,
+          "metrics": {
+            "passengers_generated": 15319,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 815.3509152624721,
+            "restricted_wait_s_per_pax": 202.9409015540018,
+            "restricted_in_vehicle_s_per_pax": 612.4100137084666,
+            "ewt_s": 8.784139267486044,
+            "plan_cv2": 0.05128785764921552,
+            "raw_cv2": 0.06333443043147131,
+            "awt_s": 191.55204249299865,
+            "swt_s": 182.7679032255126,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.6412213740458015,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -0.4892,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710103,
+          "scenario_tape_id": "c81f26c278c15637",
+          "wall_s": 47.904,
+          "metrics": {
+            "passengers_generated": 15469,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 843.5856089242025,
+            "restricted_wait_s_per_pax": 227.48935189401382,
+            "restricted_in_vehicle_s_per_pax": 616.0962570301895,
+            "ewt_s": 9.321411297806138,
+            "plan_cv2": 0.05609279181036018,
+            "raw_cv2": 0.06564966453503902,
+            "awt_s": 191.87022696050022,
+            "swt_s": 182.5488156626941,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.7557251908396947,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -4.2922,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710104,
+          "scenario_tape_id": "5ea857e6971df912",
+          "wall_s": 47.078,
+          "metrics": {
+            "passengers_generated": 15885,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 879.0695599251359,
+            "restricted_wait_s_per_pax": 263.7814264658976,
+            "restricted_in_vehicle_s_per_pax": 615.2881334592382,
+            "ewt_s": 9.254651350154965,
+            "plan_cv2": 0.05444628534420254,
+            "raw_cv2": 0.06362804190807218,
+            "awt_s": 191.42852958788245,
+            "swt_s": 182.17387823772745,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.9083969465648856,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -10.4699,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710105,
+          "scenario_tape_id": "cbbd878042797d0e",
+          "wall_s": 46.456,
+          "metrics": {
+            "passengers_generated": 16562,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 840.4434193518232,
+            "restricted_wait_s_per_pax": 222.84246536075577,
+            "restricted_in_vehicle_s_per_pax": 617.6009539910639,
+            "ewt_s": 10.214864548002453,
+            "plan_cv2": 0.06533604754856266,
+            "raw_cv2": 0.07236246428354617,
+            "awt_s": 192.7910501757047,
+            "swt_s": 182.57618562770222,
+            "readiness_delay_s_per_trip": 2.049618320610687,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.5,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -6.2387,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710106,
+          "scenario_tape_id": "409bd4874e434cea",
+          "wall_s": 47.763,
+          "metrics": {
+            "passengers_generated": 16004,
+            "passenger_unserved_rate": 0.0008122969257685578,
+            "restricted_journey_s_per_pax": 1005.5354043237072,
+            "restricted_wait_s_per_pax": 375.96236008476546,
+            "restricted_in_vehicle_s_per_pax": 629.5730442389403,
+            "ewt_s": 9.453101025649932,
+            "plan_cv2": 0.05681097200533007,
+            "raw_cv2": 0.0653382566964622,
+            "awt_s": 191.8492814236889,
+            "swt_s": 182.39618039803895,
+            "readiness_delay_s_per_trip": 0.5572519083969466,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.4618320610687023,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -19.452,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710107,
+          "scenario_tape_id": "6f6ac15d6b301eb9",
+          "wall_s": 47.303,
+          "metrics": {
+            "passengers_generated": 14963,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 811.187655565171,
+            "restricted_wait_s_per_pax": 195.44575888669834,
+            "restricted_in_vehicle_s_per_pax": 615.7418966784736,
+            "ewt_s": 9.929777510898298,
+            "plan_cv2": 0.05898023663873264,
+            "raw_cv2": 0.06965875210678688,
+            "awt_s": 192.78451399906595,
+            "swt_s": 182.85473648816765,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.9083969465648856,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": 1.1791,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710108,
+          "scenario_tape_id": "d3a13bca181e5e79",
+          "wall_s": 46.925,
+          "metrics": {
+            "passengers_generated": 16053,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 830.4274350104143,
+            "restricted_wait_s_per_pax": 216.04165042186563,
+            "restricted_in_vehicle_s_per_pax": 614.3857845885505,
+            "ewt_s": 8.703355108394785,
+            "plan_cv2": 0.05092614154064327,
+            "raw_cv2": 0.060141532940600345,
+            "awt_s": 191.22086151835447,
+            "swt_s": 182.5175064099597,
+            "readiness_delay_s_per_trip": 0.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 1.5076335877862594,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -3.7837,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        }
+      ]
+    },
+    "ood_congestion": {
+      "means": {
+        "passengers_generated": 15624.625,
+        "passenger_unserved_rate": 0.0,
+        "restricted_journey_s_per_pax": 917.19851,
+        "restricted_wait_s_per_pax": 234.629642,
+        "restricted_in_vehicle_s_per_pax": 682.568867,
+        "ewt_s": 17.070071,
+        "plan_cv2": 0.099595,
+        "raw_cv2": 0.104569,
+        "awt_s": 198.858459,
+        "swt_s": 181.788388,
+        "readiness_delay_s_per_trip": 5.360687,
+        "readiness_delay_p95_s": 7.00625,
+        "hold_s_per_trip": 4.048187,
+        "trips_launched": 262.0,
+        "trips_completed": 262.0,
+        "physical_buses": 14.0
+      },
+      "per_day": [
+        {
+          "day": 2710101,
+          "scenario_tape_id": "3a3f33f0c376bf71",
+          "wall_s": 48.817,
+          "metrics": {
+            "passengers_generated": 15755,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 896.0225775718096,
+            "restricted_wait_s_per_pax": 218.1286391395659,
+            "restricted_in_vehicle_s_per_pax": 677.8939384322438,
+            "ewt_s": 15.871883171932968,
+            "plan_cv2": 0.0926648220223168,
+            "raw_cv2": 0.09697132668187271,
+            "awt_s": 197.64484645077002,
+            "swt_s": 181.77296327883704,
+            "readiness_delay_s_per_trip": 5.3893129770992365,
+            "readiness_delay_p95_s": 7.599999999999909,
+            "hold_s_per_trip": 3.568702290076336,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -4.6421,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710102,
+          "scenario_tape_id": "f943bda0412ea3d2",
+          "wall_s": 48.416,
+          "metrics": {
+            "passengers_generated": 15162,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 883.9121844406964,
+            "restricted_wait_s_per_pax": 205.2666231690916,
+            "restricted_in_vehicle_s_per_pax": 678.6455612716001,
+            "ewt_s": 14.200578864126816,
+            "plan_cv2": 0.08203093286922014,
+            "raw_cv2": 0.09115912457015364,
+            "awt_s": 196.64486490026246,
+            "swt_s": 182.44428603613565,
+            "readiness_delay_s_per_trip": 1.0725190839694656,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 3.549618320610687,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -1.1042,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710103,
+          "scenario_tape_id": "c81f26c278c15637",
+          "wall_s": 48.9,
+          "metrics": {
+            "passengers_generated": 15367,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 918.9833953534472,
+            "restricted_wait_s_per_pax": 234.1905275197782,
+            "restricted_in_vehicle_s_per_pax": 684.7928678336696,
+            "ewt_s": 17.588438311423403,
+            "plan_cv2": 0.104079546387968,
+            "raw_cv2": 0.10742099451907547,
+            "awt_s": 199.2825774309485,
+            "swt_s": 181.69413911952512,
+            "readiness_delay_s_per_trip": 5.0,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 3.7022900763358777,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -6.2968,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710104,
+          "scenario_tape_id": "5ea857e6971df912",
+          "wall_s": 48.446,
+          "metrics": {
+            "passengers_generated": 15725,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 937.9260956986168,
+            "restricted_wait_s_per_pax": 254.84107185123978,
+            "restricted_in_vehicle_s_per_pax": 683.0850238473768,
+            "ewt_s": 18.01450548246447,
+            "plan_cv2": 0.10056633283800435,
+            "raw_cv2": 0.10493595825384534,
+            "awt_s": 198.74128311265036,
+            "swt_s": 180.7267776301859,
+            "readiness_delay_s_per_trip": 6.519083969465649,
+            "readiness_delay_p95_s": 1.8999999999999773,
+            "hold_s_per_trip": 4.541984732824427,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -10.444,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710105,
+          "scenario_tape_id": "cbbd878042797d0e",
+          "wall_s": 48.087,
+          "metrics": {
+            "passengers_generated": 16446,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 936.8293310628624,
+            "restricted_wait_s_per_pax": 254.32933106286018,
+            "restricted_in_vehicle_s_per_pax": 682.5,
+            "ewt_s": 21.918200362867186,
+            "plan_cv2": 0.1312002150276704,
+            "raw_cv2": 0.13055225908707083,
+            "awt_s": 203.07767452782863,
+            "swt_s": 181.15947416496147,
+            "readiness_delay_s_per_trip": 9.950381679389313,
+            "readiness_delay_p95_s": 46.5499999999999,
+            "hold_s_per_trip": 6.030534351145038,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -12.3377,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710106,
+          "scenario_tape_id": "409bd4874e434cea",
+          "wall_s": 47.777,
+          "metrics": {
+            "passengers_generated": 15750,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 995.6789382163269,
+            "restricted_wait_s_per_pax": 299.4765255179107,
+            "restricted_in_vehicle_s_per_pax": 696.2024126984127,
+            "ewt_s": 19.668340307871464,
+            "plan_cv2": 0.11613297633595716,
+            "raw_cv2": 0.12317559864627543,
+            "awt_s": 201.86421975961335,
+            "swt_s": 182.1958794517419,
+            "readiness_delay_s_per_trip": 7.4541984732824424,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 5.229007633587786,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -15.2958,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710107,
+          "scenario_tape_id": "6f6ac15d6b301eb9",
+          "wall_s": 48.687,
+          "metrics": {
+            "passengers_generated": 14875,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 879.8004077245381,
+            "restricted_wait_s_per_pax": 199.52269343882455,
+            "restricted_in_vehicle_s_per_pax": 680.2777142857143,
+            "ewt_s": 15.978988294529458,
+            "plan_cv2": 0.09454182753249762,
+            "raw_cv2": 0.09955742552290432,
+            "awt_s": 198.18934453096034,
+            "swt_s": 182.21035623643087,
+            "readiness_delay_s_per_trip": 5.511450381679389,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 3.072519083969466,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -0.3203,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710108,
+          "scenario_tape_id": "d3a13bca181e5e79",
+          "wall_s": 46.992,
+          "metrics": {
+            "passengers_generated": 15917,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 888.4351490922744,
+            "restricted_wait_s_per_pax": 211.28172822150927,
+            "restricted_in_vehicle_s_per_pax": 677.1534208707671,
+            "ewt_s": 13.319629262055415,
+            "plan_cv2": 0.07554141269887098,
+            "raw_cv2": 0.08278124467454015,
+            "awt_s": 195.4228591749836,
+            "swt_s": 182.1032299129282,
+            "readiness_delay_s_per_trip": 1.9885496183206106,
+            "readiness_delay_p95_s": 0.0,
+            "hold_s_per_trip": 2.6908396946564888,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 14
+          },
+          "rl_stats": {
+            "upper_return": -3.4218,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        }
+      ]
+    },
+    "null_flat_sanity": {
+      "means": {
+        "passengers_generated": 20761.375,
+        "passenger_unserved_rate": 0.001581,
+        "restricted_journey_s_per_pax": 1112.030823,
+        "restricted_wait_s_per_pax": 453.134789,
+        "restricted_in_vehicle_s_per_pax": 658.896034,
+        "ewt_s": 40.845777,
+        "plan_cv2": 0.227116,
+        "raw_cv2": 0.213174,
+        "awt_s": 220.033072,
+        "swt_s": 179.187296,
+        "readiness_delay_s_per_trip": 66.531966,
+        "readiness_delay_p95_s": 355.2125,
+        "hold_s_per_trip": 4.749523,
+        "trips_launched": 262.0,
+        "trips_completed": 262.0,
+        "physical_buses": 12.0
+      },
+      "per_day": [
+        {
+          "day": 2710101,
+          "scenario_tape_id": "3a3f33f0c376bf71",
+          "wall_s": 48.384,
+          "metrics": {
+            "passengers_generated": 20913,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 1018.894391218608,
+            "restricted_wait_s_per_pax": 355.2536892628942,
+            "restricted_in_vehicle_s_per_pax": 663.6407019557213,
+            "ewt_s": 54.93440096333579,
+            "plan_cv2": 0.3140931066750677,
+            "raw_cv2": 0.2867923972732624,
+            "awt_s": 233.7065130879856,
+            "swt_s": 178.77211212464982,
+            "readiness_delay_s_per_trip": 58.225190839694655,
+            "readiness_delay_p95_s": 411.24999999999983,
+            "hold_s_per_trip": 4.923664122137405,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -41.2,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710102,
+          "scenario_tape_id": "f943bda0412ea3d2",
+          "wall_s": 49.229,
+          "metrics": {
+            "passengers_generated": 20707,
+            "passenger_unserved_rate": 0.0032839136523880813,
+            "restricted_journey_s_per_pax": 1147.2983111525089,
+            "restricted_wait_s_per_pax": 497.4244037781908,
+            "restricted_in_vehicle_s_per_pax": 649.8739073743178,
+            "ewt_s": 30.203329669370298,
+            "plan_cv2": 0.16496691328219606,
+            "raw_cv2": 0.15637626775106758,
+            "awt_s": 209.55087415010144,
+            "swt_s": 179.34754448073113,
+            "readiness_delay_s_per_trip": 42.79389312977099,
+            "readiness_delay_p95_s": 244.84999999999997,
+            "hold_s_per_trip": 5.229007633587786,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -53.4685,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710103,
+          "scenario_tape_id": "c81f26c278c15637",
+          "wall_s": 46.808,
+          "metrics": {
+            "passengers_generated": 20331,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 1088.4008024928175,
+            "restricted_wait_s_per_pax": 423.08817645376485,
+            "restricted_in_vehicle_s_per_pax": 665.3126260390536,
+            "ewt_s": 50.1041840591684,
+            "plan_cv2": 0.2782791407709631,
+            "raw_cv2": 0.26070982471579135,
+            "awt_s": 229.56816288822,
+            "swt_s": 179.4639788290516,
+            "readiness_delay_s_per_trip": 167.27480916030535,
+            "readiness_delay_p95_s": 639.4999999999999,
+            "hold_s_per_trip": 6.488549618320611,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -62.132,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710104,
+          "scenario_tape_id": "5ea857e6971df912",
+          "wall_s": 48.337,
+          "metrics": {
+            "passengers_generated": 20607,
+            "passenger_unserved_rate": 0.0014072887853641967,
+            "restricted_journey_s_per_pax": 1017.6958683651643,
+            "restricted_wait_s_per_pax": 359.0872887562966,
+            "restricted_in_vehicle_s_per_pax": 658.6085796088707,
+            "ewt_s": 32.113292934937974,
+            "plan_cv2": 0.1763455199838037,
+            "raw_cv2": 0.16072232402213127,
+            "awt_s": 210.53168042281936,
+            "swt_s": 178.4183874878814,
+            "readiness_delay_s_per_trip": 47.152671755725194,
+            "readiness_delay_p95_s": 318.5999999999999,
+            "hold_s_per_trip": 2.8435114503816794,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -35.566,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710105,
+          "scenario_tape_id": "cbbd878042797d0e",
+          "wall_s": 47.954,
+          "metrics": {
+            "passengers_generated": 22311,
+            "passenger_unserved_rate": 0.0018376585540764644,
+            "restricted_journey_s_per_pax": 1309.6172854162826,
+            "restricted_wait_s_per_pax": 650.0859779894429,
+            "restricted_in_vehicle_s_per_pax": 659.5313074268298,
+            "ewt_s": 37.76979393955393,
+            "plan_cv2": 0.21083289164135097,
+            "raw_cv2": 0.19010329202226814,
+            "awt_s": 216.13131898565263,
+            "swt_s": 178.36152504609865,
+            "readiness_delay_s_per_trip": 58.66793893129771,
+            "readiness_delay_p95_s": 282.34999999999985,
+            "hold_s_per_trip": 4.255725190839694,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -79.2532,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710106,
+          "scenario_tape_id": "409bd4874e434cea",
+          "wall_s": 47.142,
+          "metrics": {
+            "passengers_generated": 19596,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 957.2597181732162,
+            "restricted_wait_s_per_pax": 294.6974605696227,
+            "restricted_in_vehicle_s_per_pax": 662.5622576035926,
+            "ewt_s": 45.97671613641493,
+            "plan_cv2": 0.26333118606012984,
+            "raw_cv2": 0.24928221889124996,
+            "awt_s": 225.3914071265693,
+            "swt_s": 179.41469099015436,
+            "readiness_delay_s_per_trip": 59.95038167938932,
+            "readiness_delay_p95_s": 365.95,
+            "hold_s_per_trip": 4.866412213740458,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -27.0538,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710107,
+          "scenario_tape_id": "6f6ac15d6b301eb9",
+          "wall_s": 46.03,
+          "metrics": {
+            "passengers_generated": 20220,
+            "passenger_unserved_rate": 0.0,
+            "restricted_journey_s_per_pax": 1007.8044385339434,
+            "restricted_wait_s_per_pax": 351.6567629652063,
+            "restricted_in_vehicle_s_per_pax": 656.1476755687438,
+            "ewt_s": 42.16785248767991,
+            "plan_cv2": 0.22314507093927669,
+            "raw_cv2": 0.22471172137180875,
+            "awt_s": 222.41049435507438,
+            "swt_s": 180.24264186739452,
+            "readiness_delay_s_per_trip": 56.99236641221374,
+            "readiness_delay_p95_s": 321.9,
+            "hold_s_per_trip": 5.209923664122138,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -38.3621,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        },
+        {
+          "day": 2710108,
+          "scenario_tape_id": "d3a13bca181e5e79",
+          "wall_s": 46.591,
+          "metrics": {
+            "passengers_generated": 21406,
+            "passenger_unserved_rate": 0.0061197795010744654,
+            "restricted_journey_s_per_pax": 1349.2757723325867,
+            "restricted_wait_s_per_pax": 693.7845549169118,
+            "restricted_in_vehicle_s_per_pax": 655.4912174156779,
+            "ewt_s": 33.49664345445692,
+            "plan_cv2": 0.18593078261568832,
+            "raw_cv2": 0.17669029096458083,
+            "awt_s": 212.97412694575488,
+            "swt_s": 179.47748349129796,
+            "readiness_delay_s_per_trip": 41.19847328244275,
+            "readiness_delay_p95_s": 257.29999999999984,
+            "hold_s_per_trip": 4.179389312977099,
+            "trips_launched": 262,
+            "trips_completed": 262,
+            "physical_buses": 12
+          },
+          "rl_stats": {
+            "upper_return": -77.0336,
+            "lower_reward_mean": 0.0,
+            "lower_cost_mean": 0.0
+          }
+        }
+      ]
+    }
+  },
+  "train_curve": [
+    {
+      "episode": 1,
+      "journey_s": 848.396,
+      "ewt_s": 10.954,
+      "readiness_s": 0.233
+    },
+    {
+      "episode": 2,
+      "journey_s": 912.95,
+      "ewt_s": 9.731,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 3,
+      "journey_s": 896.751,
+      "ewt_s": 11.577,
+      "readiness_s": 0.439
+    },
+    {
+      "episode": 4,
+      "journey_s": 863.972,
+      "ewt_s": 12.557,
+      "readiness_s": 3.294
+    },
+    {
+      "episode": 5,
+      "journey_s": 887.688,
+      "ewt_s": 9.839,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 6,
+      "journey_s": 822.498,
+      "ewt_s": 8.162,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 7,
+      "journey_s": 892.783,
+      "ewt_s": 12.873,
+      "readiness_s": 4.679
+    },
+    {
+      "episode": 8,
+      "journey_s": 827.178,
+      "ewt_s": 17.407,
+      "readiness_s": 100.424
+    },
+    {
+      "episode": 9,
+      "journey_s": 858.13,
+      "ewt_s": 18.334,
+      "readiness_s": 76.729
+    },
+    {
+      "episode": 10,
+      "journey_s": 844.237,
+      "ewt_s": 19.632,
+      "readiness_s": 40.538
+    },
+    {
+      "episode": 11,
+      "journey_s": 910.258,
+      "ewt_s": 13.027,
+      "readiness_s": 18.588
+    },
+    {
+      "episode": 12,
+      "journey_s": 847.597,
+      "ewt_s": 11.025,
+      "readiness_s": 2.244
+    },
+    {
+      "episode": 13,
+      "journey_s": 843.241,
+      "ewt_s": 12.444,
+      "readiness_s": 0.248
+    },
+    {
+      "episode": 14,
+      "journey_s": 885.871,
+      "ewt_s": 8.491,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 15,
+      "journey_s": 820.278,
+      "ewt_s": 8.806,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 16,
+      "journey_s": 826.918,
+      "ewt_s": 7.678,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 17,
+      "journey_s": 809.399,
+      "ewt_s": 9.639,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 18,
+      "journey_s": 805.166,
+      "ewt_s": 9.471,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 19,
+      "journey_s": 882.474,
+      "ewt_s": 9.282,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 20,
+      "journey_s": 839.206,
+      "ewt_s": 9.321,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 21,
+      "journey_s": 814.445,
+      "ewt_s": 7.318,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 22,
+      "journey_s": 806.183,
+      "ewt_s": 8.633,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 23,
+      "journey_s": 859.572,
+      "ewt_s": 9.853,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 24,
+      "journey_s": 820.819,
+      "ewt_s": 8.752,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 25,
+      "journey_s": 842.242,
+      "ewt_s": 8.33,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 26,
+      "journey_s": 1022.852,
+      "ewt_s": 11.654,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 27,
+      "journey_s": 820.637,
+      "ewt_s": 8.307,
+      "readiness_s": 0.046
+    },
+    {
+      "episode": 28,
+      "journey_s": 833.153,
+      "ewt_s": 9.554,
+      "readiness_s": 0.58
+    },
+    {
+      "episode": 29,
+      "journey_s": 841.676,
+      "ewt_s": 7.368,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 30,
+      "journey_s": 839.908,
+      "ewt_s": 9.039,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 31,
+      "journey_s": 887.53,
+      "ewt_s": 8.395,
+      "readiness_s": 0.05
+    },
+    {
+      "episode": 32,
+      "journey_s": 808.003,
+      "ewt_s": 9.417,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 33,
+      "journey_s": 839.521,
+      "ewt_s": 8.338,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 34,
+      "journey_s": 963.585,
+      "ewt_s": 9.412,
+      "readiness_s": 0.248
+    },
+    {
+      "episode": 35,
+      "journey_s": 833.881,
+      "ewt_s": 9.543,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 36,
+      "journey_s": 798.48,
+      "ewt_s": 8.076,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 37,
+      "journey_s": 876.566,
+      "ewt_s": 9.567,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 38,
+      "journey_s": 812.094,
+      "ewt_s": 9.088,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 39,
+      "journey_s": 808.549,
+      "ewt_s": 8.15,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 40,
+      "journey_s": 816.681,
+      "ewt_s": 14.176,
+      "readiness_s": 19.588
+    },
+    {
+      "episode": 41,
+      "journey_s": 825.385,
+      "ewt_s": 9.568,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 42,
+      "journey_s": 806.779,
+      "ewt_s": 13.098,
+      "readiness_s": 12.645
+    },
+    {
+      "episode": 43,
+      "journey_s": 808.761,
+      "ewt_s": 9.234,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 44,
+      "journey_s": 817.43,
+      "ewt_s": 15.276,
+      "readiness_s": 24.317
+    },
+    {
+      "episode": 45,
+      "journey_s": 813.916,
+      "ewt_s": 10.163,
+      "readiness_s": 0.248
+    },
+    {
+      "episode": 46,
+      "journey_s": 849.461,
+      "ewt_s": 9.588,
+      "readiness_s": 1.214
+    },
+    {
+      "episode": 47,
+      "journey_s": 803.478,
+      "ewt_s": 14.119,
+      "readiness_s": 26.34
+    },
+    {
+      "episode": 48,
+      "journey_s": 801.601,
+      "ewt_s": 9.494,
+      "readiness_s": 2.126
+    },
+    {
+      "episode": 49,
+      "journey_s": 817.708,
+      "ewt_s": 9.526,
+      "readiness_s": 1.962
+    },
+    {
+      "episode": 50,
+      "journey_s": 792.188,
+      "ewt_s": 9.089,
+      "readiness_s": 0.057
+    },
+    {
+      "episode": 51,
+      "journey_s": 885.467,
+      "ewt_s": 11.677,
+      "readiness_s": 40.573
+    },
+    {
+      "episode": 52,
+      "journey_s": 807.93,
+      "ewt_s": 10.061,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 53,
+      "journey_s": 806.644,
+      "ewt_s": 8.786,
+      "readiness_s": 0.595
+    },
+    {
+      "episode": 54,
+      "journey_s": 847.232,
+      "ewt_s": 8.523,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 55,
+      "journey_s": 811.401,
+      "ewt_s": 8.349,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 56,
+      "journey_s": 833.995,
+      "ewt_s": 13.073,
+      "readiness_s": 8.309
+    },
+    {
+      "episode": 57,
+      "journey_s": 814.682,
+      "ewt_s": 10.023,
+      "readiness_s": 0.496
+    },
+    {
+      "episode": 58,
+      "journey_s": 818.476,
+      "ewt_s": 10.565,
+      "readiness_s": 0.679
+    },
+    {
+      "episode": 59,
+      "journey_s": 820.684,
+      "ewt_s": 12.315,
+      "readiness_s": 1.622
+    },
+    {
+      "episode": 60,
+      "journey_s": 849.739,
+      "ewt_s": 10.501,
+      "readiness_s": 0.092
+    },
+    {
+      "episode": 61,
+      "journey_s": 805.347,
+      "ewt_s": 9.295,
+      "readiness_s": 0.061
+    },
+    {
+      "episode": 62,
+      "journey_s": 919.77,
+      "ewt_s": 7.978,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 63,
+      "journey_s": 821.336,
+      "ewt_s": 9.145,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 64,
+      "journey_s": 837.17,
+      "ewt_s": 8.602,
+      "readiness_s": 0.859
+    },
+    {
+      "episode": 65,
+      "journey_s": 810.588,
+      "ewt_s": 9.683,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 66,
+      "journey_s": 805.938,
+      "ewt_s": 9.544,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 67,
+      "journey_s": 819.507,
+      "ewt_s": 8.543,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 68,
+      "journey_s": 922.682,
+      "ewt_s": 8.381,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 69,
+      "journey_s": 855.167,
+      "ewt_s": 9.495,
+      "readiness_s": 0.027
+    },
+    {
+      "episode": 70,
+      "journey_s": 886.552,
+      "ewt_s": 10.474,
+      "readiness_s": 0.069
+    },
+    {
+      "episode": 71,
+      "journey_s": 810.387,
+      "ewt_s": 9.557,
+      "readiness_s": 0.809
+    },
+    {
+      "episode": 72,
+      "journey_s": 816.445,
+      "ewt_s": 8.812,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 73,
+      "journey_s": 864.475,
+      "ewt_s": 9.031,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 74,
+      "journey_s": 816.099,
+      "ewt_s": 8.832,
+      "readiness_s": 0.412
+    },
+    {
+      "episode": 75,
+      "journey_s": 804.182,
+      "ewt_s": 9.174,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 76,
+      "journey_s": 834.146,
+      "ewt_s": 8.399,
+      "readiness_s": 0.076
+    },
+    {
+      "episode": 77,
+      "journey_s": 815.551,
+      "ewt_s": 9.588,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 78,
+      "journey_s": 822.633,
+      "ewt_s": 10.765,
+      "readiness_s": 0.065
+    },
+    {
+      "episode": 79,
+      "journey_s": 800.326,
+      "ewt_s": 10.714,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 80,
+      "journey_s": 809.342,
+      "ewt_s": 8.353,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 81,
+      "journey_s": 858.731,
+      "ewt_s": 9.395,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 82,
+      "journey_s": 816.085,
+      "ewt_s": 8.968,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 83,
+      "journey_s": 815.804,
+      "ewt_s": 9.0,
+      "readiness_s": 0.256
+    },
+    {
+      "episode": 84,
+      "journey_s": 815.822,
+      "ewt_s": 9.703,
+      "readiness_s": 0.183
+    },
+    {
+      "episode": 85,
+      "journey_s": 920.576,
+      "ewt_s": 9.25,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 86,
+      "journey_s": 805.783,
+      "ewt_s": 11.455,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 87,
+      "journey_s": 791.636,
+      "ewt_s": 9.364,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 88,
+      "journey_s": 844.01,
+      "ewt_s": 10.301,
+      "readiness_s": 0.004
+    },
+    {
+      "episode": 89,
+      "journey_s": 801.145,
+      "ewt_s": 9.821,
+      "readiness_s": 0.145
+    },
+    {
+      "episode": 90,
+      "journey_s": 943.392,
+      "ewt_s": 8.322,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 91,
+      "journey_s": 799.491,
+      "ewt_s": 8.15,
+      "readiness_s": 0.004
+    },
+    {
+      "episode": 92,
+      "journey_s": 807.645,
+      "ewt_s": 9.125,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 93,
+      "journey_s": 814.551,
+      "ewt_s": 9.743,
+      "readiness_s": 0.454
+    },
+    {
+      "episode": 94,
+      "journey_s": 818.566,
+      "ewt_s": 9.621,
+      "readiness_s": 0.206
+    },
+    {
+      "episode": 95,
+      "journey_s": 808.599,
+      "ewt_s": 8.557,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 96,
+      "journey_s": 853.23,
+      "ewt_s": 8.352,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 97,
+      "journey_s": 813.601,
+      "ewt_s": 7.523,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 98,
+      "journey_s": 791.823,
+      "ewt_s": 7.629,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 99,
+      "journey_s": 813.985,
+      "ewt_s": 7.597,
+      "readiness_s": 0.031
+    },
+    {
+      "episode": 100,
+      "journey_s": 807.28,
+      "ewt_s": 8.462,
+      "readiness_s": 0.416
+    },
+    {
+      "episode": 101,
+      "journey_s": 853.843,
+      "ewt_s": 8.487,
+      "readiness_s": 0.366
+    },
+    {
+      "episode": 102,
+      "journey_s": 831.495,
+      "ewt_s": 9.525,
+      "readiness_s": 0.45
+    },
+    {
+      "episode": 103,
+      "journey_s": 902.741,
+      "ewt_s": 9.409,
+      "readiness_s": 0.389
+    },
+    {
+      "episode": 104,
+      "journey_s": 902.429,
+      "ewt_s": 8.426,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 105,
+      "journey_s": 816.357,
+      "ewt_s": 10.084,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 106,
+      "journey_s": 981.531,
+      "ewt_s": 9.652,
+      "readiness_s": 0.588
+    },
+    {
+      "episode": 107,
+      "journey_s": 807.15,
+      "ewt_s": 8.112,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 108,
+      "journey_s": 822.835,
+      "ewt_s": 10.198,
+      "readiness_s": 0.214
+    },
+    {
+      "episode": 109,
+      "journey_s": 816.636,
+      "ewt_s": 8.564,
+      "readiness_s": 1.374
+    },
+    {
+      "episode": 110,
+      "journey_s": 809.689,
+      "ewt_s": 8.289,
+      "readiness_s": 0.179
+    },
+    {
+      "episode": 111,
+      "journey_s": 836.676,
+      "ewt_s": 9.289,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 112,
+      "journey_s": 804.37,
+      "ewt_s": 9.922,
+      "readiness_s": 1.656
+    },
+    {
+      "episode": 113,
+      "journey_s": 825.297,
+      "ewt_s": 9.241,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 114,
+      "journey_s": 820.351,
+      "ewt_s": 8.733,
+      "readiness_s": 1.149
+    },
+    {
+      "episode": 115,
+      "journey_s": 832.096,
+      "ewt_s": 8.374,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 116,
+      "journey_s": 835.422,
+      "ewt_s": 8.535,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 117,
+      "journey_s": 810.811,
+      "ewt_s": 8.942,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 118,
+      "journey_s": 832.891,
+      "ewt_s": 8.59,
+      "readiness_s": 6.195
+    },
+    {
+      "episode": 119,
+      "journey_s": 815.618,
+      "ewt_s": 9.067,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 120,
+      "journey_s": 844.156,
+      "ewt_s": 8.358,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 121,
+      "journey_s": 991.35,
+      "ewt_s": 10.257,
+      "readiness_s": 1.218
+    },
+    {
+      "episode": 122,
+      "journey_s": 845.449,
+      "ewt_s": 8.609,
+      "readiness_s": 1.431
+    },
+    {
+      "episode": 123,
+      "journey_s": 812.608,
+      "ewt_s": 10.138,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 124,
+      "journey_s": 869.568,
+      "ewt_s": 7.926,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 125,
+      "journey_s": 823.877,
+      "ewt_s": 8.455,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 126,
+      "journey_s": 941.966,
+      "ewt_s": 8.627,
+      "readiness_s": 0.229
+    },
+    {
+      "episode": 127,
+      "journey_s": 840.112,
+      "ewt_s": 10.462,
+      "readiness_s": 8.492
+    },
+    {
+      "episode": 128,
+      "journey_s": 837.815,
+      "ewt_s": 11.191,
+      "readiness_s": 1.748
+    },
+    {
+      "episode": 129,
+      "journey_s": 976.262,
+      "ewt_s": 9.008,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 130,
+      "journey_s": 855.479,
+      "ewt_s": 9.231,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 131,
+      "journey_s": 839.671,
+      "ewt_s": 8.75,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 132,
+      "journey_s": 815.786,
+      "ewt_s": 10.161,
+      "readiness_s": 0.156
+    },
+    {
+      "episode": 133,
+      "journey_s": 848.766,
+      "ewt_s": 8.546,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 134,
+      "journey_s": 855.668,
+      "ewt_s": 9.013,
+      "readiness_s": 1.172
+    },
+    {
+      "episode": 135,
+      "journey_s": 821.803,
+      "ewt_s": 10.664,
+      "readiness_s": 0.599
+    },
+    {
+      "episode": 136,
+      "journey_s": 842.666,
+      "ewt_s": 10.271,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 137,
+      "journey_s": 803.325,
+      "ewt_s": 9.145,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 138,
+      "journey_s": 884.798,
+      "ewt_s": 8.286,
+      "readiness_s": 0.05
+    },
+    {
+      "episode": 139,
+      "journey_s": 817.294,
+      "ewt_s": 6.787,
+      "readiness_s": 0.267
+    },
+    {
+      "episode": 140,
+      "journey_s": 854.179,
+      "ewt_s": 8.702,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 141,
+      "journey_s": 815.993,
+      "ewt_s": 9.164,
+      "readiness_s": 0.313
+    },
+    {
+      "episode": 142,
+      "journey_s": 816.759,
+      "ewt_s": 7.581,
+      "readiness_s": 0.237
+    },
+    {
+      "episode": 143,
+      "journey_s": 802.784,
+      "ewt_s": 8.848,
+      "readiness_s": 1.355
+    },
+    {
+      "episode": 144,
+      "journey_s": 799.704,
+      "ewt_s": 8.561,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 145,
+      "journey_s": 812.435,
+      "ewt_s": 9.978,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 146,
+      "journey_s": 808.08,
+      "ewt_s": 9.47,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 147,
+      "journey_s": 835.156,
+      "ewt_s": 9.022,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 148,
+      "journey_s": 798.629,
+      "ewt_s": 8.719,
+      "readiness_s": 0.645
+    },
+    {
+      "episode": 149,
+      "journey_s": 815.142,
+      "ewt_s": 10.316,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 150,
+      "journey_s": 806.014,
+      "ewt_s": 8.668,
+      "readiness_s": 0.061
+    },
+    {
+      "episode": 151,
+      "journey_s": 898.042,
+      "ewt_s": 8.014,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 152,
+      "journey_s": 842.707,
+      "ewt_s": 8.742,
+      "readiness_s": 1.45
+    },
+    {
+      "episode": 153,
+      "journey_s": 798.66,
+      "ewt_s": 8.664,
+      "readiness_s": 0.057
+    },
+    {
+      "episode": 154,
+      "journey_s": 827.554,
+      "ewt_s": 9.002,
+      "readiness_s": 0.122
+    },
+    {
+      "episode": 155,
+      "journey_s": 801.092,
+      "ewt_s": 9.212,
+      "readiness_s": 0.088
+    },
+    {
+      "episode": 156,
+      "journey_s": 868.428,
+      "ewt_s": 9.295,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 157,
+      "journey_s": 817.863,
+      "ewt_s": 9.119,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 158,
+      "journey_s": 810.895,
+      "ewt_s": 8.424,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 159,
+      "journey_s": 847.33,
+      "ewt_s": 8.59,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 160,
+      "journey_s": 842.555,
+      "ewt_s": 7.856,
+      "readiness_s": 0.107
+    },
+    {
+      "episode": 161,
+      "journey_s": 818.875,
+      "ewt_s": 9.302,
+      "readiness_s": 0.656
+    },
+    {
+      "episode": 162,
+      "journey_s": 825.05,
+      "ewt_s": 7.626,
+      "readiness_s": 0.26
+    },
+    {
+      "episode": 163,
+      "journey_s": 835.335,
+      "ewt_s": 7.968,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 164,
+      "journey_s": 810.764,
+      "ewt_s": 9.305,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 165,
+      "journey_s": 809.393,
+      "ewt_s": 8.405,
+      "readiness_s": 0.191
+    },
+    {
+      "episode": 166,
+      "journey_s": 825.363,
+      "ewt_s": 9.982,
+      "readiness_s": 4.695
+    },
+    {
+      "episode": 167,
+      "journey_s": 823.229,
+      "ewt_s": 9.212,
+      "readiness_s": 0.508
+    },
+    {
+      "episode": 168,
+      "journey_s": 796.557,
+      "ewt_s": 12.151,
+      "readiness_s": 11.153
+    },
+    {
+      "episode": 169,
+      "journey_s": 824.713,
+      "ewt_s": 9.171,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 170,
+      "journey_s": 808.909,
+      "ewt_s": 8.799,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 171,
+      "journey_s": 852.284,
+      "ewt_s": 8.67,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 172,
+      "journey_s": 804.445,
+      "ewt_s": 9.589,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 173,
+      "journey_s": 816.209,
+      "ewt_s": 9.609,
+      "readiness_s": 1.26
+    },
+    {
+      "episode": 174,
+      "journey_s": 804.732,
+      "ewt_s": 9.033,
+      "readiness_s": 0.004
+    },
+    {
+      "episode": 175,
+      "journey_s": 815.539,
+      "ewt_s": 9.336,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 176,
+      "journey_s": 836.509,
+      "ewt_s": 8.812,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 177,
+      "journey_s": 826.102,
+      "ewt_s": 8.623,
+      "readiness_s": 0.027
+    },
+    {
+      "episode": 178,
+      "journey_s": 835.127,
+      "ewt_s": 7.674,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 179,
+      "journey_s": 798.54,
+      "ewt_s": 7.475,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 180,
+      "journey_s": 812.825,
+      "ewt_s": 10.858,
+      "readiness_s": 0.878
+    },
+    {
+      "episode": 181,
+      "journey_s": 828.255,
+      "ewt_s": 9.293,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 182,
+      "journey_s": 796.832,
+      "ewt_s": 7.632,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 183,
+      "journey_s": 864.117,
+      "ewt_s": 8.304,
+      "readiness_s": 0.156
+    },
+    {
+      "episode": 184,
+      "journey_s": 840.266,
+      "ewt_s": 7.749,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 185,
+      "journey_s": 851.437,
+      "ewt_s": 7.111,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 186,
+      "journey_s": 815.28,
+      "ewt_s": 7.253,
+      "readiness_s": 0.008
+    },
+    {
+      "episode": 187,
+      "journey_s": 848.274,
+      "ewt_s": 7.794,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 188,
+      "journey_s": 810.81,
+      "ewt_s": 9.04,
+      "readiness_s": 0.141
+    },
+    {
+      "episode": 189,
+      "journey_s": 849.254,
+      "ewt_s": 8.238,
+      "readiness_s": 0.256
+    },
+    {
+      "episode": 190,
+      "journey_s": 844.999,
+      "ewt_s": 7.979,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 191,
+      "journey_s": 873.702,
+      "ewt_s": 7.138,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 192,
+      "journey_s": 823.854,
+      "ewt_s": 8.42,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 193,
+      "journey_s": 811.164,
+      "ewt_s": 9.675,
+      "readiness_s": 0.401
+    },
+    {
+      "episode": 194,
+      "journey_s": 802.075,
+      "ewt_s": 8.657,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 195,
+      "journey_s": 801.47,
+      "ewt_s": 9.498,
+      "readiness_s": 1.027
+    },
+    {
+      "episode": 196,
+      "journey_s": 817.832,
+      "ewt_s": 8.934,
+      "readiness_s": 0.565
+    },
+    {
+      "episode": 197,
+      "journey_s": 825.453,
+      "ewt_s": 8.136,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 198,
+      "journey_s": 816.02,
+      "ewt_s": 8.347,
+      "readiness_s": 0.0
+    },
+    {
+      "episode": 199,
+      "journey_s": 803.489,
+      "ewt_s": 10.6,
+      "readiness_s": 1.954
+    },
+    {
+      "episode": 200,
+      "journey_s": 866.512,
+      "ewt_s": 11.449,
+      "readiness_s": 2.069
+    }
+  ]
+}

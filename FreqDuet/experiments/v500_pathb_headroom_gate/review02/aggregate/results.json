@@ -1,0 +1,1407 @@
+{
+  "completed": true,
+  "experiment": "v500_pathb_headroom_gate_rev02",
+  "by_corridor": {
+    "tidal_bimodal": {
+      "n_days": 8,
+      "arm_means": {
+        "A0_fixed_nohold": {
+          "passengers_generated": 15166.125,
+          "passenger_unserved_rate": 5.8e-05,
+          "restricted_journey_s_per_pax": 838.406038,
+          "restricted_wait_s_per_pax": 225.796429,
+          "restricted_in_vehicle_s_per_pax": 612.609609,
+          "ewt_s": 8.998671,
+          "plan_cv2": 0.05126,
+          "raw_cv2": 0.051395,
+          "awt_s": 188.998671,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.121183,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A1_fixed_bilateral": {
+          "passengers_generated": 15166.125,
+          "passenger_unserved_rate": 5.8e-05,
+          "restricted_journey_s_per_pax": 873.851493,
+          "restricted_wait_s_per_pax": 222.413931,
+          "restricted_in_vehicle_s_per_pax": 651.437561,
+          "ewt_s": 3.375235,
+          "plan_cv2": 0.020094,
+          "raw_cv2": 0.020145,
+          "awt_s": 183.375235,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.300095,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 113.237118,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A2_lf_quota_nohold": {
+          "passengers_generated": 15166.125,
+          "passenger_unserved_rate": 0.003014,
+          "restricted_journey_s_per_pax": 929.008443,
+          "restricted_wait_s_per_pax": 318.136179,
+          "restricted_in_vehicle_s_per_pax": 610.872264,
+          "ewt_s": 16.499895,
+          "plan_cv2": 0.138081,
+          "raw_cv2": 0.145318,
+          "awt_s": 206.094983,
+          "swt_s": 189.595089,
+          "readiness_delay_s_per_trip": 19.892176,
+          "readiness_delay_p95_s": 172.8,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A3_lf_quota_unbudgeted_hold": {
+          "passengers_generated": 15166.125,
+          "passenger_unserved_rate": 0.003268,
+          "restricted_journey_s_per_pax": 982.074474,
+          "restricted_wait_s_per_pax": 309.507885,
+          "restricted_in_vehicle_s_per_pax": 672.566589,
+          "ewt_s": 2.965474,
+          "plan_cv2": 0.027263,
+          "raw_cv2": 0.067383,
+          "awt_s": 192.066555,
+          "swt_s": 189.101081,
+          "readiness_delay_s_per_trip": 119.277672,
+          "readiness_delay_p95_s": 617.36875,
+          "hold_s_per_trip": 172.535782,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A4_lf_quota_turnaround_hf_hold": {
+          "passengers_generated": 15166.125,
+          "passenger_unserved_rate": 0.003149,
+          "restricted_journey_s_per_pax": 948.104052,
+          "restricted_wait_s_per_pax": 317.607439,
+          "restricted_in_vehicle_s_per_pax": 630.496614,
+          "ewt_s": 14.102286,
+          "plan_cv2": 0.12689,
+          "raw_cv2": 0.13118,
+          "awt_s": 203.548628,
+          "swt_s": 189.446343,
+          "readiness_delay_s_per_trip": 23.456107,
+          "readiness_delay_p95_s": 191.325,
+          "hold_s_per_trip": 52.027672,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        }
+      },
+      "paired_contrasts": {
+        "A4_minus_A1_fixed_bilateral": {
+          "restricted_journey_s_per_pax": {
+            "mean": 74.25256,
+            "ci95": [
+              20.548377,
+              128.059729
+            ],
+            "days_improved": 2
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 95.193507,
+            "ci95": [
+              41.028552,
+              149.720021
+            ],
+            "days_improved": 1
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -20.940948,
+            "ci95": [
+              -22.637928,
+              -19.374677
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 10.727051,
+            "ci95": [
+              7.138573,
+              14.221425
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.106796,
+            "ci95": [
+              0.06997,
+              0.143755
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.111035,
+            "ci95": [
+              0.089698,
+              0.131044
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 23.156011,
+            "ci95": [
+              15.574427,
+              32.592211
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": -61.209447,
+            "ci95": [
+              -62.655057,
+              -59.606333
+            ],
+            "days_improved": 8
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.003091,
+            "ci95": [
+              0.000856,
+              0.005667
+            ],
+            "days_improved": 1
+          }
+        },
+        "A4_minus_A0_fixed_nohold": {
+          "restricted_journey_s_per_pax": {
+            "mean": 109.698014,
+            "ci95": [
+              56.400154,
+              163.630902
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 91.81101,
+            "ci95": [
+              38.377802,
+              146.115367
+            ],
+            "days_improved": 1
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 17.887004,
+            "ci95": [
+              16.676159,
+              18.934561
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": 5.103614,
+            "ci95": [
+              1.302004,
+              8.881416
+            ],
+            "days_improved": 2
+          },
+          "plan_cv2": {
+            "mean": 0.075629,
+            "ci95": [
+              0.03752,
+              0.114235
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.079786,
+            "ci95": [
+              0.057531,
+              0.100436
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 23.334924,
+            "ci95": [
+              15.751765,
+              32.735258
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 52.027672,
+            "ci95": [
+              50.496183,
+              53.549797
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.003091,
+            "ci95": [
+              0.000856,
+              0.005667
+            ],
+            "days_improved": 1
+          }
+        },
+        "A2_minus_A0_pure_lf_gain": {
+          "restricted_journey_s_per_pax": {
+            "mean": 90.602406,
+            "ci95": [
+              39.602804,
+              141.602007
+            ],
+            "days_improved": 1
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 92.339751,
+            "ci95": [
+              41.152677,
+              143.413789
+            ],
+            "days_improved": 1
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -1.737345,
+            "ci95": [
+              -3.169384,
+              -0.526748
+            ],
+            "days_improved": 6
+          },
+          "ewt_s": {
+            "mean": 7.501223,
+            "ci95": [
+              5.292418,
+              10.001547
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.08682,
+            "ci95": [
+              0.062609,
+              0.114829
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.093923,
+            "ci95": [
+              0.079362,
+              0.109208
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 19.770992,
+            "ci95": [
+              14.485687,
+              25.858934
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.002956,
+            "ci95": [
+              0.000903,
+              0.005181
+            ],
+            "days_improved": 1
+          }
+        },
+        "A3_minus_A2_unbudgeted_leakage": {
+          "restricted_journey_s_per_pax": {
+            "mean": 53.066031,
+            "ci95": [
+              42.196924,
+              62.741152
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": -8.628294,
+            "ci95": [
+              -19.275428,
+              1.651667
+            ],
+            "days_improved": 5
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 61.694325,
+            "ci95": [
+              60.191077,
+              63.117286
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": -13.534421,
+            "ci95": [
+              -16.505773,
+              -11.052991
+            ],
+            "days_improved": 8
+          },
+          "plan_cv2": {
+            "mean": -0.110817,
+            "ci95": [
+              -0.138314,
+              -0.08702
+            ],
+            "days_improved": 8
+          },
+          "raw_cv2": {
+            "mean": -0.077935,
+            "ci95": [
+              -0.093164,
+              -0.064886
+            ],
+            "days_improved": 8
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 99.385496,
+            "ci95": [
+              61.540553,
+              140.290088
+            ],
+            "days_improved": 1
+          },
+          "hold_s_per_trip": {
+            "mean": 172.535782,
+            "ci95": [
+              169.864027,
+              175.248092
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.000254,
+            "ci95": [
+              5.7e-05,
+              0.000486
+            ],
+            "days_improved": 0
+          }
+        },
+        "A4_minus_A3_budget_repair": {
+          "restricted_journey_s_per_pax": {
+            "mean": -33.970422,
+            "ci95": [
+              -50.730436,
+              -19.428271
+            ],
+            "days_improved": 8
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 8.099553,
+            "ci95": [
+              -9.66696,
+              23.417106
+            ],
+            "days_improved": 1
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -42.069975,
+            "ci95": [
+              -43.691789,
+              -40.391784
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 11.136812,
+            "ci95": [
+              7.60158,
+              14.756095
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.099626,
+            "ci95": [
+              0.063554,
+              0.134743
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.063797,
+            "ci95": [
+              0.043524,
+              0.083896
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": -95.821565,
+            "ci95": [
+              -138.582192,
+              -58.169287
+            ],
+            "days_improved": 7
+          },
+          "hold_s_per_trip": {
+            "mean": -120.508111,
+            "ci95": [
+              -123.256262,
+              -117.853053
+            ],
+            "days_improved": 8
+          },
+          "passenger_unserved_rate": {
+            "mean": -0.000119,
+            "ci95": [
+              -0.000803,
+              0.000411
+            ],
+            "days_improved": 2
+          }
+        }
+      }
+    },
+    "mbta_route111_wkdy": {
+      "n_days": 8,
+      "arm_means": {
+        "A0_fixed_nohold": {
+          "passengers_generated": 9021.0,
+          "passenger_unserved_rate": 5.6e-05,
+          "restricted_journey_s_per_pax": 1145.959011,
+          "restricted_wait_s_per_pax": 217.696027,
+          "restricted_in_vehicle_s_per_pax": 928.262985,
+          "ewt_s": 11.770968,
+          "plan_cv2": 0.066192,
+          "raw_cv2": 0.066283,
+          "awt_s": 191.770968,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.318702,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A1_fixed_bilateral": {
+          "passengers_generated": 9021.0,
+          "passenger_unserved_rate": 5.6e-05,
+          "restricted_journey_s_per_pax": 1176.503952,
+          "restricted_wait_s_per_pax": 217.473685,
+          "restricted_in_vehicle_s_per_pax": 959.030266,
+          "ewt_s": 5.739334,
+          "plan_cv2": 0.032663,
+          "raw_cv2": 0.032706,
+          "awt_s": 185.739334,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 0.526718,
+          "readiness_delay_p95_s": 0.0,
+          "hold_s_per_trip": 81.739027,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A2_lf_quota_nohold": {
+          "passengers_generated": 9021.0,
+          "passenger_unserved_rate": 5.6e-05,
+          "restricted_journey_s_per_pax": 1156.822564,
+          "restricted_wait_s_per_pax": 223.986941,
+          "restricted_in_vehicle_s_per_pax": 932.835622,
+          "ewt_s": 17.926482,
+          "plan_cv2": 0.137639,
+          "raw_cv2": 0.161548,
+          "awt_s": 209.002576,
+          "swt_s": 191.076094,
+          "readiness_delay_s_per_trip": 24.408397,
+          "readiness_delay_p95_s": 189.4625,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A3_lf_quota_unbudgeted_hold": {
+          "passengers_generated": 9021.0,
+          "passenger_unserved_rate": 5.6e-05,
+          "restricted_journey_s_per_pax": 1199.127589,
+          "restricted_wait_s_per_pax": 218.486424,
+          "restricted_in_vehicle_s_per_pax": 980.641165,
+          "ewt_s": 6.886899,
+          "plan_cv2": 0.055489,
+          "raw_cv2": 0.097778,
+          "awt_s": 197.539084,
+          "swt_s": 190.652185,
+          "readiness_delay_s_per_trip": 57.805344,
+          "readiness_delay_p95_s": 385.15,
+          "hold_s_per_trip": 115.808683,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        },
+        "A4_lf_quota_turnaround_hf_hold": {
+          "passengers_generated": 9021.0,
+          "passenger_unserved_rate": 5.6e-05,
+          "restricted_journey_s_per_pax": 1173.88936,
+          "restricted_wait_s_per_pax": 221.670691,
+          "restricted_in_vehicle_s_per_pax": 952.218669,
+          "ewt_s": 12.245989,
+          "plan_cv2": 0.099611,
+          "raw_cv2": 0.12858,
+          "awt_s": 203.075167,
+          "swt_s": 190.829178,
+          "readiness_delay_s_per_trip": 23.945611,
+          "readiness_delay_p95_s": 205.70625,
+          "hold_s_per_trip": 48.167939,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 14.0
+        }
+      },
+      "paired_contrasts": {
+        "A4_minus_A1_fixed_bilateral": {
+          "restricted_journey_s_per_pax": {
+            "mean": -2.614592,
+            "ci95": [
+              -15.662911,
+              7.634393
+            ],
+            "days_improved": 4
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 4.197005,
+            "ci95": [
+              -7.803122,
+              12.90926
+            ],
+            "days_improved": 2
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -6.811597,
+            "ci95": [
+              -8.558645,
+              -4.912434
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 6.506655,
+            "ci95": [
+              4.162497,
+              9.17399
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.066948,
+            "ci95": [
+              0.045085,
+              0.091853
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.095874,
+            "ci95": [
+              0.084276,
+              0.108855
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 23.418893,
+            "ci95": [
+              15.882467,
+              32.397901
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": -33.571088,
+            "ci95": [
+              -36.035305,
+              -30.908635
+            ],
+            "days_improved": 8
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          }
+        },
+        "A4_minus_A0_fixed_nohold": {
+          "restricted_journey_s_per_pax": {
+            "mean": 27.930349,
+            "ci95": [
+              14.91786,
+              37.836387
+            ],
+            "days_improved": 1
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 3.974664,
+            "ci95": [
+              -7.518788,
+              12.565616
+            ],
+            "days_improved": 1
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 23.955684,
+            "ci95": [
+              22.232491,
+              25.745545
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": 0.475021,
+            "ci95": [
+              -1.827702,
+              3.036897
+            ],
+            "days_improved": 4
+          },
+          "plan_cv2": {
+            "mean": 0.033419,
+            "ci95": [
+              0.012552,
+              0.057176
+            ],
+            "days_improved": 1
+          },
+          "raw_cv2": {
+            "mean": 0.062297,
+            "ci95": [
+              0.050774,
+              0.074685
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 23.626908,
+            "ci95": [
+              16.211295,
+              32.587536
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 48.167939,
+            "ci95": [
+              45.849177,
+              50.448533
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          }
+        },
+        "A2_minus_A0_pure_lf_gain": {
+          "restricted_journey_s_per_pax": {
+            "mean": 10.863552,
+            "ci95": [
+              -2.458241,
+              21.611443
+            ],
+            "days_improved": 1
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 6.290915,
+            "ci95": [
+              -5.265782,
+              15.246145
+            ],
+            "days_improved": 1
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 4.572637,
+            "ci95": [
+              2.430601,
+              6.739504
+            ],
+            "days_improved": 1
+          },
+          "ewt_s": {
+            "mean": 6.155515,
+            "ci95": [
+              3.874427,
+              8.464809
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.071446,
+            "ci95": [
+              0.053256,
+              0.091323
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.095265,
+            "ci95": [
+              0.08426,
+              0.105874
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 24.089695,
+            "ci95": [
+              16.598056,
+              32.963383
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          }
+        },
+        "A3_minus_A2_unbudgeted_leakage": {
+          "restricted_journey_s_per_pax": {
+            "mean": 42.305025,
+            "ci95": [
+              37.97539,
+              46.9811
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": -5.500517,
+            "ci95": [
+              -8.232185,
+              -2.443563
+            ],
+            "days_improved": 7
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 47.805543,
+            "ci95": [
+              45.589677,
+              50.181654
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": -11.039583,
+            "ci95": [
+              -12.98357,
+              -9.174619
+            ],
+            "days_improved": 8
+          },
+          "plan_cv2": {
+            "mean": -0.08215,
+            "ci95": [
+              -0.097589,
+              -0.066836
+            ],
+            "days_improved": 8
+          },
+          "raw_cv2": {
+            "mean": -0.063771,
+            "ci95": [
+              -0.07435,
+              -0.053537
+            ],
+            "days_improved": 8
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 33.396947,
+            "ci95": [
+              21.868619,
+              48.317748
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 115.808683,
+            "ci95": [
+              112.655057,
+              118.709625
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          }
+        },
+        "A4_minus_A3_budget_repair": {
+          "restricted_journey_s_per_pax": {
+            "mean": -25.238229,
+            "ci95": [
+              -29.755742,
+              -20.895252
+            ],
+            "days_improved": 8
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 3.184267,
+            "ci95": [
+              -0.162106,
+              6.641683
+            ],
+            "days_improved": 2
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -28.422496,
+            "ci95": [
+              -30.515051,
+              -26.576401
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 5.35909,
+            "ci95": [
+              3.553298,
+              7.310686
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.044122,
+            "ci95": [
+              0.027742,
+              0.062187
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.030802,
+            "ci95": [
+              0.021392,
+              0.041714
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": -33.859733,
+            "ci95": [
+              -48.210926,
+              -22.964695
+            ],
+            "days_improved": 8
+          },
+          "hold_s_per_trip": {
+            "mean": -67.640744,
+            "ci95": [
+              -71.514909,
+              -63.549439
+            ],
+            "days_improved": 8
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          }
+        }
+      }
+    },
+    "flat_sanity": {
+      "n_days": 8,
+      "arm_means": {
+        "A0_fixed_nohold": {
+          "passengers_generated": 20288.375,
+          "passenger_unserved_rate": 5e-05,
+          "restricted_journey_s_per_pax": 1022.478454,
+          "restricted_wait_s_per_pax": 367.089269,
+          "restricted_in_vehicle_s_per_pax": 655.389185,
+          "ewt_s": 36.898813,
+          "plan_cv2": 0.202092,
+          "raw_cv2": 0.200497,
+          "awt_s": 216.898813,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 43.340649,
+          "readiness_delay_p95_s": 293.30625,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 12.0
+        },
+        "A1_fixed_bilateral": {
+          "passengers_generated": 20288.375,
+          "passenger_unserved_rate": 0.0,
+          "restricted_journey_s_per_pax": 1061.041057,
+          "restricted_wait_s_per_pax": 366.613053,
+          "restricted_in_vehicle_s_per_pax": 694.428004,
+          "ewt_s": 18.272924,
+          "plan_cv2": 0.097356,
+          "raw_cv2": 0.096465,
+          "awt_s": 198.272924,
+          "swt_s": 180.0,
+          "readiness_delay_s_per_trip": 86.200382,
+          "readiness_delay_p95_s": 414.00625,
+          "hold_s_per_trip": 122.511927,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 12.0
+        },
+        "A2_lf_quota_nohold": {
+          "passengers_generated": 20288.375,
+          "passenger_unserved_rate": 0.012426,
+          "restricted_journey_s_per_pax": 1235.17804,
+          "restricted_wait_s_per_pax": 586.215785,
+          "restricted_in_vehicle_s_per_pax": 648.962255,
+          "ewt_s": 66.078229,
+          "plan_cv2": 0.403933,
+          "raw_cv2": 0.374827,
+          "awt_s": 248.274775,
+          "swt_s": 182.196546,
+          "readiness_delay_s_per_trip": 155.414599,
+          "readiness_delay_p95_s": 659.18125,
+          "hold_s_per_trip": 0.0,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 12.0
+        },
+        "A3_lf_quota_unbudgeted_hold": {
+          "passengers_generated": 20288.375,
+          "passenger_unserved_rate": 0.001196,
+          "restricted_journey_s_per_pax": 1095.911869,
+          "restricted_wait_s_per_pax": 367.412843,
+          "restricted_in_vehicle_s_per_pax": 728.499026,
+          "ewt_s": 8.362655,
+          "plan_cv2": 0.094489,
+          "raw_cv2": 0.076539,
+          "awt_s": 194.298056,
+          "swt_s": 185.9354,
+          "readiness_delay_s_per_trip": 1325.855916,
+          "readiness_delay_p95_s": 2477.31875,
+          "hold_s_per_trip": 222.604962,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 12.0
+        },
+        "A4_lf_quota_turnaround_hf_hold": {
+          "passengers_generated": 20288.375,
+          "passenger_unserved_rate": 0.012713,
+          "restricted_journey_s_per_pax": 1258.391164,
+          "restricted_wait_s_per_pax": 600.846624,
+          "restricted_in_vehicle_s_per_pax": 657.54454,
+          "ewt_s": 59.551527,
+          "plan_cv2": 0.368894,
+          "raw_cv2": 0.339234,
+          "awt_s": 241.846212,
+          "swt_s": 182.294685,
+          "readiness_delay_s_per_trip": 172.300573,
+          "readiness_delay_p95_s": 693.78125,
+          "hold_s_per_trip": 27.929389,
+          "trips_launched": 262.0,
+          "trips_completed": 262.0,
+          "physical_buses": 12.0
+        }
+      },
+      "paired_contrasts": {
+        "A4_minus_A1_fixed_bilateral": {
+          "restricted_journey_s_per_pax": {
+            "mean": 197.350107,
+            "ci95": [
+              107.43013,
+              296.922044
+            ],
+            "days_improved": 1
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 234.233571,
+            "ci95": [
+              142.128912,
+              336.260479
+            ],
+            "days_improved": 0
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -36.883465,
+            "ci95": [
+              -40.798873,
+              -33.344371
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 41.278603,
+            "ci95": [
+              33.196324,
+              49.994545
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.271538,
+            "ci95": [
+              0.214007,
+              0.333067
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.242769,
+            "ci95": [
+              0.199546,
+              0.289514
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 86.100191,
+            "ci95": [
+              42.199129,
+              129.990458
+            ],
+            "days_improved": 1
+          },
+          "hold_s_per_trip": {
+            "mean": -94.582538,
+            "ci95": [
+              -96.932312,
+              -92.087309
+            ],
+            "days_improved": 8
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.012713,
+            "ci95": [
+              0.008742,
+              0.017737
+            ],
+            "days_improved": 0
+          }
+        },
+        "A4_minus_A0_fixed_nohold": {
+          "restricted_journey_s_per_pax": {
+            "mean": 235.91271,
+            "ci95": [
+              145.911862,
+              334.689484
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 233.757355,
+            "ci95": [
+              143.297228,
+              335.073757
+            ],
+            "days_improved": 0
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 2.155354,
+            "ci95": [
+              -1.324317,
+              5.274304
+            ],
+            "days_improved": 3
+          },
+          "ewt_s": {
+            "mean": 22.652714,
+            "ci95": [
+              15.458648,
+              30.775662
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.166802,
+            "ci95": [
+              0.113686,
+              0.225668
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.138736,
+            "ci95": [
+              0.099529,
+              0.182505
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 128.959924,
+            "ci95": [
+              85.879771,
+              170.744036
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 27.929389,
+            "ci95": [
+              26.724714,
+              29.203304
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.012663,
+            "ci95": [
+              0.008679,
+              0.017736
+            ],
+            "days_improved": 0
+          }
+        },
+        "A2_minus_A0_pure_lf_gain": {
+          "restricted_journey_s_per_pax": {
+            "mean": 212.699586,
+            "ci95": [
+              118.155709,
+              314.122879
+            ],
+            "days_improved": 1
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 219.126516,
+            "ci95": [
+              123.128777,
+              323.426795
+            ],
+            "days_improved": 0
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -6.42693,
+            "ci95": [
+              -9.777235,
+              -3.544977
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 29.179416,
+            "ci95": [
+              23.277016,
+              35.565299
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.201841,
+            "ci95": [
+              0.161421,
+              0.245245
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.17433,
+            "ci95": [
+              0.141786,
+              0.209154
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 112.07395,
+            "ci95": [
+              70.980916,
+              157.916985
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.012377,
+            "ci95": [
+              0.008469,
+              0.017316
+            ],
+            "days_improved": 0
+          }
+        },
+        "A3_minus_A2_unbudgeted_leakage": {
+          "restricted_journey_s_per_pax": {
+            "mean": -139.266171,
+            "ci95": [
+              -222.711743,
+              -67.929658
+            ],
+            "days_improved": 8
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": -218.802942,
+            "ci95": [
+              -305.475825,
+              -145.099585
+            ],
+            "days_improved": 8
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": 79.536771,
+            "ci95": [
+              75.587069,
+              83.484536
+            ],
+            "days_improved": 0
+          },
+          "ewt_s": {
+            "mean": -57.715574,
+            "ci95": [
+              -64.129703,
+              -51.52962
+            ],
+            "days_improved": 8
+          },
+          "plan_cv2": {
+            "mean": -0.309445,
+            "ci95": [
+              -0.355211,
+              -0.261986
+            ],
+            "days_improved": 8
+          },
+          "raw_cv2": {
+            "mean": -0.298288,
+            "ci95": [
+              -0.334133,
+              -0.262787
+            ],
+            "days_improved": 8
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": 1170.441317,
+            "ci95": [
+              1112.719466,
+              1230.875477
+            ],
+            "days_improved": 0
+          },
+          "hold_s_per_trip": {
+            "mean": 222.604962,
+            "ci95": [
+              219.064885,
+              225.520038
+            ],
+            "days_improved": 0
+          },
+          "passenger_unserved_rate": {
+            "mean": -0.011231,
+            "ci95": [
+              -0.0155,
+              -0.007739
+            ],
+            "days_improved": 8
+          }
+        },
+        "A4_minus_A3_budget_repair": {
+          "restricted_journey_s_per_pax": {
+            "mean": 162.479295,
+            "ci95": [
+              95.04347,
+              248.262935
+            ],
+            "days_improved": 0
+          },
+          "restricted_wait_s_per_pax": {
+            "mean": 233.433781,
+            "ci95": [
+              163.906549,
+              323.080714
+            ],
+            "days_improved": 0
+          },
+          "restricted_in_vehicle_s_per_pax": {
+            "mean": -70.954487,
+            "ci95": [
+              -74.667445,
+              -67.401643
+            ],
+            "days_improved": 8
+          },
+          "ewt_s": {
+            "mean": 51.188872,
+            "ci95": [
+              43.06147,
+              60.102325
+            ],
+            "days_improved": 0
+          },
+          "plan_cv2": {
+            "mean": 0.274405,
+            "ci95": [
+              0.211599,
+              0.340756
+            ],
+            "days_improved": 0
+          },
+          "raw_cv2": {
+            "mean": 0.262694,
+            "ci95": [
+              0.215147,
+              0.314298
+            ],
+            "days_improved": 0
+          },
+          "readiness_delay_s_per_trip": {
+            "mean": -1153.555344,
+            "ci95": [
+              -1234.498092,
+              -1068.951419
+            ],
+            "days_improved": 8
+          },
+          "hold_s_per_trip": {
+            "mean": -194.675573,
+            "ci95": [
+              -197.750477,
+              -191.25
+            ],
+            "days_improved": 8
+          },
+          "passenger_unserved_rate": {
+            "mean": 0.011518,
+            "ci95": [
+              0.007932,
+              0.015863
+            ],
+            "days_improved": 0
+          }
+        }
+      }
+    }
+  }
+}

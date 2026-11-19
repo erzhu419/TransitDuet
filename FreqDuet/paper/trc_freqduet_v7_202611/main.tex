@@ -1,0 +1,51 @@
+\documentclass[preprint,12pt,authoryear,nopreprintline]{elsarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,multirow,array}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{proposition}{Proposition}
+\setlength{\emergencystretch}{2em}
+
+\journal{Transportation Research Part C: Emerging Technologies}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{FreqDuet: Frequency-Separated and Turnaround-Budgeted Bi-Level Constrained Reinforcement Learning for Non-Stationary Urban Bus Corridors}
+
+\author[aff1]{Anonymous Authors}
+\address[aff1]{Submitted to Transportation Research Part C: Emerging Technologies}
+
+\begin{abstract}
+Real-time control on high-frequency urban bus corridors spans two coupled authorities: slow-clock terminal headway allocation ($15\text{--}60\text{ min}$) to match diurnal tidal demand waves under fixed vehicle pools and daily trip quotas, and stop-event vehicle holding ($5\text{--}25\text{ s}$) to suppress bunching and absorb localized boarding shocks. Existing analytical rules equalize raw gaps regardless of onboard passenger occupancy or non-stationary timetable transitions, while unconstrained hierarchical reinforcement learning (HRL) suffers from cross-band automatic passenger counting (APC) confounding and late-training fleet starvation when cumulative stop holding exhausts terminal turnaround slack. We propose \textbf{FreqDuet}, a frequency-separated, turnaround-budgeted bi-level constrained Soft Actor-Critic (SAC) framework operating strictly on causal APC and automatic vehicle location (AVL) observations. FreqDuet pairs a headway-normalized causal APC rate feed---eliminating concave log-rate Jensen bias under intermittent arrivals---with an online damped Fourier Recursive Least Squares (Harmonic-RLS) decomposer and persistent shock promotion gate, routing smooth low-frequency diurnal forecasts to an upper slow-clock Ensemble SAC planner (equipped with a Newell-consistent quota potential) and localized high-frequency positive innovations to a lower stop-event Constrained Ensemble SAC controller. A causal first-in-first-out (FIFO) Turnaround Budget Ledger translates scheduled opposite-direction launches and vehicle arrival-time projections into hard per-trip holding masks alongside a zero-hold-advantage critic and Lagrangian safety dual. Because all rewards and costs are formulated in estimator-free physical person-seconds, matched-dimension five-way observation ablations cleanly isolate the causal value of frequency-to-authority alignment. Across an empirical Fall~2025 Boston MBTA Route~111 weekday corridor reconstructed from GTFS and stop-level APC records ($9{,}330\text{ pax/day}$) and a high-load bimodal tidal corridor ($15{,}660\text{ pax/day}$), FreqDuet reduces passenger journey time by $14.32\text{ s/pax}$ and $14.02\text{ s/pax}$ over no-hold operations, by $45.34\text{ s/pax}$ and $48.78\text{ s/pax}$ over bilateral headway equalization, and by $9.59\text{ s/pax}$ over unseparated no-frequency HRL on empirical APC data, while sustaining monotonic $200$-episode stability and outperforming rolling economic MPC by $28.16\text{ s/pax}$ under corridor-wide congestion.
+\end{abstract}
+
+\begin{keyword}
+public transit control \sep bus bunching \sep hierarchical reinforcement learning \sep constrained Markov decision process \sep frequency decomposition \sep turnaround slack
+\end{keyword}
+
+\end{frontmatter}
+
+\input{sec1_intro}
+\input{sec2_related}
+\input{sec3_problem}
+\input{sec4_method}
+\input{sec5_setup}
+\input{sec6_results}
+\input{sec7_conclusion}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{refs}
+
+\end{document}
