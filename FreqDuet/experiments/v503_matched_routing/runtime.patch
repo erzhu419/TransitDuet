@@ -1,0 +1,338 @@
+--- a/freqduet_v7_b1.py
++++ b/freqduet_v7_b1.py
+@@ -55,7 +55,8 @@
+ 
+ 
+ UPPER_STATE_DIM = 21
+-LOWER_STATE_DIM = 20
++LOWER_STATE_DIM = 19
++FIXED_RETENTION = 0.50
+ LOWER_ACTION_BINS = [0.0, 5.0, 10.0, 15.0, 20.0, 25.0]
+ LOWER_MAX_HOLD_S = 25.0
+ UPPER_GAMMA = 0.996
+@@ -63,12 +64,11 @@
+ 
+ 
+ def build_upper_action_candidates() -> np.ndarray:
+-    """30 discrete joint plans: 5 loop headway factors x 3 tilts x 2 budget tiers."""
++    """Fifteen timetable actions with one shared holding-budget retention."""
+     rows = []
+     for loop_factor in (0.78, 0.89, 1.00, 1.12, 1.24):
+         for dir_tilt_s in (-36.0, 0.0, 36.0):
+-            for budget_tier in (0.50, 0.90):
+-                rows.append([loop_factor, dir_tilt_s, budget_tier])
++            rows.append([loop_factor, dir_tilt_s, FIXED_RETENTION])
+     return np.asarray(rows, dtype=np.float32)
+ 
+ 
+@@ -246,7 +246,7 @@
+                 self.dir_raw_hist[d].append(tot_d)
+ 
+         def wrapped_update(_raw_apc_bin, od_arrivals=None):
+-            scale_counts = float(tracker.bin_interval_s) / 60.0
++            scale_counts = float(tracker.update_interval_s) / 60.0
+             held_counts = {k: v * scale_counts for k, v in self.rate_per_min.items()}
+             for d in (True, False):
+                 self.dir_raw_hist[d].append(
+@@ -591,7 +591,7 @@
+     def __init__(self, corridor_len_m: float, disable_budget: bool = False):
+         self.corridor_len_m = float(corridor_len_m)
+         self.disable_budget = bool(disable_budget)
+-        self.budget_retention = 0.85
++        self.budget_retention = FIXED_RETENTION
+         self.active_trips: Dict[Tuple[int, int], dict] = {}
+         self.completed_nonhold_s: Dict[bool, List[float]] = {True: [], False: []}
+         self.completed_usage_hist: Dict[bool, deque] = {
+@@ -723,6 +723,39 @@
+             self.active_trips[key]["hold_s"] += float(hold_s)
+ 
+ 
++def station_band(state, band: str) -> tuple[float, float]:
++    current = float(getattr(state, band))
++    return current, current - float(getattr(state, "prev_" + band))
++
++
++def band_for_head(band_mode: str, *, upper: bool) -> str:
++    if band_mode not in ("aligned", "swapped"):
++        raise ValueError(f"Unknown V503 arm: {band_mode}")
++    return "low" if (band_mode == "aligned") == upper else "high"
++
++
++def upper_band(env: env_bus, which: str, daily_pax_prior: float) -> list[float]:
++    tracker = env.frequency_tracker
++    scale = max(0.5 * daily_pax_prior / 783.0, 0.2)
++    features = []
++    for direction in (True, False):
++        vals = [station_band(tracker._get_local_state((int(st.station_id), direction)), which)
++                for st in env.stations
++                if st.station_type != 0 and st.od is not None and bool(st.direction) == direction]
++        rate, slope = np.asarray(vals, dtype=np.float64).T
++        features.extend(np.clip([rate.sum() / scale, np.sqrt(np.mean(rate**2)) * len(rate) / scale,
++                                 rate.std() * len(rate) / scale, slope.sum() * 5 / scale],
++                                -3.5, 3.5))
++    return features
++
++
++def lower_band(tracker, station: int, downstream: list[int], direction: bool, which: str) -> list[float]:
++    here, change = station_band(tracker._get_local_state((station, direction)), which)
++    nearby = [station_band(tracker._get_local_state((sid, direction)), which) for sid in downstream]
++    near, near_change = np.mean(nearby, axis=0) if nearby else (0.0, 0.0)
++    return np.clip(np.asarray([here, near, 5 * change, 5 * near_change]) / 3.0, -3.5, 3.5).tolist()
++
++
+ def build_upper_state(
+     env: env_bus,
+     now_s: float,
+@@ -765,74 +798,7 @@
+         readiness_norm,
+     ]  # 13 dims
+ 
+-    ref_half = max(0.5 * float(daily_pax_prior) / 783.0, 0.2)
+-    if band_mode == "aligned":
+-        band = [
+-            np.clip(lf_stats["now_up"] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["now_dn"] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["cur_up"] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["cur_dn"] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["slope_up"] / ref_half * 10.0, -2.0, 2.0),
+-            np.clip(lf_stats["slope_dn"] / ref_half * 10.0, -2.0, 2.0),
+-            np.clip(lf_stats["root_rem_mean"] / lf_stats["root_cur_tot"], 0.4, 2.2),
+-            np.clip((lf_stats["cur_up"] - lf_stats["cur_dn"]) / lf_stats["cur_tot"], -1.0, 1.0),
+-        ]
+-    elif band_mode == "raw":
+-        h_up = list(apc_feed.dir_raw_hist[True])
+-        h_dn = list(apc_feed.dir_raw_hist[False])
+-        band = [
+-            np.clip(h_up[-1] / ref_half, 0.0, 3.5),
+-            np.clip(h_dn[-1] / ref_half, 0.0, 3.5),
+-            np.clip(float(np.mean(h_up[-5:])) / ref_half, 0.0, 3.5),
+-            np.clip(float(np.mean(h_dn[-5:])) / ref_half, 0.0, 3.5),
+-            np.clip((h_up[-1] - h_up[-4]) / ref_half, -2.0, 2.0),
+-            np.clip((h_dn[-1] - h_dn[-4]) / ref_half, -2.0, 2.0),
+-            np.clip(float(np.mean(h_up[-15:])) / ref_half, 0.0, 3.5),
+-            np.clip(float(np.mean(h_dn[-15:])) / ref_half, 0.0, 3.5),
+-        ]
+-    elif band_mode == "swapped":
+-        # Upper receives only high-frequency residual statistics
+-        band = [
+-            np.clip(lf_stats["hf_pos_up"] / ref_half, 0.0, 3.0),
+-            np.clip(lf_stats["hf_pos_dn"] / ref_half, 0.0, 3.0),
+-            np.clip(lf_stats["hf_energy_up"] / ref_half, 0.0, 3.0),
+-            np.clip(lf_stats["hf_energy_dn"] / ref_half, 0.0, 3.0),
+-            np.clip(lf_stats["hf_max_up"] / max(ref_half * 0.2, 0.2), 0.0, 3.0),
+-            np.clip(lf_stats["hf_max_dn"] / max(ref_half * 0.2, 0.2), 0.0, 3.0),
+-            float(lf_stats["hf_frac_up"]),
+-            float(lf_stats["hf_frac_dn"]),
+-        ]
+-    elif band_mode == "all_band":
+-        h_up = list(apc_feed.dir_raw_hist[True])
+-        h_dn = list(apc_feed.dir_raw_hist[False])
+-        band = [
+-            np.clip(lf_stats["cur_up"] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["cur_dn"] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["hf_pos_up"] / ref_half, 0.0, 3.0),
+-            np.clip(lf_stats["hf_pos_dn"] / ref_half, 0.0, 3.0),
+-            np.clip(h_up[-1] / ref_half, 0.0, 3.5),
+-            np.clip(h_dn[-1] / ref_half, 0.0, 3.5),
+-            np.clip(lf_stats["root_rem_mean"] / lf_stats["root_cur_tot"], 0.4, 2.2),
+-            np.clip((lf_stats["hf_pos_up"] - lf_stats["hf_pos_dn"]) / ref_half, -2.0, 2.0),
+-        ]
+-    elif band_mode == "nofreq":
+-        h_up = list(apc_feed.dir_raw_hist[True])
+-        h_dn = list(apc_feed.dir_raw_hist[False])
+-        load_up = [len(b.passengers) / max(b.capacity, 1) for b in env.bus_all if b.on_route and bool(b.direction)]
+-        load_dn = [len(b.passengers) / max(b.capacity, 1) for b in env.bus_all if b.on_route and not bool(b.direction)]
+-        band = [
+-            np.clip(float(np.mean(h_up[-15:])) / ref_half, 0.0, 3.5),
+-            np.clip(float(np.mean(h_dn[-15:])) / ref_half, 0.0, 3.5),
+-            float(np.mean(load_up)) if load_up else 0.0,
+-            float(np.mean(load_dn)) if load_dn else 0.0,
+-            on_up,
+-            on_dn,
+-            0.0,
+-            0.0,
+-        ]
+-    else:
+-        raise ValueError(f"Unknown band_mode: {band_mode}")
+-
++    band = upper_band(env, band_for_head(band_mode, upper=True), daily_pax_prior)
+     vec = np.asarray(base + band, dtype=np.float32)
+     assert vec.shape == (UPPER_STATE_DIM,)
+     return vec
+@@ -856,7 +822,7 @@
+     apc_feed: CausalHeadwayAPCRateFeed,
+     band_mode: str,
+ ) -> Tuple[np.ndarray, dict]:
+-    """Build matched 20-dim lower stop-event state vector (index 0 = budget limit ratio)."""
++    """Build matched 19-dim lower stop-event state vector (index 0 = budget limit ratio)."""
+     key = (int(bus.bus_id), int(bus.trip_id))
+     rem_b = float(ledger.remaining_budget_s.get(key, 30.0))
+     slack = float(ledger.slack_s.get(key, 120.0))
+@@ -900,11 +866,10 @@
+     fwd_rel = float(np.clip((fwd - h_own) / h_own, -1.0, 2.0))
+     bwd_rel = float(np.clip((bwd - h_fol) / h_fol, -1.0, 2.0)) if bwd is not None else 0.0
+     load_ratio = float(len(bus.passengers) / max(float(bus.capacity), 1.0))
+-    left_behind_norm = float(np.clip(float(bus.last_left_behind_count) / 20.0, 0.0, 2.0))
+     prog = float(np.clip(bus.travel_distance / max(corridor_len_m, 1.0), 0.0, 1.0))
+     phase = 2.0 * math.pi * (now_s / 50400.0)
+ 
+-    base16 = [
++    base15 = [
+         limit_ratio,  # [0] HARD ACTION MASK FEATURE INDEX!
+         float(np.clip(rem_b / 75.0, 0.0, 1.5)),
+         float(np.clip((rem_b / rem_stops) / 12.0, 0.0, 2.0)),
+@@ -917,7 +882,6 @@
+         (h_own - 360.0) / 180.0,
+         (h_fol - 360.0) / 180.0,
+         load_ratio,
+-        left_behind_norm,
+         prog,
+         math.sin(phase),
+         math.cos(phase),
+@@ -930,64 +894,9 @@
+         int(bus.effective_station[i].station_id)
+         for i in range(cur_idx + 1, min(len(bus.effective_station) - 1, cur_idx + 3))
+     ]
+-    tracker = env.frequency_tracker
+-    loc_state = tracker._get_local_state((st_here, direction))
+-    ref_st = max(float(loc_state.low), 0.5)
+-
+-    if band_mode == "aligned":
+-        hf_here = max(0.0, float(loc_state.high)) / ref_st
+-        hf_en = math.sqrt(max(0.0, float(loc_state.high_energy))) / ref_st
+-        ds_hf = [
+-            max(0.0, float(tracker._get_local_state((sid, direction)).high))
+-            / max(float(tracker._get_local_state((sid, direction)).low), 0.5)
+-            for sid in ds_ids
+-        ]
+-        promo_age = float(tracker.local_promotion_summary(st_here, direction).get("age", 0.0))
+-        band4 = [
+-            float(np.clip(hf_here, 0.0, 3.0)),
+-            float(np.clip(hf_en, 0.0, 3.0)),
+-            float(np.clip(max(ds_hf, default=0.0), 0.0, 3.0)),
+-            float(np.clip(promo_age, 0.0, 1.0)),
+-        ]
+-    elif band_mode == "raw":
+-        rh = list(apc_feed.raw_rate_hist.get((st_here, direction), [1.0, 1.0]))
+-        ds_raw = [
+-            float(np.mean(list(apc_feed.raw_rate_hist.get((sid, direction), [1.0]))[-2:]))
+-            for sid in ds_ids
+-        ]
+-        band4 = [
+-            float(np.clip(rh[-1] / 3.0, 0.0, 3.0)),
+-            float(np.clip(float(np.mean(rh[-3:])) / 3.0, 0.0, 3.0)),
+-            float(np.clip(max(ds_raw, default=0.0) / 3.0, 0.0, 3.0)),
+-            float(np.clip((rh[-1] - rh[-2]) / 3.0, -2.0, 2.0)),
+-        ]
+-    elif band_mode == "swapped":
+-        ds_lf = [float(tracker._get_local_state((sid, direction)).low) / 3.0 for sid in ds_ids]
+-        band4 = [
+-            float(np.clip(float(loc_state.low) / 3.0, 0.0, 3.0)),
+-            float(np.clip(float(loc_state.low_slope) * 5.0, -2.0, 2.0)),
+-            float(np.clip(max(ds_lf, default=0.0), 0.0, 3.0)),
+-            float(np.clip(float(loc_state.forecast(15)) / max(ref_st, 0.5), 0.0, 3.0)),
+-        ]
+-    elif band_mode == "all_band":
+-        rh = list(apc_feed.raw_rate_hist.get((st_here, direction), [1.0]))
+-        band4 = [
+-            float(np.clip(float(loc_state.low) / 3.0, 0.0, 3.0)),
+-            float(np.clip(max(0.0, float(loc_state.high)) / ref_st, 0.0, 3.0)),
+-            float(np.clip(rh[-1] / 3.0, 0.0, 3.0)),
+-            float(np.clip(float(loc_state.forecast(15)) / 3.0, 0.0, 3.0)),
+-        ]
+-    elif band_mode == "nofreq":
+-        band4 = [
+-            float(np.clip(float(bus.last_board_count) / 20.0, 0.0, 2.0)),
+-            float(np.clip(float(bus.last_service_dwell_s) / 30.0, 0.0, 2.0)),
+-            0.0,
+-            0.0,
+-        ]
+-    else:
+-        raise ValueError(f"Unknown band_mode: {band_mode}")
+-
+-    vec = np.asarray(base16 + band4, dtype=np.float32)
++    band4 = lower_band(env.frequency_tracker, st_here, ds_ids, direction,
++                       band_for_head(band_mode, upper=False))
++    vec = np.asarray(base15 + band4, dtype=np.float32)
+     assert vec.shape == (LOWER_STATE_DIM,)
+     ctx = {
+         "fwd": fwd if fwd_valid else None,
+@@ -1212,7 +1121,7 @@
+         },
+         "lower_context": {
+             "enable": True,
+-            "features": ["load", "capacity", "queue", "speed_residual", "shock_age", "schedule_slack"],
++            "features": ["load", "capacity", "speed_residual", "shock_age", "schedule_slack"],
+         },
+     })
+     env._upper_policy_callback = lambda _s, trip: float(getattr(trip, "target_headway", 360.0))
+@@ -1318,7 +1227,7 @@
+                 a_u = upper_trainer.policy_net.get_action(s_u, deterministic=eval_mode)
+                 loop_factor = float(a_u[0])
+                 dir_tilt_s = float(a_u[1])
+-                ledger.budget_retention = float(a_u[2])
++                assert float(a_u[2]) == FIXED_RETENTION
+ 
+                 h_floor = ledger.cycle_headway_floor_s(n_fleet, env)
+                 desired_hw = {}
+@@ -1369,6 +1278,7 @@
+                 t_key = (int(bus.bus_id), int(bus.trip_id))
+                 s_l, ctx = build_lower_state(env, bus, now_s, corridor_len_m, ledger, apc_feed, band_mode)
+                 chosen = float(lower_trainer.policy_net.get_action(s_l, deterministic=eval_mode))
++                assert chosen <= min(LOWER_MAX_HOLD_S, ledger.remaining_budget_s[t_key]) + 1e-6
+                 if not eval_mode and lower_replay is not None:
+                     raw_arr = getattr(bus, "forward_headway", None)
+                     arr_hw = (
+@@ -1591,6 +1501,10 @@
+     return {"means": means, "per_day": per_day}
+ 
+ 
++def training_day(seed: int, episode: int) -> int:
++    return 53_000_000 + (seed - 50310) * 1_000 + episode
++
++
+ def train_seed(
+     *,
+     corridor_dir: Path,
+@@ -1614,6 +1528,7 @@
+     start_ep = 1
+     train_curve: List[dict] = []
+     checkpoint_evals: Dict[str, dict] = {}
++    upper_updates = lower_updates = 0
+     latest_ckpt = ckpt_dir / "latest.pt"
+     load_target = resume_path if (resume_path is not None and resume_path.exists()) else (latest_ckpt if (resume_path is not None and latest_ckpt.exists()) else None)
+ 
+@@ -1631,10 +1546,10 @@
+         print(f"Resumed {corridor_} seed={seed} from episode {start_ep}", flush=True)
+ 
+     t_start = time.monotonic()
+-    eval_milestones = {40, 100, episodes}
++    eval_milestones = {episodes}
+ 
+     for ep in range(start_ep, episodes + 1):
+-        day_seed = 1_000_000 + int(seed) * 10_000 + int(ep)
++        day_seed = training_day(seed, ep)
+         ep_out = run_b1_episode(
+             corridor_dir=corridor_dir,
+             corridor_meta=corridor_meta,
+@@ -1651,9 +1566,11 @@
+         if ep >= 3 and len(upper.replay_buffer) >= 48:
+             for _ in range(32):
+                 u_upd = upper.update(batch_size=48)
++                upper_updates += 1
+         if ep >= 3 and len(lower_replay) >= 256:
+             for _ in range(64):
+                 l_upd = lower.update(lower_replay, batch_size=128, reward_scale=2.0)
++                lower_updates += 1
+ 
+         train_curve.append({
+             "episode": ep,
+@@ -1707,6 +1624,8 @@
+         "ablation": ablation,
+         "episodes": int(episodes),
+         "val_days": val_days,
++        "upper_updates": upper_updates,
++        "lower_updates": lower_updates,
+         "checkpoint_evals": checkpoint_evals,
+         "train_curve": train_curve,
+     }
