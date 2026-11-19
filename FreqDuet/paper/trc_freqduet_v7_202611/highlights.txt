@@ -1,5 +1,5 @@
-- Proposes FreqDuet, a bi-level constrained SAC for tidal urban bus corridors.
-- Headway-normalized Harmonic-RLS routes LF trends to dispatch, HF shocks to hold.
-- Causal FIFO Turnaround Budget Ledger prevents fixed-pool fleet starvation.
-- Estimator-free person-second rewards isolate causal 5-way band-routing gains.
-- Cuts MBTA Route 111 journey time by 14.3 s vs no-hold and 45.3 s vs 2-sided hold.
+- Jointly controls terminal dispatch and stop holding with a fixed fleet.
+- Applies per-trip holding limits based on projected vehicle availability.
+- Reduces simulated journey time by about 14 s per rider vs fixed no-hold.
+- Quantifies the trade-off with arrival regularity and vehicle readiness.
+- Harmonic inputs help in the MBTA-informed case but not on both corridors.

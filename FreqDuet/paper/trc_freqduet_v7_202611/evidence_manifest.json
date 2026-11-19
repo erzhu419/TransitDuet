@@ -5,7 +5,7 @@
     "gate2_stability_6seed": "experiments/v501_pathb_b1_stability/review03/aggregate/results.json",
     "gate3_confirmation_matrix": "experiments/v502_pathb_trc_matrix/review/aggregate/results.json"
   },
-  "verified_headline_claims": {
+  "archived_point_estimates": {
     "mbta111_confirm16d_FreqDuet_journey_s": 1132.92,
     "mbta111_confirm16d_FreqDuet_minus_FixedNoHold_s": -14.32,
     "mbta111_confirm16d_FreqDuet_minus_Daganzo2009_s": -82.12,
@@ -25,5 +25,10 @@
     "mbta111_gate1_budget_repair_s": -40.34,
     "tidal_gate1_budget_repair_s": -48.11,
     "flat_gate1_budget_repair_s": -129.67
+  },
+  "archived_point_estimates_note": "These keys retain the original arm identifiers, not the revised manuscript labels. The estimates describe the archived policies as run.",
+  "manuscript_estimation": {
+    "source": "summarize_results.py",
+    "resampling": "Both paired training seed IDs and paired days for the V502 intervals; 30000 draws, seed 20261119. The original archive is unchanged."
   }
 }

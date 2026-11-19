@@ -1,47 +1,10 @@
-\section{Literature Review}
+\section{Related Work}
 \label{sec:related}
 
-\subsection{Analytical and Optimization-Based Bus Holding Control}
-\label{sec:related_holding}
+\subsection{Holding and Dispatch under a Fixed Fleet}
+Regular headways reduce expected waiting for random arrivals, but increasing stop holding can impose substantial in-vehicle time \citep{welding1957instability,osuna1972control}. Analytical work uses forward headways, bilateral spacing, or a virtual schedule to regulate vehicle movement \citep{daganzo2009headway,daganzo2011cooperation,xuan2011dynamic}. Optimization-based approaches explicitly trade passenger waiting against onboard delay and can include capacity and time-window constraints \citep{eberlein2001holding,hickman2001analytic,delgado2012much,sanchez2016realtime}. \citet{berrebi2018comparing} compare schedule-, headway-, and prediction-based holding with a common evaluation setting. The forward and bilateral baselines in our study are specific implementations of gap feedback, not reproductions of every controller from those studies.
 
-The instability of close-interval transit operations was first formalized by \citet{welding1957instability} and \citet{osuna1972control}, who showed that passenger waiting time scales with $1 + \mathrm{CV}^2(H)$, where $\mathrm{CV}^2(H) = \mathrm{Var}(H)/\mathbb{E}[H]^2$ denotes the squared coefficient of variation of vehicle headways. Early real-time control formulations leveraged emerging AVL data to cast stop-level holding as deterministic or stochastic rolling-horizon quadratic programs minimizing weighted passenger waiting and onboard delay \citep{eberlein2001holding,hickman2001analytic,sun2014models}. However, full corridor-wide mathematical programs with capacity constraints \citep{delgado2012much,sanchez2016realtime} require multi-step arrival predictions across all origin--destination pairs and solve mixed-integer or nonlinear programs at every stop event.
+Dynamic dispatch can move service toward demand peaks. \citet{newell1971dispatching} derives a square-root relation between dispatch rate and demand in a continuous approximation with fixed trip count. In practice, vehicle circulation and turnaround constrain whether a planned headway can be delivered \citep{ibarra2015planning,ceder2016public,gkiotsalitis2019robust}. FreqDuet keeps a fixed trip roster and uses projected returns as a shared input to timetable and stop-holding decisions. It evaluates the resulting passenger and vehicle trade-offs rather than treating predicted fleet margin as a guarantee.
 
-To obtain scalable, closed-form feedback laws, \citet{daganzo2009headway} introduced adaptive forward-headway holding, proving that linear feedback on deviations from a target headway eliminates bunching under mild perturbations. Subsequent extensions incorporated cooperative two-sided spacing using both predecessor and follower positions \citep{daganzo2011cooperation,bartholdi2012self}, virtual reference schedules \citep{xuan2011dynamic}, signalized corridor priority \citep{estrada2016bus}, overtaking and distributed boarding dynamics \citep{wu2017modelling}, predictive headway estimation \citep{andres2017predictive}, and dynamic bus substitution \citep{petit2018substitution}. In a comprehensive comparative evaluation, \citet{berrebi2018comparing} demonstrated that bilateral holding rules achieve strong headway regularity without requiring long-horizon predictions, establishing a widely adopted benchmark in transit operations \citep{cats2011impacts,cats2012guidelines}. Nevertheless, as highlighted in the synthesis of \citet{gkiotsalitis2021atstop}, purely headway-equalizing rules remain blind to onboard passenger occupancy, time-varying scheduled headway transitions, and terminal turnaround slack under finite fleets.
-
-\subsection{Dynamic Timetabling and Fixed-Fleet Corridor Circulation}
-\label{sec:related_dispatch}
-
-On timescales of $15$--$60\text{ min}$, passenger demand along urban radial corridors exhibits pronounced directional asymmetry and peak-to-trough variation that cannot be addressed by stop-level holding around a static headway. \citet{newell1971dispatching} proved that when a fixed number of daily vehicle dispatches is allocated across a non-stationary arrival intensity $\Lambda(t)$ to minimize total passenger waiting time without capacity saturation, optimal dispatch frequency scales proportionally to $\sqrt{\Lambda(t)}$ (equivalently, target headway $H^\star(t) \propto \Lambda(t)^{-1/2}$). Modern automated fare collection and APC systems enable rich empirical characterization of these spatio-temporal demand profiles \citep{pelletier2011smart,furth2006service}.
-
-Translating time-varying dispatch rates into executable corridor operations is constrained by vehicle circulation across both directions \citep{ibarra2015planning,ceder2016public}. \citet{gkiotsalitis2019robust} formulated robust timetable optimization subject to fleet size and regulatory layover bounds, showing that aggressive peak headway compression erodes terminal recovery time and amplifies trip-to-trip delay propagation. When real-time holding is deployed concurrently with dynamic dispatch on a fixed-pool corridor, the two authorities become tightly coupled through terminal inventory: every second of en-route holding directly consumes terminal layover slack prior to the vehicle's next opposite-direction trip. Existing optimization frameworks rarely coordinate real-time stop holding with dynamic quota-conserving headway allocation in closed loop without resorting to brittle centralized trajectory forecasts.
-
-\subsection{Reinforcement Learning and Multi-Timescale Control in Transit}
-\label{sec:related_rl}
-
-Deep reinforcement learning has emerged as an attractive model-free alternative for real-time bus control under complex stochastic dwell and traffic dynamics. \citet{chen2016marl} and \citet{alesiani2018rl} pioneered multi-agent Q-learning and policy-gradient holding controllers on single-loop corridors. \citet{wang2020dynamic} introduced a multi-agent actor--critic framework with graph-structured vehicle interactions, later extending it to asynchronous event-driven execution \citep{wang2021asynchronous} and distributional risk-sensitive critics \citep{wang2023robust}. \citet{rodriguez2023cooperative} combined holding and stop-skipping in a cooperative DRL policy, while \citet{yu2024hierarchical} explored hierarchical multi-agent RL for bunching mitigation. Most recently, \citet{xu2025systematic} conducted a systematic benchmark of RL bus bunching configurations, cautioning that reward functions dominated by headway equalization frequently inflate in-vehicle travel times and fail to outperform simple analytical baselines on net passenger journey time when evaluated under realistic fleet constraints.
-
-In parallel, the machine learning literature has established principles for temporal abstraction \citep{sutton1999between,nachum2018data}, off-policy maximum-entropy actor--critic learning \citep{haarnoja2018soft,christodoulou2019discrete,chen2021redq}, constrained MDPs via Lagrangian duality \citep{altman1999constrained,miryoosefi2019constraints,stooke2020responsive}, and multi-frequency control \citep{lee2020multiple,metelli2020persistence,holt2025evocontrol}. However, directly transplanting generic hierarchical RL to public transit fails for two domain-specific reasons: (i) temporal action abstraction alone does not prevent high-frequency APC sampling noise and localized demand spikes from corrupting upper-level timetable decisions, and (ii) unconstrained lower-level exploration systematically violates terminal turnaround feasibility on fixed-pool corridors.
-
-\begin{table}[t]
-\centering
-\caption{Positioning of \texttt{FreqDuet} relative to representative transit control paradigms.}
-\label{tab:literature_positioning}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lcccccc@{}}
-\toprule
-Study / Paradigm & Dynamic & Stop-Event & Demand Band & Fixed-Pool & Onboard-Load & Causal APC/AVL \\
- & Headway & Holding & Separation & Turnaround Cap & Journey Obj. & Identification \\
-\midrule
-\citet{daganzo2009headway} & -- & Forward & -- & -- & -- & \checkmark \\
-\citet{berrebi2018comparing} & -- & Bilateral & -- & -- & -- & \checkmark \\
-\citet{sanchez2016realtime} & -- & Rolling QP & -- & Soft / Open & \checkmark & Forecast-dep. \\
-\citet{gkiotsalitis2019robust} & Offline / Per. & -- & -- & \checkmark & \checkmark & -- \\
-\citet{wang2020dynamic,wang2023robust} & -- & MARL & -- & Ring / Uncap. & Partial & Raw state \\
-\citet{yu2024hierarchical} & Regional HRL & MARL & -- & Uncapped & Headway-dom. & Raw state \\
-\textbf{\texttt{FreqDuet} (Ours)} & \textbf{Slow SAC} & \textbf{CMDP SAC} & \textbf{LF$\to$U, HF$\to$L} & \textbf{Hard FIFO Mask} & \textbf{Exact Pax-s} & \textbf{4-Way Causal} \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-Table~\ref{tab:literature_positioning} summarizes how FreqDuet bridges these research streams. Unlike single-level holding controllers \citep{daganzo2009headway,berrebi2018comparing,wang2020dynamic} or unconstrained hierarchical RL \citep{yu2024hierarchical}, FreqDuet aligns online frequency-decomposed APC signals with the physical authority of each control layer while enforcing exact daily trip quotas and hard FIFO turnaround budgets under estimator-free passenger journey objectives.
+\subsection{Learning Across Decision Timescales}
+Event-based and multi-agent reinforcement learning have been applied to stop holding and related bus controls \citep{chen2016marl,alesiani2018rl,wang2020dynamic,wang2021asynchronous}. Performance depends on the observations, reward and operating constraints used in a comparison \citep{xu2025systematic}. We combine temporal abstraction and off-policy discrete actor--critic learning \citep{sutton1999between,haarnoja2018soft,christodoulou2019discrete,chen2021redq} with a constrained lower-layer objective \citep{altman1999constrained,stooke2020responsive}. The slower policy operates on the departure plan; the faster policy acts on a bus at a stop. The experiment compares different demand representations for the two policies under this shared physical and learning architecture. It does not assume that a change in performance identifies the effect of routing any one frequency band.

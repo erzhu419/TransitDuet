@@ -1,6 +1,11 @@
-# Current Paper Entry
+# FreqDuet Manuscripts
 
-The active FreqDuet draft is the [state-dependent capped holding
+The [TR-C v7 draft](trc_freqduet_v7_202611/README.md) studies joint dispatch
+and stop holding in V500--V502. It reports as-run simulation trade-offs
+and a corridor-specific demand-representation result. It is distinct
+from the fixed-timetable capped holding study below.
+
+The [state-dependent capped holding
 manuscript](tits_capped_holding_20261116/README.md). Its primary evidence is
 the V410--V412 fixed-timetable, fixed-fleet comparison with the within-day
 transition rule. A common 10 s ceiling, matched aggregate commanded holding

@@ -1,215 +1,123 @@
-\section{Experimental Results and Analysis}
+\input{tables/nominal}
+\input{tables/probe}
+\input{tables/checkpoints}
+\input{tables/ood}
+\input{tables/transfer}
+
+\section{Results}
 \label{sec:results}
 
-We organize our empirical evaluation around four research questions directly linked to the structural challenges identified in Sections~\ref{sec:intro} and~\ref{sec:problem}:
-\begin{enumerate}
-  \item \textbf{Overall corridor effectiveness (Section~\ref{sec:results_main}):} Does \texttt{FreqDuet} reduce system-wide passenger journey time relative to analytical headway feedback, rolling-horizon economic MPC, and single-level DRL without degrading timetable regularity or fleet circulation?
-  \item \textbf{Turnaround coupling and long-horizon stability (Section~\ref{sec:results_stability}):} To what extent does unbudgeted holding induce fixed-pool turnaround spillover (Proposition~\ref{prop:osuna_turnaround}), and does the FIFO Turnaround Budget Ledger sustain monotonic policy improvement over $200$-episode training horizons?
-  \item \textbf{Causal identification of frequency-to-authority alignment (Section~\ref{sec:results_ablation}):} Under estimator-free physical rewards and identical $(21, 20)$ state dimensions, what is the isolated causal contribution of routing low-frequency diurnal forecasts to the upper planner and high-frequency positive shocks to the lower controller, and under what signal-to-noise conditions does raw APC feedback suffice?
-  \item \textbf{Zero-shot robustness under regime shifts and stationary null conditions (Section~\ref{sec:results_ood}):} How do frozen policies generalize to unscheduled $\pm 1\text{-h}$ peak shifts, $1.8\times$ localized surges, corridor-wide traffic congestion, and stationary null corridors?
-\end{enumerate}
-
-\subsection{Main Confirmation Performance Across Transit Corridors}
+\subsection{Passenger, Regularity and Circulation Outcomes}
 \label{sec:results_main}
 
-Table~\ref{tab:main_confirmation} reports the complete $12$-method evaluation across the $16$ untouched Common Random Number (CRN) confirmation service days on both the empirical Fall~2025 Boston MBTA Route~111 corridor (\texttt{MBTA-111}, Panel~A) and the high-load synthetic bimodal tidal corridor (\texttt{Tidal-Bimodal}, Panel~B). All paired journey-time contrasts $\Delta J_{\mathrm{pax}} = J_{\mathrm{pax}}(\texttt{FreqDuet}) - J_{\mathrm{pax}}(\text{Baseline})$ are computed day-by-day under synchronized passenger arrivals and link speeds, so negative values denote net journey-time savings achieved by \texttt{FreqDuet}.
+Table~\ref{tab:main_confirmation} reports the full nominal comparison. Relative to Fixed-NoHold, journey exposure falls by 14.32~s/pax on MBTA-111 (95\% interval $[-21.80,-8.21]$) and 14.02~s/pax on Tidal-Bimodal ($[-29.54,+3.95]$). The lower waiting component accounts for nearly all of the difference. The signs favor FreqDuet in all four matched seed-level means on MBTA-111, but only three on Tidal-Bimodal. Relative to the same fixed baseline, the raw arrival CV$^2$ rises from 0.0606 to 0.0739 on MBTA-111 and from 0.0525 to 0.0769 on Tidal-Bimodal; mean readiness delay also rises. The test therefore finds shorter journeys on average, not improvement on every operating outcome. All tested paths in this table launch and complete the 262-trip roster.
 
-\begin{table}[t!]
+\begin{table}[!ht]
 \centering
-\caption{Confirmation performance across $16$ untouched CRN service days ($4$ independent $200$-episode training seeds for all learned methods). $\Delta J_{\mathrm{pax}} = J_{\mathrm{pax}}(\texttt{FreqDuet}) - J_{\mathrm{pax}}(\text{Method})$ reports the paired mean difference and $95\%$ bootstrap confidence interval ($10{,}000$ resamples); negative values indicate that \texttt{FreqDuet} achieves lower passenger journey time.}
+\caption{Nominal confirmation on 16 paired simulated days per corridor. Learned policy means and between-seed SDs use four training seeds; the deterministic rules have zero training SD. $\Delta J$ is FreqDuet minus the indicated comparator, with pointwise paired seed-by-day bootstrap intervals. Time measures are seconds; passenger and trip denominators are shown where applicable.}
 \label{tab:main_confirmation}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lrrrrrrrrr@{}}
+\begin{tabular}{@{}lrrrrrrrrrr@{}}
 \toprule
-Controller & $J_{\mathrm{pax}} \pm \mathrm{SD}$ & Wait & In-Veh & $\mathrm{EWT}$ & $\mathrm{CV}^2_{\mathrm{plan}}$ & $\bar{D}^{\mathrm{ready}}$ & Hold & Unserved & Paired $\Delta J_{\mathrm{pax}}$ vs.\ \texttt{FreqDuet} \\
- & $(\text{s/pax})$ & $(\text{s})$ & $(\text{s})$ & $(\text{s})$ & & $(\text{s/trip})$ & $(\text{s/trip})$ & $(\%)$ & $[95\%\ \mathrm{CI}]\ (\text{s/pax})$ \\
-\midrule
-\multicolumn{10}{@{}l}{\textbf{Panel A: Empirical Boston MBTA Route~111 Weekday Corridor (\texttt{MBTA-111}, $9{,}330\text{ pax/day}$, $N_{\mathrm{fleet}}=14$)}} \\
-\midrule
-$B_0$: \texttt{Fixed-NoHold} & $1147.24 \pm 0.00$ & $215.28$ & $931.96$ & $10.74$ & $0.0605$ & $0.28$ & $0.00$ & $0.007$ & $-14.32\ [-20.66,\ -8.32]$ \\
-$B_1$: \citet{daganzo2009headway} & $1215.05 \pm 0.00$ & $219.47$ & $995.58$ & $3.73$ & $0.0196$ & $1.61$ & $197.28$ & $0.007$ & $-82.12\ [-90.96,\ -73.56]$ \\
-$B_2$: \citet{berrebi2018comparing} & $1178.26 \pm 0.00$ & $216.09$ & $962.17$ & $5.23$ & $0.0298$ & $0.48$ & $80.09$ & $0.007$ & $-45.34\ [-52.83,\ -38.19]$ \\
-$B_3$: \texttt{Econ-MPC} & $1127.72 \pm 0.00$ & $197.76$ & $929.96$ & $12.46$ & $0.0823$ & $10.06$ & $5.14$ & $0.000$ & $+5.20\ [+3.38,\ +7.08]$ \\
-$B_4$: \texttt{Flat-SAC} & $1147.69 \pm 0.13$ & $215.22$ & $932.47$ & $10.20$ & $0.0575$ & $0.28$ & $5.93$ & $0.007$ & $-14.77\ [-21.41,\ -8.49]$ \\
-$B_5$: \texttt{NoFreq-HRL} & $1142.51 \pm 7.34$ & $207.89$ & $934.62$ & $10.99$ & $0.0602$ & $1.38$ & $4.82$ & $0.000$ & $-9.59\ [-11.19,\ -7.99]$ \\
-\texttt{Abl-RawHistory} & $1135.70 \pm 2.61$ & $203.08$ & $932.62$ & $11.10$ & $0.0615$ & $1.46$ & $4.12$ & $0.000$ & $-2.78\ [-3.77,\ -1.78]$ \\
-\texttt{Abl-AllBand} & $1136.05 \pm 3.51$ & $203.18$ & $932.87$ & $11.12$ & $0.0626$ & $2.46$ & $3.68$ & $0.000$ & $-3.13\ [-4.96,\ -1.22]$ \\
-\texttt{Abl-Swapped} & $1135.05 \pm 3.88$ & $202.34$ & $932.71$ & $11.43$ & $0.0630$ & $3.11$ & $5.90$ & $0.000$ & $-2.13\ [-3.62,\ -0.61]$ \\
-\texttt{Abl-NoBudget} & $1137.58 \pm 5.88$ & $204.57$ & $933.01$ & $10.38$ & $0.0584$ & $0.53$ & $3.74$ & $0.000$ & $-4.66\ [-6.33,\ -3.17]$ \\
-\texttt{Abl-NoPromotion} & $1132.71 \pm 2.22$ & $200.85$ & $931.86$ & $11.78$ & $0.0670$ & $6.50$ & $4.66$ & $0.000$ & $+0.21\ [-1.76,\ +2.32]$ \\
-\textbf{\texttt{FreqDuet} (Proposed)} & $\mathbf{1132.92 \pm 3.06}$ & $201.35$ & $931.57$ & $10.69$ & $0.0613$ & $0.91$ & $3.64$ & $0.000$ & \multicolumn{1}{c}{Reference} \\
-\midrule
-\multicolumn{10}{@{}l}{\textbf{Panel B: Synthetic High-Load Bimodal Tidal Corridor (\texttt{Tidal-Bimodal}, $15{,}660\text{ pax/day}$, $N_{\mathrm{fleet}}=14$)}} \\
-\midrule
-$B_0$: \texttt{Fixed-NoHold} & $848.29 \pm 0.00$ & $233.30$ & $614.99$ & $9.31$ & $0.0524$ & $0.24$ & $0.00$ & $0.009$ & $-14.02\ [-20.22,\ -8.72]$ \\
-$B_1$: \citet{daganzo2009headway} & $896.56 \pm 0.00$ & $227.26$ & $669.30$ & $2.55$ & $0.0124$ & $1.12$ & $172.69$ & $0.009$ & $-62.29\ [-68.70,\ -56.89]$ \\
-$B_2$: \citet{berrebi2018comparing} & $883.05 \pm 0.00$ & $229.26$ & $653.79$ & $3.54$ & $0.0204$ & $0.54$ & $112.55$ & $0.009$ & $-48.78\ [-54.86,\ -43.57]$ \\
-$B_3$: \texttt{Econ-MPC} & $817.95 \pm 0.00$ & $204.24$ & $613.71$ & $18.12$ & $0.1419$ & $33.27$ & $3.06$ & $0.000$ & $+16.32\ [+8.48,\ +24.48]$ \\
-$B_4$: \texttt{Flat-SAC} & $848.09 \pm 0.10$ & $232.76$ & $615.33$ & $8.94$ & $0.0503$ & $0.25$ & $5.79$ & $0.009$ & $-13.82\ [-20.05,\ -8.54]$ \\
-$B_5$: \texttt{NoFreq-HRL} & $826.03 \pm 5.28$ & $211.82$ & $614.21$ & $9.08$ & $0.0554$ & $0.81$ & $3.87$ & $0.000$ & $+8.24\ [+4.49,\ +12.46]$ \\
-\texttt{Abl-RawHistory} & $825.24 \pm 11.82$ & $210.99$ & $614.25$ & $11.18$ & $0.0712$ & $8.21$ & $2.34$ & $0.000$ & $+9.03\ [+4.90,\ +13.88]$ \\
-\texttt{Abl-AllBand} & $821.02 \pm 2.08$ & $207.27$ & $613.75$ & $10.50$ & $0.0673$ & $5.61$ & $2.90$ & $0.000$ & $+13.25\ [+8.46,\ +18.21]$ \\
-\texttt{Abl-Swapped} & $831.19 \pm 12.86$ & $216.96$ & $614.23$ & $9.10$ & $0.0554$ & $0.81$ & $2.05$ & $0.000$ & $+3.08\ [+0.11,\ +6.27]$ \\
-\texttt{Abl-NoBudget} & $832.33 \pm 7.19$ & $217.97$ & $614.36$ & $10.09$ & $0.0621$ & $5.65$ & $5.20$ & $0.000$ & $+1.94\ [-1.73,\ +5.55]$ \\
-\texttt{Abl-NoPromotion} & $828.14 \pm 8.57$ & $214.28$ & $613.86$ & $10.75$ & $0.0662$ & $3.53$ & $1.98$ & $0.000$ & $+6.13\ [+3.19,\ +9.73]$ \\
-\textbf{\texttt{FreqDuet} (Proposed)} & $\mathbf{834.27 \pm 17.77}$ & $220.05$ & $614.22$ & $10.03$ & $0.0638$ & $2.20$ & $5.55$ & $0.003$ & \multicolumn{1}{c}{Reference} \\
+Controller & $J_{\mathrm{pax}}\pm\mathrm{SD}$ & Wait & Onboard & Actual & Plan & EWT & Readiness & Hold & Unserved & $\Delta J$ [95\% interval] \\
+ & s/pax & s/pax & s/pax & CV$^2$ & error & s & s/trip & s/trip & \% & s/pax \\
+\RowsNominal
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-Four structural findings emerge from Table~\ref{tab:main_confirmation}:
+Forward-Hold and Bilateral-Hold produce the lowest arrival headway variation among the tested controllers, at a cost of 80--197~s/trip of holding on MBTA-111 and 113--173~s/trip on Tidal-Bimodal. FreqDuet reduces journey exposure by 45.34 and 48.78~s/pax relative to Bilateral-Hold on the two corridors, respectively; these are comparisons against the specified rules, not matched holding doses. In contrast, the dispatch-capable Rolling-Heuristic has shorter nominal journeys than FreqDuet on both corridors (by 5.20 and 16.32~s/pax), but higher arrival CV$^2$ and longer readiness delays (10.06 vs.\ 0.91 and 33.27 vs.\ 2.20~s/trip). FreqDuet also has a lower journey point estimate than Flat-SAC, but that comparison changes both dispatch authority and the holding budget.
 
-\paragraph{1.\ Heavy onboard delay under load-blind analytical holding}
-Consistent with field synthesis studies \citep{cats2011impacts,cats2012guidelines,xu2025systematic} and Proposition~\ref{prop:osuna_turnaround}, classical one-sided \citep{daganzo2009headway} and cooperative two-sided \citep{daganzo2011cooperation,bartholdi2012self,berrebi2018comparing} headway-equalization laws reduce raw Excess Waiting Time ($\mathrm{EWT} = 3.73\text{ s}$ and $5.23\text{ s}$ on \texttt{MBTA-111}; $2.55\text{ s}$ and $3.54\text{ s}$ on \texttt{Tidal-Bimodal}), but do so by applying $80.09$--$197.28\text{ s/trip}$ of cumulative stop holding regardless of onboard passenger occupancy. On \texttt{MBTA-111}, where heavy morning inbound boardings in Chelsea ride across the $2.88\text{-km}$ Tobin Bridge span toward Downtown Boston, holding loaded buses inflates mean in-vehicle time by $+30.21\text{ s}$ (\citeauthor{berrebi2018comparing}) to $+63.62\text{ s}$ (\citeauthor{daganzo2009headway}) while failing to compress directional headways during tidal peaks. Consequently, \texttt{FreqDuet} reduces total passenger journey time on \texttt{MBTA-111} by $-45.34\text{ s/pax}$ ($95\%$ CI $[-52.83, -38.19]$, $16/16$ days) relative to \citet{berrebi2018comparing} and by $-82.12\text{ s/pax}$ ($[-90.96, -73.56]$, $16/16$ days) relative to \citet{daganzo2009headway}, with equally decisive reductions of $-48.78\text{ s/pax}$ and $-62.29\text{ s/pax}$ ($16/16$ days) on \texttt{Tidal-Bimodal}.
-
-\paragraph{2.\ Necessity of slow-clock quota reallocation over single-level DRL}
-Single-level stop-event \texttt{Flat-SAC} ($B_4$) learns to avoid the catastrophic onboard delay of load-blind rules by moderating stop holding to $5.79$--$5.93\text{ s/trip}$, trimming $\mathrm{EWT}$ from $10.74\text{ s}$ to $10.20\text{ s}$ on \texttt{MBTA-111} and from $9.31\text{ s}$ to $8.94\text{ s}$ on \texttt{Tidal-Bimodal}. However, locked to a static $360\text{ s}$ schedule \citep{xuan2011dynamic,andres2017predictive}, single-level holding cannot reallocate daily trip quotas toward the $9.91\times$ inbound morning tide or $6.15\times$ outbound afternoon tide, leaving passenger journey time statistically indistinguishable from \texttt{Fixed-NoHold} ($1147.69$ vs.\ $1147.24\text{ s/pax}$ on \texttt{MBTA-111}; $848.09$ vs.\ $848.29\text{ s/pax}$ on \texttt{Tidal-Bimodal}). By coordinating quota-conserving slow-clock headway modulation with selective downstream-aware holding ($3.64$--$5.55\text{ s/trip}$), \texttt{FreqDuet} outperforms \texttt{Fixed-NoHold} by $-14.32\text{ s/pax}$ ($[-20.66, -8.32]$, $15/16$ days) and \texttt{Flat-SAC} by $-14.77\text{ s/pax}$ ($[-21.41, -8.49]$, $15/16$ days) on \texttt{MBTA-111}, and achieves $-14.02\text{ s/pax}$ ($[-20.22, -8.72]$, $14/16$ days) over \texttt{Fixed-NoHold} on \texttt{Tidal-Bimodal} while simultaneously eliminating capacity-induced end-of-horizon stranding ($0.000\%$ unserved on \texttt{MBTA-111}).
-
-\paragraph{3.\ Empirical dominance on real-world GTFS/APC ridership}
-On empirical \texttt{MBTA-111}, \texttt{FreqDuet} achieves $1132.92 \pm 3.06\text{ s/pax}$ with $\mathrm{EWT} = 10.69\text{ s}$ (matching \texttt{Fixed-NoHold}'s $10.74\text{ s}$ while cutting waiting time by $-13.93\text{ s/pax}$) and near-zero terminal readiness delay ($\bar{D}^{\mathrm{ready}} = 0.91\text{ s/trip}$). Crucially, \texttt{FreqDuet} statistically significantly outperforms \emph{every} single-level RL, unseparated HRL, and structural budget ablation on \texttt{MBTA-111}, with $95\%$ bootstrap confidence intervals strictly excluding zero against \texttt{NoFreq-HRL} ($-9.59\text{ s/pax}$, $16/16$ days), \texttt{Abl-NoBudget} ($-4.66\text{ s/pax}$, $16/16$ days), \texttt{Abl-AllBand} ($-3.13\text{ s/pax}$, $13/16$ days), \texttt{Abl-RawHistory} ($-2.78\text{ s/pax}$, $15/16$ days), and \texttt{Abl-Swapped} ($-2.13\text{ s/pax}$, $12/16$ days).
-
-\paragraph{4.\ Regularity and fleet-starvation trade-off against greedy rolling \texttt{Econ-MPC}}
-Myopic rolling-horizon \texttt{Econ-MPC} ($B_3$) attains lower nominal waiting time ($197.76\text{ s}$ on \texttt{MBTA-111}; $204.24\text{ s}$ on \texttt{Tidal-Bimodal}) by plugging unfiltered trailing $10\text{-min}$ APC counts directly into Newell's square-root dispatch formula \citep{hickman2001analytic,wu2017modelling}. Yet this aggressive myopic compression severely erodes schedule regularity and terminal fleet reserves even under nominal conditions: on \texttt{MBTA-111}, \texttt{Econ-MPC} inflates $\mathrm{EWT}$ to $12.46\text{ s}$ ($\mathrm{CV}^2_{\mathrm{plan}} = 0.0823$) and increases terminal readiness delay $11$-fold to $10.06\text{ s/trip}$ ($95$th-percentile delay $68.26\text{ s}$); on \texttt{Tidal-Bimodal}, \texttt{Econ-MPC}'s $\mathrm{EWT}$ nearly doubles to $18.12\text{ s}$ ($\mathrm{CV}^2_{\mathrm{plan}} = 0.1419$) and mean readiness delay surges to $33.27\text{ s/trip}$. As shown in Section~\ref{sec:results_ood}, when link travel speeds tighten by just $-0.8\text{ m/s}$, this lack of multi-step turnaround foresight causes \texttt{Econ-MPC} to suffer catastrophic fleet starvation ($\bar{D}^{\mathrm{ready}} = 92.55\text{ s/trip}$), losing to \texttt{FreqDuet} by $-28.16\text{ s/pax}$.
-
-\subsection{Turnaround Coupling Decomposition and \texorpdfstring{$200$}{200}-Episode Training Stability}
+\subsection{Turnaround Probe and Checkpoint Behavior}
 \label{sec:results_stability}
 
-To verify Proposition~\ref{prop:osuna_turnaround} directly before any neural policy optimization, Part~A of Table~\ref{tab:stability_budget} isolates the physical interaction between dynamic LF headway allocation and terminal turnaround slack across all three corridors using zero-training mechanism probes on $8$ held-out development days. Starting from dynamic Harmonic-RLS quota-conserving dispatch without holding ($A_2$), adding unbudgeted bilateral stop holding ($A_3$) reduces local $\mathrm{EWT}$ but applies $111.38$--$221.13\text{ s/trip}$ of cumulative holding across intermediate stops. Because peak headway compression already operates near the Ceder cycle floor $H_{\min}(t)$, this unbudgeted holding exhausts terminal layover slack, driving $95$th-percentile readiness delay $D^{\mathrm{ready}}_{p95}$ up to $40.19\text{ s}$ (\texttt{MBTA-111}), $138.51\text{ s}$ (\texttt{Tidal-Bimodal}), and $336.95\text{ s}$ (\texttt{Flat-Null}), and inflating passenger journey time by $+43.72\text{ s/pax}$, $+51.18\text{ s/pax}$, and $+134.17\text{ s/pax}$, respectively ($0/8$ days improved). Introducing the causal FIFO Turnaround Budget Ledger alongside HF-gated holding ($A_4 - A_3$) immediately eliminates this cross-directional spillover, recovering $-40.34\text{ s/pax}$ ($[-44.41, -36.19]$) on \texttt{MBTA-111}, $-48.11\text{ s/pax}$ ($[-55.91, -39.44]$) on \texttt{Tidal-Bimodal}, and $-129.67\text{ s/pax}$ ($[-174.10, -91.77]$) on \texttt{Flat-Null} across $8/8$ service days.
+V500 uses three non-learning policies to examine the linkage between holding and vehicle availability: a projected LF-driven timetable with no holding ($A_2$); the same scheduling rule with plan-consistent two-sided holding up to 30~s per stop ($A_3$); and the same scheduling rule with a different, load-aware holding objective and a 20~s per-stop limit further restricted by the trip budget ($A_4$). The latter uses LF and positive residuals in its downstream rate proxy and penalizes tight projected slack. Table~\ref{tab:probe} shows that $A_3$ improves EWT but substantially increases journey exposure. Switching to $A_4$ recovers much of that exposure, with shorter readiness delays and less commanded holding, while giving back part of the EWT improvement. The combined changes cannot identify the effect of the ledger alone. Nor does the improvement over $A_3$ establish that $A_4$ is better than $A_2$.
 
-\begin{figure}[t!]
+\begin{table}[!ht]
+\centering\small
+\caption{Development probe on eight matched days per corridor. Differences are first policy minus second policy. Readiness and hold are levels for the first policy in each contrast. Intervals use the archived demand-day bootstrap.}
+\label{tab:probe}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Contrast & $\Delta J$ [95\% interval] & $\Delta$EWT & Readiness & Hold \\
+ & s/pax & s & s/trip & s/trip \\
+\RowsProbe
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=\textwidth]{figures/fig3_stability_curves.pdf}
-  \caption{Long-horizon bi-level RL training dynamics and frozen checkpoint stability: (a, b) Smoothed $9$-episode rolling training journey time (mean $\pm 1\text{ SEM}$) across $N_{\mathrm{ep}} = 200$ complete simulated service days comparing turnaround-budgeted \texttt{FreqDuet} ($6$ seeds) against unbudgeted \texttt{Abl-NoBudget} ($4$ seeds); (c) Frozen validation performance ($\text{ep}40 \to \text{ep}100 \to \text{ep}200$, $6$ seeds $\times\ 10$ CRN validation days) relative to \citet{berrebi2018comparing}.}
+  \caption{Training-day journeys and frozen checkpoint performance. Panels (a,b) compare the nine-episode rolling means of six FreqDuet and four NoBudget seeds, with $\pm1$ standard error across seeds. Panel (c) uses the six FreqDuet seeds evaluated at three checkpoints on ten validation days, with between-seed SDs, relative to the fixed bilateral comparator. The training curves and frozen checkpoint means answer different questions.}
   \label{fig:stability}
 \end{figure}
 
-\begin{table}[t!]
-\centering
-\caption{Physical turnaround-coupling decomposition (Part~A, $8$ CRN days) and $6$-seed frozen checkpoint progression across $200$ training episodes (Part~B, $10$ CRN validation days).}
-\label{tab:stability_budget}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}llrrrrrr@{}}
+\begin{table}[!ht]
+\centering\small
+\caption{Validation at three frozen checkpoints in V501 (six training seeds and ten paired days). The $\pm$ term is the SD across seed-level means.}
+\label{tab:checkpoints}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Corridor & Mechanism Contrast / Milestone & $J_{\mathrm{pax}}$ or $\Delta J_{\mathrm{pax}}$ & $95\%$ Bootstrap CI & Wait / $\Delta$Wait & $\mathrm{EWT}$ / $\Delta\mathrm{EWT}$ & $\bar{D}^{\mathrm{ready}}$ & $D^{\mathrm{ready}}_{p95}$ or SD \\
- & & $(\text{s/pax})$ & $(\text{s/pax})$ & $(\text{s/pax})$ & $(\text{s})$ & $(\text{s/trip})$ & $(\text{s})$ \\
-\midrule
-\multicolumn{8}{@{}l}{\textbf{Part A: Zero-Training Turnaround Spillover and FIFO Budget Repair ($8$ CRN Days)}} \\
-\midrule
-\multirow{2}{*}{\texttt{MBTA-111}} & Unbudgeted spillover ($A_3 - A_2$) & $+43.72$ & $[+39.90,\ +47.29]$ & $-2.61$ & $-7.22$ & $8.49$ & $40.19\ (p_{95})$ \\
- & FIFO budget repair ($A_4 - A_3$) & $\mathbf{-40.34}$ & $[-44.41,\ -36.19]$ & $+1.95$ & $+4.96$ & $4.90$ & $10.84\ (p_{95})$ \\
-\addlinespace[2pt]
-\multirow{2}{*}{\texttt{Tidal-Bimodal}} & Unbudgeted spillover ($A_3 - A_2$) & $+51.18$ & $[+43.33,\ +58.58]$ & $-12.32$ & $-8.10$ & $15.65$ & $138.51\ (p_{95})$ \\
- & FIFO budget repair ($A_4 - A_3$) & $\mathbf{-48.11}$ & $[-55.91,\ -39.44]$ & $+12.09$ & $+5.49$ & $4.01$ & $0.00\ (p_{95})$ \\
-\addlinespace[2pt]
-\multirow{2}{*}{\texttt{Flat-Null}} & Unbudgeted spillover ($A_3 - A_2$) & $+134.17$ & $[+93.69,\ +182.43]$ & $+58.05$ & $-14.29$ & $69.74$ & $336.95\ (p_{95})$ \\
- & FIFO budget repair ($A_4 - A_3$) & $\mathbf{-129.67}$ & $[-174.10,\ -91.77]$ & $-60.21$ & $+7.44$ & $17.86$ & $132.09\ (p_{95})$ \\
-\midrule
-\multicolumn{8}{@{}l}{\textbf{Part B: Six-Seed Bi-Level Constrained SAC Progression ($6$ Seeds $\times\ 10$ Validation CRN Days)}} \\
-\midrule
-\multirow{4}{*}{\texttt{MBTA-111}} & Frozen checkpoint $\text{ep}40$ & $1139.89$ & --- & $211.19$ & $12.40$ & $2.21$ & $\pm 6.01\ (\text{SD})$ \\
- & Frozen checkpoint $\text{ep}100$ & $1131.83$ & --- & $204.53$ & $12.02$ & $2.75$ & $\pm 4.48\ (\text{SD})$ \\
- & Frozen checkpoint $\text{ep}200$ & $\mathbf{1129.72}$ & --- & $202.51$ & $11.62$ & $2.11$ & $\pm 3.42\ (\text{SD})$ \\
- & Paired drift ($\text{ep}200 - \text{ep}40$) & $\mathbf{-10.18}$ & $[-14.59,\ -6.72]$ & $-8.68$ & $-0.78$ & $-0.09$ & $10/10\text{ days}$ \\
-\addlinespace[2pt]
-\multirow{4}{*}{\texttt{Tidal-Bimodal}} & Frozen checkpoint $\text{ep}40$ & $837.12$ & --- & $225.02$ & $11.30$ & $14.20$ & $\pm 16.41\ (\text{SD})$ \\
- & Frozen checkpoint $\text{ep}100$ & $826.99$ & --- & $215.71$ & $9.99$ & $2.59$ & $\pm 14.98\ (\text{SD})$ \\
- & Frozen checkpoint $\text{ep}200$ & $\mathbf{816.03}$ & --- & $205.85$ & $9.85$ & $2.59$ & $\pm 10.26\ (\text{SD})$ \\
- & Paired drift ($\text{ep}200 - \text{ep}40$) & $\mathbf{-21.09}$ & $[-28.12,\ -15.44]$ & $-19.17$ & $-1.45$ & $-11.62$ & $10/10\text{ days}$ \\
+Episode & $J$ (s/pax) & Wait (s/pax) & EWT (s) & Readiness (s/trip) \\
+\RowsCheckpoints
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
-Figure~\ref{fig:stability} and Part~B of Table~\ref{tab:stability_budget} evaluate whether this structural invariant translates into stable multi-hundred-episode bi-level RL convergence \citep{miryoosefi2019constraints,wang2021asynchronous}. Across $6$ independent random seeds evaluated at frozen checkpoints $\text{ep}40$, $\text{ep}100$, and $\text{ep}200$, \texttt{FreqDuet} exhibits strictly monotonic improvement in mean passenger journey time, passenger waiting time, and Excess Waiting Time on both corridors—completely eliminating the late-training performance reversal typical of unconstrained hierarchical RL:
-\begin{itemize}
-  \item On \texttt{MBTA-111}, mean validation journey time improves monotonically from $1139.89 \pm 6.01\text{ s/pax}$ ($\text{ep}40$) to $1131.83 \pm 4.48\text{ s/pax}$ ($\text{ep}100$) and $1129.72 \pm 3.42\text{ s/pax}$ ($\text{ep}200$). The paired late-training gain $\text{ep}200 - \text{ep}40$ is $-10.18\text{ s/pax}$ ($95\%$ CI $[-14.59, -6.72]$, improved on $10/10$ validation days), accompanied by a $-0.78\text{ s}$ reduction in $\mathrm{EWT}$ ($9/10$ days) and a $43\%$ reduction in across-seed standard deviation ($6.01 \to 3.42\text{ s/pax}$). At $\text{ep}200$, the $6$-seed ensemble beats \citet{berrebi2018comparing} by $-40.38\text{ s/pax}$ ($[-51.85, -31.77]$, $10/10$ days) and \texttt{Fixed-NoHold} by $-9.27\text{ s/pax}$ ($[-19.81, -1.57]$, $8/10$ days).
-  \item On \texttt{Tidal-Bimodal}, validation journey time drops monotonically from $837.12 \pm 16.41\text{ s/pax}$ ($\text{ep}40$) to $826.99 \pm 14.98\text{ s/pax}$ ($\text{ep}100$) and $816.03 \pm 10.26\text{ s/pax}$ ($\text{ep}200$), yielding a paired $\text{ep}200 - \text{ep}40$ improvement of $-21.09\text{ s/pax}$ ($[-28.12, -15.44]$, $10/10$ days) while simultaneously cutting $\mathrm{EWT}$ by $-1.45\text{ s}$ ($10/10$ days) and terminal readiness delay from $14.20\text{ s/trip}$ to $2.59\text{ s/trip}$ ($-11.62\text{ s/trip}$, $10/10$ days).
-\end{itemize}
-By contrast, removing the Turnaround Budget Ledger (\texttt{Abl-NoBudget}) exposes the upper planner to unpredictable lower-level slack consumption during training (Figure~\ref{fig:stability}b): on \texttt{MBTA-111} confirmation days, \texttt{Abl-NoBudget} trails \texttt{FreqDuet} by $+4.66\text{ s/pax}$ ($16/16$ days) with nearly double the across-seed variance ($5.88$ vs.\ $3.06\text{ s/pax}$), and its degradation widens nearly threefold to $+12.71\text{ s/pax}$ under $1.8\times$ localized demand surges (Section~\ref{sec:results_ood}).
+The pooled validation journey estimate decreases from episode 40 to 200 by 10.18~s/pax on MBTA-111 and 21.09~s/pax on Tidal-Bimodal (Table~\ref{tab:checkpoints}). This is not monotonic learning across seeds. From episode 100 to 200, the journey estimate deteriorates for one of six MBTA-111 seeds and two of six Tidal-Bimodal seeds. For example, on Tidal-Bimodal, seed 102 increases from 823.83 to 835.68~s/pax. The comparison of the six-seed and four-seed training curves (Figure~\ref{fig:stability}) is descriptive and does not establish that the ledger prevents late-training reversals.
 
-\subsection{Causal Identification of Frequency-to-Authority Routing and Signal-to-Noise Boundary}
+\subsection{Demand Feature Comparisons}
 \label{sec:results_ablation}
 
-Because Eqs.~\eqref{eq:upper_reward} and \eqref{eq:lower_reward}--\eqref{eq:lower_cost} compute all upper and lower rewards and CMDP costs strictly from realized physical passenger waiting, onboard delay, $\mathrm{EWT}$, and readiness delay—without referencing the Harmonic-RLS estimator—the five matched $(21, 20)$-dimensional observation arms in Figure~\ref{fig:ablation}a--b provide a clean causal test of timescale-aligned signal routing.
+On MBTA-111, the aligned representation reduces journey exposure by 9.59~s/pax relative to the coarse-input NoFreq-HRL ($[-14.25,-5.50]$). All four matched seed-level differences favor FreqDuet (between $-15.82$ and $-4.44$~s/pax, averaging over test days within each seed). The advantages over RawHistory, AllBand and Swapped are smaller: their paired seed-by-day intervals include zero. The NoBudget and NoPromotion contrasts also include zero, although NoPromotion has a higher readiness delay point estimate on MBTA-111.
 
-\begin{figure}[t!]
+On Tidal-Bimodal, the direction changes: NoFreq-HRL, RawHistory and AllBand have lower journey point estimates than the aligned method. For example, FreqDuet minus NoFreq-HRL is $+8.24$~s/pax ($[-2.76,+22.41]$). The two corridors differ in load, geography and modeled traffic and demand, so this comparison cannot identify a signal-to-noise threshold or the cause of the reversal. Figure~\ref{fig:ablation} summarizes the feature and regularity comparisons.
+
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=\textwidth]{figures/fig4_frequency_budget_ablation.pdf}
-  \caption{Causal frequency-routing identification and regularity--journey Pareto structure: (a, b) Matched $(21, 20)$-dimensional five-arm observation comparison on $16$ confirmation CRN days (mean $\Delta J_{\mathrm{pax}}$ vs.\ \texttt{Fixed-NoHold} $\pm 1\text{ SD}$ across $4$ seeds); (c) Empirical \texttt{MBTA-111} joint frontier of Excess Waiting Time ($\mathrm{EWT}$) versus mean passenger journey time ($J_{\mathrm{pax}}$).}
+  \caption{(a,b) Journey differences from Fixed-NoHold for five demand feature representations. Bars show between-seed SDs, not confidence intervals. (c) EWT relative to each controller's own target plan versus journey exposure for selected MBTA-111 controllers.}
   \label{fig:ablation}
 \end{figure}
 
-On empirical \texttt{MBTA-111} (Figure~\ref{fig:ablation}b), routing smooth LF level, slope, and $20\text{-min}$ harmonic forecasts to the $900\text{ s}$ planner and positive HF shocks to the stop-event controller (\texttt{Aligned}) outperforms every alternative observation routing:
-\begin{enumerate}
-  \item \textbf{Value of online frequency decomposition over coarse counts (\texttt{Aligned} vs.\ \texttt{NoFreq-HRL}):} Observing only trailing $15\text{-min}$ boarding counts without headway-normalized Harmonic-RLS forecasts causes \texttt{NoFreq-HRL} to lag the steep $07{:}00$ inbound tide and $16{:}00$ outbound reversal by $15$--$30\text{ min}$. \texttt{FreqDuet} reduces journey time by $-9.59\text{ s/pax}$ ($[-11.19, -7.99]$, $16/16$ days) while cutting across-seed SD from $7.34\text{ s}$ to $3.06\text{ s}$.
-  \item \textbf{Cross-band confounding in unseparated representations (\texttt{Aligned} vs.\ \texttt{Abl-AllBand} \& \texttt{Abl-RawHistory}):} Supplying all frequency bands or multi-window raw APC histories simultaneously to both levels might appear strictly more expressive in principle, yet under finite $200$-episode sample budgets the upper $900\text{ s}$ critic overfits to transient stop-level Poisson arrivals and localized $15\text{-min}$ bursts. \texttt{FreqDuet} beats \texttt{Abl-AllBand} by $-3.13\text{ s/pax}$ ($[-4.96, -1.22]$, $13/16$ days) and \texttt{Abl-RawHistory} by $-2.78\text{ s/pax}$ ($[-3.77, -1.78]$, $15/16$ days), while cutting readiness delay from $2.46\text{ s/trip}$ (\texttt{Abl-AllBand}) to $0.91\text{ s/trip}$.
-  \item \textbf{Timescale inversion penalty (\texttt{Aligned} vs.\ \texttt{Abl-Swapped}):} Inverting band assignments ($\text{HF}\to\text{U}, \text{LF}\to\text{L}$) degrades journey time by $+2.13\text{ s/pax}$ ($[-3.62, -0.61]$, $12/16$ days), elevates $\mathrm{EWT}$ from $10.69\text{ s}$ to $11.43\text{ s}$, and more than triples readiness delay to $3.11\text{ s/trip}$, confirming that driving global headway allocation with high-frequency innovations destabilizes terminal dispatch pacing.
-\end{enumerate}
-
-As visualized on the joint Regularity--Journey plane (Figure~\ref{fig:ablation}c), \texttt{FreqDuet} occupies a favorable knee along the empirical Pareto frontier: relative to \texttt{Fixed-NoHold}, it saves $14.32\text{ s/pax}$ of journey time without sacrificing $\mathrm{EWT}$ ($10.69\text{ s}$ vs.\ $10.74\text{ s}$), whereas classical rules buy lower $\mathrm{EWT}$ at a prohibitive $+31$ to $+68\text{ s/pax}$ journey penalty and \texttt{Econ-MPC} buys an additional $5.20\text{ s/pax}$ wait reduction only by degrading $\mathrm{EWT}$ to $12.46\text{ s}$ and inflating terminal readiness delay $11$-fold.
-
-\paragraph{Signal-to-noise boundary condition on homogeneous high-count synthetic corridors}
-Comparing Panels~A and~B of Table~\ref{tab:main_confirmation} (and Figure~\ref{fig:ablation}a vs.\ \ref{fig:ablation}b) also reveals an instructive domain boundary condition. First, in the $4$-seed confirmation cohort on \texttt{Tidal-Bimodal}, three \texttt{FreqDuet} seeds converge tightly ($822.03\text{ s}$, $818.51\text{ s}$, and $839.42\text{ s/pax}$, consistent with the $6$-seed $816.03 \pm 10.26\text{ s/pax}$ audit in Table~\ref{tab:stability_budget}), whereas one training seed ($857.13\text{ s/pax}$) experienced an adverse stochastic perturbation near $\text{ep}200$; per pre-registered reporting standards, all four seeds are retained unedited. Second, even accounting for seed variance, unseparated \texttt{Abl-AllBand} ($821.02 \pm 2.08\text{ s/pax}$) and \texttt{Abl-RawHistory} ($825.24 \pm 11.82\text{ s/pax}$) achieve slightly lower nominal waiting times on \texttt{Tidal-Bimodal}, albeit with $2.5\times$--$3.7\times$ higher readiness delay ($5.61$--$8.21\text{ s/trip}$ vs.\ $2.20\text{ s/trip}$). Physically, \texttt{Tidal-Bimodal} distributes $15{,}660\text{ pax/day}$ smoothly across $20$ identical radial stops with globally correlated $\pm 15\%$ day-level demand multipliers. When corridor-wide arrival counts are high and spatially homogeneous, raw trailing APC aggregates exhibit high signal-to-noise ratio (SNR), allowing unregularized policies to track random day-wide amplitude scaling slightly faster than a damped ($\gamma_f = 0.998$) harmonic filter. Conversely, on real-world \texttt{MBTA-111}—where $9{,}330\text{ pax/day}$ are unevenly concentrated across $23$ heterogeneous urban stops and long bridge links—per-stop APC counts suffer substantial Poisson shot noise and headway-sampling variance. In this realistic low-to-moderate SNR regime, Harmonic-RLS filtering and frequency separation prove decisive both in-distribution and out-of-distribution.
-
-\subsection{Out-of-Distribution Stress Tests and Stationary Null Verification}
+\subsection{Perturbed Demand, Running Speeds and Stationary Transfer}
 \label{sec:results_ood}
 
-Figure~\ref{fig:ood} and Table~\ref{tab:ood_stress} evaluate zero-shot generalization of the frozen $\text{ep}200$ policies across four $8\text{-day}$ OOD and null regimes without any weight updates or hyperparameter retuning.
+On MBTA-111, FreqDuet has lower journey point estimates than Fixed-NoHold under all three perturbations. Other learned variants also improve in all three, and the ranking relative to alternatives changes. Under congestion, FreqDuet reduces journey exposure by 28.16~s/pax and readiness delay by 78.73~s/trip relative to the Rolling-Heuristic. Against Fixed-NoHold on that same cohort, it reduces journey exposure by 7.68~s/pax but increases readiness delay from 10.41 to 13.81~s/trip. On Tidal-Bimodal, the journey gain over the Rolling-Heuristic under congestion is 4.96~s/pax, and several feature variants have better journey point estimates than the aligned method. With a shifted tidal peak, FreqDuet averages 1.62~s/pax more journey exposure than Fixed-NoHold. These are regime-specific contrasts, not evidence of general robustness across routes.
 
-\begin{figure}[t!]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=\textwidth]{figures/fig5_ood_generalization.pdf}
-  \caption{Zero-shot out-of-distribution generalization across nominal confirmation ($16\text{ days}$), $\pm 1\text{-h}$ diurnal peak shifts ($8\text{ days}$), $1.8\times$ localized high-frequency demand surges ($8\text{ days}$), and $-0.8\text{ m/s}$ corridor-wide traffic congestion ($8\text{ days}$): (a) \texttt{Tidal-Bimodal}; (b) Empirical \texttt{MBTA-111}.}
+  \caption{Journey differences from Fixed-NoHold in the nominal and three perturbed regimes for selected policies. Differences are point estimates on paired simulated days; negative values favor the indicated policy.}
   \label{fig:ood}
 \end{figure}
 
-\begin{table}[t!]
-\centering
-\caption{Zero-shot out-of-distribution (OOD) and cross-fleet stationary null evaluation ($8$ held-out CRN days per suite; frozen $\text{ep}200$ policies). Bold denotes the best net passenger journey time within each corridor regime ($^{\ast}$ indicates that the paired $95\%$ bootstrap CI vs.\ \texttt{FreqDuet} strictly favors \texttt{FreqDuet}).}
+\begin{table}[!ht]
+\centering\small
+\caption{Perturbation results on eight matched days per regime and corridor. $J$ is restricted journey exposure (s/pax), and $D$ is readiness delay (s/trip).}
 \label{tab:ood_stress}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lrrrrrrrr@{}}
+\begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-Controller & \multicolumn{2}{c}{\texttt{OOD-PeakShift} ($\pm 1\text{ h}$)} & \multicolumn{2}{c}{\texttt{OOD-HFSurge} ($1.8\times$)} & \multicolumn{2}{c}{\texttt{OOD-Congestion} ($-0.8\text{ m/s}$)} & \multicolumn{2}{c}{\texttt{Null-FlatSanity} ($12$ buses)} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(l){8-9}
- & $J_{\mathrm{pax}}$ (s) & $\bar{D}^{\mathrm{ready}}$ (s) & $J_{\mathrm{pax}}$ (s) & $\bar{D}^{\mathrm{ready}}$ (s) & $J_{\mathrm{pax}}$ (s) & $\bar{D}^{\mathrm{ready}}$ (s) & $J_{\mathrm{pax}}$ (s) & $\bar{D}^{\mathrm{ready}}$ (s) \\
-\midrule
-\multicolumn{9}{@{}l}{\textbf{Panel A: Empirical Boston MBTA Route~111 Weekday Corridor (\texttt{MBTA-111})}} \\
-\midrule
-$B_0$: \texttt{Fixed-NoHold} & $1128.80$ & $0.21$ & $1141.35^{\ast}$ & $0.20$ & $1270.69^{\ast}$ & $10.41$ & $\mathbf{1017.03}$ & $39.20$ \\
-$B_1$: \citet{daganzo2009headway} & $1193.45^{\ast}$ & $1.49$ & $1205.34^{\ast}$ & $1.28$ & $1333.91^{\ast}$ & $28.72$ & $1083.30$ & $133.74$ \\
-$B_2$: \citet{berrebi2018comparing} & $1158.40^{\ast}$ & $0.27$ & $1171.01^{\ast}$ & $0.29$ & $1300.62^{\ast}$ & $17.74$ & $1062.71$ & $87.46$ \\
-$B_3$: \texttt{Econ-MPC} & $\mathbf{1120.65}$ & $8.90$ & $1133.49$ & $9.93$ & $1291.17^{\ast}$ & $92.55$ & $1315.61^{\ast}$ & $147.19$ \\
-$B_4$: \texttt{Flat-SAC} & $1129.26$ & $0.22$ & $1141.73^{\ast}$ & $0.21$ & $1268.79^{\ast}$ & $10.62$ & $1017.59$ & $42.30$ \\
-$B_5$: \texttt{NoFreq-HRL} & $1131.44^{\ast}$ & $3.16$ & $1148.71^{\ast}$ & $2.02$ & $1271.37^{\ast}$ & $13.86$ & $1184.64^{\ast}$ & $111.05$ \\
-\texttt{Abl-RawHistory} & $1123.82$ & $3.42$ & $1133.52$ & $1.48$ & $\mathbf{1261.37}$ & $7.32$ & $1185.78^{\ast}$ & $152.78$ \\
-\texttt{Abl-AllBand} & $1129.80^{\ast}$ & $2.06$ & $1146.71^{\ast}$ & $2.55$ & $1271.91^{\ast}$ & $16.49$ & $1114.08$ & $78.01$ \\
-\texttt{Abl-Swapped} & $1125.88^{\ast}$ & $3.54$ & $1139.61^{\ast}$ & $2.67$ & $1265.66$ & $14.08$ & $1150.33$ & $98.53$ \\
-\texttt{Abl-NoBudget} & $1128.98^{\ast}$ & $0.31$ & $1146.02^{\ast}$ & $0.46$ & $1268.22^{\ast}$ & $6.61$ & $1172.23^{\ast}$ & $176.25$ \\
-\texttt{Abl-NoPromotion} & $1125.18$ & $5.89$ & $1136.49^{\ast}$ & $6.43$ & $1268.67^{\ast}$ & $28.48$ & $1244.27^{\ast}$ & $206.37$ \\
-\textbf{\texttt{FreqDuet} (Proposed)} & $1123.68$ & $1.71$ & $\mathbf{1133.31}$ & $1.22$ & $1263.01$ & $13.81$ & $1123.42$ & $65.32$ \\
-\midrule
-\multicolumn{9}{@{}l}{\textbf{Panel B: Synthetic High-Load Bimodal Tidal Corridor (\texttt{Tidal-Bimodal})}} \\
-\midrule
-$B_0$: \texttt{Fixed-NoHold} & $822.73$ & $0.03$ & $857.18$ & $0.18$ & $921.81^{\ast}$ & $5.82$ & $\mathbf{1017.03}$ & $39.20$ \\
-$B_1$: \citet{daganzo2009headway} & $871.01^{\ast}$ & $0.35$ & $905.09^{\ast}$ & $0.87$ & $966.76^{\ast}$ & $14.21$ & $1083.30$ & $133.74$ \\
-$B_2$: \citet{berrebi2018comparing} & $857.86^{\ast}$ & $0.26$ & $892.25^{\ast}$ & $0.68$ & $954.84^{\ast}$ & $11.06$ & $1062.71$ & $87.46$ \\
-$B_3$: \texttt{Econ-MPC} & $\mathbf{804.63}$ & $17.09$ & $\mathbf{819.25}$ & $19.30$ & $920.02$ & $82.69$ & $1315.61^{\ast}$ & $147.19$ \\
-$B_4$: \texttt{Flat-SAC} & $822.51$ & $0.07$ & $857.45$ & $0.20$ & $921.79^{\ast}$ & $6.24$ & $1017.59$ & $42.30$ \\
-$B_5$: \texttt{NoFreq-HRL} & $810.73$ & $1.43$ & $835.44$ & $0.68$ & $\mathbf{902.12}$ & $5.27$ & $1184.64^{\ast}$ & $111.05$ \\
-\texttt{Abl-AllBand} & $806.73$ & $1.24$ & $828.76$ & $2.16$ & $902.26$ & $14.62$ & $1114.08$ & $78.01$ \\
-\texttt{Abl-NoBudget} & $818.84$ & $0.85$ & $847.69$ & $1.28$ & $915.57$ & $18.80$ & $1172.23^{\ast}$ & $176.25$ \\
-\texttt{Abl-NoPromotion} & $813.19$ & $2.43$ & $847.89$ & $3.55$ & $918.41$ & $20.99$ & $1244.27^{\ast}$ & $206.37$ \\
-\textbf{\texttt{FreqDuet} (Proposed)} & $824.35$ & $1.67$ & $851.02$ & $2.30$ & $915.06$ & $14.56$ & $1123.42$ & $65.32$ \\
+ & \multicolumn{2}{c}{Peak shift} & \multicolumn{2}{c}{Local surges} & \multicolumn{2}{c}{Slower running} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(l){6-7}
+Controller & $J$ & $D$ & $J$ & $D$ & $J$ & $D$ \\
+\RowsOod
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
-Three critical operational insights stand out from Table~\ref{tab:ood_stress} and Figure~\ref{fig:ood}:
-\begin{enumerate}
-  \item \textbf{Consistent OOD superiority and shock-promotion value on empirical \texttt{MBTA-111}:} As shown in Figure~\ref{fig:ood}b, \texttt{FreqDuet} is the \emph{only} bi-level or analytical controller that improves upon \texttt{Fixed-NoHold} across every single OOD regime on \texttt{MBTA-111}: $-5.12\text{ s/pax}$ under $\pm 1\text{-h}$ peak shifts, $-8.03\text{ s/pax}$ ($[-12.97, -3.89]$, $8/8$ days) under $1.8\times$ HF surges, and $-7.68\text{ s/pax}$ ($[-13.22, -2.99]$, $7/8$ days) under corridor-wide traffic congestion. By contrast, unseparated \texttt{Abl-AllBand} and \texttt{NoFreq-HRL} both degrade to net-worse than \texttt{Fixed-NoHold} across all three OOD suites ($+1.00$ to $+7.36\text{ s/pax}$). Moreover, while \texttt{Abl-NoPromotion} matches \texttt{FreqDuet} on nominal days, disabling the persistent shock promotion gate causes significant degradation under $1.8\times$ HF surges (\texttt{FreqDuet} wins by $-3.17\text{ s/pax}$, $[-3.94, -2.42]$, $8/8$ days) and traffic congestion (\texttt{FreqDuet} wins by $-5.66\text{ s/pax}$, $[-7.60, -2.77]$, $7/8$ days, while cutting readiness delay from $28.48\text{ s/trip}$ to $13.81\text{ s/trip}$).
-  \item \textbf{Collapse of myopic rolling \texttt{Econ-MPC} under corridor congestion:} Under \texttt{OOD-Congestion} ($-0.8\text{ m/s}$ link speed drop across all segments), round-trip cycle times lengthen and Ceder's dynamic floor $H_{\min}(t)$ rises toward the nominal $360\text{ s}$ headway. Because \texttt{Econ-MPC} lacks multi-step value-function foresight ($N_U = 6$) and quota-potential shaping $\Phi(s^U_k)$, its myopic compression triggers severe fleet queue cascades at both terminals: mean readiness delay explodes to $92.55\text{ s/trip}$ ($\mathrm{EWT} = 45.57\text{ s}$) on \texttt{MBTA-111} and $82.69\text{ s/trip}$ ($\mathrm{EWT} = 40.54\text{ s}$) on \texttt{Tidal-Bimodal}. Consequently, \texttt{FreqDuet} beats \texttt{Econ-MPC} on congested \texttt{MBTA-111} by $-28.16\text{ s/pax}$ ($[-44.46, -11.29]$, $7/8$ days; $-24.01\text{ s}$ lower $\mathrm{EWT}$ and $-78.73\text{ s/trip}$ lower readiness delay) and on congested \texttt{Tidal-Bimodal} by $-4.96\text{ s/pax}$ ($-20.70\text{ s}$ lower $\mathrm{EWT}$, $-68.12\text{ s/trip}$ lower readiness delay).
-  \item \textbf{In-domain vs.\ cross-fleet stationary null behavior:} Comparing Table~\ref{tab:stability_budget} (Part~A, \texttt{Flat-Null}) with the rightmost columns of Table~\ref{tab:ood_stress} distinguishes native stationary operation from extreme cross-fleet transfer. When initialized natively on the $12\text{-bus}$, $50\text{-pax}$ stationary \texttt{Flat-Null} corridor ($20{,}288\text{ pax/day}$), \texttt{FreqDuet}'s Harmonic-RLS and FIFO ledger ($A_4$) achieve $0.000\%$ unserved passengers, cut $\mathrm{EWT}$ by $-13.50\text{ s}$ ($[-17.63, -9.58]$, $8/8$ days) and readiness delay by $-25.48\text{ s/trip}$ relative to \texttt{Fixed-NoHold}, and beat \citet{berrebi2018comparing} by $-20.19\text{ s/pax}$. When $14\text{-bus}$ tidal policies are instead transferred zero-shot onto the tighter $12\text{-bus}$ stationary corridor without retraining (\texttt{Null-FlatSanity}, Table~\ref{tab:ood_stress}), static \texttt{Fixed-NoHold} ($1017.03\text{ s/pax}$) naturally avoids out-of-domain tidal priors, yet \texttt{FreqDuet} ($1123.42\text{ s/pax}$) still decisively outperforms \texttt{Econ-MPC} ($-192.18\text{ s/pax}$, $8/8$ days), \texttt{Abl-NoPromotion} ($-120.85\text{ s/pax}$, $8/8$ days), \texttt{Abl-RawHistory} ($-62.36\text{ s/pax}$), \texttt{NoFreq-HRL} ($-61.21\text{ s/pax}$), and \texttt{Abl-NoBudget} ($-48.80\text{ s/pax}$), demonstrating graceful bounded degradation under structural fleet mismatch.
-\end{enumerate}
+The stationary test (Table~\ref{tab:transfer}) transfers only the Tidal-Bimodal learned policies. Compared with Fixed-NoHold, FreqDuet has longer journeys by 106.40~s/pax and greater readiness delay by 26.12~s/trip. It outperforms some other dynamic policies but does worse than the fixed policy on both outcomes. The Flat-Null development probe used non-learning rules; it is not an in-domain learned control for this transfer.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Flat-Null transfer from Tidal-Bimodal (eight paired days). Learned controllers are frozen. $\Delta J$ is FreqDuet minus the indicated comparator with a pointwise 95\% seed-by-day bootstrap interval. No MBTA-111 policy was evaluated on this transfer.}
+\label{tab:transfer}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Controller & $J$ (s/pax) & $D$ (s/trip) & $\Delta J$ (s/pax) \\
+\RowsTransfer
+\bottomrule
+\end{tabular}
+\end{table}

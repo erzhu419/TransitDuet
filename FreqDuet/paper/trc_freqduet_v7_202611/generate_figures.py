@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Dict, List
 
@@ -24,6 +25,9 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 FIG_DIR = HERE / "figures"
 REPO_ROOT = HERE.parents[1]
+sys.path.insert(0, str(REPO_ROOT / "freqduet"))
+from frequency.demand_frequency import DemandFrequencyTracker
+
 V500_DIR = REPO_ROOT / "experiments" / "v500_pathb_headroom_gate"
 V501_DIR = REPO_ROOT / "experiments" / "v501_pathb_b1_stability"
 V502_DIR = REPO_ROOT / "experiments" / "v502_pathb_trc_matrix"
@@ -172,11 +176,11 @@ def make_fig1_architecture() -> None:
         ax, 0.015, 0.05, 0.255, 0.41,
         "Headway-Norm Harmonic-RLS",
         [
-            r"$\bullet$ $\hat{r}_{s,d} = b_{v,s}/\max(1, \Delta t_{v,s}/60)$",
-            r"   removes $\log(1+r)$ Jensen bias",
+            r"$\bullet$ Divide boardings by observed headway",
+            r"   and hold the rate between bus visits",
             r"$\bullet$ Fourier-RLS ($K=4, \gamma_f=0.998$):",
             r"   LF: $\hat{\lambda}^{\mathrm{LF}}_{s,d}(t+\tau) + \mathrm{slope}$",
-            r"   HF: $e^{+}_{s,d}(t) = [\hat{r}-\hat{\lambda}^{\mathrm{LF}}]_+$",
+            r"   HF: smoothed pre-update innovation",
             r"$\bullet$ Persistent shock promotion",
         ],
         edge=C_TEAL, face="#F0FDF4", header_bg=C_TEAL, fontsize=7.8,
@@ -191,7 +195,7 @@ def make_fig1_architecture() -> None:
             r"   quota balance, ready pool, floor $H_{\min}$",
             r"$\bullet$ Joint plan $a^U_k = (\rho_k, \delta_k, \beta_k)$ ($|\mathcal{A}_U|=30$)",
             r"$\bullet$ Quota-conserving launch projection",
-            r"$\bullet$ Estimator-free interval reward $r^U_k$",
+            r"$\bullet$ Shaped interval reward $r^U_k$",
         ],
         edge=C_BLUE, face="#EFF6FF", header_bg=C_BLUE, fontsize=7.8,
     )
@@ -213,42 +217,40 @@ def make_fig1_architecture() -> None:
         ax, 0.345, 0.04, 0.325, 0.22,
         r"Lower Constrained SAC ($u_e \in \{0,\dots,25\}\,\mathrm{s}$)",
         [
-            r"$\bullet$ State $s^L_e \in \mathbb{R}^{20}$: $[s^L_e]_0 = B_{v,m}/u_{\max}$, $u^\star_e, e^{+}_{s,d}$",
+            r"$\bullet$ State: budget, gaps, load, station queue, HF",
             r"$\bullet$ Hard mask $\mathcal{M}(B_{v,m})$ + zero-hold-adv. $Q_\psi$",
-            "• Osuna\u2013Newell pax-s $r^L_e$ + CMDP dual $\\lambda_L$",
+            r"$\bullet$ Passenger-time proxy and CMDP dual $\lambda_L$",
         ],
         edge=C_ORANGE, face="#FFF7ED", header_bg=C_ORANGE, fontsize=7.7,
     )
 
-    # Right column: Execution & Safety Guarantees
+    # Right column: Execution and comparators
     draw_box(
         ax, 0.740, 0.53, 0.245, 0.42,
-        "Closed-Loop Invariants",
+        "Closed-Loop Execution",
         [
-            r"1. Exact daily trip quota:",
-            r"   $\sum \mathbb{I}\{\mathrm{launched}\} = M_d$,",
-            r"   sweeper $\tau_{M_d} \geq T_{\mathrm{end}}$",
-            r"2. Non-stationary $H_{d,m}$",
-            r"   matches tidal peaks",
-            r"3. Hard turnaround cap:",
+            r"1. Fixed planned trip roster",
+            r"   sweeper $\tau^{\mathrm{sched}}_{M_d}\geq T_{\mathrm{end}}$",
+            r"2. Dispatch requires a ready bus",
+            r"   and eligible plan time",
+            r"3. Holds debit the trip budget",
             r"   $\sum_{e \in m} u_e \leq B_{v,m}(t_0)$",
-            r"   prevents fleet starvation",
+            r"   with ETA-based updates",
         ],
         edge=C_DARK, face="#F8FAFC", header_bg="#334155", fontsize=7.8,
     )
 
     draw_box(
         ax, 0.740, 0.05, 0.245, 0.41,
-        "4-Way Band Identification",
+        "Five Policy Representations",
         [
-            r"$\bullet$ Rewards $r^U_k, r^L_e, c^L_e$ are",
-            r"   100% tracker-free",
+            r"$\bullet$ Shared reward formula and ledger",
             r"$\bullet$ Matched $(21,20)$-dim arms:",
             r"   - Aligned (LF$\to$U, HF$\to$L)",
             r"   - Raw APC History",
             r"   - All-Band Unseparated",
             r"   - Swapped (HF$\to$U, LF$\to$L)",
-            r"   - No-Frequency HRL",
+            r"   - Coarse APC (NoFreq-HRL)",
         ],
         edge=C_GOLD, face="#FFFBEB", header_bg="#B45309", fontsize=7.7,
     )
@@ -261,6 +263,7 @@ def make_fig1_architecture() -> None:
     draw_arrow(ax, (0.508, 0.33), (0.508, 0.26), r"Budget $B_{v,m}$", color=C_PURPLE, lx_off=0.055, ly_off=0.0)
     draw_arrow(ax, (0.670, 0.78), (0.740, 0.78), "Timetable", color=C_BLUE, ly_off=0.025)
     draw_arrow(ax, (0.670, 0.16), (0.740, 0.60), "Hold $u_e$", color=C_ORANGE, rad=-0.10, lx_off=0.020, ly_off=-0.02)
+    draw_arrow(ax, (0.270, 0.31), (0.345, 0.42), "LF", color=C_TEAL, ly_off=0.015)
     draw_arrow(ax, (0.270, 0.78), (0.345, 0.80), "AVL + Pool", color=C_DARK, ly_off=0.026)
 
     save_fig(fig, "fig1_architecture")
@@ -300,13 +303,7 @@ def make_fig2_corridors_decomposition() -> None:
     ax.plot(hours + 0.5, m_dn, "-s", color=C_ORANGE, lw=1.8, ms=3.8, label="Outbound (Haymarket $\\to$ Woodlawn)")
     ax.fill_between(hours + 0.5, m_up, m_dn, where=(m_up >= m_dn), color=C_BLUE, alpha=0.10)
     ax.fill_between(hours + 0.5, m_up, m_dn, where=(m_dn > m_up), color=C_ORANGE, alpha=0.10)
-    ax.annotate("5.3:1 AM\ninbound tide", xy=(7.5, 773), xytext=(8.8, 575),
-                arrowprops={"arrowstyle": "->", "color": C_BLUE, "lw": 0.9},
-                fontsize=7.5, color=C_BLUE, fontweight="bold")
-    ax.annotate("3.6:1 PM\noutbound tide", xy=(16.5, 646), xytext=(15.5, 755),
-                arrowprops={"arrowstyle": "->", "color": C_ORANGE, "lw": 0.9},
-                fontsize=7.5, color=C_ORANGE, fontweight="bold")
-    ax.set_title("(b) MBTA Route 111 APC/GTFS (9,330 pax/day)")
+    ax.set_title("(b) MBTA-informed (9,330 pax/day)")
     ax.set_xlabel("Hour of Service Day")
     ax.set_ylabel("Directional Demand (pax/h)")
     ax.set_xlim(6.0, 20.0)
@@ -326,40 +323,52 @@ def make_fig2_corridors_decomposition() -> None:
     surge_mask = (mins >= 315) & (mins < 330)
     true_rate[surge_mask] *= 2.85
 
-    # Simulate bus arrivals every ~6 min and compare naive 1-min log1p EWMA vs headway-normalized Fourier-RLS
-    naive_bins = np.zeros_like(mins)
-    hw_norm_rate = np.zeros_like(mins)
+    # Feed both filters the same boarding events, never the latent rate.
+    key = (1, True)
+    prior_theta = np.zeros(10)
+    initial_rate = 1.0
+    prior_theta[0] = math.log1p(initial_rate)
+
+    def tracker():
+        return DemandFrequencyTracker(
+            update_interval_s=20, bin_sec=60, method="harmonic",
+            harmonic_period_s=50400, fourier_k=4, harmonic_forgetting=0.998,
+            harmonic_prior_var=0.35, harmonic_prior={"local": {key: prior_theta}},
+            promotion_enable=False,
+        )
+
+    normalized = tracker()
+    archived = tracker()
+    raw = tracker()
     last_arr = 0
-    cur_est = true_rate[0]
+    cur_est = initial_rate
+    scaled_lf, lf_est, naive_lf, hf_pos = [], [], [], []
     for m in range(len(mins)):
-        if m > 0 and (m % 6 == 0):
+        before = cur_est
+        boarded = 0.0
+        if m > 0 and m % 6 == 0:
             dt = m - last_arr
-            lam_sum = float(true_rate[last_arr:m].sum())
-            boarded = float(rng.poisson(lam_sum))
-            naive_bins[m] = boarded
-            inst_r = boarded / max(dt, 1)
-            cur_est = 0.75 * inst_r + 0.25 * cur_est
+            boarded = float(rng.poisson(float(true_rate[last_arr:m].sum())))
+            cur_est = 0.75 * (boarded / dt) + 0.25 * cur_est
             last_arr = m
-        hw_norm_rate[m] = cur_est
+        for tick in range(3):
+            rate = before if tick < 2 else cur_est
+            normalized.update({key: rate / 3})
+            archived.update({key: rate})
+            raw.update({key: boarded if tick == 2 else 0.0})
+        observed = archived._get_local_state(key)
+        scaled_lf.append(observed.low)
+        lf_est.append(normalized._get_local_state(key).low)
+        naive_lf.append(raw._get_local_state(key).low)
+        hf_pos.append(max(0.0, observed.high))
 
-    # Fourier K=4 projection for LF band + naive log1p smoothing
-    omega = 2.0 * math.pi / 840.0
-    X = np.column_stack([np.ones_like(mins)] + [
-        fn(k * omega * mins) for k in range(1, 5) for fn in (np.cos, np.sin)
-    ])
-    theta_lf, *_ = np.linalg.lstsq(X, np.log1p(np.maximum(base_curve, 0.0)), rcond=None)
-    lf_est = np.expm1(X @ theta_lf)
-    theta_naive, *_ = np.linalg.lstsq(X, np.log1p(naive_bins), rcond=None)
-    naive_lf = np.expm1(X @ theta_naive)
-    hf_pos = np.maximum(0.0, hw_norm_rate - lf_est)
-
-    ax.plot(hr_grid, hw_norm_rate, color=C_GREY, alpha=0.42, lw=0.9, label="Causal headway-norm APC $\\hat{r}_t$")
-    ax.plot(hr_grid, lf_est, color=C_BLUE, lw=2.0, label="Harmonic-RLS LF $\\hat{\\lambda}^{\\mathrm{LF}}_t$ ($\\to$ Upper)")
-    ax.plot(hr_grid, naive_lf, "--", color="#B91C1C", lw=1.4, label="Unnormalized 1-min $\\log(1+b_t)$ (bias)")
-    ax.fill_between(hr_grid, 0.0, hf_pos, color=C_ORANGE, alpha=0.45, label="HF shock $e^+_t$ ($\\to$ Lower)")
-    ax.set_title("(c) Causal Decomposition & Jensen-Bias Repair")
+    ax.plot(hr_grid, lf_est, color=C_BLUE, lw=1.5, label="LF: unit-consistent rate")
+    ax.plot(hr_grid, scaled_lf, color=C_PURPLE, lw=1.5, label="LF: archived feed")
+    ax.plot(hr_grid, naive_lf, "--", color=C_GREY, lw=1.2, label="LF: raw minute counts")
+    ax.fill_between(hr_grid, 0.0, hf_pos, color=C_ORANGE, alpha=0.40, label="HF+: archived feed")
+    ax.set_title("(c) Online Harmonic Update (Toy Data)")
     ax.set_xlabel("Hour of Service Day")
-    ax.set_ylabel("Stop Boarding Rate (pax/min)")
+    ax.set_ylabel("Filter Output (rate scale)")
     ax.set_xlim(6.0, 20.0)
     ax.set_xticks([6, 8, 10, 12, 14, 16, 18, 20])
     ax.grid(True, alpha=0.25, ls="--")
@@ -411,7 +420,7 @@ def make_post_experiment_figures() -> None:
         a0_val = v501_agg["by_corridor"][c_key]["baselines"]["A0_fixed_nohold"]["restricted_journey_s_per_pax"]
         a1_val = v501_agg["by_corridor"][c_key]["baselines"]["A1_fixed_bilateral"]["restricted_journey_s_per_pax"]
         ax.axhline(a0_val, color=C_GREY, ls=":", lw=1.2, label="Fixed-NoHold")
-        ax.axhline(a1_val, color="#B91C1C", ls="-.", lw=1.1, label="Berrebi et al. (2018)")
+        ax.axhline(a1_val, color="#B91C1C", ls="-.", lw=1.1, label="Bilateral-Hold")
         ax.set_title(f"({'ab'[idx]}) {c_title}")
         ax.set_xlabel("Training Service Day (Episode)")
         ax.set_ylabel("Journey Time (s/pax)")
@@ -442,7 +451,7 @@ def make_post_experiment_figures() -> None:
     ax.set_xticklabels(["Episode 40", "Episode 100", "Episode 200"])
     ax.set_ylim(-59.0, 4.0)
     ax.set_ylabel("Journey Delta vs. Bilateral Hold (s/pax)")
-    ax.set_title("(c) Frozen Checkpoint Stability (6 Seeds)")
+    ax.set_title("(c) Frozen Checkpoint Means (6 Seeds)")
     ax.grid(True, axis="y", alpha=0.25, ls="--")
     ax.legend(loc="lower left", frameon=True, fontsize=7.4)
 
@@ -497,14 +506,14 @@ def make_post_experiment_figures() -> None:
     ax = axes[2]
     m_mbta = v502_agg["by_corridor"]["mbta_route111_wkdy"]["confirm_16d"]["methods"]
     pareto_pts = [
-        ("B1_Daganzo2009", "Daganzo (2009)", "#7F1D1D", "^", (6, -3), "left"),
-        ("B2_Berrebi2018", "Berrebi (2018)", "#DC2626", "v", (6, -2), "left"),
+        ("B1_Daganzo2009", "Forward-Hold", "#7F1D1D", "^", (6, -3), "left"),
+        ("B2_Berrebi2018", "Bilateral-Hold", "#DC2626", "v", (6, -2), "left"),
         ("B4_FlatSAC", "Flat-SAC", C_PURPLE, "P", (-6, 3), "right"),
         ("B0_Fixed_NoHold", "Fixed-NoHold", C_GREY, "s", (6, 3), "left"),
         ("B5_TransitDuet_NoFreq", "NoFreq-HRL", C_SKY, "o", (6, 1), "left"),
         ("Abl_NoBudget", "Abl-NoBudget", C_ORANGE, "X", (-6, -2), "right"),
         ("FreqDuet_Aligned", "FreqDuet (Ours)", C_BLUE, "*", (7, -3), "left"),
-        ("B3_EconMPC", "Econ-MPC", C_GOLD, "D", (-6, -4), "right"),
+        ("B3_EconMPC", "Rolling-Heuristic", C_GOLD, "D", (-6, -4), "right"),
     ]
     for key, name, col, mk, offset, ha_align in pareto_pts:
         ewt = m_mbta[key]["mean"]["ewt_s"]
@@ -520,7 +529,7 @@ def make_post_experiment_figures() -> None:
     ax.set_ylim(1122.0, 1222.0)
     ax.set_xlabel("Excess Waiting Time, EWT (s) [$\\leftarrow$ better]")
     ax.set_ylabel("Journey Time (s/pax) [$\\downarrow$ better]")
-    ax.set_title("(c) MBTA-111 Regularity\u2013Journey Frontier")
+    ax.set_title("(c) MBTA-111 Regularity\u2013Journey Trade-off")
     ax.grid(True, alpha=0.25, ls="--")
 
     fig.tight_layout()
@@ -536,10 +545,10 @@ def make_post_experiment_figures() -> None:
     ]
     comp_methods = [
         ("FreqDuet_Aligned", "FreqDuet (Proposed)", C_BLUE),
-        ("B3_EconMPC", "Rolling Econ-MPC", C_GOLD),
+        ("B3_EconMPC", "Rolling-Heuristic", C_GOLD),
         ("Abl_AllBand", "Abl-AllBand (Unseparated)", C_SKY),
         ("B5_TransitDuet_NoFreq", "NoFreq-HRL", C_PURPLE),
-        ("B2_Berrebi2018", "Berrebi et al. (2018)", C_ORANGE),
+        ("B2_Berrebi2018", "Bilateral-Hold", C_ORANGE),
     ]
 
     for idx, (c_key, c_title) in enumerate(corridors):
@@ -557,7 +566,7 @@ def make_post_experiment_figures() -> None:
         ax.set_xticks(xp)
         ax.set_xticklabels([sl for _, sl in suites])
         ax.set_ylabel("Journey Delta vs. Fixed-NoHold (s/pax)")
-        ax.set_title(f"({'ab'[idx]}) OOD Robustness: {c_title}")
+        ax.set_title(f"({'ab'[idx]}) Perturbation Tests: {c_title}")
         ax.grid(True, axis="y", alpha=0.25, ls="--")
 
     handles, labels = axes[0].get_legend_handles_labels()

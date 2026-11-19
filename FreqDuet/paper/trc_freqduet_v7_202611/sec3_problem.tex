@@ -1,60 +1,42 @@
-\section{Problem Formulation and Multi-Timescale Corridor Dynamics}
+\section{Problem Formulation}
 \label{sec:problem}
 
-\subsection{Bidirectional Fixed-Pool Corridor and Terminal Readiness Dynamics}
+\subsection{Fixed Fleet and Terminal Dispatch}
 \label{sec:problem_corridor}
 
-Consider a bidirectional urban bus corridor operating over a daily service horizon $[0, T_{\mathrm{end}}]$ followed by a clearance window $[T_{\mathrm{end}}, T_{\mathrm{eval}}]$ so that every passenger generated up to $T_{\mathrm{end}}$ completes their journey or is accounted for within $[0, T_{\mathrm{eval}}]$. Let $d \in \{+, -\}$ index the two service directions (e.g., inbound and outbound), with $\bar{d}$ denoting the opposite direction. Each direction $d$ traverses an ordered sequence of stops $\mathcal{S}_d = (s_{d,0}, s_{d,1}, \dots, s_{d,S_d})$ spanning corridor length $L_d$, where $s_{d,0}$ is the dispatch terminal, $\{s_{d,1}, \dots, s_{d,S_d-1}\}$ are intermediate boarding/alighting stops, and $s_{d,S_d}$ is the receiving terminal (which serves as the dispatch terminal $s_{\bar{d},0}$ for direction $\bar{d}$).
+A bidirectional corridor has a physical fleet of $N_{\mathrm{fleet}}$ buses, capacity $C_{\mathrm{bus}}$, and a roster of $M_d$ trips in direction $d\in\{+,-\}$. Trips depart from one terminal and return to the other terminal's vehicle pool. The planner may revise uncommitted departure times $\tau_{d,m}^{\mathrm{sched}}$ and target headways $H_{d,m}$, but does not add or remove trips. The final planned departure in each direction is no earlier than the original final departure and the demand cutoff $T_{\mathrm{end}}$. We distinguish this planning constraint from completing the roster in the realized simulation.
 
-A fixed physical fleet $\mathcal{V} = \{1, \dots, N_{\mathrm{fleet}}\}$ of homogeneous vehicles with passenger capacity $C_{\mathrm{bus}}$ circulates continuously between the two terminals. Prior to the service day, the transit agency commits to an exact daily trip quota $M_d$ in each direction ($M_+ + M_-$ total daily trips), indexed in dispatch order $m \in \{1, \dots, M_d\}$ with nominal baseline launch times $\tau^{\mathrm{base}}_{d,1} < \dots < \tau^{\mathrm{base}}_{d,M_d}$. Under dynamic slow-clock timetable control, unlaunched trips carry mutable scheduled launch times $\tau^{\mathrm{sched}}_{d,m}$ and associated planned target headways $H_{d,m} = \tau^{\mathrm{sched}}_{d,m} - \tau^{\mathrm{sched}}_{d,m-1}$, subject to two hard operational invariants:
+A trip becomes eligible for dispatch when its revised scheduled time and minimum terminal separation permit it. It then waits if no vehicle is ready. The reported readiness delay is $D_{d,m}^{\mathrm{ready}}=\tau_{d,m}^{\mathrm{act}}-\tau_{d,m}^{\mathrm{elig}}$, where $\tau_{d,m}^{\mathrm{elig}}$ is the first eligible time. This is not delay from the original public timetable and excludes waiting before first eligibility. At intermediate stops a bus boards up to its remaining capacity. Its return time includes link travel, passenger-service dwell and discretionary holding:
 \begin{equation}
-  \sum_{m=1}^{M_d} \mathbb{I}\{\text{trip }(d,m)\text{ launched}\} = M_d,
-  \qquad
-  \tau^{\mathrm{sched}}_{d,M_d} \ge \max\!\bigl(\tau^{\mathrm{base}}_{d,M_d},\, T_{\mathrm{end}}\bigr),
-  \label{eq:quota_sweeper_invariants}
-\end{equation}
-which conserve daily operator work-hours while ensuring that the final sweeper trip never departs prior to passenger generation cutoff $T_{\mathrm{end}}$.
-
-Let $\mathcal{I}_d(t) \subseteq \mathcal{V}$ denote the pool of vehicles physically idle and ready at terminal $s_{d,0}$ at clock time $t$. When trip $(d,m)$ reaches its scheduled launch time $\tau^{\mathrm{sched}}_{d,m}$, it can be dispatched only when $\mathcal{I}_d(t) \neq \emptyset$ and a minimum terminal dispatch separation $h_{\min}^{\mathrm{disp}}$ has elapsed since $\tau^{\mathrm{act}}_{d,m-1}$. Hence, the actual launch time $\tau^{\mathrm{act}}_{d,m}$ and the resulting \emph{terminal readiness delay} $D^{\mathrm{ready}}_{d,m}$ satisfy:
-\begin{equation}
-  \tau^{\mathrm{act}}_{d,m} = \inf\Bigl\{t \ge \max\bigl(\tau^{\mathrm{sched}}_{d,m},\, \tau^{\mathrm{act}}_{d,m-1} + h_{\min}^{\mathrm{disp}}\bigr) : \mathcal{I}_d(t) \neq \emptyset\Bigr\},
-  \qquad
-  D^{\mathrm{ready}}_{d,m} = \max\bigl(0,\, \tau^{\mathrm{act}}_{d,m} - \tau^{\mathrm{sched}}_{d,m}\bigr).
-  \label{eq:readiness_delay}
-\end{equation}
-Once vehicle $v \in \mathcal{V}$ is dispatched on trip $(d,m)$ at $\tau^{\mathrm{act}}_{d,m}$, it traverses links with stochastic traffic speeds, serves waiting passengers up to residual capacity $C_{\mathrm{bus}} - L_{v}(t)$ (leaving excess passengers queued at the stop), and may execute discretionary holding $u_{v,m,s} \in \mathcal{A}_L$ at intermediate stops $s \in \{1, \dots, S_d-1\}$. Its arrival at the opposite terminal $s_{\bar{d},0}$ occurs at
-\begin{equation}
-  \tau^{\mathrm{ret}}_{v,m} = \tau^{\mathrm{act}}_{d,m} + T^{\mathrm{link}}_{v,m} + T^{\mathrm{dwell}}_{v,m} + \sum_{s=1}^{S_d-1} u_{v,m,s},
+  \tau^{\mathrm{ret}}_{v,m} = \tau^{\mathrm{act}}_{d,m} + T^{\mathrm{link}}_{v,m}
+      + T^{\mathrm{dwell}}_{v,m} + \sum_s u_{v,m,s}.
   \label{eq:return_time}
 \end{equation}
-after which vehicle $v$ joins the opposite terminal pool $\mathcal{I}_{\bar{d}}(t)$ following a minimum turnaround buffer $\tau_{\mathrm{buf}}$. Let $\tilde{T}^{\mathrm{run}}_d(t)$ denote the rolling median non-holding one-way run time ($T^{\mathrm{link}} + T^{\mathrm{dwell}}$). By Ceder's fleet-cycle bound \citep{ceder2016public}, sustaining average headway $H$ across both directions without unbounded queue growth in $D^{\mathrm{ready}}_{d,m}$ requires $N_{\mathrm{fleet}} \ge (\tilde{T}^{\mathrm{run}}_+(t) + \tilde{T}^{\mathrm{run}}_-(t) + \tau_{\mathrm{turn}})/H$, defining a causal dynamic headway floor:
-\begin{equation}
-  H_{\min}(t) = \max\!\left(H_{\mathrm{abs}},\, \kappa_{\mathrm{cyc}} \frac{\tilde{T}^{\mathrm{run}}_+(t) + \tilde{T}^{\mathrm{run}}_-(t) + \tau_{\mathrm{turn}}}{N_{\mathrm{fleet}}}\right),
-  \label{eq:cycle_floor}
-\end{equation}
-where $\kappa_{\mathrm{cyc}} > 1$ provides a stochastic cycle margin against link travel-time variance.
+The simulator requires the vehicle to be available at the receiving terminal before reuse. The 20~s buffer used later in the ledger is a planning allowance, not a mandatory physical layover.
 
-\subsection{Performance Metrics and Non-Stationary Regularity}
+\subsection{Passenger and Regularity Metrics}
 \label{sec:problem_metrics}
 
-Let $\mathcal{P}$ denote all passengers arriving during $[0, T_{\mathrm{end}}]$. For each passenger $p \in \mathcal{P}$ arriving at origin stop $o_p$ at time $t^{\mathrm{arr}}_p$, boarding at $t^{\mathrm{brd}}_p$, and alighting at destination $q_p$ at $t^{\mathrm{alg}}_p \le T_{\mathrm{eval}}$, the waiting time is $w_p = t^{\mathrm{brd}}_p - t^{\mathrm{arr}}_p$ and the in-vehicle travel time (including any holding experienced onboard) is $v_p = t^{\mathrm{alg}}_p - t^{\mathrm{brd}}_p$. Passengers still unalighted at $T_{\mathrm{eval}}$ incur censored horizon time $T_{\mathrm{eval}} - t^{\mathrm{arr}}_p$. The primary system-wide objective is mean passenger journey time:
-\begin{equation}
-  J_{\mathrm{pax}} = \frac{1}{|\mathcal{P}|} \sum_{p \in \mathcal{P}} \bigl(w_p + v_p\bigr).
-  \label{eq:journey_objective}
-\end{equation}
+For the $|\mathcal{P}|$ passengers generated by the demand cutoff, restricted mean journey exposure $J_{\mathrm{pax}}$ is total waiting plus onboard person-time divided by $|\mathcal{P}|$. A passenger still waiting or riding at the evaluation cutoff contributes time accrued through that cutoff. We also report the fraction not served. The means do not condition on completing a journey.
 
-Under time-varying scheduled headways $\{H_{d,m}\}$, classical raw headway variance $\mathrm{CV}^2_{\mathrm{raw}} = \mathrm{Var}(h)/\mathbb{E}[h]^2$ conflates intentional peak-to-off-peak frequency modulation with unintended bunching. Let $\mathcal{E}_{s,d} = \{(h_{s,d,j}, H_{s,d,j})\}_{j=1}^{J_{s,d}}$ denote realized inter-departure headways $h_{s,d,j}$ and corresponding active trip target headways $H_{s,d,j}$ at stop $(s,d)$. We evaluate regularity using both \emph{plan-normalized squared headway error} ($\mathrm{CV}^2_{\mathrm{plan}}$) and Transport for London \emph{Excess Waiting Time} ($\mathrm{EWT}$):
+For recorded nonterminal \emph{arrival} headways $h$, we report raw $\mathrm{CV}^2_{\mathrm{raw}}=\mathrm{Var}(h)/\mathbb{E}[h]^2$. Let $\mathcal{E}$ contain the observed headways and their active target headways $H$. Plan-normalized headway error and the excess-waiting-time (EWT) proxy are:
 \begin{equation}
-  \mathrm{CV}^2_{\mathrm{plan}} = \frac{1}{|\mathcal{E}|} \sum_{(h, H) \in \mathcal{E}} \left(\frac{h - H}{H}\right)^2,
-  \qquad
-  \mathrm{EWT} = \frac{1}{\sum_{s,d} 1} \sum_{s,d} \left(\frac{\sum_j h_{s,d,j}^2}{2 \sum_j h_{s,d,j}} - \frac{\sum_j H_{s,d,j}^2}{2 \sum_j H_{s,d,j}}\right).
-  \label{eq:plan_cv2_ewt}
+\begin{aligned}
+  \mathrm{CV}^2_{\mathrm{plan}} &=
+     \frac{1}{|\mathcal{E}|}\sum_{(h,H)\in\mathcal E}\left(\frac{h-H}{H}\right)^2,\\
+  \mathrm{EWT} &= \frac{1}{|\mathcal{S}|}\sum_{(s,d)\in\mathcal{S}}
+  \left[\frac{\sum_j h_{s,d,j}^2}{2\sum_j h_{s,d,j}} -
+        \frac{\sum_j H_{s,d,j}^2}{2\sum_j H_{s,d,j}}\right],
+\end{aligned}
+\label{eq:plan_cv2_ewt}
 \end{equation}
-Note that $\mathrm{EWT} = \mathrm{AWT} - \mathrm{SWT}$ directly measures the additional random-arrival waiting time (in seconds) caused by deviations from the active timetable, vanishing identically whenever $h_{s,d,j} = H_{s,d,j}$ even across sharp peak-to-trough headway changes.
+where $\mathcal{S}$ is the set of stop-direction groups with valid headways. EWT is relative to each controller's own plan, not a shared public timetable or a direct measure of actual passenger waits. The raw CV$^2$ does not remove intentional headway changes. Neither metric substitutes for the direct passenger outcome.
+
+\subsection{A Plan-Consistent Two-Gap Holding Target}
 
 \begin{proposition}[Plan-Consistent Non-Stationary Bilateral Holding Target]
 \label{prop:nonstationary_target}
-Suppose vehicle $v$ serving trip $(d,m)$ with planned headway $H_{\mathrm{own}} > 0$ completes boarding at stop $s$ with causal forward departure headway $g^{\mathrm{fwd}} \ge 0$ and same-time causal follower departure gap $g^{\mathrm{bwd}} \ge 0$, where the trailing vehicle serves trip $(d,m+1)$ with planned headway $H_{\mathrm{fol}} > 0$. Applying holding $u \in [0, \bar{u}]$ shifts the local gaps to $(g^{\mathrm{fwd}} + u,\, g^{\mathrm{bwd}} - u)$. Minimizing the local plan-normalized regularity loss
+Suppose vehicle $v$ serving trip $(d,m)$ with planned headway $H_{\mathrm{own}} > 0$ completes boarding at stop $s$ with causal forward departure headway $g^{\mathrm{fwd}} \ge 0$ and same-time causal follower departure gap $g^{\mathrm{bwd}} \ge 0$, where the trailing vehicle serves trip $(d,m+1)$ with planned headway $H_{\mathrm{fol}} > 0$. Applying holding $u \in [0,\bar u]$ with $\bar u>0$ shifts the local gaps to $(g^{\mathrm{fwd}} + u,\, g^{\mathrm{bwd}} - u)$. Minimizing the local plan-normalized regularity loss
 \begin{equation}
   \mathcal{L}_{\mathrm{reg}}(u) = \frac{1}{2}\left[\left(\frac{g^{\mathrm{fwd}} + u - H_{\mathrm{own}}}{H_{\mathrm{own}}}\right)^2 + \left(\frac{g^{\mathrm{bwd}} - u - H_{\mathrm{fol}}}{H_{\mathrm{fol}}}\right)^2\right]
   \label{eq:local_reg_loss}
@@ -79,32 +61,21 @@ The objective $\mathcal{L}_{\mathrm{reg}}(u)$ in Eq.~\eqref{eq:local_reg_loss} i
 Projecting the unconstrained minimizer onto the compact interval $[0, \bar{u}]$ yields Eq.~\eqref{eq:u_star_nonstationary}. Substituting $H_{\mathrm{own}} = H_{\mathrm{fol}} = H$ cancels $H^{-2}$ and cancels $\pm H$ in the numerator, yielding $\frac{1}{2}(g^{\mathrm{bwd}} - g^{\mathrm{fwd}})$. Substituting $g^{\mathrm{fwd}} = H_{\mathrm{own}}$ and $g^{\mathrm{bwd}} = H_{\mathrm{fol}}$ makes the numerator identically zero, so $u^\star = 0$, whereas $\frac{1}{2}(g^{\mathrm{bwd}} - g^{\mathrm{fwd}}) = \frac{1}{2}(H_{\mathrm{fol}} - H_{\mathrm{own}}) > 0$ whenever $H_{\mathrm{fol}} > H_{\mathrm{own}}$.
 \end{proof}
 
-\subsection{Marginal Person-Seconds Trade-Off and Turnaround Spillover}
+\subsection{Local Waiting Savings and the Limits of Turnaround Pricing}
 \label{sec:problem_osuna}
 
-Proposition~\ref{prop:nonstationary_target} characterizes pure headway regularity, yet holding also delays onboard passengers and consumes terminal turnaround slack. We next formalize the coupled marginal journey-time impact of a stop-level holding action.
-
-\begin{proposition}[Marginal Osuna--Newell Person-Seconds Variation with Turnaround Coupling]
-\label{prop:osuna_turnaround}
-Consider decision event $e$ of vehicle $v$ at stop $s$ with onboard passenger load $L^{\mathrm{on}}_e$, remaining downstream arrival intensity $\Lambda^{\mathrm{ds}}_e$ (pax/s across remaining stops on trip $(d,m)$), local gaps $(g^{\mathrm{fwd}}, g^{\mathrm{bwd}})$, planned headways $(H_{\mathrm{own}}, H_{\mathrm{fol}})$ with local cycle span $\bar{H}_e = \frac{1}{2}(H_{\mathrm{own}} + H_{\mathrm{fol}})$, and remaining terminal turnaround slack $\sigma_{v,m}$ prior to the matched opposite-direction trip $(\bar{d}, \pi(v))$ facing corridor arrival intensity $\Lambda^{\mathrm{opp}}$ and planned headway $H_{\mathrm{opp}}$. Under locally rigid downstream propagation without capacity saturation, holding vehicle $v$ by $u \ge 0$ changes total expected system person-seconds by $-\Delta J(u)$, where the net person-seconds saved is
+Under a constant arrival rate $\Lambda$ (passengers per second), no capacity limit and rigid shifts on a downstream two-gap segment, the expected waiting saved by holding $u$ is
 \begin{equation}
-  \begin{aligned}
-  \Delta W_{\mathrm{net}}(u)
-  &= \underbrace{\Lambda^{\mathrm{ds}}_e \bar{H}_e u \left[\left(\frac{g^{\mathrm{bwd}}}{H_{\mathrm{fol}}} - \frac{g^{\mathrm{fwd}}}{H_{\mathrm{own}}}\right) - \frac{u}{2}\left(\frac{1}{H_{\mathrm{own}}} + \frac{1}{H_{\mathrm{fol}}}\right)\right]}_{\text{downstream waiting time saved }\Delta W_{\mathrm{save}}(u)} \\
-  &\quad - \underbrace{L^{\mathrm{on}}_e u}_{\text{onboard delay}}
-  - \underbrace{\Phi_{\mathrm{turn}}\bigl([u - \sigma_{v,m}]_+\bigr)}_{\text{turnaround spillover}},
-  \end{aligned}
+  \Delta W(u)=\Lambda u(g^{\mathrm{bwd}}-g^{\mathrm{fwd}}-u).
   \label{eq:osuna_turnaround_delta}
 \end{equation}
-with $\Phi_{\mathrm{turn}}(\xi) \ge \Lambda^{\mathrm{opp}} H_{\mathrm{opp}} \xi + \frac{1}{2}\Lambda^{\mathrm{opp}}\xi^2$ for $\xi = [u - \sigma_{v,m}]_+ > 0$. Consequently:
-\begin{enumerate}
-  \item Even when $\sigma_{v,m} > u$ ($\Phi_{\mathrm{turn}} = 0$), holding improves net passenger journey time ($\Delta W_{\mathrm{net}}'(0^+) > 0$) if and only if $\Lambda^{\mathrm{ds}}_e \bar{H}_e (g^{\mathrm{bwd}}/H_{\mathrm{fol}} - g^{\mathrm{fwd}}/H_{\mathrm{own}}) > L^{\mathrm{on}}_e$.
-  \item Whenever cumulative trip holding exhausts turnaround slack ($\sigma_{v,m} \le 0$), any positive hold $u > 0$ delays the opposite-direction terminal launch by $u$, widening the opposite-direction leading headway from $H_{\mathrm{opp}}$ to $H_{\mathrm{opp}} + u$ and imposing an uncompensated cross-directional waiting penalty of at least $\Lambda^{\mathrm{opp}} H_{\mathrm{opp}} u$ across the entire opposite corridor.
-\end{enumerate}
-\end{proposition}
+This follows by subtracting the squared-gap waiting cost after holding from that before holding \citep{osuna1972control}. The local onboard cost is $L^{\mathrm{on}}u$. When targets differ, the controller instead uses a plan-aware \emph{proxy} for the first term:
+\begin{equation}
+  G(u)=\widehat{\Lambda}^{\mathrm{ds}}\frac{H_{\mathrm{own}}+H_{\mathrm{fol}}}{2}u
+  \left[\frac{g^{\mathrm{bwd}}}{H_{\mathrm{fol}}}-\frac{g^{\mathrm{fwd}}}{H_{\mathrm{own}}}
+  -\frac{u}{2}\!\left(\frac{1}{H_{\mathrm{own}}}+\frac{1}{H_{\mathrm{fol}}}\right)\right].
+  \label{eq:normalized_hold_proxy}
+\end{equation}
+It reduces to Eq.~\eqref{eq:osuna_turnaround_delta} for equal headway targets with $\Lambda=\widehat{\Lambda}^{\mathrm{ds}}$. With unequal targets, capacity constraints or state-dependent dwell, it is not the causal change in system-wide waiting.
 
-\begin{proof}
-Under plan-normalized spacing over local two-trip span $2\bar{H}_e = H_{\mathrm{own}} + H_{\mathrm{fol}}$, the weighted squared headway loss before and after holding $u$ changes at rate $\bar{H}_e [\mathcal{L}_{\mathrm{reg}}(0) - \mathcal{L}_{\mathrm{reg}}(u)]$ scaled by $H_{\mathrm{own}} H_{\mathrm{fol}}$; differentiating Eq.~\eqref{eq:local_reg_loss} and integrating from $0$ to $u$ yields $\Delta W_{\mathrm{save}}(u)$ in Eq.~\eqref{eq:osuna_turnaround_delta} (which reduces to the exact Osuna--Newell identity $\frac{1}{2}\Lambda^{\mathrm{ds}}_e [(g^{\mathrm{fwd}})^2 + (g^{\mathrm{bwd}})^2 - (g^{\mathrm{fwd}}+u)^2 - (g^{\mathrm{bwd}}-u)^2] = \Lambda^{\mathrm{ds}}_e u (g^{\mathrm{bwd}} - g^{\mathrm{fwd}} - u)$ when $H_{\mathrm{own}} = H_{\mathrm{fol}} = \bar{H}_e$). Each of the $L^{\mathrm{on}}_e$ onboard passengers experiences exact additional in-vehicle delay $u$. Finally, by Eqs.~\eqref{eq:readiness_delay}--\eqref{eq:return_time}, if $\xi = [u - \sigma_{v,m}]_+ > 0$, opposite-direction trip $(\bar{d}, \pi(v))$ suffers readiness delay $\Delta D^{\mathrm{ready}} = \xi$, expanding its forward corridor headway from $H_{\mathrm{opp}}$ to $H_{\mathrm{opp}} + \xi$; under Poisson arrivals of rate $\Lambda^{\mathrm{opp}}$, expected passenger wait over that interval increases by $\frac{1}{2}\Lambda^{\mathrm{opp}}[(H_{\mathrm{opp}}+\xi)^2 - H_{\mathrm{opp}}^2] = \Lambda^{\mathrm{opp}} H_{\mathrm{opp}} \xi + \frac{1}{2}\Lambda^{\mathrm{opp}}\xi^2$. Evaluating $\Delta W_{\mathrm{net}}'(0^+)$ directly yields condition~(1).
-\end{proof}
-
-Proposition~\ref{prop:osuna_turnaround} reveals why both classical load-blind holding and unbudgeted hierarchical RL fail on realistic corridors: near corridor midpoints where $L^{\mathrm{on}}_e$ is high and $\Lambda^{\mathrm{ds}}_e$ decays toward the terminal, $\Delta W_{\mathrm{net}}'(0^+) < 0$ even when $g^{\mathrm{bwd}} > g^{\mathrm{fwd}}$; and during tidal peaks when $\sigma_{v,m} \to 0$, unmasked holding triggers corridor-wide opposite-direction starvation $\Phi_{\mathrm{turn}}$ many minutes later, creating a severe non-local credit-assignment pathology that our Turnaround Budget Ledger eliminates by construction.
+Turnaround effects depend on future departures. For illustration, if the same vehicle is required for the next dispatch, a hold beyond its actual slack can delay that dispatch. Whether the resulting net waiting cost is large also depends on the next gap. With constant arrivals, initially equal gaps $H$, and a single dispatch delayed by $\delta<H$ while its neighbors stay fixed, gaps become $H+\delta$ and $H-\delta$, and the added waiting across both gaps is $\Lambda\delta^2$. Other ready vehicles may absorb the delay entirely. We therefore use predicted slack to limit holds, and measure passenger and vehicle consequences in simulation rather than assuming a lower bound on spillover.
