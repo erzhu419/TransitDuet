@@ -1,0 +1,8 @@
+\section{Discussion and conclusions}
+
+The corrected study shows why better passenger time and operational reliability need separate evaluation. Against the specified dynamic rule, the learned controller had both lower journey exposure and more regular, less delayed operations; against the matched raw-input learner, journeys fell but the joint criterion was not met. Consequently, the gain from the full controller is better supported than a general gain from assigning different frequency bands to its two policies. This distinction matters when different features also change the realized timetable and use of the holding budget.
+
+\input{generated/holding_discussion}
+
+\subsection{Limitations}
+The corrected evaluation uses one data-informed route model and four training seeds. Reusing paired days in the mechanism comparison does not create another independent confirmation. Boardings under capacity constraints are a censored demand proxy, and projected trip times can misrepresent future vehicle stock. The field observations benchmark running times and selected same-vehicle turnaround gaps; they do not validate the simulated controller under deployment. In published-timetable service, a controller should not depart early against an advertised promise. The results do not measure timed-transfer outcomes, off-peak schedule-sensitive rider behavior, or the consequences of adding a passenger notice or departure-advance constraint.

@@ -1,0 +1,33 @@
+\documentclass[pdflatex,sn-basic]{sn-jnl}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,graphicx}
+\usepackage{microtype}
+\hypersetup{hidelinks}
+\setlength{\emergencystretch}{2em}
+
+\begin{document}
+\title[Terminal rescheduling and stop holding]{Terminal rescheduling and stop holding with a fixed bus fleet: passenger gains and circulation risks}
+\author{\fnm{Author details} \sur{provided separately}}
+\abstract{%
+Moving departures toward demand can reduce waiting without adding trips, but the same buses must return in time to serve the opposite direction. We study whether stop holding adds value to terminal rescheduling when both decisions draw on the same vehicle time. FreqDuet uses an upper policy to revise unreleased departures and a lower policy to hold at stops, with holding bounded by projected turnaround availability. In a simulation informed by data for Boston's Route 111, four frozen policy pairs were evaluated on 16 new paired demand days with 14 buses and 262 trips. Compared with a dynamic rule using the same action set and trip budget, the learned controller reduced journey exposure by 4.26 seconds per passenger (95\% paired interval: 0.71 to 7.74 seconds saved), improved arrival regularity, and reduced readiness delay. Relative to the same learned architecture using unfiltered passenger-count inputs, harmonic policy inputs reduced journeys by 4.56 seconds per passenger, but did not meet the joint regularity and readiness criterion. Both learned variants retained the same harmonic input to the budget ledger. \input{generated/abstract_extension} The results concern headway-managed service with retiming, not adherence to a published timetable.
+}
+\keywords{Bus operations, terminal dispatch, stop holding, vehicle circulation, headway management}
+\maketitle
+
+\input{introduction}
+\input{methods}
+\input{results}
+\input{discussion}
+\appendix
+\input{implementation}
+
+\section*{Statements and Declarations}
+\noindent\textbf{Data and code availability.}
+The accompanying review archive contains the frozen simulation workbooks, paired result summaries, and code to recreate the tables and figure. The associated study protocols and simulation code are archived with the project. Agency data are credited in the methods and the review archive; they are not included in the controller evaluation as realized futures.
+
+\noindent\textbf{Generative AI.}
+Google Gemini and OpenAI Codex assisted in revision of the text and implementation. The report uses the numerical outputs of the archived code and paired study records.
+
+\bibliography{refs}
+\end{document}

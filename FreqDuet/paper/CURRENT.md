@@ -1,8 +1,14 @@
 # FreqDuet Manuscripts
 
+The [Public Transport revision](public_transport_freqduet_v7_202611/README.md)
+is the current fixed-fleet joint-control manuscript. V504 is the main
+corrected comparison. V505 isolates stop holding with the upper actors
+frozen, adds a matched rolling benchmark, and records the circulation
+failure and field timing check. The mainline controller is unchanged.
+
 The [TR-C v7 draft](trc_freqduet_v7_202611/README.md) studies joint dispatch
-and stop holding in V500--V502. It reports as-run simulation trade-offs
-and a corridor-specific demand-representation result. It is distinct
+and stop holding in V500--V503. It reports as-run simulation trade-offs
+and the corrected routing comparison, which did not meet its joint criterion. It is distinct
 from the fixed-timetable capped holding study below.
 
 The [state-dependent capped holding

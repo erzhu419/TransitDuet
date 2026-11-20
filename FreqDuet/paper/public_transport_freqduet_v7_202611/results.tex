@@ -1,0 +1,29 @@
+\section{Results}
+
+\subsection{Corrected fixed-fleet comparison}
+Table~\ref{tab:main} gives the main results. All 144 evaluation paths operated the complete roster with the fixed fleet and zero unserved passengers. Aligned reduced journeys relative to Manual in all four seed means and 13 of 16 day means. The reduction was 0.38\% of the Manual journey mean, including 3.93 seconds less waiting and 0.33 seconds less onboard time; the onboard interval included zero. Multiplying the paired differences by each scenario's generated passenger count gives \input{generated/person_hours} passenger-hours saved per operating day. With the same budget constraints, the policies still held very differently: 3.46 versus 11.73 seconds per trip. The result supports the combined learned controller on this corridor, not an improvement per unit of holding.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Main paired comparison on 16 new MBTA-informed simulation days (V504). Entries are Aligned minus the comparator, with pointwise 95\% seed-by-day bootstrap intervals. Negative values favor Aligned. Absolute offset is measured against the original nominal timetable.}
+\label{tab:main}
+\input{generated/v504_table}
+\end{table}
+
+Relative to NoFreq, harmonic actor inputs reduced journeys on 15 of 16 day means and in three of four seed means. The point estimate for arrival regularity also favored Aligned, but its interval did not establish non-harm. Average readiness delay was higher. An exploratory NoFreq--Manual comparison is useful for interpreting the large readiness gain: even without harmonic actor inputs, NoFreq lowered readiness delay by 98.35 seconds per trip relative to Manual, while the journey difference was only $+0.30$ seconds per passenger (interval $[-5.84,+5.99]$). The large readiness advantage against Manual is therefore not evidence of a harmonic actor effect. V503, the matched band-swap study on a separate day set, also failed its joint criterion; the journey difference was $-4.28$ seconds per passenger (interval $[-10.56,+1.45]$).
+
+\subsection{Holding attribution and rolling benchmark}
+\input{generated/holding_results}
+
+\subsection{What readiness and timetable displacement measure}
+The Aligned controller had 3.65 seconds of readiness delay per trip, measured from eligibility under its own active plan, and 515.42 seconds of absolute displacement from the original 360-second timetable. These are not contradictory: trips can move substantially on the calendar while a bus is usually ready to run the revised plan. Averaged over every trip (including zero contributions), Aligned had 319.70 seconds of earliness and 195.72 seconds of lateness, compared with 257.58 and 503.47 seconds with Manual and 743.01 and 356.11 seconds with NoFreq. Thus the lower absolute displacement against Manual was driven by less lateness, not uniformly by less earliness. An eight-minute mean absolute plan displacement is not an eight-minute change in experienced passenger waiting.
+
+\subsection{A measured circulation failure in simulation}
+Seed 50314 on day 53020003 incurred 150.50 seconds of readiness delay per trip, versus 5.34 seconds with NoFreq. The pair accounts for about 98\% of the overall mean readiness difference. The observation remains in all primary results. We examine it as an already identified failure, not as a randomly sampled operating day or an estimate of how often failures occur.
+\input{generated/case_results}
+
+\subsection{Independent running-time and terminal check}
+\input{generated/field_results}
+
+\subsection{Relationship to the earlier implementation}
+The archived V500--V502 studies used a nominal 60-second conversion at each 20-second APC update, and the old actor read the exact simulated post-boarding queue. The full old controller reduced mean journeys by 14.32 and 14.02 seconds per passenger against fixed dispatch with no holding on the MBTA-informed and synthetic tidal corridors, respectively. Only the first interval excluded zero when training seeds were included. The archived rolling rule was faster than the old learned controller by 5.20 and 16.32 seconds per passenger, respectively, but had higher readiness delay. In the old eight-day non-learning development study, adding constrained holding to the same dispatch rule increased mean journeys by 3.37 and 3.07 seconds per passenger. These are historical context, not tests of the current controller or estimates of retiming in isolation. The corrected variant changed the upper action set, fixed retention, and matched the feature comparisons; subtracting the old 9.59-second harmonic-input estimate from the new 4.56-second estimate would not isolate a unit-conversion effect.

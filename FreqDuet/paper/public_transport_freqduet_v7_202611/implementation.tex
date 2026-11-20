@@ -1,0 +1,42 @@
+\section{Implementation details}
+
+\subsection{Actor inputs}
+The upper operational block uses phase sine and
+cosine, remaining day fraction, each directional remaining-trip fraction
+relative to the remaining day, quota-available gaps, directional ready
+counts, total active fleet fraction, the cycle-based spacing floor, recent
+budget utilization and preceding interval readiness delay. For each
+direction, the four demand statistics are the sum, scaled spatial root
+mean square, scaled spatial standard deviation and aggregate one-bin
+change. For the lower actor the operational inputs are the dynamic action
+limit, remaining holding, holding per remaining stop, estimated turnaround
+slack, overdue trips at the next terminal, two relative headways, two-sided
+availability, analytical gap-based hold target, the two planned target
+headways, onboard fraction, route progress, and phase sine and cosine.
+Its demand statistics are the local quantity and the mean of the next
+two stops, each with its one-bin change. This summary and its normalization
+are shared by the corrected input comparisons.
+
+\subsection{Updates}
+Each policy and critic has two 96-unit hidden layers.
+The reward critics use six members and a pessimistic mean-minus-standard
+deviation target. The upper replay uses six-step discounted returns
+($\gamma=0.996$), a capacity of 20,000 and batches of 48. The lower replay
+uses one-step returns ($\gamma=0.92$), a capacity of 180,000 and batches of
+128. Both learning rates are $3\times10^{-4}$; the lower multiplier uses
+$10^{-3}$ and a cost target of 0.020. The four final seed pairs use the
+first two days as replay warm-up and make 32 upper and 64 lower updates
+on each subsequent training day. Final evaluation uses greedy action
+selection with the same action mask as training.
+
+\subsection{Limits and forecasts}
+The dynamic lower mask multiplies the
+normalized remaining action allowance by the 25-second bin maximum;
+the zero bin is always legal. The upper spacing floor estimates the
+two directional trip times plus 40 seconds divided by the fleet size,
+then scales by 0.85, 0.90 or 0.97 as terminal stock falls from at least
+three to two or fewer than two vehicles. The result is clipped to
+$[250,335]$ seconds, with an upper requested gap of 455 seconds. The
+operating projection falls back to uniform residual gaps when the
+two-block allocation is infeasible. The minimum actual dispatch
+spacing enforced by the simulator is a separate 120-second rule.
