@@ -11,9 +11,10 @@ Date: 2026-11-20. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
   builds favor the rule over distance and a timing portfolio under shared caps.
 - **Clock-grid queries.** Training without hidden event annotations beats
   periodic, random-offset and distance timing on held-out PointMaze paths.
-  Ridge also beats two learned timing gates and the raw-input MLP at the same
-  192 paired queries. The acquisition study did not establish noninferiority
-  to event stratification; the predictor comparison did not isolate features.
+  Ridge beats the distance and cost-difference gates. The binary gate did not
+  beat shared periodic timing. The acquisition study did not establish
+  noninferiority to event stratification; the raw-input MLP comparison at 192
+  paired queries did not isolate features.
 - **Second plant.** After retraining on derived polygonal Reacher, selected
   fixed-clock ISE improved 5.00% across eight roots (nominal p = 0.00937;
   Holm p = 0.0656 across seven ridge timing contrasts). The driver reuses
@@ -26,7 +27,8 @@ Date: 2026-11-20. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
   and less planner time, but scoring more than offsets the planner savings.
   Against distance gates with more calls, fewer-call ridge is less accurate
   and costs more upper-loop time at both tested points. The measured control
-  times do not establish a net speedup.
+  times used fixed-order blocks and scored forced deadlines; they do not
+  establish a net speedup or measure the minimum possible trigger overhead.
 - **Waiting value.** Earlier development isolates opposite-signed episode
   gains despite positive 50-step gains. A next-check waiting target did not
   displace the frozen trigger.
@@ -44,8 +46,8 @@ The learned binary and cost-difference gates are budgeted adaptations, not
 reproductions of the original TEMPLE or Option-Critic algorithms. Retain the
 fixed-call timing claim on the tested planning and execution hierarchies.
 The [TMLR submission build](tmlr/README.md) uses the official anonymous
-style and packages reproducible analysis as an anonymous ZIP, not native
-simulation or controller training. The authors complete the private
+style and packages both reproducible analysis and one frozen PointMaze
+simulation in an anonymous ZIP, not controller training. The authors complete the private
 OpenReview declarations before upload. A stronger
 cross-task claim needs an independent comparison with a selected strong
 timing gate under matched total compute, not more periodic controls.

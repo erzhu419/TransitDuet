@@ -9,7 +9,7 @@ make -C paper tmlr-package
 ```
 
 - Manuscript upload: `paper/tmlr/submission.pdf`, compiled in the default anonymous review mode.
-- Supplemental upload: `/tmp/tmlr-supplement.zip` (override with `TMLR_SUPPLEMENT=/absolute/path.zip`). It is an offline analysis and reproduction artifact, not a retraining package.
+- Supplemental upload: `/tmp/tmlr-supplement.zip` (override with `TMLR_SUPPLEMENT=/absolute/path.zip`). It includes the offline analysis and a [frozen PointMaze replay](../README.md#run-the-frozen-pointmaze-example), not a retraining package.
 
 The PDF contains the appendix after the bibliography. TMLR sets no hard
 page limit, but its [FAQ](https://www.jmlr.org/tmlr/faq.html) notes that papers

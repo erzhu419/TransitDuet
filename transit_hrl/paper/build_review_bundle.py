@@ -1,4 +1,4 @@
-"""Package offline analysis without operational files or local archive metadata."""
+"""Package offline analysis and frozen replay without cluster files."""
 
 from io import BytesIO
 from pathlib import Path, PurePosixPath
@@ -17,6 +17,8 @@ def include(name: str) -> bool:
     if path.parts[0] == "results":
         return path.name == "summary.json" or path.parent.name == "report"
     return name in {
+        "scripts/__init__.py",
+        "scripts/run_plan_validity_reliability.py",
         "tests/test_paper_plan_validity_evidence.py",
         "tests/test_plan_validity_figures.py",
     }

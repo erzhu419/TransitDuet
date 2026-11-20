@@ -95,6 +95,17 @@ class PaperEvidenceTests(unittest.TestCase):
     def test_route_b_tables_match_saved_summaries(self):
         paper = (ROOT / "paper/manuscript.md").read_text()
         sb = self.evidence["pointmaze_strong_baselines"]
+        means = sb["mean_ise"]
+        binary_wins = sum(
+            row["temple_minus_ridge_ise"] < row["shared_periodic_minus_ridge_ise"]
+            for row in sb["root_effects"].values()
+        )
+        self.assertGreater(means["temple_gate"], means["shared_periodic"])
+        self.assertIn(
+            f'{means["temple_gate"]:.5f} vs. {means["shared_periodic"]:.5f} ISE; '
+            f"{binary_wins}/8 roots favored the gate",
+            paper,
+        )
         for m_key, c_key in (
             ("native_periodic_hrl", "native_periodic_minus_ridge_ise"),
             ("shared_periodic", "shared_periodic_minus_ridge_ise"),

@@ -26,9 +26,28 @@ make -C paper reproduce
 
 If Pandoc is not on `PATH`, pass `PANDOC=/absolute/path/to/pandoc`.
 `make -C paper review-bundle` writes `/tmp/freqhrl-review.tar.gz`. This
-analysis package excludes deployment scripts, cluster paths, job receipts,
+review package excludes scheduler scripts, cluster paths, job receipts,
 and archived operational notes. The full local working package is built
 with `make -C paper bundle` (`/tmp/freqhrl-submission.tar.gz`).
+
+## Run the frozen PointMaze example
+
+From the same directory, with Python 3.10 on Linux:
+
+```sh
+python3 -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+python3 -m pip install -r paper/requirements-replay.txt
+make -C paper replay
+```
+
+This runs the original trigger and controller code without training, a GPU,
+rendering or a scheduler. The example is the first root and first held path
+of the PointMaze yoked-clock study (root `1981400000`, path `1987400100`).
+It verifies all 24 call times against the [replay fixture](data/pointmaze_replay.json)
+and compares the 1,200-step episode ISE against the saved evaluation
+(`1.0109450548372947`, absolute tolerance `1e-5`). The expected call times
+were recorded from the shipped replay runtime; the reference ISE comes from
+the original study. This is a single-episode check, not a new efficacy test.
 
 ## Data and scope
 
@@ -45,5 +64,5 @@ with `make -C paper bundle` (`/tmp/freqhrl-submission.tar.gz`).
 | Table 10 | Smooth-ellipse Reacher and LQR cart-pole applicability summaries | Check paired applicability contrasts and preserve both diagnostic qualification outcomes |
 | Tables 6-7, Figure 3 | Qualified Stage298/301/304 Transit reports and event audit | Preserve single-intervention contrasts and the negative two-decision episode boundary |
 
-The rebuild uses saved outcomes and does not require a simulator or scheduler.
-The bundle does not contain the raw trajectories or checkpoints needed to rerun policy training.
+The results rebuild uses saved outcomes without running a simulator or scheduler.
+The single replay checkpoint does not reproduce policy training or all evaluation cohorts.

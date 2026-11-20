@@ -4,7 +4,7 @@ BUNDLE ?= /tmp/freqhrl-submission.tar.gz
 REVIEW_BUNDLE ?= /tmp/freqhrl-review.tar.gz
 TMLR_SUPPLEMENT ?= /tmp/tmlr-supplement.zip
 
-.PHONY: reproduce evidence figures check bundle review-bundle tmlr tmlr-package
+.PHONY: reproduce replay evidence figures check bundle review-bundle tmlr tmlr-package
 
 submission.pdf: manuscript.md references.bib submission.lua Makefile $(wildcard figures/*.pdf)
 	mkdir -p .submission
@@ -43,6 +43,9 @@ check:
 reproduce: figures
 	$(MAKE) submission.pdf
 	$(MAKE) check
+
+replay:
+	cd .. && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. $(PYTHON) paper/replay_pointmaze.py
 
 bundle: reproduce
 	cd .. && tar -czf "$(abspath $(BUNDLE))" -T paper/artifact_files.txt
