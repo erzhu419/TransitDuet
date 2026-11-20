@@ -72,8 +72,8 @@ The structured renewal-value predictor uses normalized plan age \((t - t_{\mathr
 In the fixed-budget confirmation (\(B = 24\)), the deployment threshold \(q\) is set to the 75th percentile of leave-one-fit-path-out predictions \(\hat{\Delta}_{\mathrm{oof}}\) using fit paths only. When calibrating across general call budgets \(B = T / K\) or external baselines, scalar quantile or threshold parameters are selected on disjoint timing-selection paths per root while holding controller and predictor weights fixed.
 
 ```text
-Fit and select the variable-duration controller on disjoint training and selection paths.
-Acquire paired keep/renew labels on disjoint branch-fit paths (event-stratified or label-free).
+Fit and select the controller on separate training and selection paths.
+Acquire paired keep/renew labels on separate branch-fit paths.
 Fit causal predictor weights and threshold q without accessing evaluation paths.
 For each held-out episode (horizon T, bin length K, deadline M = K/2, stride S):
     Call pi_U at step t = 0.
@@ -126,7 +126,7 @@ We report separate development screens on smooth-ellipse Reacher (24 paired path
 
 ### 5.1 Independent PointMaze confirmation and portfolio benchmarks
 
-All five preregistered confirmation gates passed on the eight independent optimizer roots (Table 1; Figure 2). Every individual root showed positive ISE and return gains over periodic planning. Pooled mean episode ISE was `1.447072` under periodic timing, `1.549716` under random offsets, `1.202303` under the 170-feature current-only trigger, and `0.941530` under the 39-feature causal-history trigger (a 34.94% reduction relative to periodic timing). Every mode executed exactly 24 planner calls per episode; the causal-history trigger placed `13.1953` pre-deadline calls on average and evaluated `84.1875` linear score checks per episode (range 48--120). The preceding eight-root development cohort independently passed the same gates (ISE gain `0.396372`, 95% CI `[0.275784, 0.516959]`; return gain `30.770657`, 95% CI `[21.111415, 40.429899]`).
+All five preregistered confirmation gates passed on the eight independent optimizer roots (Table 1; Figure 4). Every individual root showed positive ISE and return gains over periodic planning. Pooled mean episode ISE was `1.447072` under periodic timing, `1.549716` under random offsets, `1.202303` under the 170-feature current-only trigger, and `0.941530` under the 39-feature causal-history trigger (a 34.94% reduction relative to periodic timing). Every mode executed exactly 24 planner calls per episode; the causal-history trigger placed `13.1953` pre-deadline calls on average and evaluated `84.1875` linear score checks per episode (range 48--120). The preceding eight-root development cohort independently passed the same gates (ISE gain `0.396372`, 95% CI `[0.275784, 0.516959]`; return gain `30.770657`, 95% CI `[21.111415, 40.429899]`).
 
 **Table 1. Frozen independent-seed PointMaze confirmation.** Positive contrasts favor the causal-history candidate or the trained controller. Intervals are two-sided 95% Student-\(t\) bounds across eight paired optimizer-root means (\(\mathrm{df} = 7\)).
 
@@ -138,24 +138,13 @@ All five preregistered confirmation gates passed on the eight independent optimi
 | Candidate - fixed episode return | 40.662456 | [31.548406, 49.776506] |
 | Untrained - trained controller ISE | 20.862987 | [15.939428, 25.786547] |
 
-![Independent PointMaze timing confirmation.](figures/fig2_pointmaze_confirmation.png)
-
-**Figure 2 | Independent-seed PointMaze confirmation.** (a) Paired root ISE advantages over periodic (primary), random-offset, and current-only timing; (b) episode return advantage over periodic timing; (c) controller-learning verification comparing untrained and trained controller ISE; (d) mean planner calls and trigger score checks per episode. Teal dots denote the eight optimizer-root means (16 evaluation paths each); black diamonds and bars denote grand means and 95% Student-\(t\) intervals (\(\mathrm{df} = 7\)).
-
-On the lifecycle-capped cohort, the frozen rule reduced mean ISE by 7.28% relative to per-root selected tracking-distance thresholds on 256 diagnostic paths (`1.01091` versus `1.09029`, gain `0.07938`, 95% CI `[0.03008, 0.12868]`, 8/8 roots), and outperformed both the distance threshold by 5.81% (7/8 roots) and the learned-termination/best-clock portfolio by 21.56% (8/8 roots) on 512 subsequent paired paths under shared CPU, step, and `10 ms` p99 latency caps (realized max p99 `1.78 ms`; Table 2). A capacity-matched 91-parameter quadratic ablation on 512 paths further showed that \(100\,\mathrm{ms}\) target-velocity and force-RMS history reduced ISE by 6.44% over instantaneous features (`1.14792` versus `1.22699`, 95% CI `[0.01870, 0.13942]`, 8/8 roots), whereas a \(500\,\mathrm{ms}\) velocity window degraded ISE by 5.85% (`1.21502`).
-
-**Table 2. PointMaze timing portfolio and distance threshold.** Positive gains favor the plan-validity timing rule (mean ISE: 0.99934) across 512 paired fresh paths on eight frozen controller builds.
-
-| Comparator | Episode ISE (Stage9: 0.99934) | Paired root ISE gain [nominal 95% CI] | Relative gain |
-| --- | ---: | --- | ---: |
-| Selected distance threshold | 1.06097 | 0.06163 [0.01980, 0.10345] | 5.81% |
-| Selected termination or clock | 1.27402 | 0.27467 [0.19309, 0.35625] | 21.56% |
+On the lifecycle-capped cohort, the frozen rule reduced mean ISE by 7.28% relative to per-root selected tracking-distance thresholds on 256 diagnostic paths (`1.01091` versus `1.09029`, gain `0.07938`, 95% CI `[0.03008, 0.12868]`, 8/8 roots), and outperformed both the distance threshold by 5.81% (7/8 roots) and the learned-termination/best-clock portfolio by 21.56% (8/8 roots) on 512 subsequent paired paths under shared CPU, step, and `10 ms` p99 latency caps (realized max p99 `1.78 ms`; Table 8). A capacity-matched 91-parameter quadratic ablation on 512 paths further showed that \(100\,\mathrm{ms}\) target-velocity and force-RMS history reduced ISE by 6.44% over instantaneous features (`1.14792` versus `1.22699`, 95% CI `[0.01870, 0.13942]`, 8/8 roots), whereas a \(500\,\mathrm{ms}\) velocity window degraded ISE by 5.85% (`1.21502`).
 
 ### 5.2 Clock-grid query acquisition without event labels
 
-Uniform clock-grid queries (mean ISE `1.01228`) improved ISE by 32.36% over periodic, 36.59% over random offsets, and 6.42% over the selected tracking-distance threshold on 512 new paired paths; all eight roots favored the uniform predictor on these comparisons (Table 3; Figure 3a). Against event-stratified supervision (`1.01512`), the paired difference was `0.00284` (95% CI `[-0.02368, 0.02936]`). The interval includes zero and no noninferiority margin was set. Observable-change sampling also improved ISE versus periodic (`30.77%`) and distance (`4.21%`, 95% CI `[0.02998, 0.06121]`, 8/8 roots).
+Uniform clock-grid queries (mean ISE `1.01228`) improved ISE by 32.36% over periodic, 36.59% over random offsets, and 6.42% over the selected tracking-distance threshold on 512 new paired paths; all eight roots favored the uniform predictor on these comparisons (Table 2; Figure 2a). Against event-stratified supervision (`1.01512`), the paired difference was `0.00284` (95% CI `[-0.02368, 0.02936]`). The interval includes zero and no noninferiority margin was set. Observable-change sampling also improved ISE versus periodic (`30.77%`) and distance (`4.21%`, 95% CI `[0.02998, 0.06121]`, 8/8 roots).
 
-**Table 3. Label-free renewal-query acquisition at \(B = 24\) calls.** Positive contrasts favor the unprivileged predictor (*unprivileged-uniform* mean ISE: `1.01228`, return: `944.15`) across eight frozen roots (512 paired paths).
+**Table 2. Label-free renewal-query acquisition at \(B = 24\) calls.** Positive contrasts favor the unprivileged predictor (*unprivileged-uniform* mean ISE: `1.01228`, return: `944.15`) across eight frozen roots (512 paired paths).
 
 | Contrast (`Comparator - candidate` ISE) | Paired ISE gain | 95% CI | Relative gain | Favorable roots |
 | --- | ---: | --- | ---: | ---: |
@@ -167,9 +156,9 @@ Uniform clock-grid queries (mean ISE `1.01228`) improved ISE by 32.36% over peri
 
 ### 5.3 PointMaze timing and predictor comparisons
 
-On 512 paired paths, the variable-duration controller run periodically achieved `1.47639` ISE, versus `1.56950` for the separately trained native-periodic controller. The clock-grid ridge achieved `0.99422` ISE and `945.89` return, improving ISE over native-periodic HRL by 36.65% (`0.57529`, 95% CI `[0.50935, 0.64123]`) and over the learned binary gate by 33.80%. It improved over the cost-difference gate by 4.38% (`0.04550`, 95% CI `[0.02553, 0.06546]`, path halves `+4.29%` and `+4.46%`). The MLP reduced ISE relative to native-periodic, shared periodic and learned binary timing. At the same 192 paired queries, ridge reached 21.05% lower ISE than the MLP (`0.26505`, 95% CI `[0.16322, 0.36689]`, 8/8 roots). Table 4 and Figure 4a report a difference between complete predictors at one query budget, not an isolated effect of dot-products or a sample-efficiency curve.
+On 512 paired paths, the variable-duration controller run periodically achieved `1.47639` ISE, versus `1.56950` for the separately trained native-periodic controller. The clock-grid ridge achieved `0.99422` ISE and `945.89` return, improving ISE over native-periodic HRL by 36.65% (`0.57529`, 95% CI `[0.50935, 0.64123]`) and over the learned binary gate by 33.80%. It improved over the cost-difference gate by 4.38% (`0.04550`, 95% CI `[0.02553, 0.06546]`, path halves `+4.29%` and `+4.46%`). The MLP reduced ISE relative to native-periodic, shared periodic and learned binary timing. At the same 192 paired queries, ridge reached 21.05% lower ISE than the MLP (`0.26505`, 95% CI `[0.16322, 0.36689]`, 8/8 roots). Table 3 and Figure 5a report a difference between complete predictors at one query budget, not an isolated effect of dot-products or a sample-efficiency curve.
 
-**Table 4. PointMaze timing and predictor comparisons (\(B=24\), 512 paired paths).** Positive gains favor the clock-grid ridge (mean ISE: `0.99422`, return: `945.89`). Intervals use the eight paired root means.
+**Table 3. PointMaze timing and predictor comparisons (\(B=24\), 512 paired paths).** Positive gains favor the clock-grid ridge (mean ISE: `0.99422`, return: `945.89`). Intervals use the eight paired root means.
 
 | Comparator | Comparator ISE | Paired ISE gain [95% CI] | Relative gain | Roots |
 | --- | ---: | --- | ---: | ---: |
@@ -182,11 +171,11 @@ On 512 paired paths, the variable-duration controller run periodically achieved 
 
 ### 5.4 Tracking across call budgets and measured CEM costs
 
-Across all six planner-call budgets \(B \in \{12, 15, 20, 24, 30, 40\}\), label-free plan-validity timing achieved strictly lower episode ISE than periodic, best-clock, and per-budget recalibrated distance thresholds, with positive two-sided 95% intervals at every budget (Table 5; Figure 3b,c). Relative ISE reductions ranged from 27.85% to 31.47% over periodic planning (8/8 roots at every budget) and from 5.56% to 9.25% over recalibrated distance cuts. Cross-budget comparisons confirm substantial call compression (Figure 3d): **20 adaptive calls** (`1.31047`) beat **24 periodic calls** (`1.49962`) by `0.18914` (95% CI `[0.12310, 0.25519]`; 12.61% lower ISE on 8/8 roots with 16.7% fewer calls), and **24 adaptive calls** (`1.02774`) beat **30 periodic calls** (`1.23319`) by `0.20545` (95% CI `[0.13924, 0.27166]`; 16.66% lower ISE on 8/8 roots with 20.0% fewer calls).
+Across all six planner-call budgets \(B \in \{12, 15, 20, 24, 30, 40\}\), label-free plan-validity timing achieved strictly lower episode ISE than periodic, best-clock, and per-budget recalibrated distance thresholds, with positive two-sided 95% intervals at every budget (Table 4; Figure 2b,c). Relative ISE reductions ranged from 27.85% to 31.47% over periodic planning (8/8 roots at every budget) and from 5.56% to 9.25% over recalibrated distance cuts. Cross-budget comparisons confirm substantial call compression (Figure 2d): **20 adaptive calls** (`1.31047`) beat **24 periodic calls** (`1.49962`) by `0.18914` (95% CI `[0.12310, 0.25519]`; 12.61% lower ISE on 8/8 roots with 16.7% fewer calls), and **24 adaptive calls** (`1.02774`) beat **30 periodic calls** (`1.23319`) by `0.20545` (95% CI `[0.13924, 0.27166]`; 16.66% lower ISE on 8/8 roots with 20.0% fewer calls).
 
 The fewer-call ridge schedules did not beat higher-budget distance thresholds. In a secondary analysis on the same paired paths, distance minus ridge ISE was `-0.20906` (95% CI `[-0.27511, -0.14301]`) for 20 ridge versus 24 distance calls, and `-0.08401` (95% CI `[-0.14192, -0.02610]`) for 24 ridge versus 30 distance calls. The call savings at better tracking therefore apply to the reported periodic comparisons.
 
-**Table 5. Multi-budget planning Pareto frontier across 512 fresh paired paths per budget.** Distance thresholds and predictor quantiles are calibrated on disjoint selection paths separately at each budget \(B\).
+**Table 4. Multi-budget planning Pareto frontier across 512 fresh paired paths per budget.** Distance thresholds and predictor quantiles are calibrated on disjoint selection paths separately at each budget \(B\).
 
 | Calls \(B\) (bin \(K\)) | Periodic ISE | Distance cut ISE | Unprivileged ISE | Gain vs. distance [95% CI] | Gain vs. periodic |
 | --- | ---: | ---: | ---: | --- | ---: |
@@ -199,32 +188,17 @@ The fewer-call ridge schedules did not beat higher-budget distance thresholds. I
 
 ![Label-free query acquisition and multi-budget Pareto frontier.](figures/fig3_unprivileged_and_pareto.png)
 
-**Figure 3 | Query acquisition and call budgets.** (a) At \(B=24\), the clock-grid trigger improves on periodic and tracking-distance timing. The interval against event-stratified queries includes zero. (b) Episode ISE at six call counts. (c) Paired gains over separately calibrated distance thresholds at matched call counts. (d) Paired differences when ridge makes fewer calls than the named comparator. Positive values favor ridge; negative values favor the comparator. The 30-versus-40 periodic contrast is inconclusive.
+**Figure 2 | Query acquisition and call budgets.** (a) At \(B=24\), the clock-grid trigger improves on periodic and tracking-distance timing. The interval against event-stratified queries includes zero. (b) Episode ISE at six call counts. (c) Paired gains over separately calibrated distance thresholds at matched call counts. (d) Paired differences when ridge makes fewer calls than the named comparator. Positive values favor ridge; negative values favor the comparator. The 30-versus-40 periodic contrast is inconclusive.
 
-With the CEM planner, clock-grid timing had `23.83%`--`32.67%` lower ISE than periodic timing at matched call counts. It had lower point estimates than the distance threshold at all six budgets, but the intervals crossed zero at 15 and 24 calls (Table 6). In the cross-budget tests, 20 adaptive calls beat 24 periodic calls by 15.82% ISE (`0.22821`, 95% CI `[0.17814, 0.27827]`), and 24 adaptive calls beat 30 periodic calls by 13.99% (`0.16341`, `[0.07660, 0.25022]`). They saved `18.38 ms` (`[11.12, 25.65]`) and `31.08 ms` (`[21.49, 40.66]`) of planner time per episode, respectively. Including scoring, the signed savings were `-22.81 ms` (`[-37.10, -8.53]`) and `-35.50 ms` (`[-52.53, -18.46]`): both were slower. For 20 versus 30 calls, the upper-loop savings were `10.28 ms` (`[-5.87, 26.42]`), and the ISE contrast also crossed zero. The 24-call distance threshold improved ISE and saved `32.06 ms` (`[19.57, 44.55]`) of planner-plus-score time relative to 30 periodic calls. These are eight-root paired intervals (Figure 4d).
+With the CEM planner, clock-grid timing had `23.83%`--`32.67%` lower ISE than periodic timing at matched call counts. It had lower point estimates than the distance threshold at all six budgets, but the intervals crossed zero at 15 and 24 calls (Table 9). In the cross-budget tests, 20 adaptive calls beat 24 periodic calls by 15.82% ISE (`0.22821`, 95% CI `[0.17814, 0.27827]`), and 24 adaptive calls beat 30 periodic calls by 13.99% (`0.16341`, `[0.07660, 0.25022]`). They saved `18.38 ms` (`[11.12, 25.65]`) and `31.08 ms` (`[21.49, 40.66]`) of planner time per episode, respectively. Including scoring, the signed savings were `-22.81 ms` (`[-37.10, -8.53]`) and `-35.50 ms` (`[-52.53, -18.46]`): both were slower. For 20 versus 30 calls, the upper-loop savings were `10.28 ms` (`[-5.87, 26.42]`), and the ISE contrast also crossed zero. The 24-call distance threshold improved ISE and saved `32.06 ms` (`[19.57, 44.55]`) of planner-plus-score time relative to 30 periodic calls. These are eight-root paired intervals (Figure 5d).
 
 Adding recorded lower inference time, the signed savings for the two accuracy-positive ridge comparisons were `-22.27 ms` (95% CI `[-101.00, 56.45]`) and `-13.30 ms` (`[-81.62, 55.02]`), respectively. This sum excludes environment dynamics and untimed control operations. Neither comparison established a net speedup.
 
-**Table 6. CEM subgoal planner accuracy and wall-clock decomposition (256 paired paths/budget).** Columns report episode ISE and per-episode wall-clock times (ms) for CEM planning (`Plan ms`) and Python trigger checks (`Check ms`).
-
-| Calls \(B\) | Periodic ISE | Distance ISE | Unprivileged ISE | Gain vs. periodic [95% CI] | Plan ms | Check ms |
-| --- | ---: | ---: | ---: | --- | ---: | ---: |
-| 12 | 3.05587 | 2.59857 | 2.32774 | 0.72813 [0.60337, 0.85288] | 50.22 | 22.70 |
-| 15 | 2.51956 | 1.82694 | 1.74231 | 0.77725 [0.66598, 0.88852] | 62.93 | 32.55 |
-| 20 | 1.80377 | 1.35345 | 1.21456 | 0.58921 [0.50519, 0.67322] | 87.57 | 41.20 |
-| 24 | 1.44276 | 1.08649 | 1.00496 | 0.43781 [0.35064, 0.52498] | 107.97 | 66.57 |
-| 30 | 1.16837 | 0.85759 | 0.79823 | 0.37014 [0.32450, 0.41578] | 138.30 | 74.00 |
-| 40 | 0.81310 | 0.63007 | 0.54905 | 0.26405 [0.22296, 0.30514] | 178.02 | 105.35 |
-
-![Timing baselines, polygonal Reacher, and the CEM compute trade-off.](figures/fig4_route_b_baselines_reacher_cem.png)
-
-**Figure 4 | Timing baselines, second-plant confirmation, and CEM costs.** (a,b) Paired root ISE gains over timing and predictor baselines in PointMaze and polygonal Reacher. (c) CEM planner time alone versus episode ISE across the six call budgets. (d) Cross-budget savings in planner time alone and planner plus scoring time; positive favors the first schedule. Neither quantity includes lower control.
-
 ### 5.5 Second physical plant confirmation and structural applicability boundaries
 
-On polygonal Reacher (512 paired paths, eight fresh roots), the clock-grid ridge (`4.48852` ISE, return `703.08`) had lower episode ISE than random offsets (6.44%), the per-root selected fixed clock (5.00%, 8/8 roots), shared periodic timing (4.27%), and the learned binary gate (3.86%). The paired nominal 95% intervals for ISE and return favored ridge in those four comparisons (Table 7; Figure 4b). The generic MLP (`4.57433` ISE) also improved on the selected clock (`0.15054`, 95% CI `[0.06006, 0.24101]`), shared periodic timing (`0.11419`, `[0.00610, 0.22228]`), and the learned binary gate (`0.09452`, `[0.00184, 0.18721]`).
+On polygonal Reacher (512 paired paths, eight fresh roots), the clock-grid ridge (`4.48852` ISE, return `703.08`) had lower episode ISE than random offsets (6.44%), the per-root selected fixed clock (5.00%, 8/8 roots), shared periodic timing (4.27%), and the learned binary gate (3.86%). The paired nominal 95% intervals for ISE and return favored ridge in those four comparisons (Table 5; Figure 5b). The generic MLP (`4.57433` ISE) also improved on the selected clock (`0.15054`, 95% CI `[0.06006, 0.24101]`), shared periodic timing (`0.11419`, `[0.00610, 0.22228]`), and the learned binary gate (`0.09452`, `[0.00184, 0.18721]`).
 
-**Table 7. Independent eight-seed confirmation on 2-DOF `Reacher-v5` polygonal tracking (\(B = 24\), 512 paired paths).** Positive contrasts favor label-free relational plan-validity ridge (mean ISE: `4.48852`, return: `703.08`) across all eight unfiltered roots.
+**Table 5. Independent eight-seed confirmation on 2-DOF `Reacher-v5` polygonal tracking (\(B = 24\), 512 paired paths).** Positive contrasts favor label-free relational plan-validity ridge (mean ISE: `4.48852`, return: `703.08`) across all eight unfiltered roots.
 
 | Comparator | Comparator ISE | Paired ISE gain [95% CI] | Relative gain | Roots |
 | --- | ---: | --- | ---: | ---: |
@@ -236,16 +210,7 @@ On polygonal Reacher (512 paired paths, eight fresh roots), the clock-grid ridge
 | Cost-difference gate | 4.44330 | -0.04522 [-0.15268, 0.06224] | -1.02% | 5/8 |
 | Native-periodic HRL | 4.55387 | 0.06534 [-1.09412, 1.22481] | +1.43% | 4/8 |
 
-The Reacher contrasts against the distance threshold, cost-difference gate and separately trained native-periodic HRL were inconclusive, not equivalent (Table 7). Unlike in PointMaze, the cost-difference gate had lower ISE than ridge at the point estimate. Waypoint freshness, checked on timing-selection paths, averaged `+18.24%`. In a descriptive split, the six roots with freshness gains above 5% had mean ISE `4.1908` for ridge and `4.4544` for shared periodic; on the other two roots, shared-controller timing rules spanned `5.38`--`5.41` ISE. All eight roots stay in the main comparisons. This split does not establish a predictive threshold or a causal explanation for the task differences.
-
-**Table 8. Structural applicability screens.** Positive entries denote relative reductions in whole-episode ISE versus the comparator on paired development paths.
-
-| Frozen root or configuration | Current vs previous waypoint | Event vs selected clock | Event vs rotated offsets |
-| --- | ---: | ---: | ---: |
-| Reacher 1972210000 | +12.30% | -0.22% | +0.30% |
-| Reacher 1972220000 | +6.02% | +1.99% | +1.41% |
-| Cart-pole, LQR position weight 10 | -8.30% | +5.13% | +5.03% |
-| Cart-pole, LQR position weight 30 | +4.41% | +10.03% | +9.77% |
+The Reacher contrasts against the distance threshold, cost-difference gate and separately trained native-periodic HRL were inconclusive, not equivalent (Table 5). Unlike in PointMaze, the cost-difference gate had lower ISE than ridge at the point estimate. Waypoint freshness, checked on timing-selection paths, averaged `+18.24%`. In a descriptive split, the six roots with freshness gains above 5% had mean ISE `4.1908` for ridge and `4.4544` for shared periodic; on the other two roots, shared-controller timing rules spanned `5.38`--`5.41` ISE. All eight roots stay in the main comparisons. This split does not establish a predictive threshold or a causal explanation for the task differences.
 
 In smooth-ellipse Reacher, current waypoints improved tracking in both frozen roots, but the tested event alignment did not show a reliable gain over either timing control. In cart-pole, visible-command timing beat both controls in each configuration, while waypoint freshness reversed sign with the lower controller. The reversal persisted in a crossed 32-path comparison at both offsets (freshness shift `0.02458`, 95% CI `[0.02299, 0.02618]`). These screens separate two questions: whether a fresh waypoint helps, and whether shifting a call helps.
 
@@ -267,9 +232,9 @@ Paired keep/renew supervision improves when a tracking hierarchy spends a fixed 
 
 To examine whether validated single-intervention value guarantees full-episode improvement under repeated discrete resource constraints, we report an auxiliary boundary study in a native bidirectional bus corridor simulator. Unlike within-bin waypoint timing, this domain uses finite-Monte-Carlo action selection (`P8` proposals screened on `S8` rollouts) to choose timetable headways above a frozen lower holding controller.
 
-In two independent 400-prefix single-intervention cohorts, the joint fleet-plus-service selector reduced total cost and passenger waiting relative to raw control under both prefix-bootstrap and conditional-Monte-Carlo 95% intervals. The service-only selector was also evaluated in the second cohort and reduced both outcomes. The joint selector did not show extra cost improvement over service-only (Table 9; Figure 5a,b). In a subsequent 320-scene complete-episode evaluation with interventions at callbacks 8 and 9 of 44, service-only total cost increased at the point estimate (`+1901.331 x 1e-6`), the paired normal waiting interval crossed zero, and the preregistered 50% base-wait retention criterion failed (Table 10; Figure 5c--f). Four discrete peak-fleet changes (three increases, one decrease) accounted for the excess fleet cost. The Transit selector is a different algorithm, so this result illustrates a local-to-episode boundary rather than a failed replication of the timing rule.
+In two independent 400-prefix single-intervention cohorts, the joint fleet-plus-service selector reduced total cost and passenger waiting relative to raw control under both prefix-bootstrap and conditional-Monte-Carlo 95% intervals. The service-only selector was also evaluated in the second cohort and reduced both outcomes. The joint selector did not show extra cost improvement over service-only (Table 6; Figure 3a,b). In a subsequent 320-scene complete-episode evaluation with interventions at callbacks 8 and 9 of 44, service-only total cost increased at the point estimate (`+1901.331 x 1e-6`), the paired normal waiting interval crossed zero, and the preregistered 50% base-wait retention criterion failed (Table 7; Figure 3c--f). Four discrete peak-fleet changes (three increases, one decrease) accounted for the excess fleet cost. The Transit selector is a different algorithm, so this result illustrates a local-to-episode boundary rather than a failed replication of the timing rule.
 
-**Table 9. Native Transit single-intervention outcomes.** Negative values favor the first controller; cost and waiting-minute contrasts are scaled by \(10^6\).
+**Table 6. Native Transit single-intervention outcomes.** Negative values favor the first controller; cost and waiting-minute contrasts are scaled by \(10^6\).
 
 | Study / contrast / endpoint | Mean | Prefix CI95 | Conditional MC CI95 |
 | --- | ---: | --- | --- |
@@ -282,7 +247,7 @@ In two independent 400-prefix single-intervention cohorts, the joint fleet-plus-
 | Stage301 / joint - service-only / cost | 10.981 | [-38.466, 60.105] | [-26.841, 48.802] |
 | Stage301 / joint - service-only / wait | 159.565 | [82.814, 250.561] | [110.377, 208.754] |
 
-**Table 10. Complete-episode Transit boundary (two consecutive interventions across 320 scenes).** Negative values favor the first controller (\(10^6\) scaling).
+**Table 7. Complete-episode Transit boundary (two consecutive interventions across 320 scenes).** Negative values favor the first controller (\(10^6\) scaling).
 
 | Contrast / endpoint | Mean | Episode bootstrap CI95 | Paired normal CI95 |
 | --- | ---: | --- | --- |
@@ -293,4 +258,47 @@ In two independent 400-prefix single-intervention cohorts, the joint fleet-plus-
 
 ![Native Transit single-intervention benefits and two-decision boundary.](figures/fig5_transit_boundary.png)
 
-**Figure 5 | Local Transit gains and the repeated-decision episode boundary.** (a,b) Single-intervention cost and waiting reductions on two 400-prefix cohorts (`Stage298` = Cohort A, `Stage301` = Cohort B). (c,d) Complete-episode cost and waiting contrasts across 320 paired two-decision scenes and their 160-scene halves. (e) Descriptive decomposition showing discrete peak-fleet penalties outweighing continuous service savings. (f) Paired half-base waiting retention margin \(\Delta W_{\mathrm{service}} - 0.5\,\Delta W_{\mathrm{base}}\), where negative upper bounds under both CIs in all parts were required and not met.
+**Figure 3 | Local Transit gains and the repeated-decision episode boundary.** (a,b) Single-intervention cost and waiting reductions on two 400-prefix cohorts (`Stage298` = Cohort A, `Stage301` = Cohort B). (c,d) Complete-episode cost and waiting contrasts across 320 paired two-decision scenes and their 160-scene halves. (e) Descriptive decomposition showing discrete peak-fleet penalties outweighing continuous service savings. (f) Paired half-base waiting retention margin \(\Delta W_{\mathrm{service}} - 0.5\,\Delta W_{\mathrm{base}}\), where negative upper bounds under both CIs in all parts were required and not met.
+
+## Appendix B. Supporting Tracking and Timing Results
+
+### PointMaze root effects and portfolio
+
+![Independent PointMaze timing confirmation.](figures/fig2_pointmaze_confirmation.png)
+
+**Figure 4 | Independent-seed PointMaze confirmation.** (a) Paired root ISE advantages over periodic (primary), random-offset, and current-only timing; (b) episode return advantage over periodic timing; (c) controller-learning verification comparing untrained and trained controller ISE; (d) mean planner calls and trigger score checks per episode. Teal dots denote the eight optimizer-root means (16 evaluation paths each); black diamonds and bars denote grand means and 95% Student-\(t\) intervals (\(\mathrm{df} = 7\)).
+
+**Table 8. PointMaze timing portfolio and distance threshold.** Positive gains favor the plan-validity timing rule (mean ISE: 0.99934) across 512 paired fresh paths on eight frozen controller builds.
+
+| Comparator | Episode ISE (Stage9: 0.99934) | Paired root ISE gain [nominal 95% CI] | Relative gain |
+| --- | ---: | --- | ---: |
+| Selected distance threshold | 1.06097 | 0.06163 [0.01980, 0.10345] | 5.81% |
+| Selected termination or clock | 1.27402 | 0.27467 [0.19309, 0.35625] | 21.56% |
+
+### CEM costs and second-plant timing contrasts
+
+**Table 9. CEM subgoal planner accuracy and wall-clock decomposition (256 paired paths/budget).** Columns report episode ISE and per-episode wall-clock times (ms) for CEM planning (`Plan ms`) and Python trigger checks (`Check ms`).
+
+| Calls \(B\) | Periodic ISE | Distance ISE | Unprivileged ISE | Gain vs. periodic [95% CI] | Plan ms | Check ms |
+| --- | ---: | ---: | ---: | --- | ---: | ---: |
+| 12 | 3.05587 | 2.59857 | 2.32774 | 0.72813 [0.60337, 0.85288] | 50.22 | 22.70 |
+| 15 | 2.51956 | 1.82694 | 1.74231 | 0.77725 [0.66598, 0.88852] | 62.93 | 32.55 |
+| 20 | 1.80377 | 1.35345 | 1.21456 | 0.58921 [0.50519, 0.67322] | 87.57 | 41.20 |
+| 24 | 1.44276 | 1.08649 | 1.00496 | 0.43781 [0.35064, 0.52498] | 107.97 | 66.57 |
+| 30 | 1.16837 | 0.85759 | 0.79823 | 0.37014 [0.32450, 0.41578] | 138.30 | 74.00 |
+| 40 | 0.81310 | 0.63007 | 0.54905 | 0.26405 [0.22296, 0.30514] | 178.02 | 105.35 |
+
+![Timing baselines, polygonal Reacher, and the CEM compute trade-off.](figures/fig4_route_b_baselines_reacher_cem.png)
+
+**Figure 5 | Timing baselines, second-plant confirmation, and CEM costs.** (a,b) Paired root ISE gains over timing and predictor baselines in PointMaze and polygonal Reacher. (c) CEM planner time alone versus episode ISE across the six call budgets. (d) Cross-budget savings in planner time alone and planner plus scoring time; positive favors the first schedule. Neither quantity includes lower control.
+
+### Applicability screens
+
+**Table 10. Structural applicability screens.** Positive entries denote relative reductions in whole-episode ISE versus the comparator on paired development paths.
+
+| Frozen root or configuration | Current vs previous waypoint | Event vs selected clock | Event vs rotated offsets |
+| --- | ---: | ---: | ---: |
+| Reacher 1972210000 | +12.30% | -0.22% | +0.30% |
+| Reacher 1972220000 | +6.02% | +1.99% | +1.41% |
+| Cart-pole, LQR position weight 10 | -8.30% | +5.13% | +5.03% |
+| Cart-pole, LQR position weight 30 | +4.41% | +10.03% | +9.77% |

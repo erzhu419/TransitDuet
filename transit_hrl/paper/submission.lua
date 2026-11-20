@@ -16,6 +16,23 @@ local function is_wide_transit_table(tbl)
   return first_cell:match("Study / contrast") ~= nil or first_cell:match("Contrast / endpoint") ~= nil
 end
 
+local function tmlr_heading(block, blocks)
+  local heading = block.content
+  if heading[1].text == "Appendix" then
+    if heading[3].text == "A." then
+      blocks:insert(pandoc.RawBlock("latex",
+        "\\clearpage\n\\bibliographystyle{tmlr}\n\\bibliography{references}\n\\clearpage\n\\appendix"))
+    end
+    for _ = 1, 4 do
+      heading:remove(1)
+    end
+  elseif heading[1].text and heading[1].text:match("^%d[%d.]*$") then
+    heading:remove(1)
+    heading:remove(1)
+  end
+  block.content = heading
+end
+
 function Pandoc(doc)
   local source = doc.blocks
   doc.meta.title = pandoc.MetaInlines(source[1].content)
@@ -28,6 +45,9 @@ function Pandoc(doc)
     local flush = false
     if block.t == "Header" then
       block.level = block.level - 1
+      if doc.meta.tmlr then
+        tmlr_heading(block, blocks)
+      end
     elseif block.t == "Figure" then
       block.caption = caption(next_block, "Figure")
       block = block:walk({Image = function(image)
@@ -58,5 +78,14 @@ function Pandoc(doc)
     i = i + 1
   end
   doc.blocks = blocks
+  if doc.meta.tmlr then
+    -- Local supplement filenames are not valid links in a standalone review PDF.
+    return doc:walk({Link = function(link)
+      if not link.target:match("^%a+:") and not link.target:match("^#") then
+        return link.content
+      end
+      return link
+    end})
+  end
   return doc
 end

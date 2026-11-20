@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path, PurePosixPath
 import sys
 import tarfile
+from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = "paper/artifact_files.txt"
@@ -30,6 +31,18 @@ def anonymous(member: tarfile.TarInfo) -> tarfile.TarInfo:
 def build(output: Path) -> None:
     names = [name for name in (ROOT / MANIFEST).read_text().splitlines() if name and include(name)]
     manifest = ("\n".join(names) + "\n").encode()
+    if output.suffix == ".zip":
+        with ZipFile(output, "w", compression=ZIP_DEFLATED) as bundle:
+            for name in names:
+                if name == MANIFEST:
+                    continue
+                source = ROOT / name
+                files = sorted(source.rglob("*")) if source.is_dir() else [source]
+                for path in files:
+                    if path.is_file():
+                        bundle.writestr(path.relative_to(ROOT).as_posix(), path.read_bytes())
+            bundle.writestr(MANIFEST, manifest)
+        return
     with tarfile.open(output, "w:gz") as bundle:
         for name in names:
             if name != MANIFEST:

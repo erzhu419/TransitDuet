@@ -1,0 +1,33 @@
+\documentclass[10pt]{article}
+\usepackage{tmlr}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{longtable,booktabs,array,calc}
+\usepackage{hyperref}
+\usepackage{url}
+
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% Bound Pandoc's vector figure includes without changing the journal layout.
+\newsavebox{\pandocimage}
+\newcommand{\pandocbounded}[1]{%
+  \sbox{\pandocimage}{#1}%
+  \ifdim\wd\pandocimage>\linewidth
+    \resizebox{\linewidth}{!}{\usebox{\pandocimage}}%
+  \else
+    \usebox{\pandocimage}%
+  \fi
+}
+
+\title{$title$}
+\author{}
+\hypersetup{pdftitle={$title$},pdfauthor={},hidelinks}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+$abstract$
+\end{abstract}
+
+$body$
+
+\end{document}

@@ -33,9 +33,9 @@ Date: 2026-11-20. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
 The learned binary and cost-difference gates are budgeted adaptations, not
 reproductions of the original TEMPLE or Option-Critic algorithms. Retain the
 fixed-call timing claim on the tested planning and execution hierarchies.
-The review bundle reproduces analysis and presentation from saved evidence,
-not native simulation or controller training. It excludes cluster details
-and normalizes archive ownership metadata. Check the specific venue's
-template, page limits and anonymity rules before uploading. A stronger
+The [TMLR submission build](tmlr/README.md) uses the official anonymous
+style and packages reproducible analysis as an anonymous ZIP, not native
+simulation or controller training. The authors complete the private
+OpenReview declarations before upload. A stronger
 cross-task claim needs an independent comparison with a selected strong
 timing gate under matched total compute, not more periodic controls.
