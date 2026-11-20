@@ -1,0 +1,119 @@
+--- freqduet_v7_b1.py
++++ freqduet_v7_b1.py
+@@ -31,6 +31,10 @@
+ 
+ import numpy as np
+ import torch
++from matched_controls import (
++    MinuteRates, desired_headways, dispatch_metrics, raw_lower, raw_upper,
++    rule_hold, rule_plan,
++)
+ 
+ 
+ HERE = Path(__file__).resolve().parent
+@@ -245,6 +249,8 @@
+             for _ in range(16):
+                 self.dir_raw_hist[d].append(tot_d)
+ 
++        self.minute = MinuteRates(self.rate_per_min)
++
+         def wrapped_update(_raw_apc_bin, od_arrivals=None):
+             scale_counts = float(tracker.update_interval_s) / 60.0
+             held_counts = {k: v * scale_counts for k, v in self.rate_per_min.items()}
+@@ -252,7 +258,10 @@
+                 self.dir_raw_hist[d].append(
+                     sum(v for (_, kd), v in self.rate_per_min.items() if kd == d)
+                 )
+-            return self._orig_update(held_counts, od_arrivals or {})
++            before = tracker.total_updates
++            result = self._orig_update(held_counts, od_arrivals or {})
++            self.minute.add(held_counts, tracker.total_updates != before)
++            return result
+ 
+         env.frequency_tracker.update = wrapped_update
+ 
+@@ -798,7 +807,8 @@
+         readiness_norm,
+     ]  # 13 dims
+ 
+-    band = upper_band(env, band_for_head(band_mode, upper=True), daily_pax_prior)
++    band = (raw_upper(apc_feed.minute, daily_pax_prior) if band_mode in ("nofreq", "manual")
++            else upper_band(env, band_for_head(band_mode, upper=True), daily_pax_prior))
+     vec = np.asarray(base + band, dtype=np.float32)
+     assert vec.shape == (UPPER_STATE_DIM,)
+     return vec
+@@ -894,8 +904,10 @@
+         int(bus.effective_station[i].station_id)
+         for i in range(cur_idx + 1, min(len(bus.effective_station) - 1, cur_idx + 3))
+     ]
+-    band4 = lower_band(env.frequency_tracker, st_here, ds_ids, direction,
+-                       band_for_head(band_mode, upper=False))
++    band4 = (raw_lower(apc_feed.minute, st_here, ds_ids, direction)
++             if band_mode in ("nofreq", "manual") else
++             lower_band(env.frequency_tracker, st_here, ds_ids, direction,
++                        band_for_head(band_mode, upper=False)))
+     vec = np.asarray(base15 + band4, dtype=np.float32)
+     assert vec.shape == (LOWER_STATE_DIM,)
+     ctx = {
+@@ -1169,6 +1181,7 @@
+     lower_costs = []
+     total_hold_s = 0.0
+     bins15 = np.asarray([0.0, 5.0, 10.0, 15.0], dtype=np.float64)
++    manual_actions = build_upper_action_candidates() if band_mode == "manual" else None
+ 
+     t0 = time.monotonic()
+     while not env.done:
+@@ -1224,21 +1237,16 @@
+                 int_ev_start_idx = len(env.headway_events.events)
+                 int_ready_start_idx = len(env._fleet_readiness_delays_s)
+ 
+-                a_u = upper_trainer.policy_net.get_action(s_u, deterministic=eval_mode)
+-                loop_factor = float(a_u[0])
+-                dir_tilt_s = float(a_u[1])
+-                assert float(a_u[2]) == FIXED_RETENTION
+-
+                 h_floor = ledger.cycle_headway_floor_s(n_fleet, env)
+-                desired_hw = {}
+-                for d in (True, False):
+-                    h_avail, _ = remaining_quota_info(env, now_s, d)
+-                    ready_d = env._ready_vehicle_count(d)
+-                    ready_opp = env._ready_vehicle_count(not d)
+-                    inv_guard = float(np.clip(0.55 + 0.35 * (ready_d - ready_opp), 0.15, 1.0))
+-                    sign_d = 1.0 if d else -1.0
+-                    raw_h = h_avail * loop_factor + sign_d * dir_tilt_s * inv_guard
+-                    desired_hw[d] = float(np.clip(raw_h, h_floor, 455.0))
++                available = {d: remaining_quota_info(env, now_s, d)[0] for d in (True, False)}
++                ready = {d: env._ready_vehicle_count(d) for d in available}
++                if manual_actions is None:
++                    a_u = upper_trainer.policy_net.get_action(s_u, deterministic=eval_mode)
++                else:
++                    a_u = rule_plan(manual_actions, available, ready, h_floor,
++                                    apc_feed.minute, daily_pax_prior)
++                assert float(a_u[2]) == FIXED_RETENTION
++                desired_hw = desired_headways(a_u, available, ready, h_floor)
+ 
+                 apply_global_quota_timetable(
+                     env, now_s, desired_hw, h_bounds=(h_floor, 455.0), tail_bounds=(max(245.0, h_floor - 10.0), 445.0)
+@@ -1277,7 +1285,13 @@
+             else:
+                 t_key = (int(bus.bus_id), int(bus.trip_id))
+                 s_l, ctx = build_lower_state(env, bus, now_s, corridor_len_m, ledger, apc_feed, band_mode)
+-                chosen = float(lower_trainer.policy_net.get_action(s_l, deterministic=eval_mode))
++                if manual_actions is None:
++                    chosen = float(lower_trainer.policy_net.get_action(s_l, deterministic=eval_mode))
++                else:
++                    chosen = rule_hold(
++                        bus, ctx, apc_feed.minute, LOWER_ACTION_BINS, ledger.remaining_budget_s[t_key],
++                        compute_lower_reward_and_cost,
++                    )
+                 assert chosen <= min(LOWER_MAX_HOLD_S, ledger.remaining_budget_s[t_key]) + 1e-6
+                 if not eval_mode and lower_replay is not None:
+                     raw_arr = getattr(bus, "forward_headway", None)
+@@ -1391,6 +1405,7 @@
+             "trips_launched": int(launched_count),
+             "trips_completed": int(completed_count),
+             "physical_buses": len(env.bus_all),
++            **(dispatch_metrics(env.timetables) if eval_mode else {}),
+         },
+         "rl_stats": {
+             "upper_return": round(float(np.sum(upper_rewards)), 4) if upper_rewards else 0.0,
