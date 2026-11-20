@@ -29,7 +29,9 @@ paper/data/stage9/replicate_209061.json
 paper/data/stage9/replicate_209073.json
 paper/data/stage9/replicate_209089.json
 paper/data/stage9/replicate_209101.json
+paper/data/waiting_value.json
 tests/test_paper_plan_validity_evidence.py
+tests/test_pointmaze_review_controls.py
 tests/test_plan_validity_figures.py
 tests/test_plan_validity_unprivileged_and_pareto.py
 tests/test_route_b_components.py
@@ -49,6 +51,7 @@ scripts/run_route_b_expensive_planner.py
 scripts/run_route_b_pointmaze_baselines.py
 scripts/run_route_b_reacher_polygonal.py
 scripts/run_route_b_scheduleurm.py
+scripts/run_pointmaze_review_controls.py
 md/freq_hrl_boundary_conditioning_confirmation_2026-11-11.md
 md/freq_hrl_cartpole_timing_applicability_2026-11-12.md
 md/freq_hrl_cartpole_waypoint_factorial_2026-11-12.md
@@ -69,6 +72,7 @@ protocols/plan_validity_stage9_unprivileged_queries_2026-11-18.json
 protocols/plan_validity_stage9_budget_pareto_2026-11-18.json
 protocols/plan_validity_route_b_expensive_cem_planner_2026-11-18.json
 protocols/plan_validity_route_b_strong_baselines_2026-11-18.json
+protocols/plan_validity_pointmaze_review_controls_2026-11-20.json
 protocols/plan_validity_reacher_polygonal_confirmation_2026-11-18.json
 results/cartpole_timing_applicability_20261112/summary.json
 results/cartpole_waypoint_factorial_20261112/summary.json
@@ -89,4 +93,5 @@ results/pointmaze_stage9_unprivileged_queries_20261118/summary.json
 results/pointmaze_stage9_budget_pareto_20261118/summary.json
 results/pointmaze_route_b_expensive_cem_planner_20261118/summary.json
 results/pointmaze_route_b_strong_baselines_20261118/summary.json
+results/pointmaze_review_controls_20261120/summary.json
 results/reacher_polygonal_route_b_confirmation_20261118/summary.json

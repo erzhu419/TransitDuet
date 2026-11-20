@@ -11,7 +11,13 @@ supplementary ZIP, see the [TMLR build and submission instructions](tmlr/README.
 ## Rebuild
 
 From `transit_hrl/` or the root of the extracted bundle, with Python 3.10+,
-GNU Make, Pandoc 3, latexmk/pdfLaTeX, and Poppler (`pdftotext`):
+GNU Make, and Poppler (`pdftotext`). The reference PDF build uses
+**Pandoc 3.9, latexmk 4.76 and pdfTeX 1.40.22 (TeX Live 2022/dev/Debian)**.
+Install a full working LaTeX format and the fonts and packages used by the
+templates; on Debian the build uses `latexmk`, `texlive-latex-extra`,
+`texlive-fonts-recommended` and `lmodern`. Verify that
+`kpsewhich -engine=pdftex -format=fmt pdflatex.fmt` finds the format before
+building. Pandoc 3.1.11.1 does not support the current Lua filter.
 
 ```sh
 python3 -m pip install -r paper/requirements.txt
@@ -32,8 +38,10 @@ with `make -C paper bundle` (`/tmp/freqhrl-submission.tar.gz`).
 | Table 8 | PointMaze timing portfolio summary | Check means, contrasts and intervals against the frozen follow-up |
 | Table 2, Figure 2a | Label-free query ablation summary (`B = 24`) | Recompute paired eight-root contrasts for clock-grid and observable-change query acquisition |
 | Table 3, Figure 5a | PointMaze timing baselines and MLP summary | Verify eight-root contrasts against native periodic, learned binary, distance threshold, cost difference, and raw MLP |
+| Path-specific timing and supervision | PointMaze matched review-controls summary | Recompute root-level ISE intervals for the yoked clock and matched-step single-arm supervision |
 | Tables 4 and 9, Figures 2b-d and 5c,d | Multi-budget and CEM summaries (`B = 12..40`) | Verify same- and cross-budget ISE against periodic and distance timing, plus planner, scoring and measured control time |
-| Table 5, Figure 5b | `Reacher-v5` polygonal 8-seed confirmation summary | Verify unfiltered eight-root second-plant confirmation contrasts and waypoint-authority strata |
+| Table 5, Figure 5b | `Reacher-v5` polygonal 8-seed evaluation summary | Verify unfiltered root contrasts, Holm sensitivity and waypoint-authority strata |
+| Discussion | Local-episode and matched-target development summaries | Recompute the local versus episode gains and the waiting-target comparison on two roots per task |
 | Table 10 | Smooth-ellipse Reacher and LQR cart-pole applicability summaries | Check paired applicability contrasts and preserve both diagnostic qualification outcomes |
 | Tables 6-7, Figure 3 | Qualified Stage298/301/304 Transit reports and event audit | Preserve single-intervention contrasts and the negative two-decision episode boundary |
 

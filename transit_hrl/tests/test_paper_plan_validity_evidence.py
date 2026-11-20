@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+from math import isclose
 from pathlib import Path
 import re
 import subprocess
@@ -22,7 +23,23 @@ class PaperEvidenceTests(unittest.TestCase):
 
     def test_saved_artifact_matches_original_result_sources(self):
         saved = json.loads((ROOT / "paper/plan_validity_evidence.json").read_text())
-        self.assertEqual(saved, self.evidence)
+
+        def compare(left, right, at=""):
+            self.assertIs(type(left), type(right), at)
+            if isinstance(left, dict):
+                self.assertEqual(left.keys(), right.keys(), at)
+                for key in left:
+                    compare(left[key], right[key], f"{at}/{key}")
+            elif isinstance(left, list):
+                self.assertEqual(len(left), len(right), at)
+                for i, (a, b) in enumerate(zip(left, right)):
+                    compare(a, b, f"{at}/{i}")
+            elif isinstance(left, float):
+                self.assertTrue(isclose(left, right, rel_tol=1e-12, abs_tol=1e-12), (at, left, right))
+            else:
+                self.assertEqual(left, right, at)
+
+        compare(saved, self.evidence)
 
     def test_pointmaze_intervals_match_original_confirmation(self):
         expected = {
@@ -142,12 +159,49 @@ class PaperEvidenceTests(unittest.TestCase):
             low, high = row["measured_control_ms_saved"]["CI95"]
             self.assertLess(low, 0)
             self.assertGreater(high, 0)
+        for comparison in ("unprivileged_B20_vs_distance_B24", "unprivileged_B24_vs_distance_B30"):
+            row = costs[comparison]
+            for field, places in (("ise_gain", 5), ("upper_loop_ms_saved", 2)):
+                mean, (low, high) = row[field]["mean"], row[field]["CI95"]
+                self.assertLess(high, 0)
+                self.assertIn(f"`{-mean:.{places}f}" + (" ms`" if places == 2 else "`"), paper)
+                self.assertIn(f"`[{-high:.{places}f}, {-low:.{places}f}]`", paper)
+            self.assertLess(row["measured_control_ms_saved"]["CI95"][0], 0)
+            self.assertGreater(row["measured_control_ms_saved"]["CI95"][1], 0)
+
+    def test_second_plant_multiplicity_and_waiting_diagnostics_match_text(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        reacher = self.evidence["reacher_polygonal_confirmation"]
+        sensitivity = reacher["ridge_baseline_ise_sensitivity"]
+        nominal = sensitivity["paired_two_sided_p"]["best_clock_minus_ridge_ise"]
+        adjusted = min(sensitivity["holm_p"].values())
+        self.assertEqual(len(sensitivity["holm_p"]), 7)
+        self.assertIn(f"p={nominal:.5f}", paper)
+        self.assertIn(f"p={adjusted:.4f}", paper)
+        waiting = self.evidence["waiting_value_development_diagnostics"]
+        for row in waiting["ellipse_reacher_interventions"].values():
+            self.assertIn(f"`{row['adaptive_50_step_gain']:.5f}`", paper)
+            self.assertIn(f"`{row['full_episode_gain']:+.5f}`", paper)
+        for row in waiting["matched_target_comparison"].values():
+            self.assertIn(f"{row['wait_over_local_relative_gain']:.2%}", paper)
+
+    def test_yoked_and_paired_supervision_results_match_manuscript(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        report = self.evidence["pointmaze_review_controls"]
+        self.assertEqual((report["root_count"], report["paired_paths"], report["calls_per_episode"]), (8, 512, 24))
+        self.assertEqual(report["different_yoked_schedules"], 512)
+        self.assertTrue(report["contrasts"]["yoked"]["supported"])
+        self.assertFalse(report["contrasts"]["single_arm"]["supported"])
+        for row in report["contrasts"].values():
+            self.assertIn(f"{row['relative_gain']:.2%}", paper)
+            for low, high in (row["CI95"], row["CI97p5"]):
+                self.assertIn(f"`[{low:.5f}, {high:.5f}]`", paper)
 
     def test_units_and_failed_closed_loop_decision_are_preserved(self):
         pm = self.evidence["pointmaze_stage9_confirmation"]
         self.assertEqual((pm["root_count"], pm["evaluation_paths"], pm["paired_mode_rollouts"]), (8, 128, 512))
         self.assertEqual(pm["upper_calls_per_episode_all_modes"], 24)
-        self.assertEqual(self.evidence["new_training_or_simulation"], 0)
+        self.assertEqual(self.evidence["rebuild_training_or_simulation"], 0)
         native = self.evidence["transit_stage304_two_decisions"]
         self.assertEqual(native["independent_scene_units"], 320)
         for key in ("service_closed_loop_supported", "joint_closed_loop_supported", "critic_incremental_cost_supported"):

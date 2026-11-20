@@ -14,19 +14,29 @@ Date: 2026-11-20. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
   Ridge also beats two learned timing gates and the raw-input MLP at the same
   192 paired queries. The acquisition study did not establish noninferiority
   to event stratification; the predictor comparison did not isolate features.
-- **Second plant.** On derived polygonal Reacher, eight fresh roots support
-  a 5.00% ISE improvement against the selected fixed clock. The distance,
-  cost-difference and native-periodic comparisons are inconclusive.
+- **Second plant.** After retraining on derived polygonal Reacher, selected
+  fixed-clock ISE improved 5.00% across eight roots (nominal p = 0.00937;
+  Holm p = 0.0656 across seven ridge timing contrasts). The driver reuses
+  PointMaze's disturbance mechanism. Adaptive gate contrasts are mixed.
 - **Call counts.** The matched-count ridge benefits do not carry over to
   every cross-budget comparison: 20- and 24-call ridge schedules beat the
   24- and 30-call periodic schedules, but lose to the respective distance
   gates at those higher counts.
 - **Compute trade-off.** Two CEM comparisons improve ISE with fewer calls
   and less planner time, but scoring more than offsets the planner savings.
-  The measured control-time intervals do not establish a net speedup.
+  Against distance gates with more calls, fewer-call ridge is less accurate
+  and costs more upper-loop time at both tested points. The measured control
+  times do not establish a net speedup.
+- **Waiting value.** Earlier development isolates opposite-signed episode
+  gains despite positive 50-step gains. A next-check waiting target did not
+  displace the frozen trigger.
 - **Scope.** The smooth Reacher and cart-pole screens separate waypoint
   freshness from timing opportunity. Transit Stage304 remains a negative
   episode result for a different action selector.
+- **Timing mechanism.** Online timing beats the yoked-clock replay by
+  37.42%, with a positive adjusted interval and both path halves favorable.
+  Pairing versus matched-step single-arm supervision is inconclusive after
+  adjustment despite a favorable 3.29% point estimate.
 
 ## Before submission
 

@@ -1,0 +1,62 @@
+{
+  "sources": [
+    "results/plan_validity_local_episode_diagnostic_20261110/summary.json",
+    "results/plan_validity_target_credit_20261110/summary.json"
+  ],
+  "local_credit_parts": {
+    "1972210000": {
+      "local_advantage": 0.008942885034402081,
+      "opportunity_gap": -0.0073130195920489555,
+      "tail_advantage": 0.033466693138460936,
+      "full_advantage": 0.03509655858081451
+    },
+    "1972220000": {
+      "local_advantage": -0.006269716328626649,
+      "opportunity_gap": 0.01165512630106274,
+      "tail_advantage": -0.07303703159370008,
+      "full_advantage": -0.06765162162126409
+    }
+  },
+  "matched_episode_panels": {
+    "pointmaze": {
+      "mean_ise": {
+        "L": 0.9345071686903491,
+        "W": 0.8812942397666245,
+        "G": 1.1551997236762295,
+        "history": 0.8375443488253536,
+        "threshold": 0.8961398454030431,
+        "termination_history": 1.0165117253002536
+      },
+      "root_differences_from_L": {
+        "W": [
+          0.027514832846005297,
+          -0.13394069069345454
+        ],
+        "G": [
+          0.44776422828607,
+          -0.006379118314309207
+        ]
+      }
+    },
+    "reacher_tracking": {
+      "mean_ise": {
+        "L": 4.262345462516633,
+        "W": 4.241529359974393,
+        "G": 4.261325278493757,
+        "history": 4.2061992837627,
+        "threshold": 4.190341062663229,
+        "termination_history": 4.28790394055453
+      },
+      "root_differences_from_L": {
+        "W": [
+          0.02367543968895458,
+          -0.06530764477343337
+        ],
+        "G": [
+          0.023978380946893307,
+          -0.026018748992644503
+        ]
+      }
+    }
+  }
+}

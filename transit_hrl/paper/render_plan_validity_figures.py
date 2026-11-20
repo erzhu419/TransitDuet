@@ -643,6 +643,8 @@ def figure4_route_b(evidence):
         ("unprivileged_B20_vs_periodic_B30", "upper_loop_ms_saved", "20 vs Per-30 (upper)", BLUE),
         ("distance_B24_vs_periodic_B30", "upper_loop_ms_saved", "Dist 24 vs Per-30", BLUE),
         ("unprivileged_B20_vs_periodic_B24", "upper_loop_ms_saved", "20 vs Per-24 (upper)", ORANGE),
+        ("unprivileged_B20_vs_distance_B24", "upper_loop_ms_saved", "20 vs Dist-24 (upper)", ORANGE),
+        ("unprivileged_B24_vs_distance_B30", "upper_loop_ms_saved", "24 vs Dist-30 (upper)", ORANGE),
     )
     for y_idx, (c_key, sub_key, c_label, col) in enumerate(time_specs):
         item = cem["cross_budget_savings"][c_key][sub_key]
@@ -663,7 +665,7 @@ def figure4_route_b(evidence):
         )
     d.set_yticks(range(len(time_specs)), [lbl for _, _, lbl, _ in time_specs])
     d.set_ylim(len(time_specs) - 0.55, -0.55)
-    baseline(d, "Periodic - adaptive time (ms)")
+    baseline(d, "Comparator - candidate time (ms)")
     low_d, high_d = d.get_xlim()
     d.set_xlim(low_d - 0.05 * (high_d - low_d), high_d + 0.05 * (high_d - low_d))
 

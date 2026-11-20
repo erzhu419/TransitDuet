@@ -1,0 +1,186 @@
+{
+  "run_name": "pointmaze_review_controls_20261120",
+  "root_count": 8,
+  "phase": "formal",
+  "paths_per_root": 64,
+  "calls_per_episode": 24,
+  "mean_ise": {
+    "ridge": 1.0032429834851584,
+    "yoked": 1.603094007326672,
+    "single_arm": 1.0374123870518979
+  },
+  "contrasts": {
+    "yoked": {
+      "paired_gain": {
+        "n": 8,
+        "mean": 0.5998510238415133,
+        "interval": [
+          0.5435736628577947,
+          0.656128384825232
+        ]
+      },
+      "adjusted_interval": [
+        0.5322302472580845,
+        0.6674718004249421
+      ],
+      "relative_gain": 0.37418331120944565,
+      "half_gains": [
+        0.5829537266550866,
+        0.6167483210279401
+      ],
+      "favorable_roots": 8,
+      "supported": true
+    },
+    "single_arm": {
+      "paired_gain": {
+        "n": 8,
+        "mean": 0.03416940356673923,
+        "interval": [
+          0.0021804699796692736,
+          0.0661583371538092
+        ]
+      },
+      "adjusted_interval": [
+        -0.004267305145654023,
+        0.0726061122791325
+      ],
+      "relative_gain": 0.032937146300943354,
+      "half_gains": [
+        0.0343276412098674,
+        0.034011165923611066
+      ],
+      "favorable_roots": 6,
+      "supported": false
+    }
+  },
+  "roots": [
+    {
+      "optimizer_seed": 1981400000,
+      "supervision_steps_per_rule": 252020,
+      "supervision_planner_calls_per_rule": 4928,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 1.02135229218446,
+        "yoked": 1.628271340617491,
+        "single_arm": 1.018634317278479
+      },
+      "cpu_seconds": 660.520715946
+    },
+    {
+      "optimizer_seed": 1981410000,
+      "supervision_steps_per_rule": 251990,
+      "supervision_planner_calls_per_rule": 4946,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 1.1246843739378047,
+        "yoked": 1.7653826746967627,
+        "single_arm": 1.1187339440719426
+      },
+      "cpu_seconds": 648.514981434
+    },
+    {
+      "optimizer_seed": 1981420000,
+      "supervision_steps_per_rule": 251800,
+      "supervision_planner_calls_per_rule": 4934,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 1.0121943000210767,
+        "yoked": 1.591032797717408,
+        "single_arm": 1.055543091724006
+      },
+      "cpu_seconds": 667.996344541
+    },
+    {
+      "optimizer_seed": 1981430000,
+      "supervision_steps_per_rule": 251560,
+      "supervision_planner_calls_per_rule": 4952,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 1.0613003134986343,
+        "yoked": 1.6914561863641833,
+        "single_arm": 1.0754160522719438
+      },
+      "cpu_seconds": 646.96845436
+    },
+    {
+      "optimizer_seed": 1981440000,
+      "supervision_steps_per_rule": 252860,
+      "supervision_planner_calls_per_rule": 4952,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 0.881107534649544,
+        "yoked": 1.389336383141779,
+        "single_arm": 0.9501556990166
+      },
+      "cpu_seconds": 657.7328087589999
+    },
+    {
+      "optimizer_seed": 1981450000,
+      "supervision_steps_per_rule": 249530,
+      "supervision_planner_calls_per_rule": 4916,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 0.9638995816816138,
+        "yoked": 1.6303445418422626,
+        "single_arm": 1.01171451288932
+      },
+      "cpu_seconds": 664.243945678
+    },
+    {
+      "optimizer_seed": 1981460000,
+      "supervision_steps_per_rule": 251760,
+      "supervision_planner_calls_per_rule": 4936,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 1.0545370086768515,
+        "yoked": 1.550850194455704,
+        "single_arm": 1.060350354610763
+      },
+      "cpu_seconds": 655.2673121460001
+    },
+    {
+      "optimizer_seed": 1981470000,
+      "supervision_steps_per_rule": 253280,
+      "supervision_planner_calls_per_rule": 4968,
+      "fit_rows": [
+        192,
+        384
+      ],
+      "different_yoked_schedules": 64,
+      "mean_ise": {
+        "ridge": 0.9068684632312832,
+        "yoked": 1.5780779397777849,
+        "single_arm": 1.008751124552128
+      },
+      "cpu_seconds": 663.319581986
+    }
+  ]
+}

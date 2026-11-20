@@ -8,6 +8,8 @@ from math import sqrt
 from pathlib import Path
 from statistics import fmean, stdev
 
+from scipy.stats import t as student_t
+
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper"
 STAGE9 = "pointmaze_budgeted_trigger_stage9_v2_confirmation_20260926_r1"
@@ -16,6 +18,7 @@ PARETO_RUN = "pointmaze_stage9_budget_pareto_20261118"
 STRONG_BASELINES_RUN = "pointmaze_route_b_strong_baselines_20261118"
 REACHER_POLYGONAL_RUN = "reacher_polygonal_route_b_confirmation_20261118"
 CEM_PLANNER_RUN = "pointmaze_route_b_expensive_cem_planner_20261118"
+REVIEW_CONTROLS_RUN = "pointmaze_review_controls_20261120"
 ROOTS = (209011, 209023, 209037, 209049, 209061, 209073, 209089, 209101)
 MODES = ("fixed", "balanced_jitter", "current_compact_quadratic", "causal_validity_interactions")
 PAIRS = {
@@ -97,6 +100,7 @@ def stage9() -> dict:
     checks, early, branch_steps, paths, by_root = [], [], 0, [], {}
     mode_checks = {mode: [] for mode in MODES}
     example, policy_contract = None, None
+    paths_favoring_candidate = 0
     for root in ROOTS:
         path = stage9_input(root)
         cell = read(path)
@@ -106,6 +110,10 @@ def stage9() -> dict:
         indexed = {(r["seed"], r["mode"]): r for r in rows}
         assert len(seeds) == 16 and len(indexed) == len(rows) == 64
         assert all(r["upper_decision_count"] == 24 and r["protocol_valid"] for r in rows)
+        paths_favoring_candidate += sum(
+            indexed[s, "fixed"]["tracking_squared_error_integral"]
+            > indexed[s, MODES[-1]]["tracking_squared_error_integral"] for s in seeds
+        )
         for name, (after, before, field) in PAIRS.items():
             effects[name].append(fmean(indexed[s, after][field] - indexed[s, before][field] for s in seeds))
         trained = {r["seed"]: r for r in cell["canonical_evaluation_rows"]}
@@ -140,6 +148,7 @@ def stage9() -> dict:
         "statistical_unit": "optimizer_seed_root",
         "root_count": 8,
         "evaluation_paths": 128,
+        "paths_favoring_candidate_over_fixed": paths_favoring_candidate,
         "paired_mode_rollouts": 512,
         "root_effects": by_root,
         "interval_method": "paired_root_Student_t_df7_two_sided95;unchanged_registered_endpoints",
@@ -325,6 +334,7 @@ def reacher_polygonal_confirmation() -> dict:
         "best_clock_minus_generic_mlp_ise": ("best_clock", "generic_mlp_unprivileged"),
         "shared_periodic_minus_generic_mlp_ise": ("shared_periodic", "generic_mlp_unprivileged"),
         "temple_minus_generic_mlp_ise": ("temple_gate", "generic_mlp_unprivileged"),
+        "generic_mlp_minus_ridge_ise": ("generic_mlp_unprivileged", "ridge_unprivileged"),
     }
     by_root = {}
     series = {k: [] for k in contrast_specs}
@@ -347,6 +357,15 @@ def reacher_polygonal_confirmation() -> dict:
             "relative_gain": ci["mean"] / ref_mean,
             "favorable_roots": sum(v > 0.0 for v in series[name]),
         }
+    nominal = {}
+    for name, (ref, cand) in contrast_specs.items():
+        if cand == "ridge_unprivileged" and ref != "generic_mlp_unprivileged":
+            values = series[name]
+            nominal[name] = float(2 * student_t.sf(abs(fmean(values)) / (stdev(values) / sqrt(8)), df=7))
+    adjusted, running_max = {}, 0.0
+    for rank, name in enumerate(sorted(nominal, key=nominal.get)):
+        running_max = max(running_max, min(1.0, (len(nominal) - rank) * nominal[name]))
+        adjusted[name] = running_max
     auth_roots = [r for r in roots if r["waypoint_authority_relative_gain"] > 0.05]
     low_roots = [r for r in roots if r["waypoint_authority_relative_gain"] <= 0.05]
     methods = tuple(summary["mean_ise"].keys())
@@ -363,6 +382,7 @@ def reacher_polygonal_confirmation() -> dict:
             "authority_gt_0p05_roots": len(auth_roots),
             "authority_le_0p05_roots": len(low_roots),
         },
+        "ridge_baseline_ise_sensitivity": {"paired_two_sided_p": nominal, "holm_p": adjusted},
         "descriptive_ise_by_authority": {
             "authority_6_roots": {m: fmean(r["panels"]["all"][m]["mean_ise"] for r in auth_roots) for m in methods},
             "low_authority_2_roots": {m: fmean(r["panels"]["all"][m]["mean_ise"] for r in low_roots) for m in methods},
@@ -413,36 +433,36 @@ def expensive_cem_planner() -> dict:
             "relative_gain_vs_distance": entry["contrasts"]["unprivileged_vs_distance_threshold"]["relative_ise_gain"],
         }
 
-    def cem_cross(cand_method: str, cand_b: str, per_b: str) -> dict:
+    def cem_cross(cand_method: str, cand_b: str, ref_b: str, ref: str = "periodic") -> dict:
         ise_diffs, plan_ms_diffs, upper_ms_diffs = [], [], []
         measured_ctrl_ms_diffs = []
         by_root_plan, by_root_upper = {}, {}
         for r in roots:
             seed = str(r["optimizer_seed"])
-            per_m = r["budgets"][per_b]["methods"]["periodic"]
+            ref_m = r["budgets"][ref_b]["methods"][ref]
             cand_m = r["budgets"][cand_b]["methods"][cand_method]
-            ise_diffs.append(per_m["mean_ise"] - cand_m["mean_ise"])
-            p_diff = per_m["planner_ms_per_episode"] - cand_m["planner_ms_per_episode"]
-            u_diff = (per_m["planner_ms_per_episode"] + per_m["trigger_score_ms_per_episode"]) - (
+            ise_diffs.append(ref_m["mean_ise"] - cand_m["mean_ise"])
+            p_diff = ref_m["planner_ms_per_episode"] - cand_m["planner_ms_per_episode"]
+            u_diff = (ref_m["planner_ms_per_episode"] + ref_m["trigger_score_ms_per_episode"]) - (
                 cand_m["planner_ms_per_episode"] + cand_m["trigger_score_ms_per_episode"]
             )
             plan_ms_diffs.append(p_diff)
             upper_ms_diffs.append(u_diff)
             measured_ctrl_ms_diffs.append(
-                per_m["total_control_ms_per_episode"] - cand_m["total_control_ms_per_episode"]
+                ref_m["total_control_ms_per_episode"] - cand_m["total_control_ms_per_episode"]
             )
             by_root_plan[seed] = p_diff
             by_root_upper[seed] = u_diff
-        per_ise = summary["frontier"][per_b]["mean_ise"]["periodic"]
-        per_plan = summary["frontier"][per_b]["planner_ms_per_episode"]["periodic"]
+        ref_ise = summary["frontier"][ref_b]["mean_ise"][ref]
+        ref_plan = summary["frontier"][ref_b]["planner_ms_per_episode"][ref]
         ise_ci = t7_interval(ise_diffs)
         plan_ci = t7_interval(plan_ms_diffs)
         upper_ci = t7_interval(upper_ms_diffs)
         return {
-            "ise_gain": {**ise_ci, "relative_gain": ise_ci["mean"] / per_ise, "favorable_roots": sum(x > 0 for x in ise_diffs)},
+            "ise_gain": {**ise_ci, "relative_gain": ise_ci["mean"] / ref_ise, "favorable_roots": sum(x > 0 for x in ise_diffs)},
             "planner_ms_saved": {
                 **plan_ci,
-                "relative_saved": plan_ci["mean"] / per_plan,
+                "relative_saved": plan_ci["mean"] / ref_plan,
                 "favorable_roots": sum(x > 0 for x in plan_ms_diffs),
                 "roots": by_root_plan,
             },
@@ -459,6 +479,8 @@ def expensive_cem_planner() -> dict:
         "unprivileged_B24_vs_periodic_B30": cem_cross("unprivileged_uniform", "24", "30"),
         "unprivileged_B20_vs_periodic_B30": cem_cross("unprivileged_uniform", "20", "30"),
         "distance_B24_vs_periodic_B30": cem_cross("distance_threshold", "24", "30"),
+        "unprivileged_B20_vs_distance_B24": cem_cross("unprivileged_uniform", "20", "24", "distance_threshold"),
+        "unprivileged_B24_vs_distance_B30": cem_cross("unprivileged_uniform", "24", "30", "distance_threshold"),
     }
     return {
         "source": str(path.relative_to(ROOT)),
@@ -469,6 +491,73 @@ def expensive_cem_planner() -> dict:
         "frontier": frontier,
         "cross_budget_savings": cross_savings,
     }
+
+
+def pointmaze_review_controls() -> dict:
+    path = Path("results") / REVIEW_CONTROLS_RUN / "summary.json"
+    summary = read(ROOT / path)
+    roots = summary["roots"]
+    assert len(roots) == 8 and summary["phase"] == "formal"
+    assert summary["calls_per_episode"] == 24 and summary["paths_per_root"] == 64
+    assert {row["optimizer_seed"] for row in roots} == set(range(1_981_400_000, 1_981_480_000, 10_000))
+    assert all(row["fit_rows"] == [192, 384] for row in roots)
+    contrasts = {}
+    for comparator, result in summary["contrasts"].items():
+        gains = [row["mean_ise"][comparator] - row["mean_ise"]["ridge"] for row in roots]
+        ci = t7_interval(gains)
+        radius = float(student_t.ppf(0.9875, df=7) * stdev(gains) / sqrt(8))
+        adjusted = [ci["mean"] - radius, ci["mean"] + radius]
+        halves = result["half_gains"]
+        supported = adjusted[0] > 0 and min(halves) > 0
+        assert supported == result["supported"] and abs(fmean(halves) - ci["mean"]) < 1e-12
+        contrasts[comparator] = {
+            **ci, "CI97p5": adjusted, "half_gains": halves,
+            "relative_gain": ci["mean"] / fmean(row["mean_ise"][comparator] for row in roots),
+            "favorable_roots": sum(gain > 0 for gain in gains), "supported": supported,
+        }
+    return {"source": path.as_posix(), "root_count": 8, "paired_paths": 512,
+            "calls_per_episode": 24, "contrasts": contrasts, "mean_ise": summary["mean_ise"],
+            "supervision_steps_per_rule": sum(row["supervision_steps_per_rule"] for row in roots),
+            "supervision_planner_calls_per_rule": sum(row["supervision_planner_calls_per_rule"] for row in roots),
+            "evaluation_steps": 512 * 3 * 1200,
+            "different_yoked_schedules": sum(row["different_yoked_schedules"] for row in roots)}
+
+
+def extract_waiting_value_inputs() -> None:
+    local = Path("results/plan_validity_local_episode_diagnostic_20261110/summary.json")
+    matched = Path("results/plan_validity_target_credit_20261110/summary.json")
+    payload = {
+        "sources": [str(local), str(matched)],
+        "local_credit_parts": {
+            str(row["optimizer_seed"]): row["cross_future_attribution"]["mean_credit_parts"]
+            for row in read(ROOT / local)["cells"] if row["task"] == "reacher_tracking"
+        },
+        "matched_episode_panels": {
+            task: row["episode_panels"]["all"] for task, row in read(ROOT / matched)["task_means"].items()
+        },
+    }
+    (PAPER / "data/waiting_value.json").write_text(json.dumps(payload, indent=2) + "\n")
+
+
+def waiting_value_diagnostics() -> dict:
+    path = Path("paper/data/waiting_value.json")
+    inputs = read(ROOT / path)
+    by_root = {}
+    for root, credit in inputs["local_credit_parts"].items():
+        by_root[root] = {
+            "adaptive_50_step_gain": credit["local_advantage"] + credit["opportunity_gap"],
+            "full_episode_gain": credit["full_advantage"],
+        }
+    target_comparison = {}
+    for task, panel in inputs["matched_episode_panels"].items():
+        means = panel["mean_ise"]
+        target_comparison[task] = {
+            "wait_over_local_relative_gain": 1 - means["W"] / means["L"],
+            "wait_over_frozen_relative_gain": 1 - means["W"] / means["history"],
+            "wait_minus_local_by_root": panel["root_differences_from_L"]["W"],
+        }
+    return {"source": str(path), "scope": "two_root_per_task_development",
+            "ellipse_reacher_interventions": by_root, "matched_target_comparison": target_comparison}
 
 
 def transit(run: str, pairs: tuple[str, ...]) -> dict:
@@ -502,13 +591,15 @@ def build() -> dict:
     events = audit["arm_diagnostics"]["service_only"]["fleet_events"]
     return {
         "paper_scope": "plan_validity_driven_replanning;not_domain_general_Freq_HRL",
-        "new_training_or_simulation": 0,
+        "rebuild_training_or_simulation": 0,
         "pointmaze_stage9_confirmation": pointmaze,
         "pointmaze_unprivileged_ablation": unpriv,
         "pointmaze_budget_pareto": pareto,
         "pointmaze_strong_baselines": strong_b,
         "reacher_polygonal_confirmation": reacher_poly,
         "pointmaze_expensive_cem_planner": cem,
+        "pointmaze_review_controls": pointmaze_review_controls(),
+        "waiting_value_development_diagnostics": waiting_value_diagnostics(),
         "transit_stage298_single_intervention": transit(
             "native_transit_service_confirmation_stage298_20261019_r1", ("joint_budgeted_vs_raw",)
         ),
@@ -547,8 +638,13 @@ if __name__ == "__main__":
         action="store_true",
         help="refresh compact inputs from the original eight local result files",
     )
-    if parser.parse_args().extract_stage9:
+    parser.add_argument("--extract-waiting-value", action="store_true",
+                        help="refresh anonymized development inputs from the original result files")
+    opts = parser.parse_args()
+    if opts.extract_stage9:
         extract_stage9_inputs()
+    if opts.extract_waiting_value:
+        extract_waiting_value_inputs()
     evidence = build()
     output = PAPER / "plan_validity_evidence.json"
     output.write_text(json.dumps(evidence, indent=2) + "\n")
@@ -565,7 +661,7 @@ if __name__ == "__main__":
                     k: {"ise": v["ise_gain"]["mean"], "planner_ms": v["planner_ms_saved"]["mean"]}
                     for k, v in evidence["pointmaze_expensive_cem_planner"]["cross_budget_savings"].items()
                 },
-                "new_training_or_simulation": 0,
+                "rebuild_training_or_simulation": 0,
             },
             indent=2,
         )
