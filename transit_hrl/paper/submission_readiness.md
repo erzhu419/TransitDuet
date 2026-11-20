@@ -1,6 +1,6 @@
 # Plan-Validity Paper: Submission Readiness
 
-Date: 2026-11-19. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
+Date: 2026-11-20. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
 [Reproduction instructions](README.md).
 
 ## Supported claims
@@ -17,6 +17,10 @@ Date: 2026-11-19. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
 - **Second plant.** On derived polygonal Reacher, eight fresh roots support
   a 5.00% ISE improvement against the selected fixed clock. The distance,
   cost-difference and native-periodic comparisons are inconclusive.
+- **Call counts.** The matched-count ridge benefits do not carry over to
+  every cross-budget comparison: 20- and 24-call ridge schedules beat the
+  24- and 30-call periodic schedules, but lose to the respective distance
+  gates at those higher counts.
 - **Compute trade-off.** Two CEM comparisons improve ISE with fewer calls
   and less planner time, but scoring more than offsets the planner savings.
   The measured control-time intervals do not establish a net speedup.
@@ -29,6 +33,9 @@ Date: 2026-11-19. [Manuscript](manuscript.md) | [Review PDF](submission.pdf) |
 The learned binary and cost-difference gates are budgeted adaptations, not
 reproductions of the original TEMPLE or Option-Critic algorithms. Retain the
 fixed-call timing claim on the tested planning and execution hierarchies.
-The artifact reproduces analysis and presentation from saved evidence, not
-native simulation or controller training. Apply the chosen venue's template,
-page limits and anonymity requirements before uploading.
+The review bundle reproduces analysis and presentation from saved evidence,
+not native simulation or controller training. It excludes cluster details
+and normalizes archive ownership metadata. Check the specific venue's
+template, page limits and anonymity rules before uploading. A stronger
+cross-task claim needs an independent comparison with a selected strong
+timing gate under matched total compute, not more periodic controls.

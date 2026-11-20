@@ -227,18 +227,17 @@ def budget_pareto() -> dict:
             "relative_gain_vs_distance": entry["contrasts"]["unprivileged_uniform_vs_distance_threshold"]["relative_ise_gain"],
         }
 
-    def cross_contrast(cand_b: str, per_b: str) -> dict:
+    def cross_contrast(cand_b: str, ref_b: str, ref: str = "periodic") -> dict:
+        reference = [r["budgets"][ref_b]["methods"][ref]["mean_ise"] for r in roots]
         diffs = [
-            r["budgets"][per_b]["methods"]["periodic"]["mean_ise"]
-            - r["budgets"][cand_b]["methods"]["unprivileged_uniform"]["mean_ise"]
-            for r in roots
+            baseline - r["budgets"][cand_b]["methods"]["unprivileged_uniform"]["mean_ise"]
+            for r, baseline in zip(roots, reference)
         ]
-        per_mean = fmean(r["budgets"][per_b]["methods"]["periodic"]["mean_ise"] for r in roots)
         ci = t7_interval(diffs)
         return {
             **ci,
-            "relative_gain": ci["mean"] / per_mean,
-            "call_reduction_pct": 1.0 - int(cand_b) / int(per_b),
+            "relative_gain": ci["mean"] / fmean(reference),
+            "call_reduction_pct": 1.0 - int(cand_b) / int(ref_b),
             "favorable_roots": sum(d > 0.0 for d in diffs),
         }
 
@@ -246,6 +245,8 @@ def budget_pareto() -> dict:
         "unprivileged_B20_vs_periodic_B24": cross_contrast("20", "24"),
         "unprivileged_B24_vs_periodic_B30": cross_contrast("24", "30"),
         "unprivileged_B30_vs_periodic_B40": cross_contrast("30", "40"),
+        "unprivileged_B20_vs_distance_B24": cross_contrast("20", "24", "distance_threshold"),
+        "unprivileged_B24_vs_distance_B30": cross_contrast("24", "30", "distance_threshold"),
     }
     return {
         "source": str(path.relative_to(ROOT)),

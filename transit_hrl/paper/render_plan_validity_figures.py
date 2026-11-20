@@ -478,16 +478,18 @@ def figure3(evidence):
     low_c, high_c = c.get_xlim()
     c.set_xlim(min(0, low_c) - 0.04 * (high_c - low_c), high_c)
 
-    title(d, "d", "Cross-budget call savings")
+    title(d, "d", "Fewer calls: paired ISE contrasts")
     cross_specs = (
-        ("unprivileged_B20_vs_periodic_B24", "20 vs Per-24 (-17%)"),
-        ("unprivileged_B24_vs_periodic_B30", "24 vs Per-30 (-20%)"),
-        ("unprivileged_B30_vs_periodic_B40", "30 vs Per-40 (-25%)"),
+        ("unprivileged_B20_vs_periodic_B24", "20 vs periodic 24", TEAL),
+        ("unprivileged_B20_vs_distance_B24", "20 vs distance 24", BLUE),
+        ("unprivileged_B24_vs_periodic_B30", "24 vs periodic 30", TEAL),
+        ("unprivileged_B24_vs_distance_B30", "24 vs distance 30", BLUE),
+        ("unprivileged_B30_vs_periodic_B40", "30 vs periodic 40", TEAL),
     )
-    for y_idx, (c_key, c_label) in enumerate(cross_specs):
+    for y_idx, (c_key, _, color) in enumerate(cross_specs):
         item = pareto["cross_budget_call_savings"][c_key]
-        d.plot(item["CI95"], [y_idx, y_idx], color=TEAL, lw=1.3, zorder=4)
-        d.scatter([item["mean"]], [y_idx], marker="D", color=TEAL, s=16, zorder=5)
+        d.plot(item["CI95"], [y_idx, y_idx], color=color, lw=1.3, zorder=4)
+        d.scatter([item["mean"]], [y_idx], marker="D", color=color, s=16, zorder=5)
         record(
             rows,
             "d",
@@ -497,13 +499,13 @@ def figure3(evidence):
             item["mean"],
             ci=item["CI95"],
             source=f"{EVIDENCE}#/pointmaze_budget_pareto/cross_budget_call_savings/{c_key}",
-            unit="Periodic - fewer-call ISE",
+            unit="Comparator - fewer-call ridge ISE",
             n=8,
             statistical_unit="optimizer_seed_root",
         )
-    d.set_yticks(range(len(cross_specs)), [lbl for _, lbl in cross_specs])
+    d.set_yticks(range(len(cross_specs)), [label for _, label, _ in cross_specs])
     d.set_ylim(len(cross_specs) - 0.6, -0.6)
-    baseline(d, "Periodic - fewer-call ISE")
+    baseline(d, "Comparator - fewer-call ridge ISE")
     low_d, high_d = d.get_xlim()
     d.set_xlim(min(0, low_d) - 0.05 * (high_d - low_d), high_d + 0.04 * (high_d - low_d))
 

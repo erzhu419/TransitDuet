@@ -40,38 +40,42 @@ PLANS = (
 def tasks_with(signatures: set[str], state: dict | None = None) -> list[dict]:
     tasks = (state if state is not None else scheduler.load_state())["tasks"]
     items = tasks.values() if isinstance(tasks, dict) else tasks
-    return [t for t in items if t.get("signature") in signatures]
+    # The scheduler appends registrations; a manual retry can supersede an old task.
+    return list({t["signature"]: t for t in items if t.get("signature") in signatures}.values())
 
 
 def submit_jobs(jobs: list[dict], label: str) -> tuple[list[str], set[str]]:
-    signatures = {j["signature"] for j in jobs}
-    existing = tasks_with(signatures)
-    if existing:
-        ids = [t["id"] for t in existing]
-        print(f"Reusing existing registered cohort {label}: {ids}", flush=True)
-        return ids, signatures
-    execute_bulk(jobs, dry_run=False, intent_label=label)
+    by_signature = {j["signature"]: j for j in jobs}
+    signatures = set(by_signature)
+    existing = {t["signature"] for t in tasks_with(signatures)}
+    missing = [j for sig, j in by_signature.items() if sig not in existing]
+    if missing:
+        execute_bulk(missing, dry_run=False, intent_label=label)
     with scheduler.state_lock():
         state = scheduler.load_state()
-        tasks = tasks_with(signatures, state)
-        if len(tasks) != len(jobs):
-            raise RuntimeError(f"scheduler registered {len(tasks)}/{len(jobs)} jobs for {label}")
-        for task in tasks:
+        registered = {t["signature"]: t for t in tasks_with(signatures, state)}
+        if registered.keys() != signatures:
+            raise RuntimeError(f"scheduler registered {len(registered)}/{len(jobs)} jobs for {label}")
+        tasks = [registered[sig] for sig in by_signature]
+        pending = [task for task in tasks if task.get("status") == "queued"]
+        for task in pending:
             task.update(allow_cpu_training=True, protect_from_auto_eviction=True)
-        scheduler.save_state(state)
+        if pending:
+            scheduler.save_state(state)
     ids = [t["id"] for t in tasks]
-    print(f"Submitted {label}: {ids}", flush=True)
-    subprocess.run(
-        [
-            sys.executable,
-            str(SCHEDULER),
-            "dispatch",
-            *(arg for tid in ids for arg in ("--task-id", tid)),
-            "--intent-label",
-            label,
-        ],
-        check=True,
-    )
+    print(f"Registered {label}: {ids}", flush=True)
+    if pending:
+        subprocess.run(
+            [
+                sys.executable,
+                str(SCHEDULER),
+                "dispatch",
+                *(arg for task in pending for arg in ("--task-id", task["id"])),
+                "--intent-label",
+                label,
+            ],
+            check=True,
+        )
     return ids, signatures
 
 

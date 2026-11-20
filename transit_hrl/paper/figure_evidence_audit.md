@@ -1,6 +1,6 @@
 # Core Figures And Traceability Audit
 
-Date: 2026-11-19. Five manuscript figures use saved results only. Renderer: Python/matplotlib.
+Date: 2026-11-20. Five manuscript figures use saved results only. Renderer: Python/matplotlib.
 
 ## Deliverables
 
@@ -12,4 +12,4 @@ Date: 2026-11-19. Five manuscript figures use saved results only. Renderer: Pyth
 | 4 | PointMaze and polygonal Reacher timing contrasts and CEM timing components | [PNG](figures/fig4_route_b_baselines_reacher_cem.png), [PDF](figures/fig4_route_b_baselines_reacher_cem.pdf), [SVG](figures/fig4_route_b_baselines_reacher_cem.svg), [CSV](figures/fig4_route_b_baselines_reacher_cem_source.csv) |
 | 5 | Transit single-intervention gains versus failed two-decision episode criterion | [PNG](figures/fig5_transit_boundary.png), [PDF](figures/fig5_transit_boundary.pdf), [SVG](figures/fig5_transit_boundary.svg), [CSV](figures/fig5_transit_boundary_source.csv) |
 
-Rebuild from `transit_hrl/`: `make -C paper figures`. The CSV values trace back to [plan_validity_evidence.json](plan_validity_evidence.json). The renderer checks canvas bounds, and tests verify quantitative source rows, interval types, and vector text. Figure 4d reports planner-only and planner-plus-score times; the latter excludes lower inference. The measured control sum and intervals are reported in the evidence JSON and manuscript.
+Rebuild from `transit_hrl/`: `make -C paper figures`. The CSV values trace back to [plan_validity_evidence.json](plan_validity_evidence.json). Figure 3d pairs the same roots and paths at different call counts and reports distance as well as periodic comparators. Figure 4d reports planner-only and planner-plus-score times; the latter excludes lower inference. The measured control sum and intervals are reported in the evidence JSON and manuscript.

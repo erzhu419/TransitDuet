@@ -1,6 +1,6 @@
 # Plan-Validity-Driven Replanning Under a Fixed Planning Budget
 
-Working manuscript, 2026-11-19. Evidence and source map: [evidence_map.md](evidence_map.md).
+Working manuscript, 2026-11-20. Evidence and source map: [evidence_map.md](evidence_map.md).
 
 ## Abstract
 
@@ -30,6 +30,8 @@ This paper makes five contributions:
 
 **Event-triggered control and metareasoning.** Event-triggered and Lebesgue sampling controllers recompute control or model predictive control (MPC) solutions when error or Lyapunov triggers cross a threshold [@astrom2002comparison; @tabuada2007event; @heemels2012introduction; @li2014eventmpc], complementing sampling-based planners such as CEM and MPPI [@deboer2005cem; @williams2017mppi]. Rather than triggering solely on instantaneous subgoal proximity, our predictor estimates the counterfactual value of replanning [@russell1991metareasoning] from causal motion history [@zintgraf2020varibad; @konidaris2011fourier; @wang2026wavelet], paralleling dynamic test-time compute allocation in sequential agents [@paglieri2025learning; @achiam2017cpo].
 
+**Learned and budgeted replanning.** @bohn2021mpcupdate learn when a slow MPC planner should recompute while fast feedback executes its plan. @honda2024replan learn when to replace the global reference path in a hierarchical navigation system. @musavi2026replan allocate a limited update budget using a regret bound for time-varying transition dynamics. Our setting fixes one waypoint renewal per bin and learns a timing score by replaying the same prefix with and without renewal while the lower feedback policy is fixed. The contribution is this paired supervision and its empirical test at fixed call counts, rather than the idea of adaptive replanning or a regret guarantee.
+
 ## 3. Method
 
 ### 3.1 Hierarchical control and within-bin timing problem
@@ -58,12 +60,14 @@ where \(e_{t_q + j} = y_{t_q + j} - p_{t_q + j}\) is the instantaneous tracking 
 We compare three offline query-acquisition protocols at matched query budgets:
 
 1. **Event-stratified acquisition (original confirmation).** Queries are drawn equally across six simulator-defined opportunity classes (three lags after hidden target-regime switches, transient force pulses, reward-irrelevant distractor switches, and calm neutral windows). Event timestamps stratify offline training queries only and never enter features or deployment.
-2. **Label-free uniform clock-grid acquisition (*unprivileged-uniform*).** Eligible non-colliding deployment check steps (\(b \in \{1, \dots, 22\}\), offsets \(\{0, 5, 10, 15, 20, 25\}\)) are partitioned into equal temporal strata per fit path, and one query step is sampled deterministically per stratum without inspecting simulator events or state trajectories.
+2. **Uniform clock-grid acquisition (*unprivileged-uniform*).** Grid steps (\(b \in \{1, \dots, 22\}\), offsets \(\{0, 5, 10, 15, 20, 25\}\)) that do not coincide with a reference call are divided into contiguous, near-equal groups. A seeded draw selects one step per group without inspecting simulator events or trajectories.
 3. **Label-free observable-change acquisition (*unprivileged-observable*).** A single causal rollout records observable target-velocity changes and force norms on the check grid, stratifying high-motion-change, high-force, and calm steps using observable history alone.
+
+Training uses reference trajectories with randomized call offsets. The grid may include steps after the reference call has already used that bin's budget: 768 of 1,536 uniform queries on the follow-up PointMaze roots and 763 of 1,536 on polygonal Reacher. This samples local keep/renew effects, not the value of spending the bin's only call now versus waiting. At deployment the trigger never scores after a call in the same bin.
 
 ### 3.4 Causal predictor fitting and budgeted deployment
 
-The structured renewal-value predictor constructs causal features from normalized plan age \((t - t_{\mathrm{last}}) / 50\), tracking and waypoint error vectors, multi-lag causal target-velocity estimates, measured force norms, and their relational bilinear dot-products (capturing directional alignment between waypoint error, target velocity, and velocity change); no hidden regime label, distractor channel, or future observation is included. Features are standardized on fit data and fitted via ridge regression with an unpenalized intercept, selecting \(\alpha \in \{10^{-2}, 10^{-1}, \dots, 10^{4}\}\) by leave-one-fit-path-out cross-validation MSE.
+The structured renewal-value predictor uses normalized plan age \((t - t_{\mathrm{last}}) / 50\), tracking and waypoint errors, multi-lag target velocities, disturbance summaries and relational dot-products. In both simulators the current injected disturbance is part of the observation available before the action. Clock-grid acquisition does not require event annotations; this does not remove access to the disturbance channel at inference. Hidden regime labels, distractor channels and future observations are excluded from the predictor. Features are standardized on fit data and fitted via ridge regression with an unpenalized intercept. Leave-one-fit-path-out mean squared error selects \(\alpha \in \{10^{-2}, 10^{-1}, \dots, 10^{4}\}\).
 
 In the fixed-budget confirmation (\(B = 24\)), the deployment threshold \(q\) is set to the 75th percentile of leave-one-fit-path-out predictions \(\hat{\Delta}_{\mathrm{oof}}\) using fit paths only. When calibrating across general call budgets \(B = T / K\) or external baselines, scalar quantile or threshold parameters are selected on disjoint timing-selection paths per root while holding controller and predictor weights fixed.
 
@@ -180,6 +184,8 @@ On 512 paired paths, the variable-duration controller run periodically achieved 
 
 Across all six planner-call budgets \(B \in \{12, 15, 20, 24, 30, 40\}\), label-free plan-validity timing achieved strictly lower episode ISE than periodic, best-clock, and per-budget recalibrated distance thresholds, with positive two-sided 95% intervals at every budget (Table 5; Figure 3b,c). Relative ISE reductions ranged from 27.85% to 31.47% over periodic planning (8/8 roots at every budget) and from 5.56% to 9.25% over recalibrated distance cuts. Cross-budget comparisons confirm substantial call compression (Figure 3d): **20 adaptive calls** (`1.31047`) beat **24 periodic calls** (`1.49962`) by `0.18914` (95% CI `[0.12310, 0.25519]`; 12.61% lower ISE on 8/8 roots with 16.7% fewer calls), and **24 adaptive calls** (`1.02774`) beat **30 periodic calls** (`1.23319`) by `0.20545` (95% CI `[0.13924, 0.27166]`; 16.66% lower ISE on 8/8 roots with 20.0% fewer calls).
 
+The fewer-call ridge schedules did not beat higher-budget distance thresholds. In a secondary analysis on the same paired paths, distance minus ridge ISE was `-0.20906` (95% CI `[-0.27511, -0.14301]`) for 20 ridge versus 24 distance calls, and `-0.08401` (95% CI `[-0.14192, -0.02610]`) for 24 ridge versus 30 distance calls. The call savings at better tracking therefore apply to the reported periodic comparisons.
+
 **Table 5. Multi-budget planning Pareto frontier across 512 fresh paired paths per budget.** Distance thresholds and predictor quantiles are calibrated on disjoint selection paths separately at each budget \(B\).
 
 | Calls \(B\) (bin \(K\)) | Periodic ISE | Distance cut ISE | Unprivileged ISE | Gain vs. distance [95% CI] | Gain vs. periodic |
@@ -193,7 +199,7 @@ Across all six planner-call budgets \(B \in \{12, 15, 20, 24, 30, 40\}\), label-
 
 ![Label-free query acquisition and multi-budget Pareto frontier.](figures/fig3_unprivileged_and_pareto.png)
 
-**Figure 3 | Query acquisition and call budgets.** (a) At \(B=24\), the clock-grid trigger improves on periodic and tracking-distance timing. The interval against event-stratified queries includes zero. (b) Episode ISE at six call counts. (c) Paired gains over separately calibrated tracking-distance thresholds. (d) ISE contrasts when using fewer calls than periodic timing; the 30-versus-40 contrast is inconclusive.
+**Figure 3 | Query acquisition and call budgets.** (a) At \(B=24\), the clock-grid trigger improves on periodic and tracking-distance timing. The interval against event-stratified queries includes zero. (b) Episode ISE at six call counts. (c) Paired gains over separately calibrated distance thresholds at matched call counts. (d) Paired differences when ridge makes fewer calls than the named comparator. Positive values favor ridge; negative values favor the comparator. The 30-versus-40 periodic contrast is inconclusive.
 
 With the CEM planner, clock-grid timing had `23.83%`--`32.67%` lower ISE than periodic timing at matched call counts. It had lower point estimates than the distance threshold at all six budgets, but the intervals crossed zero at 15 and 24 calls (Table 6). In the cross-budget tests, 20 adaptive calls beat 24 periodic calls by 15.82% ISE (`0.22821`, 95% CI `[0.17814, 0.27827]`), and 24 adaptive calls beat 30 periodic calls by 13.99% (`0.16341`, `[0.07660, 0.25022]`). They saved `18.38 ms` (`[11.12, 25.65]`) and `31.08 ms` (`[21.49, 40.66]`) of planner time per episode, respectively. Including scoring, the signed savings were `-22.81 ms` (`[-37.10, -8.53]`) and `-35.50 ms` (`[-52.53, -18.46]`): both were slower. For 20 versus 30 calls, the upper-loop savings were `10.28 ms` (`[-5.87, 26.42]`), and the ISE contrast also crossed zero. The 24-call distance threshold improved ISE and saved `32.06 ms` (`[19.57, 44.55]`) of planner-plus-score time relative to 30 periodic calls. These are eight-root paired intervals (Figure 4d).
 
@@ -247,11 +253,11 @@ In smooth-ellipse Reacher, current waypoints improved tracking in both frozen ro
 
 **What the timing rule learns.** Pairing `keep` and `renew` on the same replayed path controls the exogenous inputs in that contrast. Clock-grid sampling removes the need for hidden event annotations, not for paired loss targets. The fixed-budget benefit transfers to the derived polygonal Reacher task against fixed-clock controls, not to every timing baseline. The rollout loss difference is a training target, not a guarantee about where to spend the bin's single call.
 
-**Limitations.** Branch supervision uses a resettable simulator and 192 paired queries per root in the clock-grid studies; prefix replay, fitting and scoring add work beyond planner calls. Our CEM comparison measures planner, scoring and lower-inference costs, not equal lifecycle compute or end-to-end speed. The 50-step target does not account for all downstream decisions. Appendix A shows why repeated control needs a separate episode test when rare events can dominate cost.
+**Limitations.** Branch supervision uses a resettable simulator and 192 paired queries per root in the clock-grid studies; prefix replay, fitting and scoring add work beyond planner calls. Performance without the simulator-provided disturbance observation was not tested. Our CEM comparison measures planner, scoring and lower-inference costs, not equal lifecycle compute or end-to-end speed. The 50-step target does not account for all downstream decisions. Appendix A shows why repeated control needs a separate episode test when rare events can dominate cost.
 
 ## 7. Reproducibility
 
-The [artifact manifest](artifact_files.txt) lists the compact analysis inputs, protocols and selected experiment code. `make -C paper reproduce` rebuilds the evidence, five figures, CSV source tables and PDF from saved results, and checks their numerical transcription and links without a simulator or scheduler. The bundle reproduces analysis and presentation; it does not include the caches and checkpoints needed to rerun training. See the [rebuild instructions](README.md) and [evidence map](evidence_map.md).
+The [artifact manifest](artifact_files.txt) lists the included inputs and source files. `make -C paper reproduce` rebuilds the evidence, five figures, CSV source tables and PDF from saved results, and checks their numerical transcription and links without a simulator or scheduler. The review bundle excludes operational cluster files and does not include the caches and checkpoints needed to rerun training. See the [rebuild instructions](README.md) and [evidence map](evidence_map.md).
 
 ## 8. Conclusion
 

@@ -66,6 +66,15 @@ class PaperEvidenceTests(unittest.TestCase):
                 paper,
             )
 
+    def test_fewer_call_distance_contrasts_match_manuscript(self):
+        paper = (ROOT / "paper/manuscript.md").read_text()
+        comparisons = self.evidence["pointmaze_budget_pareto"]["cross_budget_call_savings"]
+        for key in ("unprivileged_B20_vs_distance_B24", "unprivileged_B24_vs_distance_B30"):
+            contrast = comparisons[key]
+            low, high = contrast["CI95"]
+            self.assertLess(high, 0)
+            self.assertIn(f"`{contrast['mean']:.5f}` (95% CI `[{low:.5f}, {high:.5f}]`)", paper)
+
     def test_route_b_tables_match_saved_summaries(self):
         paper = (ROOT / "paper/manuscript.md").read_text()
         sb = self.evidence["pointmaze_strong_baselines"]

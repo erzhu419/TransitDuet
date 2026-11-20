@@ -1,8 +1,9 @@
 PYTHON ?= python3
 PANDOC ?= pandoc
 BUNDLE ?= /tmp/freqhrl-submission.tar.gz
+REVIEW_BUNDLE ?= /tmp/freqhrl-review.tar.gz
 
-.PHONY: reproduce evidence figures check bundle
+.PHONY: reproduce evidence figures check bundle review-bundle
 
 submission.pdf: manuscript.md references.bib submission.lua Makefile $(wildcard figures/*.pdf)
 	mkdir -p .submission
@@ -31,3 +32,6 @@ reproduce: figures
 
 bundle: reproduce
 	cd .. && tar -czf "$(abspath $(BUNDLE))" -T paper/artifact_files.txt
+
+review-bundle: reproduce
+	$(PYTHON) build_review_bundle.py "$(abspath $(REVIEW_BUNDLE))"
